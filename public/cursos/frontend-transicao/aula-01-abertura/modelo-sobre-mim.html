@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  MODELO — "Sobre Mim" · Aula 01 · NickDev
+  ------------------------------------------------------------
+  Este é o site que a Nicoly usa pra explicar no live code.
+  É só HTML + CSS (o que a gente viu na aula 01).
+
+  Pra fazer o SEU: troque os textos, as cores e os links
+  pelos seus. Cada parte está comentada explicando o que faz.
+  ============================================================
+-->
+<html lang="pt-BR">
+<head>
+  <!-- charset: deixa acento e emoji funcionarem certinho -->
+  <meta charset="UTF-8">
+  <!-- viewport: faz o site se ajustar à tela do celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nicoly · Sobre mim</title>
+
+  <style>
+    /* ----------------------------------------------------------
+       As cores do meu site. Troque os valores pra mudar tudo.
+       ---------------------------------------------------------- */
+    :root {
+      --rosa: #F24487;
+      --roxo: #7B4FD0;
+      --fundo: #0f0c17;
+      --card: #1a1626;
+      --texto: #f3f0fa;
+      --texto-suave: #b4aec6;
+    }
+
+    /* Zera as margens padrão e faz o padding "somar por dentro" */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* O corpo da página: fonte, cor de fundo e cor do texto */
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      line-height: 1.6;
+    }
+
+    /* "Caixa" central que segura o conteúdo e não deixa esticar demais */
+    .container {
+      max-width: 640px;      /* largura máxima */
+      margin: 0 auto;        /* centraliza na horizontal */
+      padding: 48px 24px;    /* espaço em volta */
+    }
+
+    /* --------- TOPO (minha foto + nome) --------- */
+    .topo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    /* A foto redonda. Aqui usei minhas iniciais; veja o comentário
+       lá embaixo no HTML pra trocar por uma foto de verdade. */
+    .foto {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;               /* deixa redondo */
+      object-fit: cover;                /* recorta a foto sem distorcer */
+      background: linear-gradient(135deg, var(--rosa), var(--roxo));
+      /* estilo pro texto das iniciais, caso não tenha foto ainda */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 58px;
+      font-weight: bold;
+      color: white;
+      margin: 0 auto 20px;              /* centraliza a foto */
+    }
+
+    /* Meu nome, com um degradê rosa→roxo na letra */
+    h1 {
+      font-size: 40px;
+      background: linear-gradient(100deg, var(--rosa), var(--roxo));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Minha "profissão" logo abaixo do nome */
+    .cargo {
+      color: var(--texto-suave);
+      font-size: 18px;
+      margin-top: 6px;
+    }
+
+    /* --------- CARTÕES DE CONTEÚDO --------- */
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 26px 28px;
+      margin-bottom: 20px;
+    }
+
+    /* Título de cada seção */
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+    /* Barrinha colorida ao lado do título da seção */
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 20px;
+      background: linear-gradient(var(--rosa), var(--roxo));
+      border-radius: 4px;
+      margin-right: 10px;
+      vertical-align: -3px;
+    }
+
+    p {
+      color: var(--texto-suave);
+    }
+
+    /* Lista dos meus hobbies */
+    ul {
+      list-style: none;              /* tira as bolinhas padrão */
+      margin-top: 6px;
+    }
+    li {
+      color: var(--texto-suave);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    li::before {
+      content: "→ ";                 /* uma setinha antes de cada item */
+      color: var(--rosa);
+    }
+
+    /* --------- MEUS LINKS --------- */
+    .links {
+      display: flex;
+      flex-wrap: wrap;               /* quebra linha se não couber */
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .links a {
+      color: var(--texto);
+      text-decoration: none;         /* tira o sublinhado */
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 18px;
+      border-radius: 100px;          /* botão em formato de pílula */
+      transition: 0.2s;              /* deixa o hover suave */
+    }
+    .links a:hover {
+      border-color: var(--rosa);
+      color: var(--rosa);
+    }
+
+    /* --------- RODAPÉ --------- */
+    footer {
+      text-align: center;
+      color: var(--texto-suave);
+      font-size: 14px;
+      margin-top: 32px;
+    }
+
+    /* ----------------------------------------------------------
+       RESPONSIVO: quando a tela for pequena (celular),
+       diminui um pouco o nome e os espaços.
+       ---------------------------------------------------------- */
+    @media (max-width: 480px) {
+      h1 { font-size: 32px; }
+      .container { padding: 32px 18px; }
+      .card { padding: 22px 20px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- ============ TOPO ============ -->
+    <header class="topo">
+
+      <!-- Minha foto redonda (agora com as iniciais).
+           👉 Quando tiver sua foto, troque a linha abaixo por:
+              <img class="foto" src="foto.jpg" alt="Foto da Nicoly">
+              (coloque o arquivo foto.jpg na mesma pasta do index.html) -->
+      <div class="foto">N</div>
+
+      <h1>Nicoly Beltrão</h1>
+      <p class="cargo">Desenvolvedora & professora de tecnologia</p>
+    </header>
+
+    <!-- ============ SOBRE MIM ============ -->
+    <section class="card">
+      <h2>Sobre mim</h2>
+      <p>
+        Oi! Eu <strong>ensino programação</strong> pra quem está começando na
+        tech. Acredito que dá pra aprender <em>fazendo</em>, com projeto de
+        verdade e muita cor. Esse site aqui? Fiz só com HTML e CSS. 💜
+      </p>
+    </section>
+
+    <!-- ============ HOBBIES / O QUE EU CURTO ============ -->
+    <section class="card">
+      <h2>O que eu curto</h2>
+      <ul>
+        <li>Ensinar e ver a ficha caindo na cabeça de alguém</li>
+        <li>Café enquanto codo</li>
+        <li>Design bonito e site rápido</li>
+        <li>Comunidade e tecnologia aberta</li>
+      </ul>
+    </section>
+
+    <!-- ============ MEUS LINKS ============ -->
+    <section class="card">
+      <h2>Onde me achar</h2>
+      <div class="links">
+        <!-- target="_blank" abre o link em uma nova aba -->
+        <a href="https://github.com/Nicoly-Almeida" target="_blank">GitHub</a>
+        <a href="https://instagram.com/" target="_blank">Instagram</a>
+        <a href="https://linkedin.com/" target="_blank">LinkedIn</a>
+        <a href="mailto:nicolyejady@gmail.com">E-mail</a>
+      </div>
+    </section>
+
+    <!-- ============ RODAPÉ ============ -->
+    <footer>
+      <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px;">
+      Feito com <strong>HTML &amp; CSS</strong> na aula 01 da NickDev.
+    </footer>
+
+  </div>
+
+</body>
+</html>

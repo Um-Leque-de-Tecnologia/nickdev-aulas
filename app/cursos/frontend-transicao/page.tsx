@@ -49,6 +49,12 @@ export default function FrontendTransicao() {
               <a className="mat" href={`${AULA_01}/guia-html-css.html`}>
                 📘 Guia HTML &amp; CSS
               </a>
+              <a className="mat" href={`${AULA_01}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_01}/modelo-sobre-mim.html`}>
+                🧑‍💻 Modelo (exemplo)
+              </a>
             </div>
           </div>
         </div>
