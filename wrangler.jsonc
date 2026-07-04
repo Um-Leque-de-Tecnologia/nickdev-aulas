@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Nome do Worker no Cloudflare. Precisa bater com o Worker que já existe
+  // na conta (nickdeve-aulas, com "e"), senão o binding WORKER_SELF_REFERENCE
+  // aponta pra um Worker inexistente e o deploy falha (erro 10143).
+  "name": "nickdeve-aulas",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  }
+}
