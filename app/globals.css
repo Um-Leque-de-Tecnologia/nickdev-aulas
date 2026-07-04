@@ -1,0 +1,184 @@
+/* ==========================================================================
+   NickDev — Aulas · brand.css
+   Mesma identidade visual do site "Um leque de tecnologia" (handoff hifi).
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* superfícies */
+  --bg: #08070E;
+  --surface: #100D1B;
+
+  /* gradiente da marca */
+  --magenta: #F24487;
+  --pink: #E73982;
+  --purple: #7B4FD0;
+  --purple-2: #5341B8;
+
+  /* acentos claros */
+  --pink-light: #E88BB8;
+  --purple-light: #A98CE0;
+  --tagline: #C77DB0;
+
+  /* texto */
+  --text: #F3F0FA;
+  --text-2: #B4AEC6;
+  --text-3: #8B84A0;
+  --text-4: #7B7392;
+  --text-5: #5E5876;
+
+  /* bordas */
+  --line: rgba(255, 255, 255, 0.09);
+  --line-soft: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  /* gradientes */
+  --grad: linear-gradient(100deg, #F24487, #7B4FD0);
+  --grad-text: linear-gradient(100deg, #F24487 10%, #E73982 45%, #7B4FD0 90%);
+
+  /* tipografia */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --pad-x: clamp(20px, 5vw, 64px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-display);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--purple-light); outline-offset: 3px; border-radius: 4px; }
+
+/* utilitários -------------------------------------------------------------- */
+.mono { font-family: var(--font-mono); }
+.grad-text {
+  background: var(--grad-text);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.serif { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+
+/* brilhos ambientes fixos (iguais aos do site) ----------------------------- */
+.ambient { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.ambient .glow { position: absolute; border-radius: 50%; }
+.ambient .glow.magenta {
+  width: 60vw; height: 60vw; top: -18vw; right: -14vw;
+  background: radial-gradient(circle, rgba(231, 57, 130, 0.16), transparent 62%);
+}
+.ambient .glow.purple {
+  width: 62vw; height: 62vw; bottom: -22vw; left: -16vw;
+  background: radial-gradient(circle, rgba(123, 79, 208, 0.22), transparent 62%);
+}
+
+/* layout ------------------------------------------------------------------- */
+.wrap { max-width: 1100px; margin: 0 auto; padding: clamp(28px, 5vw, 64px) var(--pad-x); position: relative; z-index: 1; }
+
+/* topo --------------------------------------------------------------------- */
+.site-header { display: flex; align-items: center; gap: 13px; margin-bottom: clamp(30px, 5vw, 52px); }
+.site-header img { height: 42px; width: auto; display: block; }
+.site-header .word { font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
+
+.backlink {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-3);
+  margin-bottom: 22px; transition: color 0.2s ease;
+}
+.backlink:hover { color: var(--purple-light); }
+
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--pink-light); margin-bottom: 14px;
+}
+h1 { font-weight: 700; font-size: clamp(32px, 5.4vw, 58px); line-height: 1.04; letter-spacing: -0.03em; }
+h2 { font-weight: 700; font-size: clamp(24px, 3.2vw, 34px); letter-spacing: -0.02em; }
+.lead { font-size: clamp(16px, 1.7vw, 20px); color: var(--text-2); max-width: 56ch; margin-top: 16px; }
+.brand-rule { width: 110px; height: 4px; border-radius: 4px; background: var(--grad); margin-top: 26px; }
+.section-label {
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-3); margin: clamp(34px, 5vw, 52px) 0 18px;
+}
+
+/* botões ------------------------------------------------------------------- */
+.glow-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: #fff;
+  background: var(--grad); padding: 11px 20px; border: 0; border-radius: 100px;
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+.glow-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px -12px rgba(231, 57, 130, 0.65); }
+
+/* cards de curso ----------------------------------------------------------- */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.card {
+  display: flex; flex-direction: column; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 18px; padding: 26px;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+a.card:hover { transform: translateY(-4px); border-color: var(--purple); }
+.card .num { font-family: var(--font-mono); font-size: 13px; color: var(--pink-light); }
+.card h3 { font-weight: 600; font-size: clamp(19px, 2.2vw, 23px); margin: 8px 0; letter-spacing: -0.01em; }
+.card p { font-size: 15px; color: var(--text-2); }
+.card .meta { font-family: var(--font-mono); font-size: 12px; color: var(--text-3); margin-top: 14px; }
+.card.soon { opacity: 0.5; }
+
+/* aula: card com materiais -------------------------------------------------- */
+.lessons { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.lesson {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+  padding: 24px 26px; display: flex; gap: 22px; align-items: flex-start;
+}
+.lesson .idx {
+  font-family: var(--font-mono); font-weight: 700; font-size: 20px; color: var(--purple-light);
+  border: 1px solid rgba(169, 140, 224, 0.5); width: 46px; height: 46px; min-width: 46px;
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+}
+.lesson .body { flex: 1; }
+.lesson h3 { font-weight: 600; font-size: clamp(18px, 2.2vw, 23px); margin-bottom: 4px; }
+.lesson p { font-size: 15px; color: var(--text-2); margin-bottom: 14px; }
+.lesson.soon { opacity: 0.5; }
+.mats { display: flex; flex-wrap: wrap; gap: 10px; }
+.mat {
+  font-family: var(--font-mono); font-size: 13px; padding: 9px 16px; border-radius: 100px;
+  border: 1px solid var(--line-strong); color: var(--text); display: inline-flex; align-items: center; gap: 8px;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.mat:hover { border-color: var(--pink-light); color: var(--pink-light); }
+.mat.primary { background: var(--grad); border: 0; color: #fff; font-weight: 600; }
+.mat.primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px -12px rgba(231, 57, 130, 0.65); color: #fff; }
+.soon-tag {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-3);
+  border: 1px dashed var(--line-strong); padding: 7px 13px; border-radius: 100px;
+}
+@media (max-width: 560px) { .lesson { flex-direction: column; gap: 14px; } }
+
+/* rodapé ------------------------------------------------------------------- */
+.footer {
+  border-top: 1px solid var(--line-soft); margin-top: clamp(40px, 6vw, 72px); padding-top: 26px;
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+}
+.footer .brand { display: flex; align-items: center; gap: 10px; }
+.footer .brand img { height: 30px; width: auto; }
+.footer .brand .word { font-weight: 700; font-size: 15px; }
+.footer .tag { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-4); }
+.footer a.home { position: relative; font-family: var(--font-mono); font-size: 13px; color: #9A93AE; }
+.footer a.home::after {
+  content: ""; position: absolute; left: 0; bottom: -3px; width: 0; height: 1.5px;
+  background: var(--grad); transition: width 0.28s ease;
+}
+.footer a.home:hover::after { width: 100%; }
+.footer .copy {
+  flex-basis: 100%; font-family: var(--font-mono); font-size: 12px; color: var(--text-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.06); margin-top: 8px; padding-top: 18px;
+}
