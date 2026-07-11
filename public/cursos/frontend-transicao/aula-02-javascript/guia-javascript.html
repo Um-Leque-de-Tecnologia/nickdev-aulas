@@ -224,13 +224,49 @@ idade &gt;= <span class="st">18</span> &amp;&amp; temCarteira;  <span class="cm"
 hobbies[<span class="st">0</span>];          <span class="cm">// "café"</span>
 hobbies.<span class="fn">length</span>;      <span class="cm">// 3</span>
 hobbies.<span class="fn">push</span>(<span class="st">"games"</span>);  <span class="cm">// adiciona no fim</span></pre>
-    <h3>Métodos que você vai amar</h3>
-    <pre>hobbies.<span class="fn">forEach</span>(h => <span class="fn">console</span>.<span class="fn">log</span>(h));  <span class="cm">// faz algo com cada item</span>
+    <h3>Descobrir o que tem dentro</h3>
+    <pre>hobbies.<span class="fn">length</span>;            <span class="cm">// 3   → quantos itens</span>
+hobbies.<span class="fn">includes</span>(<span class="st">"café"</span>);   <span class="cm">// true → esse item existe?</span>
+hobbies.<span class="fn">indexOf</span>(<span class="st">"música"</span>);   <span class="cm">// 2   → em qual posição está</span>
+hobbies.<span class="fn">at</span>(-<span class="st">1</span>);             <span class="cm">// "música" → o último item</span>
+hobbies.<span class="fn">some</span>(h => h.<span class="fn">length</span> > <span class="st">5</span>);   <span class="cm">// true  → ALGUM item passa no teste?</span>
+hobbies.<span class="fn">every</span>(h => h.<span class="fn">length</span> > <span class="st">2</span>);  <span class="cm">// true  → TODOS passam?</span></pre>
 
-<span class="kw">const</span> tamanhos = hobbies.<span class="fn">map</span>(h => h.<span class="fn">length</span>);  <span class="cm">// [4, 6, 6]</span>
+    <h3>Adicionar e remover</h3>
+    <pre>hobbies.<span class="fn">push</span>(<span class="st">"games"</span>);    <span class="cm">// adiciona no FIM</span>
+hobbies.<span class="fn">pop</span>();            <span class="cm">// remove o ÚLTIMO (e devolve ele)</span>
+hobbies.<span class="fn">unshift</span>(<span class="st">"chá"</span>);   <span class="cm">// adiciona no INÍCIO</span>
+hobbies.<span class="fn">shift</span>();          <span class="cm">// remove o PRIMEIRO</span></pre>
+    <div class="tip">Macete: <b>p</b>ush/<b>p</b>op mexem no fim; <b>sh</b>ift/un<b>sh</b>ift mexem no início.</div>
 
-<span class="cm">// item aleatório da lista:</span>
-<span class="kw">const</span> sorteado = hobbies[<span class="fn">Math</span>.<span class="fn">floor</span>(<span class="fn">Math</span>.<span class="fn">random</span>() * hobbies.<span class="fn">length</span>)];</pre>
+    <h3>Percorrer e transformar</h3>
+    <p>Estes recebem uma função e rodam ela pra cada item. Os 3 últimos criam uma <b>lista nova</b> (não mexem na original).</p>
+    <pre><span class="cm">// forEach → faz algo com cada item (não devolve nada)</span>
+hobbies.<span class="fn">forEach</span>(h => <span class="fn">console</span>.<span class="fn">log</span>(h));
+
+<span class="cm">// map → NOVA lista transformada, item por item</span>
+<span class="kw">const</span> maiusculas = hobbies.<span class="fn">map</span>(h => h.<span class="fn">toUpperCase</span>());  <span class="cm">// ["CAFÉ", ...]</span>
+
+<span class="cm">// filter → NOVA lista só com quem passa no teste</span>
+<span class="kw">const</span> curtos = hobbies.<span class="fn">filter</span>(h => h.<span class="fn">length</span> &lt;= <span class="st">4</span>);  <span class="cm">// ["café", "chá"]</span>
+
+<span class="cm">// find → o PRIMEIRO item que bate (ou undefined)</span>
+<span class="kw">const</span> achado = hobbies.<span class="fn">find</span>(h => h.<span class="fn">startsWith</span>(<span class="st">"c"</span>));  <span class="cm">// "café"</span></pre>
+
+    <h3>Resumir e organizar</h3>
+    <pre><span class="cm">// reduce → junta tudo num só valor (ex.: somar)</span>
+<span class="kw">const</span> numeros = [<span class="st">10</span>, <span class="st">20</span>, <span class="st">30</span>];
+<span class="kw">const</span> total = numeros.<span class="fn">reduce</span>((soma, n) => soma + n, <span class="st">0</span>);  <span class="cm">// 60</span>
+
+hobbies.<span class="fn">sort</span>();          <span class="cm">// ordena (alfabética por padrão)</span>
+hobbies.<span class="fn">reverse</span>();       <span class="cm">// inverte a ordem</span>
+hobbies.<span class="fn">slice</span>(<span class="st">0</span>, <span class="st">2</span>);     <span class="cm">// PEDAÇO: ["café", "código"] (não altera o original)</span>
+hobbies.<span class="fn">join</span>(<span class="st">", "</span>);      <span class="cm">// vira texto: "café, código, música"</span></pre>
+
+    <h3>Bônus: item aleatório</h3>
+    <pre><span class="kw">const</span> sorteado = hobbies[<span class="fn">Math</span>.<span class="fn">floor</span>(<span class="fn">Math</span>.<span class="fn">random</span>() * hobbies.<span class="fn">length</span>)];</pre>
+
+    <div class="tip"><b>Cuidado — muda ou não muda?</b> <code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code>, <code>sort</code>, <code>reverse</code> e <code>splice</code> <b>alteram</b> o array original. Já <code>map</code>, <code>filter</code>, <code>slice</code> e <code>join</code> devolvem algo novo e <b>deixam</b> o original em paz.</div>
   </section>
 
   <section id="loops">
