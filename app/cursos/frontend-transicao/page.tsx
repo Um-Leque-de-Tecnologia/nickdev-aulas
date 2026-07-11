@@ -78,6 +78,9 @@ export default function FrontendTransicao() {
               <a className="mat" href={`${AULA_02}/desafio.html`}>
                 🎯 Desafio
               </a>
+              <a className="mat" href={`${AULA_02}/codigos-desafios.html`}>
+                🧩 Códigos dos desafios
+              </a>
               <a className="mat" href={`${AULA_02}/modelo-resposta.html`}>
                 🧑‍💻 Modelo de resposta
               </a>

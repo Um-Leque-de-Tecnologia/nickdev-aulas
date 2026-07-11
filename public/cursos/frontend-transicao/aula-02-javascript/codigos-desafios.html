@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Códigos dos desafios · Aula 02 · NickDev</title>
+<meta name="description" content="Soluções organizadas dos desafios da aula 02 de JavaScript.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1240px;margin:0 auto;gap:0}
+
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+  aside nav a .n{font-family:var(--mono);color:var(--purple-light);margin-right:7px}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0;font-size:14.5px;color:var(--text-2)}
+  .tipbox b{color:var(--purple-light)}
+
+  .part{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .part:first-of-type{border-top:0;padding-top:0}
+  .part .big{color:var(--pink-light)}
+
+  .sol{margin-top:30px;scroll-margin-top:18px}
+  .sol-head{display:flex;align-items:baseline;gap:12px}
+  .sol .n{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:8px;padding:3px 9px;white-space:nowrap}
+  .sol h3{font-size:20px;font-weight:600}
+  .sol .desc{color:var(--text-3);font-size:14.5px;margin:6px 0 0}
+  .sol h4{font-size:13px;font-family:var(--mono);color:var(--pink-light);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 0}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.75;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-transicao">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Desafios da manhã</div>
+    <a href="#d1"><span class="n">1</span>Cartão de visita</a>
+    <a href="#d2"><span class="n">2</span>Par ou ímpar</a>
+    <a href="#d3"><span class="n">3</span>Boletim</a>
+    <a href="#d4"><span class="n">4</span>Que dia é hoje?</a>
+    <a href="#d5"><span class="n">🔥</span>Desafio turbo</a>
+    <div class="grp">Site interativo</div>
+    <a href="#s-html">HTML (estrutura)</a>
+    <a href="#s-css">CSS (tema)</a>
+    <a href="#s-saudacao">JS · Saudação</a>
+    <a href="#s-nome">JS · Nome ao vivo</a>
+    <a href="#s-curiosidade">JS · Curiosidade</a>
+    <a href="#s-hobbies">JS · Hobbies (loop)</a>
+    <a href="#s-tema">JS · Tema</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 02 · gabarito</div>
+  <h1>Códigos dos <span class="g">desafios</span></h1>
+  <p class="lead">Aqui estão as soluções, organizadas e comentadas. Use pra <b>conferir</b> depois de tentar, ou pra <b>estudar</b> como cada parte funciona.</p>
+  <div class="rule"></div>
+
+  <div class="tipbox"><b>Combinado 🤝</b> Tente sozinho(a) primeiro — errar é parte de aprender. Espiar o código antes tira a graça (e o aprendizado). Depois, volte aqui e compare com o seu.</div>
+
+  <div class="part"><span class="big">☀️</span> Parte 1 · Desafios da manhã (no console)</div>
+
+  <div class="sol" id="d1">
+    <div class="sol-head"><span class="n">1</span><h3>Cartão de visita</h3></div>
+    <p class="desc">Variáveis + template literal.</p>
+    <pre><span class="kw">const</span> nome = <span class="st">"Nicoly Almeida"</span>;
+<span class="kw">const</span> profissao = <span class="st">"desenvolvedora"</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">`Oi! Sou a ${nome}, ${profissao}.`</span>);
+<span class="cm">// → Oi! Sou a Nicoly Almeida, desenvolvedora.</span></pre>
+  </div>
+
+  <div class="sol" id="d2">
+    <div class="sol-head"><span class="n">2</span><h3>Par ou ímpar</h3></div>
+    <p class="desc">Operador resto (<code>%</code>) + <code>if / else</code>.</p>
+    <pre><span class="kw">const</span> numero = <span class="st">7</span>;
+
+<span class="kw">if</span> (numero % <span class="st">2</span> === <span class="st">0</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(numero + <span class="st">" é par"</span>);
+} <span class="kw">else</span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(numero + <span class="st">" é ímpar"</span>);
+}
+<span class="cm">// → 7 é ímpar</span></pre>
+  </div>
+
+  <div class="sol" id="d3">
+    <div class="sol-head"><span class="n">3</span><h3>Boletim</h3></div>
+    <p class="desc">Comparação (<code>&gt;=</code>) + <code>if / else</code>.</p>
+    <pre><span class="kw">const</span> nota = <span class="st">8</span>;
+
+<span class="kw">if</span> (nota &gt;= <span class="st">7</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Aprovado ✅"</span>);
+} <span class="kw">else</span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Recuperação 📚"</span>);
+}
+<span class="cm">// → Aprovado ✅</span></pre>
+  </div>
+
+  <div class="sol" id="d4">
+    <div class="sol-head"><span class="n">4</span><h3>Que dia é hoje?</h3></div>
+    <p class="desc"><code>switch / case</code> com <code>default</code> (repare nos <code>case</code> empilhados).</p>
+    <pre><span class="kw">const</span> dia = <span class="st">"sexta"</span>;
+
+<span class="kw">switch</span> (dia) {
+  <span class="kw">case</span> <span class="st">"sexta"</span>:
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Sextou! 🎉"</span>);
+    <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="st">"sábado"</span>:
+  <span class="kw">case</span> <span class="st">"domingo"</span>:
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Fim de semana 😎"</span>);
+    <span class="kw">break</span>;
+  <span class="kw">default</span>:
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Bora estudar 💻"</span>);
+}
+<span class="cm">// → Sextou! 🎉</span></pre>
+  </div>
+
+  <div class="sol" id="d5">
+    <div class="sol-head"><span class="n">🔥</span><h3>Desafio turbo · Loja com cupom</h3></div>
+    <p class="desc">Number + boolean + condicional + operador + template literal.</p>
+    <pre><span class="kw">const</span> preco = <span class="st">100</span>;
+<span class="kw">const</span> temCupom = <span class="st">true</span>;
+
+<span class="kw">let</span> precoFinal = preco;
+<span class="kw">if</span> (temCupom) {
+  precoFinal = preco * <span class="st">0.9</span>;   <span class="cm">// 10% de desconto</span>
+}
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">`Você paga R$ ${precoFinal}`</span>);
+<span class="cm">// → Você paga R$ 90</span></pre>
+  </div>
+
+  <div class="part"><span class="big">🔮</span> Parte 2 · Desafio principal — o site interativo</div>
+  <p class="lead" style="margin-top:14px">O site “sobre mim” que reage a você, quebrado em pedaços. Junte tudo num <code>index.html</code> (o CSS no <code>&lt;style&gt;</code> e o JS no <code>&lt;script&gt;</code>, no fim do <code>&lt;body&gt;</code>).</p>
+
+  <div class="sol" id="s-html">
+    <div class="sol-head"><h3>1 · HTML — a estrutura</h3></div>
+    <p class="desc">Os elementos com <code>id</code> são os que o JavaScript vai controlar.</p>
+    <pre><span class="cm">&lt;!-- botão de tema, fica no canto --&gt;</span>
+&lt;<span class="kw">button</span> id=<span class="st">"tema"</span>&gt;🌙&lt;/<span class="kw">button</span>&gt;
+
+&lt;<span class="kw">header</span>&gt;
+  &lt;<span class="kw">p</span> id=<span class="st">"saudacao"</span>&gt;&lt;/<span class="kw">p</span>&gt;         <span class="cm">&lt;!-- o JS preenche --&gt;</span>
+  &lt;<span class="kw">h1</span>&gt;Nicoly Almeida&lt;/<span class="kw">h1</span>&gt;
+  &lt;<span class="kw">input</span> id=<span class="st">"campo-nome"</span> placeholder=<span class="st">"digite seu nome"</span>&gt;
+&lt;/<span class="kw">header</span>&gt;
+
+&lt;<span class="kw">button</span> id=<span class="st">"btn-curiosidade"</span>&gt;Revelar curiosidade 🎲&lt;/<span class="kw">button</span>&gt;
+&lt;<span class="kw">p</span> id=<span class="st">"curiosidade"</span>&gt;&lt;/<span class="kw">p</span>&gt;
+
+&lt;<span class="kw">ul</span> id=<span class="st">"lista-hobbies"</span>&gt;&lt;/<span class="kw">ul</span>&gt;    <span class="cm">&lt;!-- o JS cria os itens --&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="s-css">
+    <div class="sol-head"><h3>2 · CSS — o tema claro</h3></div>
+    <p class="desc">O JS só liga/desliga a classe <code>.claro</code>; o CSS cuida da aparência.</p>
+    <pre><span class="fn">body</span> {
+  background: <span class="st">#0f0c17</span>;
+  color: <span class="st">#f3f0fa</span>;
+  transition: <span class="st">.3s</span>;        <span class="cm">/* troca suave */</span>
+}
+
+<span class="cm">/* quando o body tem a classe .claro */</span>
+<span class="fn">body.claro</span> {
+  background: <span class="st">#f4f1fa</span>;
+  color: <span class="st">#1a1626</span>;
+}</pre>
+  </div>
+
+  <div class="sol" id="s-saudacao">
+    <div class="sol-head"><h3>3 · JS — Saudação pela hora</h3></div>
+    <p class="desc"><code>Date</code> + uma função com <code>if / else</code> + DOM.</p>
+    <pre><span class="kw">const</span> hora = <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">getHours</span>();
+
+<span class="kw">function</span> <span class="fn">saudacaoPara</span>(h) {
+  <span class="kw">if</span> (h &lt; <span class="st">12</span>) <span class="kw">return</span> <span class="st">"Bom dia ☀️"</span>;
+  <span class="kw">if</span> (h &lt; <span class="st">18</span>) <span class="kw">return</span> <span class="st">"Boa tarde 🌤️"</span>;
+  <span class="kw">return</span> <span class="st">"Boa noite 🌙"</span>;
+}
+
+<span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#saudacao"</span>).<span class="fn">textContent</span> = <span class="fn">saudacaoPara</span>(hora);</pre>
+  </div>
+
+  <div class="sol" id="s-nome">
+    <div class="sol-head"><h3>4 · JS — Nome ao vivo (extra)</h3></div>
+    <p class="desc">Evento <code>input</code>: a saudação muda enquanto a pessoa digita.</p>
+    <pre><span class="kw">const</span> campoNome = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#campo-nome"</span>);
+<span class="kw">const</span> elSaudacao = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#saudacao"</span>);
+
+campoNome.<span class="fn">addEventListener</span>(<span class="st">"input"</span>, () => {
+  <span class="kw">const</span> nome = campoNome.<span class="fn">value</span>;
+  <span class="kw">if</span> (nome === <span class="st">""</span>) {
+    elSaudacao.<span class="fn">textContent</span> = <span class="fn">saudacaoPara</span>(hora);
+  } <span class="kw">else</span> {
+    elSaudacao.<span class="fn">textContent</span> = <span class="fn">saudacaoPara</span>(hora) + <span class="st">", "</span> + nome + <span class="st">"!"</span>;
+  }
+});</pre>
+  </div>
+
+  <div class="sol" id="s-curiosidade">
+    <div class="sol-head"><h3>5 · JS — Curiosidade aleatória</h3></div>
+    <p class="desc">Array + <code>Math.random</code> + evento <code>click</code> + contador.</p>
+    <pre><span class="kw">const</span> curiosidades = [
+  <span class="st">"Amo um café enquanto codo ☕"</span>,
+  <span class="st">"Já dei aula pra mais de 100 pessoas 👩‍🏫"</span>,
+  <span class="st">"Aprendi a programar depois de adulta 🚀"</span>,
+];
+
+<span class="kw">const</span> btn = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#btn-curiosidade"</span>);
+<span class="kw">const</span> alvo = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#curiosidade"</span>);
+
+btn.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  <span class="kw">const</span> i = <span class="fn">Math</span>.<span class="fn">floor</span>(<span class="fn">Math</span>.<span class="fn">random</span>() * curiosidades.<span class="fn">length</span>);
+  alvo.<span class="fn">textContent</span> = curiosidades[i];
+});</pre>
+  </div>
+
+  <div class="sol" id="s-hobbies">
+    <div class="sol-head"><h3>6 · JS — Lista de hobbies (loop)</h3></div>
+    <p class="desc"><code>forEach</code> + <code>createElement</code> + <code>appendChild</code>.</p>
+    <pre><span class="kw">const</span> hobbies = [<span class="st">"Ensinar"</span>, <span class="st">"Café"</span>, <span class="st">"Design bonito"</span>, <span class="st">"Comunidade"</span>];
+<span class="kw">const</span> lista = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#lista-hobbies"</span>);
+
+hobbies.<span class="fn">forEach</span>((hobby) => {
+  <span class="kw">const</span> li = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"li"</span>);
+  li.<span class="fn">textContent</span> = hobby;
+  lista.<span class="fn">appendChild</span>(li);
+});</pre>
+  </div>
+
+  <div class="sol" id="s-tema">
+    <div class="sol-head"><h3>7 · JS — Tema claro/escuro</h3></div>
+    <p class="desc"><code>classList.toggle</code> + troca do ícone.</p>
+    <pre><span class="kw">const</span> botaoTema = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#tema"</span>);
+
+botaoTema.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  <span class="fn">document</span>.<span class="fn">body</span>.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"claro"</span>);
+
+  <span class="kw">if</span> (<span class="fn">document</span>.<span class="fn">body</span>.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"claro"</span>)) {
+    botaoTema.<span class="fn">textContent</span> = <span class="st">"☀️"</span>;
+  } <span class="kw">else</span> {
+    botaoTema.<span class="fn">textContent</span> = <span class="st">"🌙"</span>;
+  }
+});</pre>
+  </div>
+
+  <div class="tipbox" style="margin-top:40px">Quer ver tudo junto e <b>funcionando</b>? Abra o modelo de resposta completo 👇</div>
+  <a class="cta" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver o site rodando</a>
+</main>
+</div>
+</body>
+</html>
