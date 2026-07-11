@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio · Aula 01 · NickDev</title>
+<meta name="description" content="Solução organizada do desafio da aula 01: o HTML e o CSS do site 'sobre mim'.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1240px;margin:0 auto;gap:0}
+
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0;font-size:14.5px;color:var(--text-2)}
+  .tipbox b{color:var(--purple-light)}
+
+  .part{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .part:first-of-type{border-top:0;padding-top:0}
+  .part .big{color:var(--pink-light)}
+
+  .sol{margin-top:28px;scroll-margin-top:18px}
+  .sol h3{font-size:19px;font-weight:600}
+  .sol .desc{color:var(--text-3);font-size:14.5px;margin:6px 0 0}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .tag{color:#E88BB8}
+  .att{color:#A98CE0}
+  .st{color:#A98CE0}
+  .prop{color:#F24487}
+  .sel{color:#E88BB8}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-transicao">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">HTML · estrutura</div>
+    <a href="#h-esqueleto">Esqueleto da página</a>
+    <a href="#h-topo">Topo (foto + nome)</a>
+    <a href="#h-sobre">Sobre mim</a>
+    <a href="#h-hobbies">Hobbies (lista)</a>
+    <a href="#h-links">Links</a>
+    <div class="grp">CSS · estilo</div>
+    <a href="#c-cores">Cores (variáveis)</a>
+    <a href="#c-base">Base (reset + body)</a>
+    <a href="#c-foto">Foto redonda</a>
+    <a href="#c-nome">Nome com degradê</a>
+    <a href="#c-cards">Cards e seções</a>
+    <a href="#c-lista">Lista de hobbies</a>
+    <a href="#c-links">Links com hover</a>
+    <a href="#c-responsivo">Responsivo (media query)</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · gabarito</div>
+  <h1>Código do <span class="g">desafio</span></h1>
+  <p class="lead">O site “sobre mim” feito só com <b>HTML e CSS</b>, quebrado em pedaços e comentado. Junte tudo num arquivo <code>index.html</code>: a estrutura no <code>&lt;body&gt;</code> e o estilo dentro de <code>&lt;style&gt;</code> no <code>&lt;head&gt;</code>.</p>
+  <div class="rule"></div>
+
+  <div class="tipbox"><b>Combinado 🤝</b> Tente sozinho(a) primeiro. Use isto pra <b>conferir</b> depois ou <b>estudar</b> como cada parte funciona — não pra copiar antes de tentar.</div>
+
+  <div class="part"><span class="big">🧱</span> Parte 1 · HTML — a estrutura</div>
+
+  <div class="sol" id="h-esqueleto">
+    <h3>Esqueleto da página</h3>
+    <p class="desc">Todo site começa assim. O <code>&lt;head&gt;</code> tem as configurações; o <code>&lt;body&gt;</code>, o conteúdo visível.</p>
+    <pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="att">lang</span>=<span class="st">"pt-BR"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="att">charset</span>=<span class="st">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="att">name</span>=<span class="st">"viewport"</span> <span class="att">content</span>=<span class="st">"width=device-width, initial-scale=1.0"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Sobre mim<span class="tag">&lt;/title&gt;</span>
+
+  <span class="tag">&lt;style&gt;</span>
+    <span class="cm">/* todo o CSS da Parte 2 vai aqui */</span>
+  <span class="tag">&lt;/style&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+
+  <span class="cm">&lt;!-- todo o conteúdo abaixo vai aqui --&gt;</span>
+
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="h-topo">
+    <h3>Topo — foto + nome</h3>
+    <p class="desc">A foto redonda (usando as iniciais) e o nome com o cargo.</p>
+    <pre><span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"container"</span><span class="tag">&gt;</span>
+
+  <span class="tag">&lt;header</span> <span class="att">class</span>=<span class="st">"topo"</span><span class="tag">&gt;</span>
+    <span class="cm">&lt;!-- Com uma foto de verdade seria:
+         &lt;img class="foto" src="foto.jpg" alt="Minha foto"&gt; --&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"foto"</span><span class="tag">&gt;</span>N<span class="tag">&lt;/div&gt;</span>
+
+    <span class="tag">&lt;h1&gt;</span>Nicoly Almeida<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;p</span> <span class="att">class</span>=<span class="st">"cargo"</span><span class="tag">&gt;</span>Desenvolvedora <span class="amp">&amp;</span> professora de tecnologia<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/header&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="h-sobre">
+    <h3>Sobre mim</h3>
+    <p class="desc">Um cartão com um parágrafo. <code>&lt;strong&gt;</code> deixa em negrito, <code>&lt;em&gt;</code> em itálico.</p>
+    <pre>  <span class="tag">&lt;section</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2&gt;</span>Sobre mim<span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span>
+      Oi! Eu <span class="tag">&lt;strong&gt;</span>ensino programação<span class="tag">&lt;/strong&gt;</span> pra quem está
+      começando na tech. Aprendo <span class="tag">&lt;em&gt;</span>fazendo<span class="tag">&lt;/em&gt;</span>. 💜
+    <span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/section&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="h-hobbies">
+    <h3>Hobbies — uma lista</h3>
+    <p class="desc"><code>&lt;ul&gt;</code> é a lista; cada <code>&lt;li&gt;</code> é um item.</p>
+    <pre>  <span class="tag">&lt;section</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2&gt;</span>O que eu curto<span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;ul&gt;</span>
+      <span class="tag">&lt;li&gt;</span>Ensinar e ver a ficha caindo<span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;li&gt;</span>Café enquanto codo<span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;li&gt;</span>Design bonito e site rápido<span class="tag">&lt;/li&gt;</span>
+    <span class="tag">&lt;/ul&gt;</span>
+  <span class="tag">&lt;/section&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="h-links">
+    <h3>Links</h3>
+    <p class="desc"><code>&lt;a&gt;</code> é o link. <code>href</code> é pra onde vai; <code>target="_blank"</code> abre em nova aba.</p>
+    <pre>  <span class="tag">&lt;section</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2&gt;</span>Onde me achar<span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"links"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;a</span> <span class="att">href</span>=<span class="st">"https://github.com/Nicoly-Almeida"</span> <span class="att">target</span>=<span class="st">"_blank"</span><span class="tag">&gt;</span>GitHub<span class="tag">&lt;/a&gt;</span>
+      <span class="tag">&lt;a</span> <span class="att">href</span>=<span class="st">"mailto:voce@email.com"</span><span class="tag">&gt;</span>E-mail<span class="tag">&lt;/a&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/section&gt;</span>
+
+<span class="tag">&lt;/div&gt;</span> <span class="cm">&lt;!-- fecha o .container --&gt;</span></pre>
+  </div>
+
+  <div class="part"><span class="big">🎨</span> Parte 2 · CSS — o estilo</div>
+  <p class="lead" style="margin-top:14px">Tudo isto vai dentro do <code>&lt;style&gt;</code>, lá no <code>&lt;head&gt;</code>.</p>
+
+  <div class="sol" id="c-cores">
+    <h3>Cores (variáveis)</h3>
+    <p class="desc">Guardar as cores em variáveis deixa fácil trocar tudo depois.</p>
+    <pre><span class="sel">:root</span> {
+  <span class="prop">--rosa</span>: <span class="st">#F24487</span>;
+  <span class="prop">--roxo</span>: <span class="st">#7B4FD0</span>;
+  <span class="prop">--fundo</span>: <span class="st">#0f0c17</span>;
+  <span class="prop">--card</span>: <span class="st">#1a1626</span>;
+  <span class="prop">--texto</span>: <span class="st">#f3f0fa</span>;
+  <span class="prop">--texto-suave</span>: <span class="st">#b4aec6</span>;
+}</pre>
+  </div>
+
+  <div class="sol" id="c-base">
+    <h3>Base — reset + body</h3>
+    <p class="desc">O <code>*</code> zera margens de tudo; o <code>body</code> define fonte e cores gerais.</p>
+    <pre><span class="sel">*</span> {
+  <span class="prop">margin</span>: <span class="st">0</span>;
+  <span class="prop">padding</span>: <span class="st">0</span>;
+  <span class="prop">box-sizing</span>: <span class="st">border-box</span>;   <span class="cm">/* padding soma por dentro */</span>
+}
+
+<span class="sel">body</span> {
+  <span class="prop">font-family</span>: <span class="st">'Segoe UI', system-ui, sans-serif</span>;
+  <span class="prop">background</span>: <span class="st">var(--fundo)</span>;
+  <span class="prop">color</span>: <span class="st">var(--texto)</span>;
+  <span class="prop">line-height</span>: <span class="st">1.6</span>;
+}
+
+<span class="sel">.container</span> {
+  <span class="prop">max-width</span>: <span class="st">640px</span>;      <span class="cm">/* não estica demais */</span>
+  <span class="prop">margin</span>: <span class="st">0 auto</span>;        <span class="cm">/* centraliza */</span>
+  <span class="prop">padding</span>: <span class="st">48px 24px</span>;
+}</pre>
+  </div>
+
+  <div class="sol" id="c-foto">
+    <h3>Foto redonda</h3>
+    <p class="desc"><code>border-radius: 50%</code> deixa o quadrado virar círculo.</p>
+    <pre><span class="sel">.topo</span> { <span class="prop">text-align</span>: <span class="st">center</span>; <span class="prop">margin-bottom</span>: <span class="st">40px</span>; }
+
+<span class="sel">.foto</span> {
+  <span class="prop">width</span>: <span class="st">140px</span>;
+  <span class="prop">height</span>: <span class="st">140px</span>;
+  <span class="prop">border-radius</span>: <span class="st">50%</span>;                 <span class="cm">/* vira círculo */</span>
+  <span class="prop">background</span>: <span class="st">linear-gradient(135deg, var(--rosa), var(--roxo))</span>;
+  <span class="cm">/* centraliza as iniciais dentro */</span>
+  <span class="prop">display</span>: <span class="st">flex</span>;
+  <span class="prop">align-items</span>: <span class="st">center</span>;
+  <span class="prop">justify-content</span>: <span class="st">center</span>;
+  <span class="prop">font-size</span>: <span class="st">58px</span>;
+  <span class="prop">color</span>: <span class="st">white</span>;
+  <span class="prop">margin</span>: <span class="st">0 auto 20px</span>;
+}</pre>
+  </div>
+
+  <div class="sol" id="c-nome">
+    <h3>Nome com degradê</h3>
+    <p class="desc">Truque pra dar cor de degradê no texto (aquele efeito rosa→roxo).</p>
+    <pre><span class="sel">h1</span> {
+  <span class="prop">font-size</span>: <span class="st">40px</span>;
+  <span class="prop">background</span>: <span class="st">linear-gradient(100deg, var(--rosa), var(--roxo))</span>;
+  <span class="prop">-webkit-background-clip</span>: <span class="st">text</span>;
+  <span class="prop">background-clip</span>: <span class="st">text</span>;
+  <span class="prop">color</span>: <span class="st">transparent</span>;              <span class="cm">/* deixa o degradê aparecer */</span>
+}
+
+<span class="sel">.cargo</span> { <span class="prop">color</span>: <span class="st">var(--texto-suave)</span>; <span class="prop">font-size</span>: <span class="st">18px</span>; }</pre>
+  </div>
+
+  <div class="sol" id="c-cards">
+    <h3>Cards e seções</h3>
+    <p class="desc">A barrinha colorida ao lado do título é um <code>::before</code>.</p>
+    <pre><span class="sel">.card</span> {
+  <span class="prop">background</span>: <span class="st">var(--card)</span>;
+  <span class="prop">border-radius</span>: <span class="st">16px</span>;
+  <span class="prop">padding</span>: <span class="st">26px 28px</span>;
+  <span class="prop">margin-bottom</span>: <span class="st">20px</span>;
+}
+
+<span class="sel">h2</span> { <span class="prop">font-size</span>: <span class="st">22px</span>; <span class="prop">margin-bottom</span>: <span class="st">12px</span>; }
+
+<span class="cm">/* barrinha de degradê antes do título */</span>
+<span class="sel">h2::before</span> {
+  <span class="prop">content</span>: <span class="st">""</span>;
+  <span class="prop">display</span>: <span class="st">inline-block</span>;
+  <span class="prop">width</span>: <span class="st">10px</span>;
+  <span class="prop">height</span>: <span class="st">20px</span>;
+  <span class="prop">background</span>: <span class="st">linear-gradient(var(--rosa), var(--roxo))</span>;
+  <span class="prop">border-radius</span>: <span class="st">4px</span>;
+  <span class="prop">margin-right</span>: <span class="st">10px</span>;
+  <span class="prop">vertical-align</span>: <span class="st">-3px</span>;
+}</pre>
+  </div>
+
+  <div class="sol" id="c-lista">
+    <h3>Lista de hobbies</h3>
+    <p class="desc">Tira as bolinhas padrão e põe uma setinha com <code>::before</code>.</p>
+    <pre><span class="sel">ul</span> { <span class="prop">list-style</span>: <span class="st">none</span>; <span class="prop">margin-top</span>: <span class="st">6px</span>; }
+
+<span class="sel">li</span> {
+  <span class="prop">color</span>: <span class="st">var(--texto-suave)</span>;
+  <span class="prop">padding</span>: <span class="st">8px 0</span>;
+  <span class="prop">border-bottom</span>: <span class="st">1px solid rgba(255,255,255,0.07)</span>;
+}
+<span class="sel">li::before</span> { <span class="prop">content</span>: <span class="st">"→ "</span>; <span class="prop">color</span>: <span class="st">var(--rosa)</span>; }</pre>
+  </div>
+
+  <div class="sol" id="c-links">
+    <h3>Links com hover</h3>
+    <p class="desc">Vira botão em formato de pílula; muda de cor ao passar o mouse (<code>:hover</code>).</p>
+    <pre><span class="sel">.links</span> {
+  <span class="prop">display</span>: <span class="st">flex</span>;
+  <span class="prop">flex-wrap</span>: <span class="st">wrap</span>;      <span class="cm">/* quebra linha se não couber */</span>
+  <span class="prop">gap</span>: <span class="st">12px</span>;
+}
+<span class="sel">.links a</span> {
+  <span class="prop">border</span>: <span class="st">1px solid rgba(255,255,255,0.2)</span>;
+  <span class="prop">padding</span>: <span class="st">10px 18px</span>;
+  <span class="prop">border-radius</span>: <span class="st">100px</span>;       <span class="cm">/* pílula */</span>
+  <span class="prop">text-decoration</span>: <span class="st">none</span>;
+  <span class="prop">color</span>: <span class="st">var(--texto)</span>;
+  <span class="prop">transition</span>: <span class="st">0.2s</span>;           <span class="cm">/* hover suave */</span>
+}
+<span class="sel">.links a:hover</span> {
+  <span class="prop">border-color</span>: <span class="st">var(--rosa)</span>;
+  <span class="prop">color</span>: <span class="st">var(--rosa)</span>;
+}</pre>
+  </div>
+
+  <div class="sol" id="c-responsivo">
+    <h3>Responsivo (media query)</h3>
+    <p class="desc">Em telas pequenas (celular), diminui o nome e os espaços. Um dos <b>desafios extras</b>!</p>
+    <pre><span class="cm">/* quando a largura for até 480px */</span>
+<span class="prop">@media</span> (<span class="prop">max-width</span>: <span class="st">480px</span>) {
+  <span class="sel">h1</span> { <span class="prop">font-size</span>: <span class="st">32px</span>; }
+  <span class="sel">.container</span> { <span class="prop">padding</span>: <span class="st">32px 18px</span>; }
+  <span class="sel">.card</span> { <span class="prop">padding</span>: <span class="st">22px 20px</span>; }
+}</pre>
+  </div>
+
+  <div class="tipbox" style="margin-top:40px">Quer ver o site <b>montado e funcionando</b>? Abra o modelo completo 👇</div>
+  <a class="cta" href="modelo-sobre-mim.html" target="_blank">🧑‍💻 Ver o site pronto</a>
+</main>
+</div>
+</body>
+</html>
