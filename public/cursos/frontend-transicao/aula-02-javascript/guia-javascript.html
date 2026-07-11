@@ -72,6 +72,13 @@
   .cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:14px;
     background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
 
+  /* demos renderizados (iframe com resultado real) */
+  .demo{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:12px 0 6px;background:var(--surface-2)}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:#5fd08a}
+  .demo iframe{width:100%;border:0;background:#fff;display:block}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+
   @media(max-width:860px){
     .wrap{grid-template-columns:1fr}
     aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);flex-direction:column}
@@ -299,20 +306,85 @@ pessoa.cidade = <span class="st">"SP"</span>; <span class="cm">// adicionar</spa
 
   <section id="dom">
     <h2>DOM — controlando o HTML</h2>
-    <p>O <b>DOM</b> é a página vista como objetos. Com JS você seleciona um elemento e transforma ele.</p>
-    <pre><span class="cm">// selecionar (usa seletor de CSS)</span>
-<span class="kw">const</span> titulo = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"h1"</span>);
-<span class="kw">const</span> botao  = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#meu-botao"</span>);
+    <p>O <b>DOM</b> é a sua página vista como uma árvore de objetos. Com JavaScript você <b>seleciona</b> um elemento e <b>transforma</b> ele: muda texto, cor, cria coisas novas, apaga... Os exemplos abaixo <b>rodam de verdade</b> — o resultado aparece logo embaixo de cada código.</p>
 
-<span class="cm">// mudar</span>
-titulo.<span class="fn">textContent</span> = <span class="st">"Texto novo"</span>;   <span class="cm">// o conteúdo</span>
-titulo.<span class="fn">style</span>.color = <span class="st">"hotpink"</span>;     <span class="cm">// o estilo</span>
-titulo.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"escuro"</span>); <span class="cm">// liga/desliga classe CSS</span></pre>
-    <ul>
-      <li><code>textContent</code> — o texto de dentro</li>
-      <li><code>value</code> — o que foi digitado num <code>&lt;input&gt;</code></li>
-      <li><code>classList.add / remove / toggle</code> — mexe nas classes CSS</li>
-    </ul>
+    <h3>1. Selecionar elementos</h3>
+    <pre><span class="cm">// por seletor de CSS (o mais usado)</span>
+<span class="kw">const</span> titulo = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"h1"</span>);      <span class="cm">// o primeiro &lt;h1&gt;</span>
+<span class="kw">const</span> botao  = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#enviar"</span>);  <span class="cm">// id → #</span>
+<span class="kw">const</span> cards  = <span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".card"</span>); <span class="cm">// TODOS com a classe → lista</span>
+
+<span class="cm">// atalho clássico por id</span>
+<span class="kw">const</span> caixa = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="st">"caixa"</span>);</pre>
+    <div class="tip"><code>querySelector</code> pega <b>o primeiro</b> que bate. <code>querySelectorAll</code> pega <b>todos</b> numa lista (dá pra usar <code>forEach</code> nela).</div>
+
+    <h3>2. Ler e mudar conteúdo</h3>
+    <pre>titulo.<span class="fn">textContent</span> = <span class="st">"Mudei pelo JavaScript!"</span>;  <span class="cm">// troca o texto</span>
+titulo.<span class="fn">style</span>.color = <span class="st">"#F24487"</span>;                <span class="cm">// muda o estilo (CSS)</span>
+titulo.<span class="fn">style</span>.fontSize = <span class="st">"28px"</span>;</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado</div>
+      <iframe data-demo="dom1" height="90" title="demo textContent e style"></iframe>
+    </div>
+    <div class="tip"><code>textContent</code> troca só o <b>texto</b>. <code>innerHTML</code> aceita <b>tags HTML</b> (<code>el.innerHTML = "&lt;b&gt;oi&lt;/b&gt;"</code>) — mas cuidado ao usar com texto que veio do usuário.</div>
+
+    <h3>3. Mudar classes e atributos</h3>
+    <pre><span class="cm">// classes CSS — a forma mais organizada de mudar visual</span>
+caixa.<span class="fn">classList</span>.<span class="fn">add</span>(<span class="st">"ativo"</span>);      <span class="cm">// adiciona</span>
+caixa.<span class="fn">classList</span>.<span class="fn">remove</span>(<span class="st">"ativo"</span>);   <span class="cm">// remove</span>
+caixa.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"ativo"</span>);   <span class="cm">// liga/desliga</span>
+caixa.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"ativo"</span>); <span class="cm">// tem essa classe? true/false</span>
+
+<span class="cm">// atributos</span>
+link.<span class="fn">setAttribute</span>(<span class="st">"href"</span>, <span class="st">"https://nickdeve.com"</span>);
+img.<span class="fn">src</span> = <span class="st">"foto.jpg"</span>;
+input.<span class="fn">value</span>;  <span class="cm">// o que a pessoa digitou num &lt;input&gt;</span></pre>
+
+    <h3>4. Criar, inserir e remover elementos</h3>
+    <pre><span class="cm">// criar um elemento do zero</span>
+<span class="kw">const</span> item = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"li"</span>);
+item.<span class="fn">textContent</span> = <span class="st">"Novo item"</span>;
+
+<span class="cm">// colocar dentro de outro (no fim)</span>
+lista.<span class="fn">appendChild</span>(item);
+
+<span class="cm">// apagar</span>
+item.<span class="fn">remove</span>();</pre>
+    <p>Isso combinado com um <b>loop</b> é como se monta uma lista a partir de dados:</p>
+    <pre><span class="kw">const</span> frutas = [<span class="st">"🍎 Maçã"</span>, <span class="st">"🍌 Banana"</span>, <span class="st">"🍇 Uva"</span>];
+
+frutas.<span class="fn">forEach</span>(fruta => {
+  <span class="kw">const</span> li = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"li"</span>);
+  li.<span class="fn">textContent</span> = fruta;
+  lista.<span class="fn">appendChild</span>(li);
+});</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado</div>
+      <iframe data-demo="dom2" height="120" title="demo createElement em loop"></iframe>
+    </div>
+
+    <h3>5. Reagindo a você (prévia de eventos)</h3>
+    <p>Quando o DOM encontra os <b>eventos</b>, a página fica viva. Estes dois demos são <b>clicáveis / digitáveis</b> — pode brincar:</p>
+    <pre><span class="cm">// contador de curtidas</span>
+<span class="kw">let</span> curtidas = <span class="st">0</span>;
+botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  curtidas++;
+  contador.<span class="fn">textContent</span> = curtidas + <span class="st">" ❤️"</span>;
+});</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado <span class="try">clica no botão 👆</span></div>
+      <iframe data-demo="dom3" height="120" title="demo contador de curtidas"></iframe>
+    </div>
+    <pre><span class="cm">// eco do que você digita (evento input)</span>
+campo.<span class="fn">addEventListener</span>(<span class="st">"input"</span>, () => {
+  saida.<span class="fn">textContent</span> = <span class="st">"Oi, "</span> + campo.<span class="fn">value</span> + <span class="st">"! 👋"</span>;
+});</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado <span class="try">digite algo ⌨️</span></div>
+      <iframe data-demo="dom4" height="130" title="demo input ao vivo"></iframe>
+    </div>
+
+    <div class="tip"><b>Resumo dos poderes:</b> <code>textContent</code>/<code>innerHTML</code> (conteúdo) · <code>style</code> (visual direto) · <code>classList</code> (classes CSS) · <code>value</code> (inputs) · <code>createElement</code>/<code>appendChild</code>/<code>remove</code> (criar e apagar) · <code>addEventListener</code> (reagir).</div>
   </section>
 
   <section id="eventos">
@@ -412,5 +484,53 @@ npm run dev</pre>
   </section>
 </main>
 </div>
+
+<script>
+  // Demos renderizados da seção DOM: cada iframe roda seu próprio HTML + JS.
+  const base = "<!doctype html><html><head><meta charset='utf-8'><style>"
+    + "body{font-family:system-ui,'Segoe UI',sans-serif;margin:0;padding:16px;color:#1a1a2e;background:#fff}"
+    + "h1{font-size:22px;margin:0}"
+    + "button{font:inherit;padding:9px 16px;border:0;border-radius:8px;background:#7B4FD0;color:#fff;cursor:pointer}"
+    + "button:hover{background:#F24487}"
+    + "input{font:inherit;padding:8px 12px;border:1px solid #ccc;border-radius:8px;width:100%;max-width:240px}"
+    + "ul{margin:0;padding-left:20px}li{margin:4px 0}p{margin:12px 0 0;font-size:16px}"
+    + "</style></head><body>";
+  const S = "<scr" + "ipt>", E = "</scr" + "ipt>";  // evita fechar o script de fora
+
+  const demos = {
+    // 1) mudar texto + estilo
+    dom1: base
+      + "<h1 id='t'>Título original</h1>"
+      + S + "const t=document.getElementById('t');"
+      + "t.textContent='Mudei pelo JavaScript!';"
+      + "t.style.color='#F24487';" + E
+      + "</body></html>",
+    // 2) createElement dentro de um loop
+    dom2: base
+      + "<ul id='lista'></ul>"
+      + S + "const frutas=['🍎 Maçã','🍌 Banana','🍇 Uva'];"
+      + "const lista=document.getElementById('lista');"
+      + "frutas.forEach(f=>{const li=document.createElement('li');li.textContent=f;lista.appendChild(li);});" + E
+      + "</body></html>",
+    // 3) contador de curtidas (clicável)
+    dom3: base
+      + "<button id='b'>Curtir</button> <span id='c' style='margin-left:8px;font-size:18px'>0 ❤️</span>"
+      + S + "let n=0;const b=document.getElementById('b'),c=document.getElementById('c');"
+      + "b.addEventListener('click',()=>{n++;c.textContent=n+' ❤️';});" + E
+      + "</body></html>",
+    // 4) eco do input (digitável)
+    dom4: base
+      + "<input id='campo' placeholder='digite seu nome...'>"
+      + "<p id='saida'>Oi! 👋</p>"
+      + S + "const campo=document.getElementById('campo'),saida=document.getElementById('saida');"
+      + "campo.addEventListener('input',()=>{saida.textContent = campo.value ? ('Oi, '+campo.value+'! 👋') : 'Oi! 👋';});" + E
+      + "</body></html>",
+  };
+
+  document.querySelectorAll("iframe[data-demo]").forEach(f => {
+    f.srcdoc = demos[f.dataset.demo];
+  });
+</script>
+
 </body>
 </html>
