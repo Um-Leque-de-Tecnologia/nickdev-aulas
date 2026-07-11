@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  MODELO DE RESPOSTA — Desafio 02 (JavaScript) · NickDev
+  ------------------------------------------------------------
+  Site "sobre mim" INTERATIVO. Tudo aqui usa só o que vimos:
+  variáveis, arrays, funções, if/else, DOM e eventos.
+
+  Cada bloco de JS está comentado explicando o que faz.
+  Troque os textos pelos seus e mande ver! 💜
+  ============================================================
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nicoly · Sobre mim (interativo)</title>
+
+  <style>
+    :root{
+      --rosa:#F24487;
+      --roxo:#7B4FD0;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+
+    body{
+      font-family:'Segoe UI',system-ui,sans-serif;
+      background:#0f0c17;
+      color:#f3f0fa;
+      line-height:1.6;
+      transition:background .3s, color .3s;   /* deixa a troca de tema suave */
+    }
+    /* TEMA CLARO: o JS liga/desliga a classe .claro no body */
+    body.claro{ background:#f4f1fa; color:#1a1626; }
+    body.claro .card{ background:#fff; }
+    body.claro .cargo, body.claro p{ color:#4a4560; }
+
+    .container{max-width:640px;margin:0 auto;padding:48px 24px}
+
+    /* botão de tema, fixo no canto */
+    #tema{
+      position:fixed;top:16px;right:16px;
+      font:inherit;font-size:20px;cursor:pointer;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+      width:44px;height:44px;border-radius:50%;
+    }
+
+    .topo{text-align:center;margin-bottom:36px}
+    .foto{
+      width:130px;height:130px;border-radius:50%;
+      background:linear-gradient(135deg,var(--rosa),var(--roxo));
+      display:flex;align-items:center;justify-content:center;
+      font-size:54px;font-weight:bold;color:#fff;margin:0 auto 16px;
+    }
+    /* saudação dinâmica (muda com a hora) */
+    #saudacao{font-size:15px;color:var(--rosa);font-weight:600;letter-spacing:.02em}
+    h1{
+      font-size:38px;margin-top:4px;
+      background:linear-gradient(100deg,var(--rosa),var(--roxo));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .cargo{color:#b4aec6;font-size:18px}
+
+    /* campo pra personalizar a saudação */
+    .nomebox{margin-top:16px}
+    .nomebox input{
+      font:inherit;padding:10px 16px;border-radius:100px;border:1px solid rgba(255,255,255,.2);
+      background:transparent;color:inherit;text-align:center;
+    }
+
+    .card{background:#1a1626;border-radius:16px;padding:26px 28px;margin-bottom:20px}
+    h2{font-size:22px;margin-bottom:12px}
+    h2::before{content:"";display:inline-block;width:10px;height:20px;
+      background:linear-gradient(var(--rosa),var(--roxo));border-radius:4px;margin-right:10px;vertical-align:-3px}
+    p{color:#b4aec6}
+
+    /* botão de curiosidade */
+    .btn{
+      font:inherit;font-weight:600;cursor:pointer;color:#fff;
+      background:linear-gradient(100deg,var(--rosa),var(--roxo));
+      border:0;padding:12px 22px;border-radius:100px;margin-top:6px;
+    }
+    .btn:hover{opacity:.92}
+    #curiosidade{margin-top:16px;font-size:18px;min-height:26px}
+    #contador{font-size:13px;color:#8b84a0;margin-top:8px}
+
+    ul{list-style:none;margin-top:6px}
+    li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    li::before{content:"→ ";color:var(--rosa)}
+
+    .links{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .links a{color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.2);padding:10px 18px;border-radius:100px;transition:.2s}
+    .links a:hover{border-color:var(--rosa);color:var(--rosa)}
+
+    footer{text-align:center;color:#8b84a0;font-size:14px;margin-top:28px}
+  </style>
+</head>
+
+<body>
+
+  <!-- botão de tema (o JS cuida do clique) -->
+  <button id="tema" title="Trocar tema">🌙</button>
+
+  <div class="container">
+
+    <header class="topo">
+      <div class="foto">N</div>
+      <!-- estes dois começam vazios: o JS preenche -->
+      <p id="saudacao">carregando...</p>
+      <h1>Nicoly Beltrão</h1>
+      <p class="cargo">Desenvolvedora & professora de tecnologia</p>
+
+      <!-- EXTRA: digite um nome e a saudação se personaliza ao vivo -->
+      <div class="nomebox">
+        <input id="campo-nome" type="text" placeholder="digite seu nome aqui 👋">
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Sobre mim</h2>
+      <p>Oi! Eu <strong>ensino programação</strong> pra quem está começando na tech.
+      Esse site fala de mim — e agora ele <em>reage</em> a você. Clica no botão ali embaixo. 👇</p>
+    </section>
+
+    <section class="card">
+      <h2>Me conheça melhor</h2>
+      <button id="btn-curiosidade" class="btn">Revelar uma curiosidade 🎲</button>
+      <p id="curiosidade"></p>
+      <p id="contador"></p>
+    </section>
+
+    <section class="card">
+      <h2>O que eu curto</h2>
+      <!-- esta lista é criada pelo JavaScript (loop forEach) -->
+      <ul id="lista-hobbies"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Onde me achar</h2>
+      <div class="links">
+        <a href="https://github.com/Nicoly-Almeida" target="_blank">GitHub</a>
+        <a href="mailto:nicolyejady@gmail.com">E-mail</a>
+      </div>
+    </section>
+
+    <footer>Feito com <strong>HTML, CSS e JavaScript</strong> na aula 02 da NickDev.</footer>
+
+  </div>
+
+  <!-- ============================================================
+       AQUI COMEÇA O JAVASCRIPT — a página ganha vida
+       ============================================================ -->
+  <script>
+    // ---------- 1. SAUDAÇÃO PELA HORA DO DIA ----------
+    // Pega a hora atual do computador (0 a 23)
+    const hora = new Date().getHours();
+    const elSaudacao = document.querySelector("#saudacao");
+
+    // Função que decide a saudação a partir de uma hora.
+    // Recebe a hora e RETORNA o texto certo (if / else if / else).
+    function saudacaoPara(h) {
+      if (h < 12)  return "Bom dia ☀️";
+      if (h < 18)  return "Boa tarde 🌤️";
+      return "Boa noite 🌙";
+    }
+
+    // Mostra a saudação na tela
+    elSaudacao.textContent = saudacaoPara(hora);
+
+
+    // ---------- 2. PERSONALIZAR A SAUDAÇÃO (extra) ----------
+    // Quando a pessoa digita no campo, a saudação inclui o nome dela.
+    const campoNome = document.querySelector("#campo-nome");
+
+    campoNome.addEventListener("input", () => {
+      const nome = campoNome.value;                 // o que foi digitado
+      if (nome === "") {
+        elSaudacao.textContent = saudacaoPara(hora); // vazio → saudação normal
+      } else {
+        elSaudacao.textContent = saudacaoPara(hora) + ", " + nome + "!";
+      }
+    });
+
+
+    // ---------- 3. BOTÃO DE CURIOSIDADE ALEATÓRIA ----------
+    // Um array (lista) com as minhas curiosidades
+    const curiosidades = [
+      "Amo um café enquanto codo ☕",
+      "Já dei aula pra mais de 100 pessoas 👩‍🏫",
+      "Meu primeiro site era bem feinho 😅",
+      "Aprendi a programar depois de adulta 🚀",
+      "Curto design tanto quanto código 🎨",
+    ];
+
+    const btn = document.querySelector("#btn-curiosidade");
+    const alvo = document.querySelector("#curiosidade");
+    const contador = document.querySelector("#contador");
+    let quantasVezes = 0;   // vai contando os cliques
+
+    btn.addEventListener("click", () => {
+      // sorteia um índice de 0 até (tamanho da lista - 1)
+      const i = Math.floor(Math.random() * curiosidades.length);
+      alvo.textContent = curiosidades[i];
+
+      quantasVezes = quantasVezes + 1;   // soma 1 no contador
+      contador.textContent = "Você já revelou " + quantasVezes + " curiosidade(s).";
+    });
+
+
+    // ---------- 4. LISTA DE HOBBIES COM LOOP (extra) ----------
+    // Em vez de escrever cada <li> na mão, deixo o JS criar a lista.
+    const hobbies = ["Ensinar", "Café", "Design bonito", "Comunidade"];
+    const lista = document.querySelector("#lista-hobbies");
+
+    hobbies.forEach((hobby) => {
+      const li = document.createElement("li");  // cria um <li>
+      li.textContent = hobby;                    // coloca o texto
+      lista.appendChild(li);                     // adiciona na <ul>
+    });
+
+
+    // ---------- 5. BOTÃO DE TEMA CLARO/ESCURO ----------
+    const botaoTema = document.querySelector("#tema");
+
+    botaoTema.addEventListener("click", () => {
+      // liga/desliga a classe .claro no body
+      document.body.classList.toggle("claro");
+
+      // troca o ícone do botão dependendo do tema atual
+      if (document.body.classList.contains("claro")) {
+        botaoTema.textContent = "☀️";
+      } else {
+        botaoTema.textContent = "🌙";
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const AULA_01 = "/cursos/frontend-transicao/aula-01-abertura";
+const AULA_02 = "/cursos/frontend-transicao/aula-02-javascript";
 
 export default function FrontendTransicao() {
   return (
@@ -59,16 +60,27 @@ export default function FrontendTransicao() {
           </div>
         </div>
 
-        <div className="lesson soon">
+        <div className="lesson">
           <div className="idx">02</div>
           <div className="body">
             <h3>JavaScript: a página ganha vida</h3>
             <p>
-              Variáveis, eventos e interatividade — fazendo a página reagir a
-              quem usa.
+              Variáveis, funções, arrays, condicionais, DOM e eventos — 8 horas
+              fazendo a página reagir a quem usa, com editores ao vivo e joguinhos.
             </p>
             <div className="mats">
-              <span className="soon-tag">em breve</span>
+              <a className="mat primary" href={`${AULA_02}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_02}/guia-javascript.html`}>
+                📘 Guia de JavaScript
+              </a>
+              <a className="mat" href={`${AULA_02}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_02}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
             </div>
           </div>
         </div>
