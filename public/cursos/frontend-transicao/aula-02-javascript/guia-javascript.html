@@ -102,6 +102,9 @@
     <a href="#dom">DOM</a>
     <a href="#eventos">Eventos</a>
     <a href="#pratica">Prática</a>
+    <div class="grp">Próximo nível</div>
+    <a href="#node">Node &amp; npm</a>
+    <a href="#modulos">Módulos (import/export)</a>
   </nav>
 </aside>
 
@@ -306,6 +309,70 @@ btn.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, ()
 });</pre>
     <p>Pronto pra valer? Encara o desafio da aula 👇</p>
     <a class="cta" href="desafio.html">🎯 Ir para o desafio</a>
+  </section>
+
+  <section id="node">
+    <h2>Node &amp; npm</h2>
+    <div class="tip"><b>Calma:</b> pro desafio de hoje você <b>não precisa</b> disto — tudo roda no navegador. Esta parte é um mapa do que vem nas próximas aulas, quando os projetos crescem.</div>
+
+    <h3>Por que sair do navegador?</h3>
+    <p>Até agora o JavaScript rodou dentro do navegador. O <b>Node.js</b> é um programa que roda JavaScript <b>fora</b> dele — no seu computador, direto no terminal. É o que permite usar ferramentas, servidores e projetos maiores (tipo o próprio site de vocês, feito em Next.js 👀).</p>
+
+    <h3>1. Instalar o Node</h3>
+    <p>Baixe a versão <b>LTS</b> em <code>nodejs.org</code> e instale (é só avançar). Depois, confira no terminal:</p>
+    <pre><span class="cm"># mostra a versão instalada (se aparecer um número, deu certo)</span>
+node -v
+npm -v</pre>
+    <p>O <b>npm</b> (Node Package Manager) já vem junto com o Node. É ele que baixa e organiza os "pacotes" (códigos prontos de outras pessoas).</p>
+
+    <h3>2. Começar um projeto</h3>
+    <pre><span class="cm"># cria o package.json (a "carteira de identidade" do projeto)</span>
+npm init -y
+
+<span class="cm"># instala um pacote (ex.: a biblioteca de datas)</span>
+npm install dayjs</pre>
+    <ul>
+      <li><b>package.json</b> — lista o nome do projeto, os scripts e as dependências.</li>
+      <li><b>node_modules/</b> — pasta onde o npm guarda os pacotes baixados. <b>Nunca</b> se mexe nela na mão (e não sobe pro Git).</li>
+      <li><b>package-lock.json</b> — trava as versões exatas, pra funcionar igual na máquina de todo mundo.</li>
+    </ul>
+
+    <h3>3. Rodar comandos (scripts)</h3>
+    <p>No <code>package.json</code> você define atalhos na parte <code>"scripts"</code> e roda com <code>npm run</code>:</p>
+    <pre><span class="cm">// dentro do package.json</span>
+<span class="st">"scripts"</span>: {
+  <span class="st">"dev"</span>: <span class="st">"next dev"</span>
+}
+
+<span class="cm"># no terminal:</span>
+npm run dev</pre>
+    <div class="tip"><b>Você já viu isso!</b> É exatamente assim que o site da NickDev roda: <code>npm install</code> pra baixar tudo e <code>npm run dev</code> pra ligar.</div>
+  </section>
+
+  <section id="modulos">
+    <h2>Módulos: <code>import</code> / <code>export</code></h2>
+    <p>Quando o código cresce, a gente separa ele em <b>vários arquivos</b> — cada um cuidando de uma coisa. Um arquivo <b>exporta</b> o que quer compartilhar; o outro <b>importa</b> o que precisa.</p>
+
+    <h3>Exportar (arquivo <code>saudacoes.js</code>)</h3>
+    <pre><span class="cm">// export nomeado: pode exportar vários</span>
+<span class="kw">export function</span> <span class="fn">bomDia</span>(nome) {
+  <span class="kw">return</span> <span class="st">`Bom dia, ${nome}!`</span>;
+}
+
+<span class="kw">export const</span> emoji = <span class="st">"👋"</span>;</pre>
+
+    <h3>Importar (arquivo <code>app.js</code>)</h3>
+    <pre><span class="kw">import</span> { bomDia, emoji } <span class="kw">from</span> <span class="st">"./saudacoes.js"</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">bomDia</span>(<span class="st">"Ana"</span>) + emoji);</pre>
+
+    <h3>Export default (um "principal" por arquivo)</h3>
+    <pre><span class="cm">// botao.js</span>
+<span class="kw">export default function</span> <span class="fn">Botao</span>() { ... }
+
+<span class="cm">// outro arquivo — importa sem chaves e escolhe o nome</span>
+<span class="kw">import</span> Botao <span class="kw">from</span> <span class="st">"./botao.js"</span>;</pre>
+    <div class="tip"><b>No navegador:</b> pra usar <code>import</code> direto no HTML, a tag precisa ser <code>&lt;script type="module"&gt;</code>. Em projetos com Node/Next, isso já vem configurado. É assim que o site de vocês junta os componentes (<code>import SiteHeader from ...</code>).</div>
   </section>
 </main>
 </div>
