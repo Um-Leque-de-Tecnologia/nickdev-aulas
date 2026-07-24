@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Do design ao código · NickDev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E;
+    --canvas-2:#100D1B;
+    --paper:#f6f4ef;
+    --ink:#F3F0FA;
+    --muted:#8B84A0;
+    --tag:#7B4FD0;       /* estrutura / tags */
+    --str:#A98CE0;       /* strings / sucesso */
+    --key:#F24487;       /* palavras-chave / destaque */
+    --attr:#E88BB8;      /* atributos / parada */
+    --line:rgba(255,255,255,.09);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --serif:'Newsreader',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--body);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* editor chrome (oculto — visual alinhado ao site) */
+  .chrome{display:none}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+  .chrome .file{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-left:10px}
+  .chrome .file b{color:var(--ink);font-weight:500}
+  .chrome .right{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  /* deck */
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  /* título como tag */
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(26px,5.2vw,64px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6.6vw,82px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(26px,4.4vw,52px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.4vw,27px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;color:var(--ink);max-width:60ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.9em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(14px,1.5vw,17px)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+
+  ul.clean{list-style:none;max-width:64ch}
+  ul.clean li{position:relative;padding-left:26px;margin:12px 0;font-size:clamp(15px,1.7vw,20px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  /* nav */
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;
+    font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;
+    border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+
+  /* agenda */
+  .agenda{display:flex;flex-direction:column;gap:2px;max-width:940px;width:100%}
+  .row{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;padding:12px 16px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:14px}
+  .row .d{font-size:clamp(14px,1.6vw,18px)}
+  .row .tag{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.55}.row.brk .t{color:var(--muted)}
+
+  /* fluxo web */
+  .flow{display:flex;align-items:stretch;gap:0;width:100%;max-width:960px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+  .flow .node .ico{font-size:34px;margin-bottom:10px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(15px,1.8vw,20px);margin-bottom:6px}
+  .flow .arw{display:flex;align-items:center;padding:0 14px;color:var(--tag);font-size:26px}
+  @media(max-width:820px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg)}}
+
+  /* editor ao vivo */
+  .live{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:1080px;height:min(52vh,520px)}
+  .live .pane{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--canvas-2)}
+  .live .panehd{font-family:var(--mono);font-size:12.5px;color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+  .live .panehd .d{width:9px;height:9px;border-radius:50%}
+  .live textarea{flex:1;background:transparent;border:0;resize:none;color:var(--ink);font-family:var(--mono);
+    font-size:14px;line-height:1.6;padding:14px;outline:none;tab-size:2}
+  .live iframe{flex:1;border:0;background:#fff}
+  @media(max-width:820px){.live{grid-template-columns:1fr;height:auto}.live .pane{height:38vh}}
+
+  /* box model */
+  .boxmodel{display:flex;gap:34px;align-items:center;flex-wrap:wrap}
+  .bm{--c:var(--attr);position:relative;padding:34px;border:2px dashed var(--attr);border-radius:10px;background:rgba(232,139,184,.06)}
+  .bm .lbl{position:absolute;top:6px;left:10px;font-family:var(--mono);font-size:11px;color:var(--attr)}
+  .bm-b{padding:24px;border:2px solid var(--key);border-radius:8px;background:rgba(242,68,135,.08);position:relative}
+  .bm-b .lbl{color:var(--key);border-color:var(--key)}
+  .bm-p{padding:22px;border:2px dashed var(--str);border-radius:6px;background:rgba(169,140,224,.08);position:relative}
+  .bm-p .lbl{color:var(--str)}
+  .bm-c{background:var(--tag);color:var(--canvas);font-family:var(--mono);font-weight:700;padding:16px 22px;border-radius:4px;font-size:14px}
+
+  /* parada / joguinho */
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:26px;letter-spacing:.06em}
+  .parada h1{max-width:16ch;margin:0 auto}
+  .gamebtn{margin-top:30px;display:inline-flex;align-items:center;gap:12px;font-family:var(--disp);font-weight:600;
+    font-size:clamp(17px,2vw,22px);text-decoration:none;color:var(--canvas);background:var(--attr);
+    padding:16px 30px;border-radius:14px;transition:.18s;box-shadow:0 8px 30px rgba(232,139,184,.25)}
+  .gamebtn:hover{transform:translateY(-2px)}
+  .gamebtn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .parada .url{margin-top:16px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+  /* responsivo */
+  .respo{display:flex;flex-direction:column;gap:16px;align-items:center;width:100%}
+  .devbtns{display:flex;gap:10px}
+  .devbtns button{font-family:var(--mono);font-size:13px;padding:9px 16px;border-radius:10px;border:1px solid var(--line);
+    background:var(--canvas-2);color:var(--muted);cursor:pointer;transition:.15s}
+  .devbtns button.on{color:var(--canvas);background:var(--tag);border-color:var(--tag);font-weight:600}
+  .frame{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1017;transition:width .4s ease;width:100%;max-width:900px}
+  .frame iframe{width:100%;height:min(40vh,380px);border:0;display:block;background:#fff}
+  .wlabel{font-family:var(--mono);font-size:13px;color:var(--attr)}
+
+  /* git */
+  .timeline{display:flex;align-items:center;gap:0;width:100%;max-width:920px;margin-top:10px}
+  .commit{flex:1;text-align:center;position:relative}
+  .commit .dot2{width:20px;height:20px;border-radius:50%;background:var(--str);margin:0 auto 12px;box-shadow:0 0 0 5px rgba(169,140,224,.15)}
+  .commit .msg{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+  .commit .hash{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+  .tl-line{position:absolute;top:9px;left:0;right:0;height:2px;background:var(--line);z-index:-1}
+
+  .steps{counter-reset:s;max-width:760px;width:100%}
+  .steps .st{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:34px;height:34px;min-width:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:15px}
+  .steps .st .body h3{font-size:clamp(16px,1.9vw,21px);margin-bottom:2px}
+  .steps .st .body p{font-size:clamp(13px,1.5vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:13px;color:var(--attr);border-left:2px solid var(--attr);padding-left:14px;margin-top:22px;max-width:60ch;line-height:1.5}
+
+  .big-emoji{font-size:clamp(40px,7vw,72px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  /* --- responsividade: robustez em telas baixas/estreitas --- */
+  .slide{justify-content:safe center}                 /* centraliza, mas rola do topo se não couber */
+  h1,h2,.tagtitle{overflow-wrap:break-word}
+  @media(max-width:600px){
+    .slide h1 br{display:none}                         /* deixa o título quebrar naturalmente */
+    .row{grid-template-columns:64px 1fr;gap:10px}       /* agenda reempilha no celular */
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+
+  /* centraliza o bloco de conteúdo nos slides de texto (some o vazio à direita) */
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:960px}
+</style>
+<style>
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .deck{z-index:2}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .designimg{max-width:min(300px,60vw);border-radius:16px;border:1px solid var(--line);display:block}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-transicao">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true">
+  <span class="glow magenta"></span>
+  <span class="glow purple"></span>
+</div>
+
+<div class="chrome">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="file"><b>frontend</b> / perfil.html</span>
+  <span class="right"><span id="chromeNum">01</span> / <span id="chromeTot">25</span></span>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 CAPA -->
+  <section class="slide active center">
+    <div class="eyebrow"><span class="b">módulo</span> · aula 03 · desenvolvimento frontend</div>
+    <div class="tagtitle"><span class="br">&lt;</span><span class="nm">do-design-ao-código</span><span class="br">&gt;</span></div>
+    <h1 style="margin:24px 0 14px">Do design<br><span class="grad">ao código.</span></h1>
+    <p class="lead" style="max-width:46ch">Hoje você vira o dev que recebe um layout pronto e o transforma em página de verdade.</p>
+  </section>
+
+  <!-- 2 RECAP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>onde a gente já chegou</div>
+    <h2>Você já tem as três peças</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">HTML</h3><p>a estrutura — aula 01.</p></div>
+      <div class="card"><h3 class="attr">CSS</h3><p>o estilo — aula 01.</p></div>
+      <div class="card"><h3 class="key">JavaScript</h3><p>o comportamento — aula 02.</p></div>
+    </div>
+    <p class="note">Hoje a gente junta tudo pra reconstruir um <strong>design de verdade</strong>, do jeito que se faz no trabalho.</p>
+  </section>
+
+  <!-- 3 AQUECIMENTO -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aquecimento</span> · joga no chat</div>
+    <h1 style="max-width:24ch">O que faz um site parecer <span class="key">profissional</span>?</h1>
+    <p class="lead" style="margin-top:20px">Dica: quase sempre é <strong>espaçamento, alinhamento e consistência</strong> — não “código difícil”.</p>
+  </section>
+
+  <!-- 4 AGENDA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">agenda</span> · 8 horas, com pausas e joguinhos</div>
+    <h2>O mapa do dia</h2>
+    <div class="agenda">
+      <div class="row"><span class="t">08:00</span><span class="d">Boas-vindas + recap + aquecimento</span><span class="tag">warm-up</span></div>
+      <div class="row"><span class="t">08:40</span><span class="d">Ler um design: o olho de dev + tokens</span><span class="tag">hands-on</span></div>
+      <div class="row brk"><span class="t">09:30</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
+      <div class="row"><span class="t">09:45</span><span class="d">Tipografia, cores e espaçamento</span><span class="tag">hands-on</span></div>
+      <div class="row"><span class="t">11:00</span><span class="d">Flexbox + joguinho (Flexbox Froggy)</span><span class="tag">game</span></div>
+      <div class="row brk"><span class="t">12:00</span><span class="d">🍽️ Almoço</span><span class="tag">1h</span></div>
+      <div class="row"><span class="t">13:00</span><span class="d">Grid + joguinho (Grid Garden)</span><span class="tag">game</span></div>
+      <div class="row brk"><span class="t">14:30</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
+      <div class="row"><span class="t">14:45</span><span class="d">Live code: recriar a tela de perfil juntos</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">16:00</span><span class="d">Desafio + vitrine + encerramento</span><span class="tag">🎉</span></div>
+    </div>
+  </section>
+
+  <!-- 5 O QUE É -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">design → código</span> · o trabalho de verdade</div>
+    <h2>Como é no dia a dia de um dev</h2>
+    <div class="flow">
+      <div class="node"><div class="ico">🎨</div><b>Designer</b><span class="muted">cria o layout no Figma</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">👀</div><b>Você lê</b><span class="muted">cores, medidas, blocos</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">💻</div><b>Você coda</b><span class="muted">HTML + CSS fiéis</span></div>
+    </div>
+    <p class="note">Você quase nunca inventa o visual do zero — você <strong>reconstrói</strong> um design com fidelidade.</p>
+  </section>
+
+  <!-- 6 OLHO DE DEV -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o olho de dev</span> · antes de codar</div>
+    <h2>Leia o design primeiro</h2>
+    <ul class="clean">
+      <li><strong>Blocos</strong> — quais são as caixas grandes? (viram <span class="code-inline">div</span>)</li>
+      <li><strong>Repetição</strong> — o que se repete? (vira um componente)</li>
+      <li><strong>Alinhamento</strong> — centralizado? em colunas?</li>
+      <li><strong>Espaçamento</strong> — quanto de respiro entre as coisas?</li>
+      <li><strong>Hierarquia</strong> — o que é título? o que é secundário?</li>
+    </ul>
+  </section>
+
+  <!-- 7 DESENHE CAIXAS -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">dinâmica</span> · todo mundo junto</div>
+    <div class="big-emoji">📦</div>
+    <h1 style="max-width:22ch">Desenhe <span class="key">caixas</span> por cima do design</h1>
+    <p class="lead" style="margin-top:18px;max-width:40ch">Cada retângulo que você desenhar é uma <span class="code-inline">&lt;div&gt;</span>. Acabou de descobrir sua estrutura HTML.</p>
+  </section>
+
+  <!-- 8 TOKENS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">design tokens</span> · a paleta em variáveis</div>
+    <h2>Cores e medidas viram <span class="grad">variáveis</span></h2>
+    <div class="grid2">
+      <div class="card"><h3 class="str">No design</h3><p>o designer definiu rosa <span class="code-inline">#F24487</span>, roxo <span class="code-inline">#7B4FD0</span>, cantos de <span class="code-inline">22px</span>...</p></div>
+      <div class="card"><h3 class="key">No CSS</h3><div class="mono" style="font-size:14px;color:var(--muted);line-height:1.8">:root {<br>&nbsp;&nbsp;--rosa: #F24487;<br>&nbsp;&nbsp;--raio: 22px;<br>}</div></div>
+    </div>
+    <p class="note">Usa com <span class="code-inline">var(--rosa)</span>. Pra trocar o tema todo, muda uma variável só.</p>
+  </section>
+
+  <!-- 9 TIPOGRAFIA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">tipografia</span> · a hierarquia</div>
+    <h2>Fonte e tamanho contam a história</h2>
+    <p style="margin-bottom:14px">Pega a fonte no Google Fonts e define os tamanhos do design:</p>
+    <div class="card" style="max-width:640px">
+      <div style="font-weight:700;font-size:30px">Título forte (700)</div>
+      <div style="font-size:17px;margin-top:6px">Texto normal do corpo (400)</div>
+      <div class="muted" style="font-size:13px;margin-top:6px">legenda secundária, menor e mais apagada</div>
+    </div>
+    <p class="note">Hierarquia = tamanho + peso + cor. É o que guia o olho de quem lê.</p>
+  </section>
+
+  <!-- 10 ESPAÇAMENTO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">espaçamento</span> · o segredo do "profissional"</div>
+    <h2>padding · margin · gap</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">padding</h3><p>espaço <strong>dentro</strong> da caixa.</p></div>
+      <div class="card"><h3 class="attr">margin</h3><p>espaço <strong>fora</strong> da caixa.</p></div>
+      <div class="card"><h3 class="str">gap</h3><p>espaço <strong>entre</strong> itens de flex/grid.</p></div>
+    </div>
+    <p class="note">Dica de ouro: use múltiplos de 8 (<span class="code-inline">8 · 16 · 24 · 32</span>). É o "grid de 8pt" — alinha tudo sem esforço.</p>
+  </section>
+
+  <!-- 11 FLEXBOX -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">flexbox</span> · alinhar numa direção</div>
+    <div class="tagtitle"><span class="br">{</span> <span class="nm">display:flex</span> <span class="br">}</span></div>
+    <div class="grid2" style="margin-top:22px">
+      <div class="stack">
+        <p>Flexbox organiza itens num <strong>eixo</strong> (linha ou coluna). É o jeito mais fácil de centralizar e distribuir.</p>
+      </div>
+      <div class="card"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">.barra {<br>&nbsp;&nbsp;<span class="key">display</span>: flex;<br>&nbsp;&nbsp;<span class="key">justify-content</span>: space-between;<br>&nbsp;&nbsp;<span class="key">align-items</span>: center;<br>&nbsp;&nbsp;<span class="key">gap</span>: 12px;<br>}</div></div>
+    </div>
+  </section>
+
+  <!-- 12 LIVE FLEX -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">experimenta</span> · muda os valores e vê o layout mudar</div>
+    <h3 style="margin-bottom:14px">Flexbox ao vivo 👇</h3>
+    <div class="live">
+      <div class="pane">
+        <div class="panehd"><span class="d" style="background:#F24487"></span> index.html</div>
+        <textarea id="ed1" spellcheck="false"><style>
+  .barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .item {
+    background: #7B4FD0; color:#fff;
+    padding: 20px; border-radius: 10px;
+    font-family: sans-serif;
+  }
+</style>
+<div class="barra">
+  <div class="item">1</div>
+  <div class="item">2</div>
+  <div class="item">3</div>
+</div></textarea>
+      </div>
+      <div class="pane">
+        <div class="panehd"><span class="d" style="background:#27c93f"></span> resultado</div>
+        <iframe id="pv1"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 PARADA FROGGY -->
+  <section class="slide parada">
+    <div class="badge">🐸 pausa pra jogar</div>
+    <h1><span class="str">Flexbox Froggy</span></h1>
+    <p class="lead" style="margin-top:14px;max-width:26ch">Aprenda Flexbox ajudando os sapinhos a chegarem nas vitórias-régias.</p>
+    <a class="gamebtn" style="background:var(--str);box-shadow:0 8px 30px rgba(169,140,224,.25)" href="https://flexboxfroggy.com/#pt-br" target="_blank" rel="noopener">Abrir Flexbox Froggy ↗</a>
+  </section>
+
+  <!-- 14 GRID -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">grid</span> · colunas e linhas de verdade</div>
+    <div class="tagtitle"><span class="br">{</span> <span class="nm">display:grid</span> <span class="br">}</span></div>
+    <div class="grid2" style="margin-top:22px">
+      <div class="stack"><p>Quando precisa de <strong>colunas</strong> (galeria, cards lado a lado), Grid é o ideal.</p>
+        <p class="muted"><span class="code-inline">1fr</span> = uma fração do espaço. <span class="code-inline">repeat(3, 1fr)</span> = 3 colunas iguais.</p>
+      </div>
+      <div class="card"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">.galeria {<br>&nbsp;&nbsp;<span class="key">display</span>: grid;<br>&nbsp;&nbsp;<span class="key">grid-template-columns</span>: repeat(3, 1fr);<br>&nbsp;&nbsp;<span class="key">gap</span>: 12px;<br>}</div></div>
+    </div>
+  </section>
+
+  <!-- 15 LIVE GRID -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">experimenta</span> · troca o 3 por 2 e vê a grade mudar</div>
+    <h3 style="margin-bottom:14px">Grid ao vivo 👇</h3>
+    <div class="live">
+      <div class="pane">
+        <div class="panehd"><span class="d" style="background:#F24487"></span> index.html</div>
+        <textarea id="ed2" spellcheck="false"><style>
+  .galeria {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .galeria div {
+    height: 60px; border-radius: 10px;
+    background: #F24487;
+  }
+</style>
+<div class="galeria">
+  <div></div><div></div><div></div>
+  <div></div><div></div><div></div>
+</div></textarea>
+      </div>
+      <div class="pane">
+        <div class="panehd"><span class="d" style="background:#27c93f"></span> resultado</div>
+        <iframe id="pv2"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 PARADA GRID GARDEN -->
+  <section class="slide parada">
+    <div class="badge">🥕 pausa pra jogar</div>
+    <h1><span class="tagc">Grid Garden</span></h1>
+    <p class="lead" style="margin-top:14px;max-width:26ch">Regue a plantação escrevendo CSS Grid. Vicia!</p>
+    <a class="gamebtn" style="background:var(--tag);box-shadow:0 8px 30px rgba(123,79,208,.25)" href="https://cssgridgarden.com/#pt-br" target="_blank" rel="noopener">Abrir Grid Garden ↗</a>
+  </section>
+
+  <!-- 17 FLEX vs GRID -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a dúvida de todo mundo</div>
+    <h2>Flexbox ou Grid?</h2>
+    <div class="grid2">
+      <div class="card"><h3 class="str">Flexbox</h3><p>Uma direção: uma linha <strong>ou</strong> uma coluna. Ex.: uma barra de navegação, botões em fila.</p></div>
+      <div class="card"><h3 class="tagc">Grid</h3><p>Duas direções: linhas <strong>e</strong> colunas, uma grade. Ex.: galeria de fotos, cards em grade.</p></div>
+    </div>
+    <p class="note">Na dúvida: é uma fileira? Flex. É uma grade? Grid. E pode usar os dois juntos!</p>
+  </section>
+
+  <!-- 18 IMAGENS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">imagens & assets</span> · o que vem do figma</div>
+    <h2>Fotos, ícones e logos</h2>
+    <div class="grid2">
+      <div class="stack">
+        <p>No Figma você <strong>exporta</strong> as imagens e joga na pasta do projeto.</p>
+        <div class="tags">
+          <span class="pill">SVG · logos e ícones</span>
+          <span class="pill">PNG/JPG · fotos</span>
+          <span class="pill">sempre com alt</span>
+        </div>
+      </div>
+      <div class="card"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">img {<br>&nbsp;&nbsp;<span class="key">width</span>: 92px;<br>&nbsp;&nbsp;<span class="key">border-radius</span>: 50%;<br>&nbsp;&nbsp;<span class="key">object-fit</span>: cover;<br>}</div><p style="font-size:13px;margin-top:8px">object-fit: cover recorta sem esticar.</p></div>
+    </div>
+  </section>
+
+  <!-- 19 COMPONENTES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">componentes</span> · pensar em blocos</div>
+    <h2>O que se repete vira um componente</h2>
+    <p style="max-width:60ch">Um botão, um card, uma tag... Cada padrão que aparece várias vezes vira <strong>uma classe</strong> que você reusa. Menos código, mais consistência.</p>
+    <div class="tags" style="margin-top:20px">
+      <span class="pill on">.btn</span><span class="pill on">.card</span><span class="pill on">.tag</span><span class="pill on">.avatar</span>
+    </div>
+    <p class="note">Esse pensamento em blocos é o primeiro passo pro <strong>React</strong>, lá na frente.</p>
+  </section>
+
+  <!-- 20 RESPONSIVO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">responsividade</span> · o mesmo design, toda tela</div>
+    <h2>Mobile-first + media query</h2>
+    <div class="card" style="max-width:680px"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85"><span class="attr">/* padrão: celular */</span><br>.galeria { <span class="key">grid-template-columns</span>: 1fr; }<br><br><span class="attr">/* telas maiores */</span><br><span class="key">@media</span> (min-width: 600px) {<br>&nbsp;&nbsp;.galeria { <span class="key">grid-template-columns</span>: 1fr 1fr; }<br>}</div></div>
+  </section>
+
+  <!-- 21 FIGMA PRO CSS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">do figma pro css</span> · o modo dev</div>
+    <h2>O painel te dá quase tudo</h2>
+    <ul class="clean">
+      <li><strong>Cores</strong> — clica no elemento e copia o hex</li>
+      <li><strong>Fonte</strong> — nome, tamanho e peso no painel</li>
+      <li><strong>Medidas</strong> — largura, altura, raio</li>
+      <li><strong>Espaçamento</strong> — segure <kbd>Alt</kbd> e passe o mouse pra ver distâncias</li>
+      <li><strong>Exportar</strong> — botão direito → Export nas imagens</li>
+    </ul>
+  </section>
+
+  <!-- 22 MÃO NA MASSA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">live code</span> · juntos, do design ao código</div>
+    <div class="big-emoji">🛠️</div>
+    <h1 style="max-width:22ch">Bora recriar essa <span class="grad">tela de perfil</span></h1>
+    <p class="lead" style="margin-top:18px;max-width:42ch">Do zero: tokens, card, avatar, stats em grid, botão e galeria. Passo a passo, juntos.</p>
+  </section>
+
+  <!-- 23 DESAFIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">desafio</span> · sua vez de reproduzir</div>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <h2 style="margin-bottom:8px">Recrie a tela <span class="grad">de perfil</span></h2>
+        <ul class="clean">
+          <li>Do jeito mais <strong>fiel</strong> possível ao design</li>
+          <li>Com <strong>tokens</strong>, <strong>Flexbox</strong> e <strong>Grid</strong></li>
+          <li>Botão <strong>Seguir</strong> que reage ao clique</li>
+          <li>Publicado na Vercel 🌍</li>
+        </ul>
+      </div>
+      <img class="designimg" src="design-alvo.png" alt="Tela de perfil a reproduzir">
+    </div>
+    <p class="note">Brief completo, ficha técnica e o código de referência estão na página da aula.</p>
+  </section>
+
+  <!-- 24 DEPLOY -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">reta final</span> · mostra pro mundo</div>
+    <h2>Publica e compartilha</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>git push</h3><p>sobe pro GitHub, como sempre.</p></div></div>
+      <div class="st"><div class="body"><h3>A Vercel republica</h3><p>seu design vira um link no ar.</p></div></div>
+      <div class="st"><div class="body"><h3>Vitrine 🎉</h3><p>compare seu resultado com o design e mostre pra turma.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 25 FIM -->
+  <section class="slide center">
+    <div class="big-emoji">💜</div>
+    <h1>Você transformou design<br><span class="grad">em código.</span></h1>
+    <p class="lead" style="margin-top:18px">Esse é o trabalho de um dev frontend. Mandou bem!</p>
+    <p class="url mono" style="margin-top:18px;color:var(--muted)">NickDev · um leque de tecnologia</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
+<div class="nav">
+  <span id="counter">01 / 25</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  document.getElementById('chromeTot').textContent=String(tot).padStart(2,'0');
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('chromeNum').textContent=pad(i);
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='TEXTAREA')return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+
+  // editores HTML+CSS ao vivo
+  function renderPair(edId,pvId){
+    const ed=document.getElementById(edId), pv=document.getElementById(pvId);
+    const wrap=v=>'<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;margin:0;padding:18px;color:#1a1a2e;background:#fff}</style></head><body>'+v+'</body></html>';
+    const render=()=>{ pv.srcdoc=wrap(ed.value); };
+    ed.addEventListener('input',render); render();
+  }
+  renderPair('ed1','pv1');
+  renderPair('ed2','pv2');
+</script>
+
+</body>
+</html>

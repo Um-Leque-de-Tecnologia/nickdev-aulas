@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  MODELO DE RESPOSTA — Desafio 03 (Do design ao código) · NickDev
+  ------------------------------------------------------------
+  Uma tela de PERFIL reproduzida a partir de um design.
+  Usa design tokens (variáveis), Flexbox, Grid, tipografia,
+  imagem e uma interação simples (botão Seguir).
+
+  Cada parte está comentada. Troque os textos pelos seus!
+  ============================================================
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil · Do design ao código</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------------------------------------------------------
+       DESIGN TOKENS — os valores tirados do "Figma".
+       Guardar em variáveis = trocar tudo num lugar só.
+       --------------------------------------------------------- */
+    :root {
+      --rosa: #F24487;
+      --roxo: #7B4FD0;
+      --gradiente: linear-gradient(120deg, #F24487, #7B4FD0);
+
+      --fundo: #EEF0F6;
+      --card: #FFFFFF;
+      --texto: #1B1830;
+      --texto-suave: #6B6580;
+      --linha: #ECEAF2;
+
+      --raio: 22px;            /* cantos arredondados do card */
+      --sombra: 0 24px 60px -24px rgba(74, 40, 120, .45);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', system-ui, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      /* centraliza o card na tela (Flexbox) */
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* --------- O CARD --------- */
+    .card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border-radius: var(--raio);
+      box-shadow: var(--sombra);
+      overflow: hidden;      /* faz o banner respeitar os cantos */
+    }
+
+    /* faixa colorida no topo */
+    .banner {
+      height: 96px;
+      background: var(--gradiente);
+    }
+
+    /* --------- TOPO: foto + nome --------- */
+    .topo {
+      text-align: center;
+      padding: 0 26px;
+      margin-top: -46px;     /* puxa a foto pra cima do banner */
+    }
+    .avatar {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      border: 4px solid var(--card);
+      object-fit: cover;
+      background: var(--gradiente);   /* fundo caso a imagem falhe */
+      display: block;
+      margin: 0 auto;
+    }
+    .nome {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+    .handle {
+      color: var(--texto-suave);
+      font-size: 14px;
+    }
+    .bio {
+      color: var(--texto-suave);
+      font-size: 14px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    /* --------- STATS (Grid de 3 colunas iguais) --------- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 22px 26px;
+      padding: 16px 0;
+      border-top: 1px solid var(--linha);
+      border-bottom: 1px solid var(--linha);
+      text-align: center;
+    }
+    .stats .num { font-weight: 600; font-size: 18px; }
+    .stats .lbl { color: var(--texto-suave); font-size: 12px; }
+
+    /* --------- BOTÃO SEGUIR --------- */
+    .acoes { padding: 0 26px; }
+    .btn-seguir {
+      width: 100%;
+      font: inherit;
+      font-weight: 600;
+      color: #fff;
+      background: var(--gradiente);
+      border: 0;
+      padding: 13px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .25s;
+    }
+    .btn-seguir:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px -12px rgba(242, 68, 135, .6);
+    }
+    /* estado "seguindo": vira contornado */
+    .btn-seguir.seguindo {
+      background: #fff;
+      color: var(--roxo);
+      border: 1px solid var(--roxo);
+    }
+
+    /* --------- GALERIA (Grid 2x2) --------- */
+    .galeria-titulo {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--texto-suave);
+      margin: 24px 26px 10px;
+    }
+    .galeria {
+      display: grid;
+      grid-template-columns: 1fr 1fr;   /* 2 colunas */
+      gap: 10px;
+      padding: 0 26px;
+    }
+    .galeria div {
+      height: 74px;
+      border-radius: 12px;
+    }
+    /* cores diferentes pra cada quadradinho */
+    .g1 { background: #FBD3E4; }
+    .g2 { background: #D9CCF3; }
+    .g3 { background: #FCE1CC; }
+    .g4 { background: #CDEBDD; }
+
+    /* --------- TAGS (Flexbox que quebra linha) --------- */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 18px 26px 28px;
+    }
+    .tags span {
+      font-size: 12px;
+      color: var(--roxo);
+      background: #F3EEFC;
+      padding: 6px 12px;
+      border-radius: 100px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="banner"></div>
+
+    <!-- TOPO -->
+    <div class="topo">
+      <!-- Sua foto. Trocar o src por 'foto.jpg' quando tiver uma. -->
+      <img class="avatar"
+           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='92' height='92'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23F24487'/%3E%3Cstop offset='1' stop-color='%237B4FD0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='92' height='92' fill='url(%23g)'/%3E%3Ctext x='46' y='60' font-family='sans-serif' font-size='44' font-weight='bold' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E"
+           alt="Foto de Nicoly Almeida">
+      <div class="nome">Nicoly Almeida</div>
+      <div class="handle">@nickdeve</div>
+      <p class="bio">Desenvolvedora & professora. Transformo design em código com muita cor. 💜</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div><div class="num">32</div><div class="lbl">Projetos</div></div>
+      <div><div class="num">1.2k</div><div class="lbl">Seguidores</div></div>
+      <div><div class="num">890</div><div class="lbl">Curtidas</div></div>
+    </div>
+
+    <!-- BOTÃO -->
+    <div class="acoes">
+      <button class="btn-seguir" id="seguir">Seguir</button>
+    </div>
+
+    <!-- GALERIA -->
+    <div class="galeria-titulo">Meus projetos</div>
+    <div class="galeria">
+      <div class="g1"></div>
+      <div class="g2"></div>
+      <div class="g3"></div>
+      <div class="g4"></div>
+    </div>
+
+    <!-- TAGS -->
+    <div class="tags">
+      <span>#dev</span>
+      <span>#design</span>
+      <span>#café</span>
+      <span>#frontend</span>
+    </div>
+
+  </div>
+
+  <!-- Única interação: o botão Seguir troca de estado ao clicar -->
+  <script>
+    const botao = document.querySelector("#seguir");
+    botao.addEventListener("click", () => {
+      botao.classList.toggle("seguindo");
+      // se está "seguindo", muda o texto; senão, volta pra "Seguir"
+      if (botao.classList.contains("seguindo")) {
+        botao.textContent = "Seguindo ✓";
+      } else {
+        botao.textContent = "Seguir";
+      }
+    });
+  </script>
+
+</body>
+</html>

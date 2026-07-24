@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 
 const AULA_01 = "/cursos/frontend-transicao/aula-01-abertura";
 const AULA_02 = "/cursos/frontend-transicao/aula-02-javascript";
+const AULA_03 = "/cursos/frontend-transicao/aula-03-design-codigo";
 
 export default function FrontendTransicao() {
   return (
@@ -91,13 +92,30 @@ export default function FrontendTransicao() {
           </div>
         </div>
 
-        <div className="lesson soon">
+        <div className="lesson">
           <div className="idx">03</div>
           <div className="body">
             <h3>Do design ao código</h3>
-            <p>Do Figma pra tela: transformando um layout em uma página de verdade.</p>
+            <p>
+              Do Figma pra tela: ler um design e reconstruí-lo com fidelidade —
+              tokens, Flexbox, Grid e responsividade, num projeto de 8 horas.
+            </p>
             <div className="mats">
-              <span className="soon-tag">em breve</span>
+              <a className="mat primary" href={`${AULA_03}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_03}/guia-design-codigo.html`}>
+                📘 Guia
+              </a>
+              <a className="mat" href={`${AULA_03}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_03}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
             </div>
           </div>
         </div>
