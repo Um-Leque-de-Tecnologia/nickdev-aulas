@@ -214,7 +214,7 @@
 <div class="chrome">
   <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
   <span class="file"><b>frontend</b> / portfolio.html</span>
-  <span class="right"><span id="chromeNum">01</span> / <span id="chromeTot">26</span></span>
+  <span class="right"><span id="chromeNum">01</span> / <span id="chromeTot">27</span></span>
 </div>
 
 <div class="deck" id="deck">
@@ -491,12 +491,26 @@
     <p class="note"><span class="code-inline">minmax(0, 1fr)</span> é o truque pra coluna encolher sem vazar pro lado.</p>
   </section>
 
+  <!-- 20b BOOTSTRAP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">bootstrap</span> · não reinvente a roda 🅱️</div>
+    <h2>Uma biblioteca de estilo pronta</h2>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <p>No portfólio, em vez de escrever todo o CSS, a gente usa o <strong>Bootstrap</strong>: navbar, grid, cards e botões já vêm prontos. Você só usa as <strong>classes</strong>.</p>
+        <div class="tags"><span class="pill">navbar</span><span class="pill">row / col</span><span class="pill">card</span><span class="pill">btn</span><span class="pill">dark mode nativo</span></div>
+      </div>
+      <div class="card"><div class="mono" style="font-size:13px;color:var(--muted);line-height:1.85"><span class="attr">&lt;!-- grid responsivo pronto --&gt;</span><br>&lt;div class="<span class="key">row row-cols-2 row-cols-xl-6</span>"&gt;<br><br><span class="attr">&lt;!-- card pronto --&gt;</span><br>&lt;div class="<span class="key">card shadow-sm</span>"&gt;...&lt;/div&gt;</div></div>
+    </div>
+    <p class="note">O Bootstrap dá a <strong>aparência</strong>; a sua função <span class="code-inline">criarCard()</span> continua dando o <strong>reúso</strong>. A componentização segue firme. 💜</p>
+  </section>
+
   <!-- 21 MÃO NA MASSA -->
   <section class="slide center">
     <div class="eyebrow"><span class="b">live code</span> · juntos, do design ao código</div>
     <div class="big-emoji">🛠️</div>
     <h1 style="max-width:24ch">Bora montar o <span class="grad">portfólio</span> juntos</h1>
-    <p class="lead" style="margin-top:18px;max-width:44ch">Tokens, navbar, grid, o componente card a partir de dados, e as interações. Passo a passo.</p>
+    <p class="lead" style="margin-top:18px;max-width:44ch">Bootstrap pra navbar/grid/cards, o componente card a partir de dados, e as interações. Passo a passo.</p>
   </section>
 
   <!-- 22 FIGMA PRO CSS -->
@@ -554,7 +568,7 @@
 <div class="progress" id="progress"></div>
 <div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
 <div class="nav">
-  <span id="counter">01 / 26</span>
+  <span id="counter">01 / 27</span>
   <button id="prev" aria-label="anterior">‹</button>
   <button id="next" aria-label="próximo">›</button>
 </div>

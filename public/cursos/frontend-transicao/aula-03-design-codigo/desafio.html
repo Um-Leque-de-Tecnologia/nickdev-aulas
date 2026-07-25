@@ -117,9 +117,9 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);pa
     <span class="ico">🎯</span>
     <div>
       <h3>O objetivo</h3>
-      <p>Reproduzir o design com <b>tokens</b>, <b>Flexbox</b> e <b>Grid</b>, e criar os
-      cards com uma <b>função</b> a partir de uma <b>lista de dados</b> — o jeito de
-      reaproveitar um componente sem copiar e colar.</p>
+      <p>Reproduzir o design usando a biblioteca <b>Bootstrap</b> (layout e componentes
+      prontos) + um CSS de marca, e criar os cards com uma <b>função</b> a partir de uma
+      <b>lista de dados</b> — reaproveitar um componente sem copiar e colar.</p>
     </div>
   </div>
 
@@ -180,87 +180,81 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);pa
     <div><b>➕ Carregar mais</b> — adiciona mais projetos</div>
   </div>
 
-  <div class="label">Passo a passo</div>
+  <div class="label">Passo a passo (com Bootstrap 🅱️)</div>
 
   <div class="step">
     <div class="step-head"><span class="n">01</span><h3>Leia o design e ache o que se repete</h3></div>
-    <p>Liste os blocos: navbar, perfil, filtros, grid de cards. Repare: os <b>cards são
-    todos iguais na estrutura</b>, só mudam os dados. Isso é um <b>componente</b>.</p>
+    <p>Liste os blocos: navbar, perfil, filtros, grid de cards. Os <b>cards são todos iguais
+    na estrutura</b>, só mudam os dados — isso é um <b>componente</b>.</p>
     <p class="tip"><b>Dica:</b> onde há repetição, há componente. Não escreva 6 cards na mão!</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">02</span><h3>Tokens (incluindo o tema escuro)</h3></div>
-    <p>Cores e medidas no <code>:root</code>. O tema escuro é só um segundo conjunto de tokens numa classe:</p>
-<pre>:root { <span class="s">--bg</span>:#EEF0F6; <span class="s">--card</span>:#fff; <span class="s">--texto</span>:#1B1830; }
-body.escuro { <span class="s">--bg</span>:#0F0C17; <span class="s">--card</span>:#1A1626; <span class="s">--texto</span>:#F3F0FA; }</pre>
+    <div class="step-head"><span class="n">02</span><h3>Inclua o Bootstrap</h3></div>
+    <p>O <b>Bootstrap</b> é uma biblioteca de CSS pronta: navbar, grid, cards e botões já vêm
+    estilizados. Em vez de escrever tudo, você usa as <b>classes</b> dele. Adicione no <code>&lt;head&gt;</code>:</p>
+<pre>&lt;<span class="k">link</span> <span class="f">rel</span>=<span class="s">"stylesheet"</span>
+  <span class="f">href</span>=<span class="s">"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"</span>&gt;</pre>
+    <p class="tip"><b>Combo:</b> deixe um CSS de marca pequeno por cima (só o gradiente e as cores da NickDev).</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">03</span><h3>Layout: navbar (Flex) + grid (Grid)</h3></div>
-<pre>nav .nav-in { display:<span class="s">flex</span>; justify-content:<span class="s">space-between</span>; align-items:<span class="s">center</span>; }
+    <div class="step-head"><span class="n">03</span><h3>Monte o layout com classes do Bootstrap</h3></div>
+    <p>Navbar, container e grid responsivo saem prontos — sem escrever Flexbox/Grid na mão:</p>
+<pre><span class="c">&lt;!-- navbar pronta --&gt;</span>
+&lt;<span class="k">nav</span> class=<span class="s">"navbar navbar-expand bg-body border-bottom sticky-top"</span>&gt;...&lt;/<span class="k">nav</span>&gt;
 
-#grid {
-  display:<span class="s">grid</span>;
-  grid-template-columns:<span class="s">repeat(auto-fill, minmax(200px, 1fr))</span>;
-  gap:<span class="s">16px</span>;
-}</pre>
-    <p class="tip"><b>auto-fill + minmax</b> = colunas que se ajustam sozinhas. Responsivo de graça!</p>
+<span class="c">&lt;!-- grid: 2 colunas no celular, 6 em telas grandes --&gt;</span>
+&lt;<span class="k">div</span> id=<span class="s">"grid"</span> class=<span class="s">"row row-cols-2 row-cols-md-4 row-cols-xl-6 g-3"</span>&gt;&lt;/<span class="k">div</span>&gt;</pre>
+    <p class="tip"><b>row-cols-*</b> = quantas colunas por tamanho de tela. O Bootstrap já é <b>responsivo</b>!</p>
   </div>
 
   <div class="step">
     <div class="step-head"><span class="n">04</span><h3>O componente: 1 função → N cards ⭐</h3></div>
-    <p>O coração da aula. Guarde os projetos numa <b>lista de dados</b> e crie uma <b>função</b>
-    que devolve um card. Um <code>forEach</code> reaproveita a estrutura pra cada item:</p>
-<pre><span class="c">// os dados</span>
-<span class="k">const</span> projetos = [
-  { titulo:<span class="s">"Site da NickDev"</span>, categoria:<span class="s">"Web"</span>, cor:<span class="s">"#FBD3E4"</span>, curtidas:<span class="s">42</span> },
-  { titulo:<span class="s">"App de Hábitos"</span>, categoria:<span class="s">"Mobile"</span>, cor:<span class="s">"#D9CCF3"</span>, curtidas:<span class="s">31</span> },
-];
-
-<span class="c">// o COMPONENTE: recebe 1 projeto, devolve 1 card</span>
-<span class="k">function</span> <span class="f">criarCard</span>(projeto) {
-  <span class="k">const</span> card = <span class="f">document</span>.<span class="f">createElement</span>(<span class="s">"article"</span>);
-  card.className = <span class="s">"card"</span>;
-  card.innerHTML = <span class="s">`
-    &lt;div class="capa" style="background:${projeto.cor}"&gt;&lt;/div&gt;
-    &lt;div class="card-corpo"&gt;
-      &lt;span class="tag"&gt;${projeto.categoria}&lt;/span&gt;
-      &lt;h3&gt;${projeto.titulo}&lt;/h3&gt;
+    <p>O coração da aula continua igual — mas a função devolve um <b>card do Bootstrap</b>:</p>
+<pre><span class="k">function</span> <span class="f">criarCard</span>(projeto) {
+  <span class="k">const</span> col = <span class="f">document</span>.<span class="f">createElement</span>(<span class="s">"div"</span>);
+  col.className = <span class="s">"col"</span>;
+  col.innerHTML = <span class="s">`
+    &lt;div class="card h-100 border-0 shadow-sm"&gt;
+      &lt;div class="cover" style="background:${projeto.cor}"&gt;&lt;/div&gt;
+      &lt;div class="card-body"&gt;
+        &lt;span class="badge rounded-pill tag-badge"&gt;${projeto.categoria}&lt;/span&gt;
+        &lt;h3 class="card-title h6 mt-2"&gt;${projeto.titulo}&lt;/h3&gt;
+      &lt;/div&gt;
     &lt;/div&gt;`</span>;
-  <span class="k">return</span> card;
+  <span class="k">return</span> col;
 }
-
-<span class="c">// reaproveitando pra cada item</span>
 projetos.<span class="f">forEach</span>(p =&gt; grid.<span class="f">appendChild</span>(<span class="f">criarCard</span>(p)));</pre>
-    <p class="tip"><b>Sacada:</b> um componente é só uma <b>função que devolve HTML</b>. É a mesma ideia que você vai ver no React!</p>
+    <p class="tip"><b>Sacada:</b> o Bootstrap dá a <b>aparência</b> (<code>card</code>, <code>badge</code>, <code>btn</code>); a <b>função</b> dá o <b>reúso</b>. Componente = função que devolve HTML — a ponte pro React.</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">05</span><h3>Deixe os componentes interativos</h3></div>
-    <p>Use eventos (aula 2) pra: <b>curtir</b> (dentro do card), <b>filtrar</b>, <b>trocar tema</b>:</p>
-<pre><span class="c">// tema</span>
-tema.<span class="f">addEventListener</span>(<span class="s">"click"</span>, () =&gt; <span class="f">document</span>.<span class="f">body</span>.<span class="f">classList</span>.<span class="f">toggle</span>(<span class="s">"escuro"</span>));
-
-<span class="c">// filtro: mostra só a categoria escolhida e re-renderiza</span>
-<span class="k">const</span> lista = projetos.<span class="f">filter</span>(p =&gt; p.categoria === categoria);
-<span class="f">render</span>(lista);</pre>
+    <div class="step-head"><span class="n">05</span><h3>Interações (JS da aula 2)</h3></div>
+    <p>Curtir (no card), filtrar, e o <b>tema escuro nativo do Bootstrap 5.3</b>:</p>
+<pre><span class="c">// tema: o Bootstrap já tem dark mode nativo!</span>
+tema.<span class="f">addEventListener</span>(<span class="s">"click"</span>, () =&gt; {
+  <span class="k">const</span> h = <span class="f">document</span>.<span class="f">documentElement</span>;
+  <span class="k">const</span> novo = h.<span class="f">getAttribute</span>(<span class="s">"data-bs-theme"</span>) === <span class="s">"dark"</span> ? <span class="s">"light"</span> : <span class="s">"dark"</span>;
+  h.<span class="f">setAttribute</span>(<span class="s">"data-bs-theme"</span>, novo);
+});</pre>
+    <p class="tip"><b>De graça:</b> só trocar <code>data-bs-theme</code> e o site inteiro vira escuro/claro.</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">06</span><h3>Responsivo + publicar</h3></div>
-    <p>Confira no celular (o grid já se adapta) e publique na Vercel. Manda o link no grupo! 🌍</p>
+    <div class="step-head"><span class="n">06</span><h3>Publicar</h3></div>
+    <p>Já é responsivo (o Bootstrap cuida). Publique na Vercel e manda o link no grupo! 🌍</p>
   </div>
 
   <div class="label">Requisitos mínimos</div>
   <ul class="check">
-    <li>Layout fiel ao design: navbar, perfil, filtros, grid de cards</li>
-    <li><b>Design tokens</b> no <code>:root</code> + tema escuro numa classe</li>
-    <li>Navbar com <b>Flexbox</b>, projetos em <b>Grid</b> responsivo</li>
+    <li>Bootstrap incluído (via CDN) no <code>&lt;head&gt;</code></li>
+    <li>Layout fiel: navbar, perfil, filtros e grid de cards com <b>classes do Bootstrap</b></li>
+    <li>Grid responsivo com <code>row-cols-*</code></li>
     <li>Os cards <b>gerados por uma função</b> a partir de uma lista de dados</li>
     <li>Botão <b>curtir</b> com contador em cada card</li>
-    <li>Botão de <b>tema claro/escuro</b> funcionando</li>
-    <li><b>Responsivo</b>: no celular deve ficar como a versão mobile do design</li>
+    <li>Botão de <b>tema claro/escuro</b> (com <code>data-bs-theme</code>)</li>
+    <li>Um CSS de marca por cima (gradiente/cores da NickDev)</li>
     <li>Publicado na Vercel com link funcionando</li>
   </ul>
 

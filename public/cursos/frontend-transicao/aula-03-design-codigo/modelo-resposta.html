@@ -1,308 +1,190 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  MODELO DE RESPOSTA — Desafio 03 (Do design ao código) · NickDev
+  MODELO DE RESPOSTA — Desafio 2 (Portfólio) · com BOOTSTRAP · NickDev
   ------------------------------------------------------------
-  Uma página de PORTFÓLIO reproduzida a partir de um design.
-  Além de HTML/CSS (tokens, Flexbox, Grid), traz COMPONENTES
-  QUE INTERAGEM, feitos com o JavaScript da aula 2:
+  Mesmo portfólio interativo, agora usando a biblioteca BOOTSTRAP 5
+  pra ganhar layout e componentes prontos (navbar, grid, cards,
+  botões) — e só um CSS "de marca" por cima pro visual da NickDev.
 
-    • Tema claro/escuro (toggle)
-    • Filtros que mostram/escondem projetos
-    • Cards gerados por uma FUNÇÃO a partir de uma lista de dados
-      (isto é "componentização" de verdade: 1 função → N cards)
-    • Botão de curtir com contador (em cada card)
-    • Botão "carregar mais"
+  A componentização continua: os cards são gerados por uma FUNÇÃO
+  a partir de uma lista de dados. O Bootstrap dá a APARÊNCIA;
+  a função dá o REÚSO da estrutura.
 
-  Cada parte está comentada. É a solução de referência.
+  Interações (JS da aula 2): tema, filtros, curtir, carregar mais.
   ============================================================
 -->
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Portfólio · Do design ao código</title>
+  <title>Meu Portfólio · Bootstrap</title>
+
+  <!-- 1) Bootstrap (a biblioteca) via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- 2) fonte + nosso CSS de marca -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
-    /* ---------- DESIGN TOKENS ---------- */
-    :root {
-      --rosa: #F24487;
-      --roxo: #7B4FD0;
-      --grad: linear-gradient(120deg, #F24487, #7B4FD0);
-      --bg: #EEF0F6;
-      --card: #FFFFFF;
-      --texto: #1B1830;
-      --suave: #6B6580;
-      --linha: #E7E4EF;
-      --raio: 18px;
-    }
-    /* TEMA ESCURO: o JS liga a classe .escuro no body */
-    body.escuro {
-      --bg: #0F0C17;
-      --card: #1A1626;
-      --texto: #F3F0FA;
-      --suave: #A79FB8;
-      --linha: #2A2438;
-    }
+    /* Só o "tempero" da marca. O resto vem do Bootstrap. */
+    :root { --rosa:#F24487; --roxo:#7B4FD0; --grad:linear-gradient(100deg,#F24487,#7B4FD0); }
+    body { font-family:'Poppins', system-ui, sans-serif; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Poppins', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--texto);
-      transition: background .3s, color .3s;
-      overflow-x: hidden;   /* trava rolagem lateral */
-    }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 22px; }
-
-    /* ---------- NAVBAR (Flexbox) ---------- */
-    nav {
-      position: sticky; top: 0; z-index: 10;
-      background: var(--card);
-      border-bottom: 1px solid var(--linha);
-    }
-    .nav-in {
-      max-width: 900px; margin: 0 auto; padding: 14px 22px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .logo { font-weight: 700; font-size: 18px;
-      background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .nav-links { display: flex; gap: 20px; align-items: center; }
-    .nav-links a { color: var(--suave); text-decoration: none; font-size: 14px; }
-    .nav-links a:hover { color: var(--texto); }
-    #tema {
-      font: inherit; font-size: 18px; cursor: pointer; line-height: 1;
-      background: transparent; border: 1px solid var(--linha);
-      width: 40px; height: 40px; border-radius: 50%; color: inherit;
-    }
-
-    /* ---------- PERFIL (Flexbox) ---------- */
-    .perfil { display: flex; align-items: center; gap: 18px; padding: 34px 0 26px; }
+    .logo { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .avatar {
-      width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
-      background: var(--grad);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 30px; font-weight: 700;
+      width:56px; height:56px; border-radius:50%; background:var(--grad);
+      display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:24px; flex-shrink:0;
     }
-    .perfil > div { min-width: 0; }   /* deixa o texto encolher no celular */
-    .perfil h1 { font-size: 24px; }
-    .perfil .cargo { color: var(--suave); font-size: 15px; }
-
-    /* ---------- FILTROS (componente interativo) ---------- */
-    .filtros { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
-    .filtro {
-      font: inherit; font-size: 14px; cursor: pointer;
-      background: var(--card); color: var(--suave);
-      border: 1px solid var(--linha); padding: 8px 16px; border-radius: 100px;
-      transition: .2s;
-    }
-    .filtro:hover { color: var(--texto); }
-    .filtro.ativo { background: var(--grad); color: #fff; border-color: transparent; }
-
-    /* ---------- GRID DE PROJETOS ---------- */
-    #grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-    }
-    .card { min-width: 0; }
-
-    /* ---------- O COMPONENTE CARD ---------- */
-    .card {
-      background: var(--card); border: 1px solid var(--linha);
-      border-radius: var(--raio); overflow: hidden;
-      transition: transform .18s, box-shadow .25s;
-    }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 16px 30px -18px rgba(74,40,120,.4); }
-    .capa { height: 92px; }
-    .card-corpo { padding: 14px 16px 16px; }
-    .card .tag {
-      font-size: 11px; color: var(--roxo); background: rgba(123,79,208,.12);
-      padding: 3px 10px; border-radius: 100px;
-    }
-    .card h3 { font-size: 15px; margin: 10px 0 12px; }
-    .curtir {
-      font: inherit; font-size: 13px; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 6px;
-      background: transparent; color: var(--suave);
-      border: 1px solid var(--linha); padding: 6px 12px; border-radius: 100px;
-    }
-    .curtir.ativo { color: var(--rosa); border-color: var(--rosa); }
-
-    /* ---------- CARREGAR MAIS ---------- */
-    .mais-wrap { text-align: center; margin: 26px 0 44px; }
-    #carregar {
-      font: inherit; font-weight: 600; cursor: pointer; color: #fff;
-      background: var(--grad); border: 0; padding: 12px 26px; border-radius: 100px;
-    }
-
-    footer { text-align: center; color: var(--suave); font-size: 13px; padding: 26px 0 40px; border-top: 1px solid var(--linha); }
-
-    /* ---------- RESPONSIVO ---------- */
-    @media (max-width: 620px) {
-      /* tablet estreito: 2 colunas */
-      #grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 430px) {
-      /* celular: 1 coluna, largura cheia */
-      #grid { grid-template-columns: minmax(0, 1fr); }
-    }
-    @media (max-width: 520px) {
-      .nav-links a { display: none; }   /* no celular, só logo + tema */
-      .perfil h1 { font-size: 20px; }
-    }
+    /* botões e badge com a cor da marca (por cima do Bootstrap) */
+    .btn-grad { background:var(--grad); color:#fff; border:0; }
+    .btn-grad:hover { color:#fff; filter:brightness(1.05); }
+    .filtro.active { background:var(--grad); color:#fff; border-color:transparent; }
+    .tag-badge { background:rgba(123,79,208,.14); color:var(--roxo); font-weight:500; }
+    .cover { height:88px; border-radius:.6rem .6rem 0 0; }
+    .curtir.liked { color:var(--rosa); border-color:var(--rosa); }
+    .card { transition:transform .18s, box-shadow .25s; }
+    .card:hover { transform:translateY(-4px); }
   </style>
 </head>
 
 <body>
 
-  <!-- NAVBAR -->
-  <nav>
-    <div class="nav-in">
-      <span class="logo">NickDev</span>
-      <div class="nav-links">
-        <a href="#">Projetos</a>
-        <a href="#">Sobre</a>
-        <button id="tema" title="Trocar tema">🌙</button>
+  <!-- NAVBAR (componente do Bootstrap) -->
+  <nav class="navbar navbar-expand bg-body border-bottom sticky-top">
+    <div class="container">
+      <span class="navbar-brand fw-bold logo">NickDev</span>
+      <div class="d-flex align-items-center gap-3">
+        <a class="nav-link d-none d-sm-inline" href="#">Projetos</a>
+        <a class="nav-link d-none d-sm-inline" href="#">Sobre</a>
+        <button id="tema" class="btn btn-sm btn-outline-secondary rounded-circle" title="Trocar tema">🌙</button>
       </div>
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container py-4">
 
-    <!-- PERFIL -->
-    <header class="perfil">
+    <!-- PERFIL (utilitários de flex do Bootstrap) -->
+    <header class="d-flex align-items-center gap-3 mb-4">
       <div class="avatar">N</div>
       <div>
-        <h1>Nicoly Almeida</h1>
-        <p class="cargo">Desenvolvedora & professora · meus projetos 👇</p>
+        <h1 class="h4 mb-0">Nicoly Almeida</h1>
+        <p class="text-body-secondary mb-0">Desenvolvedora &amp; professora · meus projetos 👇</p>
       </div>
     </header>
 
-    <!-- FILTROS (data-cat guarda a categoria) -->
-    <div class="filtros">
-      <button class="filtro ativo" data-cat="Todos">Todos</button>
-      <button class="filtro" data-cat="Web">Web</button>
-      <button class="filtro" data-cat="Mobile">Mobile</button>
-      <button class="filtro" data-cat="Design">Design</button>
+    <!-- FILTROS -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+      <button class="filtro btn btn-sm btn-outline-secondary rounded-pill active" data-cat="Todos">Todos</button>
+      <button class="filtro btn btn-sm btn-outline-secondary rounded-pill" data-cat="Web">Web</button>
+      <button class="filtro btn btn-sm btn-outline-secondary rounded-pill" data-cat="Mobile">Mobile</button>
+      <button class="filtro btn btn-sm btn-outline-secondary rounded-pill" data-cat="Design">Design</button>
     </div>
 
-    <!-- O JavaScript preenche este grid com os cards -->
-    <div id="grid"></div>
+    <!-- GRID (row do Bootstrap) — o JS preenche -->
+    <div id="grid" class="row row-cols-2 row-cols-md-4 row-cols-xl-6 g-3"></div>
 
-    <div class="mais-wrap">
-      <button id="carregar">Carregar mais</button>
+    <div class="text-center my-4">
+      <button id="carregar" class="btn btn-grad rounded-pill px-4">Carregar mais</button>
     </div>
-
   </div>
 
-  <footer>Feito com HTML, CSS e JavaScript na aula 03 da NickDev. 💜</footer>
-
+  <footer class="text-center text-body-secondary small py-4 border-top">
+    Feito com <strong>Bootstrap + JavaScript</strong> na aula 03 da NickDev. 💜
+  </footer>
 
   <!-- ============================================================
-       JAVASCRIPT — os componentes ganham vida
+       JAVASCRIPT — os componentes ganham vida (igual antes)
        ============================================================ -->
   <script>
     // ---------- 1. OS DADOS ----------
-    // Uma lista de objetos. O card não é escrito na mão: é gerado a partir daqui.
     const projetos = [
-      { titulo: "Site da NickDev",   categoria: "Web",    cor: "#FBD3E4", curtidas: 42 },
-      { titulo: "App de Hábitos",    categoria: "Mobile", cor: "#D9CCF3", curtidas: 31 },
-      { titulo: "Identidade Visual", categoria: "Design", cor: "#FCE1CC", curtidas: 58 },
-      { titulo: "Loja Online",       categoria: "Web",    cor: "#CDEBDD", curtidas: 27 },
-      { titulo: "App de Receitas",   categoria: "Mobile", cor: "#CFE5FB", curtidas: 19 },
-      { titulo: "Poster Evento",     categoria: "Design", cor: "#F7D9C4", curtidas: 44 },
+      { titulo:"Site da NickDev",   categoria:"Web",    cor:"#FBD3E4", curtidas:42 },
+      { titulo:"App de Hábitos",    categoria:"Mobile", cor:"#D9CCF3", curtidas:31 },
+      { titulo:"Identidade Visual", categoria:"Design", cor:"#FCE1CC", curtidas:58 },
+      { titulo:"Loja Online",       categoria:"Web",    cor:"#CDEBDD", curtidas:27 },
+      { titulo:"App de Receitas",   categoria:"Mobile", cor:"#CFE5FB", curtidas:19 },
+      { titulo:"Poster Evento",     categoria:"Design", cor:"#F7D9C4", curtidas:44 },
     ];
-    // Lote extra, revelado pelo botão "Carregar mais"
     const extras = [
-      { titulo: "Landing Page",      categoria: "Web",    cor: "#E4D4F7", curtidas: 12 },
-      { titulo: "App de Finanças",   categoria: "Mobile", cor: "#D4EFE0", curtidas: 22 },
-      { titulo: "Kit de Ícones",     categoria: "Design", cor: "#FBE0D0", curtidas: 37 },
+      { titulo:"Landing Page",    categoria:"Web",    cor:"#E4D4F7", curtidas:12 },
+      { titulo:"App de Finanças", categoria:"Mobile", cor:"#D4EFE0", curtidas:22 },
+      { titulo:"Kit de Ícones",   categoria:"Design", cor:"#FBE0D0", curtidas:37 },
     ];
 
     let filtroAtual = "Todos";
     const grid = document.querySelector("#grid");
 
     // ---------- 2. O COMPONENTE ----------
-    // Uma função que recebe UM projeto e devolve UM card pronto.
-    // É isto que a gente reaproveita — a "estrutura", não só o estilo.
+    // A função devolve uma COLUNA do grid com um CARD do Bootstrap.
+    // As classes (col, card, card-body, badge, btn) são do Bootstrap;
+    // só .cover, .tag-badge e .curtir são o nosso toque de marca.
     function criarCard(projeto) {
-      const card = document.createElement("article");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="capa" style="background:${projeto.cor}"></div>
-        <div class="card-corpo">
-          <span class="tag">${projeto.categoria}</span>
-          <h3>${projeto.titulo}</h3>
-          <button class="curtir">
-            <span class="coracao">🤍</span>
-            <span class="n">${projeto.curtidas}</span>
-          </button>
+      const col = document.createElement("div");
+      col.className = "col";
+      col.innerHTML = `
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="cover" style="background:${projeto.cor}"></div>
+          <div class="card-body">
+            <span class="badge rounded-pill tag-badge">${projeto.categoria}</span>
+            <h3 class="card-title h6 mt-2 mb-3">${projeto.titulo}</h3>
+            <button class="curtir btn btn-sm btn-outline-secondary rounded-pill">
+              <span class="coracao">🤍</span> <span class="n">${projeto.curtidas}</span>
+            </button>
+          </div>
         </div>`;
 
-      // interação do card: o botão de curtir (contido no próprio componente)
-      const btn = card.querySelector(".curtir");
-      const coracao = card.querySelector(".coracao");
-      const numero = card.querySelector(".n");
-      let curtido = false;
-      let total = projeto.curtidas;
-
+      // interação do curtir (dentro do componente)
+      const btn = col.querySelector(".curtir");
+      const coracao = col.querySelector(".coracao");
+      const numero = col.querySelector(".n");
+      let curtido = false, total = projeto.curtidas;
       btn.addEventListener("click", () => {
-        curtido = !curtido;                 // liga/desliga
-        total += curtido ? 1 : -1;          // soma ou tira 1
+        curtido = !curtido;
+        total += curtido ? 1 : -1;
         numero.textContent = total;
         coracao.textContent = curtido ? "❤️" : "🤍";
-        btn.classList.toggle("ativo", curtido);
+        btn.classList.toggle("liked", curtido);
       });
-
-      return card;
+      return col;
     }
 
-    // ---------- 3. RENDERIZAR A LISTA ----------
-    // Limpa o grid e cria um card pra cada item (o loop que reaproveita o componente).
+    // ---------- 3. RENDER + FILTRO ----------
     function render(lista) {
       grid.innerHTML = "";
-      lista.forEach(projeto => grid.appendChild(criarCard(projeto)));
+      lista.forEach(p => grid.appendChild(criarCard(p)));
     }
-
-    // Aplica o filtro atual e renderiza
     function aplicarFiltro() {
-      const lista = (filtroAtual === "Todos")
-        ? projetos
-        : projetos.filter(p => p.categoria === filtroAtual);
+      const lista = (filtroAtual === "Todos") ? projetos : projetos.filter(p => p.categoria === filtroAtual);
       render(lista);
     }
 
     // ---------- 4. FILTROS ----------
     document.querySelectorAll(".filtro").forEach(botao => {
       botao.addEventListener("click", () => {
-        // tira o "ativo" de todos e coloca só no clicado
-        document.querySelectorAll(".filtro").forEach(b => b.classList.remove("ativo"));
-        botao.classList.add("ativo");
-        filtroAtual = botao.dataset.cat;   // lê o data-cat
+        document.querySelectorAll(".filtro").forEach(b => b.classList.remove("active"));
+        botao.classList.add("active");
+        filtroAtual = botao.dataset.cat;
         aplicarFiltro();
       });
     });
 
     // ---------- 5. CARREGAR MAIS ----------
-    document.querySelector("#carregar").addEventListener("click", () => {
-      projetos.push(...extras);            // junta o lote extra na lista
-      extras.length = 0;                   // esvazia (evita duplicar)
+    document.querySelector("#carregar").addEventListener("click", (e) => {
+      projetos.push(...extras);
+      extras.length = 0;
       aplicarFiltro();
-      document.querySelector("#carregar").style.display = "none";
+      e.target.style.display = "none";
     });
 
-    // ---------- 6. TEMA CLARO/ESCURO ----------
+    // ---------- 6. TEMA (dark mode nativo do Bootstrap 5.3) ----------
     const tema = document.querySelector("#tema");
     tema.addEventListener("click", () => {
-      document.body.classList.toggle("escuro");
-      tema.textContent = document.body.classList.contains("escuro") ? "☀️" : "🌙";
+      const atual = document.documentElement.getAttribute("data-bs-theme");
+      const novo = atual === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-bs-theme", novo);
+      tema.textContent = novo === "dark" ? "☀️" : "🌙";
     });
 
-    // ---------- primeira renderização ----------
     aplicarFiltro();
   </script>
-
 </body>
 </html>

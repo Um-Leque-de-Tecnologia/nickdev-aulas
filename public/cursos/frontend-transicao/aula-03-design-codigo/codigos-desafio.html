@@ -91,12 +91,10 @@
     <a href="#c-html">HTML</a>
     <a href="#c-css">CSS</a>
     <a href="#c-js">JS · Seguir</a>
-    <div class="grp">Parte 2 · Portfólio</div>
-    <a href="#html">HTML</a>
-    <a href="#tokens">Tokens + tema</a>
-    <a href="#navbar">Navbar (flex)</a>
-    <a href="#grid">Grid + card</a>
-    <a href="#responsivo">Responsivo</a>
+    <div class="grp">Parte 2 · Portfólio (Bootstrap)</div>
+    <a href="#bs-setup">Incluir o Bootstrap</a>
+    <a href="#bs-html">HTML (classes BS)</a>
+    <a href="#bs-css">CSS de marca</a>
     <div class="grp">Parte 2 · JavaScript</div>
     <a href="#dados">Os dados</a>
     <a href="#componente" class="star">★ O componente</a>
@@ -223,83 +221,60 @@ botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, 
 
   <div class="tipbox"><b>Quer ver o card pronto?</b> <a href="modelo-card-perfil.html" target="_blank" style="color:var(--pink-light)">🃏 Abrir o card</a></div>
 
-  <div class="part"><span class="big">🧱</span> Parte 2 · Portfólio — HTML</div>
-  <div class="sol" id="html">
-    <h3>A estrutura</h3>
-    <p class="desc">Repare: o grid começa <b>vazio</b>. Os cards são criados pelo JavaScript.</p>
-    <pre><span class="tag">&lt;nav&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"nav-in"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;span</span> <span class="att">class</span>=<span class="st">"logo"</span><span class="tag">&gt;</span>NickDev<span class="tag">&lt;/span&gt;</span>
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"nav-links"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;a</span> <span class="att">href</span>=<span class="st">"#"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/a&gt; &lt;a</span> <span class="att">href</span>=<span class="st">"#"</span><span class="tag">&gt;</span>Sobre<span class="tag">&lt;/a&gt;</span>
-    <span class="tag">&lt;button</span> <span class="att">id</span>=<span class="st">"tema"</span><span class="tag">&gt;</span>🌙<span class="tag">&lt;/button&gt;</span>
-  <span class="tag">&lt;/div&gt;
-&lt;/div&gt;&lt;/nav&gt;</span>
+  <div class="part"><span class="big">🅱️</span> Parte 2 · Portfólio (Bootstrap) — Setup + HTML</div>
 
-<span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"container"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;header</span> <span class="att">class</span>=<span class="st">"perfil"</span><span class="tag">&gt;</span> ... avatar + nome ... <span class="tag">&lt;/header&gt;</span>
+  <div class="sol" id="bs-setup">
+    <h3>Incluir o Bootstrap</h3>
+    <p class="desc">Uma linha no <code>&lt;head&gt;</code> e você ganha navbar, grid, cards e botões prontos.</p>
+    <pre><span class="tag">&lt;link</span> <span class="att">rel</span>=<span class="st">"stylesheet"</span>
+  <span class="att">href</span>=<span class="st">"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"</span><span class="tag">&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"filtros"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"filtro ativo"</span> <span class="att">data-cat</span>=<span class="st">"Todos"</span><span class="tag">&gt;</span>Todos<span class="tag">&lt;/button&gt;</span>
-    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"filtro"</span> <span class="att">data-cat</span>=<span class="st">"Web"</span><span class="tag">&gt;</span>Web<span class="tag">&lt;/button&gt;</span>
-    <span class="cm">&lt;!-- Mobile, Design... --&gt;</span>
+<span class="cm">&lt;!-- dark mode nativo: o tema fica no &lt;html&gt; --&gt;</span>
+<span class="tag">&lt;html</span> <span class="att">lang</span>=<span class="st">"pt-BR"</span> <span class="att">data-bs-theme</span>=<span class="st">"light"</span><span class="tag">&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="bs-html">
+    <h3>HTML — só classes do Bootstrap</h3>
+    <p class="desc">O grid começa <b>vazio</b> (o JS preenche). Repare nas classes: <code>navbar</code>, <code>row row-cols-*</code>, <code>btn</code>.</p>
+    <pre><span class="tag">&lt;nav</span> <span class="att">class</span>=<span class="st">"navbar navbar-expand bg-body border-bottom sticky-top"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"container"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span</span> <span class="att">class</span>=<span class="st">"navbar-brand fw-bold logo"</span><span class="tag">&gt;</span>NickDev<span class="tag">&lt;/span&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"d-flex align-items-center gap-3"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;a</span> <span class="att">class</span>=<span class="st">"nav-link"</span> <span class="att">href</span>=<span class="st">"#"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/a&gt;</span>
+      <span class="tag">&lt;button</span> <span class="att">id</span>=<span class="st">"tema"</span> <span class="att">class</span>=<span class="st">"btn btn-sm btn-outline-secondary rounded-circle"</span><span class="tag">&gt;</span>🌙<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</span>
+
+<span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"container py-4"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;header</span> <span class="att">class</span>=<span class="st">"d-flex align-items-center gap-3 mb-4"</span><span class="tag">&gt;</span> ...perfil... <span class="tag">&lt;/header&gt;</span>
+
+  <span class="cm">&lt;!-- filtros: botões do Bootstrap --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"d-flex flex-wrap gap-2 mb-4"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"filtro btn btn-sm btn-outline-secondary rounded-pill active"</span> <span class="att">data-cat</span>=<span class="st">"Todos"</span><span class="tag">&gt;</span>Todos<span class="tag">&lt;/button&gt;</span>
+    <span class="cm">&lt;!-- Web, Mobile, Design... --&gt;</span>
   <span class="tag">&lt;/div&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">id</span>=<span class="st">"grid"</span><span class="tag">&gt;&lt;/div&gt;</span>   <span class="cm">&lt;!-- o JS preenche --&gt;</span>
-  <span class="tag">&lt;button</span> <span class="att">id</span>=<span class="st">"carregar"</span><span class="tag">&gt;</span>Carregar mais<span class="tag">&lt;/button&gt;</span>
+  <span class="cm">&lt;!-- grid: 2 col no celular, 6 em telas grandes --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">id</span>=<span class="st">"grid"</span> <span class="att">class</span>=<span class="st">"row row-cols-2 row-cols-md-4 row-cols-xl-6 g-3"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+  <span class="tag">&lt;button</span> <span class="att">id</span>=<span class="st">"carregar"</span> <span class="att">class</span>=<span class="st">"btn btn-grad rounded-pill px-4"</span><span class="tag">&gt;</span>Carregar mais<span class="tag">&lt;/button&gt;</span>
 <span class="tag">&lt;/div&gt;</span></pre>
+    <div class="tipbox star" style="margin-top:14px"><b>Responsivo de graça 💡</b> <code>row-cols-2 row-cols-md-4 row-cols-xl-6</code> já muda as colunas por tamanho de tela. Sem media query na mão!</div>
   </div>
 
-  <div class="part"><span class="big">🎨</span> Parte 2 · Portfólio — CSS</div>
-  <div class="sol" id="tokens">
-    <h3>Tokens + tema escuro</h3>
-    <p class="desc">O tema escuro é só um segundo conjunto de tokens numa classe — o JS liga/desliga.</p>
-    <pre><span class="sel">:root</span> {
-  <span class="prop">--rosa</span>:<span class="st">#F24487</span>; <span class="prop">--roxo</span>:<span class="st">#7B4FD0</span>;
-  <span class="prop">--bg</span>:<span class="st">#EEF0F6</span>; <span class="prop">--card</span>:<span class="st">#FFFFFF</span>;
-  <span class="prop">--texto</span>:<span class="st">#1B1830</span>; <span class="prop">--suave</span>:<span class="st">#6B6580</span>;
-  <span class="prop">--linha</span>:<span class="st">#E7E4EF</span>; <span class="prop">--raio</span>:<span class="st">18px</span>;
-}
-<span class="sel">body.escuro</span> {
-  <span class="prop">--bg</span>:<span class="st">#0F0C17</span>; <span class="prop">--card</span>:<span class="st">#1A1626</span>;
-  <span class="prop">--texto</span>:<span class="st">#F3F0FA</span>; <span class="prop">--suave</span>:<span class="st">#A79FB8</span>; <span class="prop">--linha</span>:<span class="st">#2A2438</span>;
-}
-<span class="sel">body</span> { background:<span class="st">var(--bg)</span>; color:<span class="st">var(--texto)</span>; transition:<span class="st">.3s</span>; }</pre>
-  </div>
+  <div class="sol" id="bs-css">
+    <h3>CSS de marca (só o tempero)</h3>
+    <p class="desc">O Bootstrap dá o layout; a gente só coloca o gradiente e as cores da NickDev por cima.</p>
+    <pre><span class="sel">:root</span> { <span class="prop">--grad</span>:<span class="st">linear-gradient(100deg,#F24487,#7B4FD0)</span>; }
+<span class="sel">body</span> { <span class="prop">font-family</span>:<span class="st">'Poppins', sans-serif</span>; }
 
-  <div class="sol" id="navbar">
-    <h3>Navbar (Flexbox)</h3>
-    <pre><span class="sel">.nav-in</span> {
-  display:<span class="st">flex</span>;
-  align-items:<span class="st">center</span>;
-  justify-content:<span class="st">space-between</span>;
-  padding:<span class="st">14px 22px</span>;
-}
-<span class="sel">.logo</span> { background:<span class="st">var(--grad)</span>; -webkit-background-clip:<span class="st">text</span>; color:<span class="st">transparent</span>; font-weight:<span class="st">700</span>; }</pre>
-  </div>
-
-  <div class="sol" id="grid">
-    <h3>Grid responsivo + o card</h3>
-    <p class="desc"><code>auto-fill</code> + <code>minmax</code> = colunas que se ajustam sozinhas.</p>
-    <pre><span class="sel">#grid</span> {
-  display:<span class="st">grid</span>;
-  grid-template-columns:<span class="st">repeat(auto-fill, minmax(200px, 1fr))</span>;
-  gap:<span class="st">16px</span>;
-}
-<span class="sel">.card</span> { background:<span class="st">var(--card)</span>; border:<span class="st">1px solid var(--linha)</span>; border-radius:<span class="st">var(--raio)</span>; overflow:<span class="st">hidden</span>; }
-<span class="sel">.card:hover</span> { transform:<span class="st">translateY(-4px)</span>; box-shadow:<span class="st">0 16px 30px -18px rgba(74,40,120,.4)</span>; }
-<span class="sel">.capa</span> { height:<span class="st">92px</span>; }
-<span class="sel">.curtir.ativo</span> { color:<span class="st">var(--rosa)</span>; border-color:<span class="st">var(--rosa)</span>; }</pre>
-  </div>
-
-  <div class="sol" id="responsivo">
-    <h3>Responsivo (web → mobile)</h3>
-    <p class="desc">A mágica: <code>minmax(0, 1fr)</code> deixa a coluna encolher sem vazar.</p>
-    <pre><span class="cm">/* tablet: 2 colunas */</span>
-<span class="prop">@media</span> (max-width:<span class="st">620px</span>) { <span class="sel">#grid</span> { grid-template-columns:<span class="st">repeat(2, minmax(0,1fr))</span>; } }
-
-<span class="cm">/* celular: 1 coluna + esconde os links do menu */</span>
-<span class="prop">@media</span> (max-width:<span class="st">430px</span>) { <span class="sel">#grid</span> { grid-template-columns:<span class="st">minmax(0,1fr)</span>; } }
-<span class="prop">@media</span> (max-width:<span class="st">520px</span>) { <span class="sel">.nav-links a</span> { display:<span class="st">none</span>; } }</pre>
+<span class="cm">/* logo e botões com a cor da marca */</span>
+<span class="sel">.logo</span> { <span class="prop">background</span>:<span class="st">var(--grad)</span>; <span class="prop">-webkit-background-clip</span>:<span class="st">text</span>; <span class="prop">color</span>:<span class="st">transparent</span>; }
+<span class="sel">.btn-grad</span>, <span class="sel">.filtro.active</span> { <span class="prop">background</span>:<span class="st">var(--grad)</span>; <span class="prop">color</span>:<span class="st">#fff</span>; <span class="prop">border</span>:<span class="st">0</span>; }
+<span class="sel">.tag-badge</span> { <span class="prop">background</span>:<span class="st">rgba(123,79,208,.14)</span>; <span class="prop">color</span>:<span class="st">#7B4FD0</span>; }
+<span class="sel">.cover</span> { <span class="prop">height</span>:<span class="st">88px</span>; <span class="prop">border-radius</span>:<span class="st">.6rem .6rem 0 0</span>; }
+<span class="sel">.curtir.liked</span> { <span class="prop">color</span>:<span class="st">#F24487</span>; <span class="prop">border-color</span>:<span class="st">#F24487</span>; }</pre>
   </div>
 
   <div class="part"><span class="big">⚡</span> Parte 2 · Portfólio — JavaScript</div>
@@ -318,30 +293,32 @@ botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, 
     <h3>2 · O componente ★</h3>
     <p class="desc"><b>Uma função que recebe 1 projeto e devolve 1 card.</b> É isto que a gente reaproveita — a estrutura, não só o estilo. Um componente = função que devolve HTML.</p>
     <pre><span class="kw">function</span> <span class="fn">criarCard</span>(projeto) {
-  <span class="kw">const</span> card = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"article"</span>);
-  card.className = <span class="st">"card"</span>;
-  card.innerHTML = <span class="st">`
-    &lt;div class="capa" style="background:${projeto.cor}"&gt;&lt;/div&gt;
-    &lt;div class="card-corpo"&gt;
-      &lt;span class="tag"&gt;${projeto.categoria}&lt;/span&gt;
-      &lt;h3&gt;${projeto.titulo}&lt;/h3&gt;
-      &lt;button class="curtir"&gt;
-        &lt;span class="coracao"&gt;🤍&lt;/span&gt; &lt;span class="n"&gt;${projeto.curtidas}&lt;/span&gt;
-      &lt;/button&gt;
+  <span class="kw">const</span> col = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"div"</span>);
+  col.className = <span class="st">"col"</span>;   <span class="cm">// coluna do grid do Bootstrap</span>
+  col.innerHTML = <span class="st">`
+    &lt;div class="card h-100 border-0 shadow-sm"&gt;
+      &lt;div class="cover" style="background:${projeto.cor}"&gt;&lt;/div&gt;
+      &lt;div class="card-body"&gt;
+        &lt;span class="badge rounded-pill tag-badge"&gt;${projeto.categoria}&lt;/span&gt;
+        &lt;h3 class="card-title h6 mt-2 mb-3"&gt;${projeto.titulo}&lt;/h3&gt;
+        &lt;button class="curtir btn btn-sm btn-outline-secondary rounded-pill"&gt;
+          &lt;span class="coracao"&gt;🤍&lt;/span&gt; &lt;span class="n"&gt;${projeto.curtidas}&lt;/span&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
     &lt;/div&gt;`</span>;
 
   <span class="cm">// a interação do curtir vive DENTRO do componente</span>
-  <span class="kw">const</span> btn = card.<span class="fn">querySelector</span>(<span class="st">".curtir"</span>);
+  <span class="kw">const</span> btn = col.<span class="fn">querySelector</span>(<span class="st">".curtir"</span>);
   <span class="kw">let</span> curtido = <span class="st">false</span>, total = projeto.curtidas;
   btn.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
     curtido = !curtido;
     total += curtido ? <span class="st">1</span> : <span class="st">-1</span>;
-    card.<span class="fn">querySelector</span>(<span class="st">".n"</span>).<span class="fn">textContent</span> = total;
-    card.<span class="fn">querySelector</span>(<span class="st">".coracao"</span>).<span class="fn">textContent</span> = curtido ? <span class="st">"❤️"</span> : <span class="st">"🤍"</span>;
-    btn.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"ativo"</span>, curtido);
+    col.<span class="fn">querySelector</span>(<span class="st">".n"</span>).<span class="fn">textContent</span> = total;
+    col.<span class="fn">querySelector</span>(<span class="st">".coracao"</span>).<span class="fn">textContent</span> = curtido ? <span class="st">"❤️"</span> : <span class="st">"🤍"</span>;
+    btn.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"liked"</span>, curtido);
   });
 
-  <span class="kw">return</span> card;
+  <span class="kw">return</span> col;
 }</pre>
     <div class="tipbox star" style="margin-top:14px"><b>Ponte pro React:</b> quando você vir <code>function Card() {}</code> no React, é <b>a mesma ideia</b> — uma função que devolve um pedaço de tela. Hoje vocês fizeram no braço; o React automatiza isso.</div>
   </div>
@@ -366,8 +343,8 @@ botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, 
 
 <span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".filtro"</span>).<span class="fn">forEach</span>(botao => {
   botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
-    <span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".filtro"</span>).<span class="fn">forEach</span>(b => b.classList.<span class="fn">remove</span>(<span class="st">"ativo"</span>));
-    botao.classList.<span class="fn">add</span>(<span class="st">"ativo"</span>);
+    <span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".filtro"</span>).<span class="fn">forEach</span>(b => b.classList.<span class="fn">remove</span>(<span class="st">"active"</span>));
+    botao.classList.<span class="fn">add</span>(<span class="st">"active"</span>);
     filtroAtual = botao.dataset.cat;
     <span class="fn">aplicarFiltro</span>();
   });
@@ -376,11 +353,13 @@ botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, 
 
   <div class="sol" id="tema">
     <h3>4 · Tema + carregar mais</h3>
-    <pre><span class="cm">// tema claro/escuro</span>
+    <pre><span class="cm">// tema: dark mode NATIVO do Bootstrap 5.3 (só trocar data-bs-theme)</span>
 <span class="kw">const</span> tema = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#tema"</span>);
 tema.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
-  <span class="fn">document</span>.<span class="fn">body</span>.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"escuro"</span>);
-  tema.textContent = <span class="fn">document</span>.<span class="fn">body</span>.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"escuro"</span>) ? <span class="st">"☀️"</span> : <span class="st">"🌙"</span>;
+  <span class="kw">const</span> h = <span class="fn">document</span>.<span class="fn">documentElement</span>;
+  <span class="kw">const</span> novo = h.<span class="fn">getAttribute</span>(<span class="st">"data-bs-theme"</span>) === <span class="st">"dark"</span> ? <span class="st">"light"</span> : <span class="st">"dark"</span>;
+  h.<span class="fn">setAttribute</span>(<span class="st">"data-bs-theme"</span>, novo);
+  tema.textContent = novo === <span class="st">"dark"</span> ? <span class="st">"☀️"</span> : <span class="st">"🌙"</span>;
 });
 
 <span class="cm">// carregar mais projetos</span>
