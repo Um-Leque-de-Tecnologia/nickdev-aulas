@@ -77,8 +77,8 @@
       text-align: center; margin: 22px 26px; padding: 16px 0;
       border-top: 1px solid var(--linha); border-bottom: 1px solid var(--linha);
     }
-    .stats .num { font-weight: 600; font-size: 18px; }
-    .stats .lbl { color: var(--suave); font-size: 12px; }
+    .stats .num { display: block; font-weight: 600; font-size: 18px; }
+    .stats .lbl { display: block; color: var(--suave); font-size: 12px; }
 
     /* botão Seguir */
     .acoes { padding: 0 26px; }
@@ -117,27 +117,31 @@
 
 <body>
 
-  <div class="card">
+  <!-- HTML SEMÂNTICO: cada tag diz o que a coisa É.
+       Título → <h1>/<h2>, texto → <p>, o card inteiro → <article>.
+       <div> a gente usa SÓ pra agrupar/layout (não pra texto com significado). -->
+  <article class="card">
     <div class="banner"></div>
 
     <div class="topo">
       <div class="avatar">N</div>
-      <div class="nome">Nicoly Almeida</div>
-      <div class="handle">@nickdeve</div>
+      <h1 class="nome">Nicoly Almeida</h1>       <!-- nome = título principal → h1 -->
+      <p class="handle">@nickdeve</p>            <!-- texto → p -->
       <p class="bio">Desenvolvedora & professora. Transformo design em código com muita cor. 💜</p>
     </div>
 
+    <!-- cada estatística: número em destaque (<strong>) + rótulo (<span>) -->
     <div class="stats">
-      <div><div class="num">32</div><div class="lbl">Projetos</div></div>
-      <div><div class="num">1.2k</div><div class="lbl">Seguidores</div></div>
-      <div><div class="num">890</div><div class="lbl">Curtidas</div></div>
+      <div><strong class="num">32</strong><span class="lbl">Projetos</span></div>
+      <div><strong class="num">1.2k</strong><span class="lbl">Seguidores</span></div>
+      <div><strong class="num">890</strong><span class="lbl">Curtidas</span></div>
     </div>
 
     <div class="acoes">
       <button class="btn-seguir" id="seguir">Seguir</button>
     </div>
 
-    <div class="galeria-titulo">Meus projetos</div>
+    <h2 class="galeria-titulo">Meus projetos</h2>  <!-- título de seção → h2 -->
     <div class="galeria">
       <div class="g1"></div><div class="g2"></div>
       <div class="g3"></div><div class="g4"></div>
@@ -146,7 +150,7 @@
     <div class="tags">
       <span>#dev</span><span>#design</span><span>#café</span><span>#frontend</span>
     </div>
-  </div>
+  </article>
 
   <!-- Única interação: o botão Seguir troca de estado ao clicar -->
   <script>

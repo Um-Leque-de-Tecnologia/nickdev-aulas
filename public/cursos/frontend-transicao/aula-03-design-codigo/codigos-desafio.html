@@ -117,29 +117,28 @@
   <div class="part"><span class="big">🔥</span> Parte 1 · Card de perfil (aquecimento)</div>
 
   <div class="sol" id="c-html">
-    <h3>HTML — a estrutura</h3>
-    <p class="desc">O card inteiro, do banner às tags. Simples e direto.</p>
-    <pre><span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
+    <h3>HTML — a estrutura (semântica!)</h3>
+    <p class="desc">Cada tag diz o que a coisa <b>é</b>: título → <code>&lt;h1&gt;/&lt;h2&gt;</code>, texto → <code>&lt;p&gt;</code>, o card → <code>&lt;article&gt;</code>. <code>&lt;div&gt;</code> só pra agrupar/layout.</p>
+    <pre><span class="tag">&lt;article</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
   <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span>
 
   <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"topo"</span><span class="tag">&gt;</span>
     <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"avatar"</span><span class="tag">&gt;</span>N<span class="tag">&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"nome"</span><span class="tag">&gt;</span>Nicoly Almeida<span class="tag">&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"handle"</span><span class="tag">&gt;</span>@nickdeve<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;h1</span> <span class="att">class</span>=<span class="st">"nome"</span><span class="tag">&gt;</span>Nicoly Almeida<span class="tag">&lt;/h1&gt;</span>       <span class="cm">&lt;!-- nome = título → h1 --&gt;</span>
+    <span class="tag">&lt;p</span> <span class="att">class</span>=<span class="st">"handle"</span><span class="tag">&gt;</span>@nickdeve<span class="tag">&lt;/p&gt;</span>            <span class="cm">&lt;!-- texto → p --&gt;</span>
     <span class="tag">&lt;p</span> <span class="att">class</span>=<span class="st">"bio"</span><span class="tag">&gt;</span>Desenvolvedora & professora. 💜<span class="tag">&lt;/p&gt;</span>
   <span class="tag">&lt;/div&gt;</span>
 
+  <span class="cm">&lt;!-- cada stat: número em destaque (strong) + rótulo (span) --&gt;</span>
   <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"stats"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>32<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>1.2k<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Seguidores<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>890<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Curtidas<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div&gt;&lt;strong</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>32<span class="tag">&lt;/strong&gt;&lt;span</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div&gt;&lt;strong</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>1.2k<span class="tag">&lt;/strong&gt;&lt;span</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Seguidores<span class="tag">&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div&gt;&lt;strong</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>890<span class="tag">&lt;/strong&gt;&lt;span</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Curtidas<span class="tag">&lt;/span&gt;&lt;/div&gt;</span>
   <span class="tag">&lt;/div&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"acoes"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"btn-seguir"</span> <span class="att">id</span>=<span class="st">"seguir"</span><span class="tag">&gt;</span>Seguir<span class="tag">&lt;/button&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"btn-seguir"</span> <span class="att">id</span>=<span class="st">"seguir"</span><span class="tag">&gt;</span>Seguir<span class="tag">&lt;/button&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"galeria-titulo"</span><span class="tag">&gt;</span>Meus projetos<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;h2</span> <span class="att">class</span>=<span class="st">"galeria-titulo"</span><span class="tag">&gt;</span>Meus projetos<span class="tag">&lt;/h2&gt;</span>  <span class="cm">&lt;!-- título de seção → h2 --&gt;</span>
   <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"galeria"</span><span class="tag">&gt;</span>
     <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g1"</span><span class="tag">&gt;&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"g2"</span><span class="tag">&gt;&lt;/div&gt;</span>
     <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g3"</span><span class="tag">&gt;&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"g4"</span><span class="tag">&gt;&lt;/div&gt;</span>
@@ -148,7 +147,8 @@
   <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"tags"</span><span class="tag">&gt;</span>
     <span class="tag">&lt;span&gt;</span>#dev<span class="tag">&lt;/span&gt; &lt;span&gt;</span>#design<span class="tag">&lt;/span&gt; &lt;span&gt;</span>#café<span class="tag">&lt;/span&gt;</span>
   <span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;/div&gt;</span></pre>
+<span class="tag">&lt;/article&gt;</span></pre>
+    <div class="tipbox star" style="margin-top:14px"><b>Por que não tudo <code>&lt;div&gt;</code>? 💡</b> Isso se chama <b>HTML semântico</b>. Tags que dizem o significado (título, parágrafo, artigo) ajudam leitores de tela, o Google e você mesma a entender o código. <code>&lt;div&gt;</code> não tem significado — use só pra <b>agrupar e dar layout</b>.</div>
   </div>
 
   <div class="sol" id="c-css">
