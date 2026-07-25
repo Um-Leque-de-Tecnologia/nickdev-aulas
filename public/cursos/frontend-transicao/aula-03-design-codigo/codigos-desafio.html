@@ -87,14 +87,17 @@
   <a class="voltar-curso" href="/cursos/frontend-transicao">← voltar ao curso</a>
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
-    <div class="grp">Estrutura</div>
+    <div class="grp">Parte 1 · Card 🔥</div>
+    <a href="#c-html">HTML</a>
+    <a href="#c-css">CSS</a>
+    <a href="#c-js">JS · Seguir</a>
+    <div class="grp">Parte 2 · Portfólio</div>
     <a href="#html">HTML</a>
-    <div class="grp">CSS</div>
     <a href="#tokens">Tokens + tema</a>
     <a href="#navbar">Navbar (flex)</a>
     <a href="#grid">Grid + card</a>
     <a href="#responsivo">Responsivo</a>
-    <div class="grp">JavaScript</div>
+    <div class="grp">Parte 2 · JavaScript</div>
     <a href="#dados">Os dados</a>
     <a href="#componente" class="star">★ O componente</a>
     <a href="#render">Render + filtro</a>
@@ -105,13 +108,122 @@
 
 <main>
   <div class="eyebrow">Aula 03 · gabarito</div>
-  <h1>Código do <span class="g">portfólio</span></h1>
-  <p class="lead">O portfólio interativo, pedaço por pedaço. Um <code>index.html</code>: CSS no <code>&lt;style&gt;</code>, JS no <code>&lt;script&gt;</code> (fim do body).</p>
+  <h1>Código dos <span class="g">desafios</span></h1>
+  <p class="lead">Os dois desafios, pedaço por pedaço. Comece pela <b>Parte 1</b> (o card, aquecimento), depois a <b>Parte 2</b> (o portfólio interativo). Cada um é um <code>index.html</code>.</p>
   <div class="rule"></div>
 
-  <div class="tipbox"><b>Combinado 🤝</b> Reproduza sozinho(a) primeiro. Use isto pra conferir e entender os truques — o ouro da aula está na Parte 3 (o componente).</div>
+  <div class="tipbox"><b>Combinado 🤝</b> Reproduza sozinho(a) primeiro. Use isto pra conferir e entender os truques — o ouro está no <b>componente</b> (Parte 2).</div>
 
-  <div class="part"><span class="big">🧱</span> Parte 1 · HTML</div>
+  <div class="part"><span class="big">🔥</span> Parte 1 · Card de perfil (aquecimento)</div>
+
+  <div class="sol" id="c-html">
+    <h3>HTML — a estrutura</h3>
+    <p class="desc">O card inteiro, do banner às tags. Simples e direto.</p>
+    <pre><span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"topo"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"avatar"</span><span class="tag">&gt;</span>N<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"nome"</span><span class="tag">&gt;</span>Nicoly Almeida<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"handle"</span><span class="tag">&gt;</span>@nickdeve<span class="tag">&lt;/div&gt;</span>
+    <span class="tag">&lt;p</span> <span class="att">class</span>=<span class="st">"bio"</span><span class="tag">&gt;</span>Desenvolvedora & professora. 💜<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"stats"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>32<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>1.2k<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Seguidores<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>890<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Curtidas<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"acoes"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"btn-seguir"</span> <span class="att">id</span>=<span class="st">"seguir"</span><span class="tag">&gt;</span>Seguir<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"galeria-titulo"</span><span class="tag">&gt;</span>Meus projetos<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"galeria"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g1"</span><span class="tag">&gt;&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"g2"</span><span class="tag">&gt;&lt;/div&gt;</span>
+    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g3"</span><span class="tag">&gt;&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"g4"</span><span class="tag">&gt;&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"tags"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;span&gt;</span>#dev<span class="tag">&lt;/span&gt; &lt;span&gt;</span>#design<span class="tag">&lt;/span&gt; &lt;span&gt;</span>#café<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+  </div>
+
+  <div class="sol" id="c-css">
+    <h3>CSS — tokens, layout e responsivo</h3>
+    <p class="desc">Os truques: centralizar com Flexbox, avatar sobre o banner (<code>margin</code> negativa), stats e galeria em Grid.</p>
+    <pre><span class="sel">:root</span> {
+  <span class="prop">--rosa</span>:<span class="st">#F24487</span>; <span class="prop">--roxo</span>:<span class="st">#7B4FD0</span>;
+  <span class="prop">--grad</span>:<span class="st">linear-gradient(120deg,#F24487,#7B4FD0)</span>;
+  <span class="prop">--fundo</span>:<span class="st">#EEF0F6</span>; <span class="prop">--card</span>:<span class="st">#fff</span>;
+  <span class="prop">--texto</span>:<span class="st">#1B1830</span>; <span class="prop">--suave</span>:<span class="st">#6B6580</span>;
+  <span class="prop">--linha</span>:<span class="st">#ECEAF2</span>; <span class="prop">--raio</span>:<span class="st">22px</span>;
+}
+
+<span class="cm">/* centraliza o card na tela */</span>
+<span class="sel">body</span> {
+  <span class="prop">font-family</span>:<span class="st">'Poppins', sans-serif</span>; <span class="prop">background</span>:<span class="st">var(--fundo)</span>;
+  <span class="prop">min-height</span>:<span class="st">100vh</span>; <span class="prop">display</span>:<span class="st">flex</span>;
+  <span class="prop">align-items</span>:<span class="st">center</span>; <span class="prop">justify-content</span>:<span class="st">center</span>;
+}
+
+<span class="sel">.card</span> {
+  <span class="prop">width</span>:<span class="st">100%</span>; <span class="prop">max-width</span>:<span class="st">380px</span>;   <span class="cm">/* centralizado no web, cheio no mobile */</span>
+  <span class="prop">background</span>:<span class="st">var(--card)</span>; <span class="prop">border-radius</span>:<span class="st">var(--raio)</span>;
+  <span class="prop">box-shadow</span>:<span class="st">0 24px 60px -24px rgba(74,40,120,.45)</span>; <span class="prop">overflow</span>:<span class="st">hidden</span>;
+}
+<span class="sel">.banner</span> { <span class="prop">height</span>:<span class="st">96px</span>; <span class="prop">background</span>:<span class="st">var(--grad)</span>; }
+
+<span class="cm">/* avatar puxado pra cima do banner */</span>
+<span class="sel">.topo</span> { <span class="prop">text-align</span>:<span class="st">center</span>; <span class="prop">margin-top</span>:<span class="st">-46px</span>; <span class="prop">padding</span>:<span class="st">0 26px</span>; }
+<span class="sel">.avatar</span> {
+  <span class="prop">width</span>:<span class="st">92px</span>; <span class="prop">height</span>:<span class="st">92px</span>; <span class="prop">border-radius</span>:<span class="st">50%</span>;
+  <span class="prop">border</span>:<span class="st">4px solid var(--card)</span>; <span class="prop">background</span>:<span class="st">var(--grad)</span>;
+  <span class="prop">display</span>:<span class="st">flex</span>; <span class="prop">align-items</span>:<span class="st">center</span>; <span class="prop">justify-content</span>:<span class="st">center</span>;
+  <span class="prop">color</span>:<span class="st">#fff</span>; <span class="prop">font-size</span>:<span class="st">44px</span>; <span class="prop">margin</span>:<span class="st">0 auto</span>;
+}
+
+<span class="cm">/* stats: 3 colunas iguais */</span>
+<span class="sel">.stats</span> {
+  <span class="prop">display</span>:<span class="st">grid</span>; <span class="prop">grid-template-columns</span>:<span class="st">repeat(3, 1fr)</span>; <span class="prop">text-align</span>:<span class="st">center</span>;
+  <span class="prop">margin</span>:<span class="st">22px 26px</span>; <span class="prop">padding</span>:<span class="st">16px 0</span>;
+  <span class="prop">border-top</span>:<span class="st">1px solid var(--linha)</span>; <span class="prop">border-bottom</span>:<span class="st">1px solid var(--linha)</span>;
+}
+
+<span class="cm">/* botão gradiente + estado "seguindo" */</span>
+<span class="sel">.btn-seguir</span> {
+  <span class="prop">width</span>:<span class="st">100%</span>; <span class="prop">color</span>:<span class="st">#fff</span>; <span class="prop">background</span>:<span class="st">var(--grad)</span>;
+  <span class="prop">border</span>:<span class="st">0</span>; <span class="prop">padding</span>:<span class="st">13px</span>; <span class="prop">border-radius</span>:<span class="st">100px</span>; <span class="prop">cursor</span>:<span class="st">pointer</span>;
+}
+<span class="sel">.btn-seguir.seguindo</span> { <span class="prop">background</span>:<span class="st">#fff</span>; <span class="prop">color</span>:<span class="st">var(--roxo)</span>; <span class="prop">border</span>:<span class="st">1px solid var(--roxo)</span>; }
+
+<span class="cm">/* galeria: 2 colunas · tags: flex que quebra linha */</span>
+<span class="sel">.galeria</span> { <span class="prop">display</span>:<span class="st">grid</span>; <span class="prop">grid-template-columns</span>:<span class="st">1fr 1fr</span>; <span class="prop">gap</span>:<span class="st">10px</span>; <span class="prop">padding</span>:<span class="st">0 26px</span>; }
+<span class="sel">.galeria div</span> { <span class="prop">height</span>:<span class="st">74px</span>; <span class="prop">border-radius</span>:<span class="st">12px</span>; }
+<span class="sel">.tags</span> { <span class="prop">display</span>:<span class="st">flex</span>; <span class="prop">flex-wrap</span>:<span class="st">wrap</span>; <span class="prop">gap</span>:<span class="st">8px</span>; <span class="prop">padding</span>:<span class="st">18px 26px 28px</span>; }
+
+<span class="cm">/* responsivo: em tela bem pequena, a galeria vira 1 coluna */</span>
+<span class="prop">@media</span> (max-width:<span class="st">380px</span>) { <span class="sel">.galeria</span> { <span class="prop">grid-template-columns</span>:<span class="st">1fr</span>; } }</pre>
+  </div>
+
+  <div class="sol" id="c-js">
+    <h3>JS — o botão Seguir</h3>
+    <p class="desc">Uma única interação: alterna a classe e o texto ao clicar.</p>
+    <pre><span class="kw">const</span> botao = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#seguir"</span>);
+
+botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  botao.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"seguindo"</span>);
+  botao.<span class="fn">textContent</span> = botao.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"seguindo"</span>)
+    ? <span class="st">"Seguindo ✓"</span>
+    : <span class="st">"Seguir"</span>;
+});</pre>
+  </div>
+
+  <div class="tipbox"><b>Quer ver o card pronto?</b> <a href="modelo-card-perfil.html" target="_blank" style="color:var(--pink-light)">🃏 Abrir o card</a></div>
+
+  <div class="part"><span class="big">🧱</span> Parte 2 · Portfólio — HTML</div>
   <div class="sol" id="html">
     <h3>A estrutura</h3>
     <p class="desc">Repare: o grid começa <b>vazio</b>. Os cards são criados pelo JavaScript.</p>
@@ -137,7 +249,7 @@
 <span class="tag">&lt;/div&gt;</span></pre>
   </div>
 
-  <div class="part"><span class="big">🎨</span> Parte 2 · CSS</div>
+  <div class="part"><span class="big">🎨</span> Parte 2 · Portfólio — CSS</div>
   <div class="sol" id="tokens">
     <h3>Tokens + tema escuro</h3>
     <p class="desc">O tema escuro é só um segundo conjunto de tokens numa classe — o JS liga/desliga.</p>
@@ -190,7 +302,7 @@
 <span class="prop">@media</span> (max-width:<span class="st">520px</span>) { <span class="sel">.nav-links a</span> { display:<span class="st">none</span>; } }</pre>
   </div>
 
-  <div class="part"><span class="big">⚡</span> Parte 3 · JavaScript</div>
+  <div class="part"><span class="big">⚡</span> Parte 2 · Portfólio — JavaScript</div>
 
   <div class="sol" id="dados">
     <h3>1 · Os dados</h3>
