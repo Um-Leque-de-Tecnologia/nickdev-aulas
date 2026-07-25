@@ -199,21 +199,21 @@
     padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
   .voltar:hover{color:#E88BB8;border-color:#E88BB8}
   .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-  .designimg{max-width:min(300px,60vw);border-radius:16px;border:1px solid var(--line);display:block}
+  .designimg{max-width:min(300px,52vw);border-radius:14px;border:1px solid var(--line);display:block}
+  .rdemo{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--canvas-2);width:100%;max-width:620px}
+  .rdemo .hd{font-family:var(--mono);font-size:12px;color:var(--muted);padding:8px 14px;border-bottom:1px solid var(--line)}
+  .rdemo iframe{width:100%;border:0;background:#fff;display:block;height:150px}
 </style>
 </head>
 <body>
 
 <a class="voltar" href="/cursos/frontend-transicao">← voltar ao curso</a>
 
-<div class="scene" aria-hidden="true">
-  <span class="glow magenta"></span>
-  <span class="glow purple"></span>
-</div>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
 
 <div class="chrome">
   <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-  <span class="file"><b>frontend</b> / perfil.html</span>
+  <span class="file"><b>frontend</b> / portfolio.html</span>
   <span class="right"><span id="chromeNum">01</span> / <span id="chromeTot">25</span></span>
 </div>
 
@@ -224,42 +224,42 @@
     <div class="eyebrow"><span class="b">módulo</span> · aula 03 · desenvolvimento frontend</div>
     <div class="tagtitle"><span class="br">&lt;</span><span class="nm">do-design-ao-código</span><span class="br">&gt;</span></div>
     <h1 style="margin:24px 0 14px">Do design<br><span class="grad">ao código.</span></h1>
-    <p class="lead" style="max-width:46ch">Hoje você vira o dev que recebe um layout pronto e o transforma em página de verdade.</p>
+    <p class="lead" style="max-width:48ch">Hoje você lê um design de verdade e reconstrói ele — com HTML, CSS e <strong>componentes que interagem</strong>.</p>
   </section>
 
   <!-- 2 RECAP -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>onde a gente já chegou</div>
-    <h2>Você já tem as três peças</h2>
+    <div class="eyebrow"><span class="b">// </span>as três peças que você já tem</div>
+    <h2>Hoje a gente junta tudo</h2>
     <div class="grid3">
-      <div class="card"><h3 class="tagc">HTML</h3><p>a estrutura — aula 01.</p></div>
-      <div class="card"><h3 class="attr">CSS</h3><p>o estilo — aula 01.</p></div>
-      <div class="card"><h3 class="key">JavaScript</h3><p>o comportamento — aula 02.</p></div>
+      <div class="card"><h3 class="tagc">HTML</h3><p>estrutura — aula 01.</p></div>
+      <div class="card"><h3 class="attr">CSS</h3><p>estilo — aula 01.</p></div>
+      <div class="card"><h3 class="key">JavaScript</h3><p>comportamento — aula 02.</p></div>
     </div>
-    <p class="note">Hoje a gente junta tudo pra reconstruir um <strong>design de verdade</strong>, do jeito que se faz no trabalho.</p>
+    <p class="note">Design + CSS + JS num projeto só: um <strong>portfólio</strong> que reage a quem usa.</p>
   </section>
 
   <!-- 3 AQUECIMENTO -->
   <section class="slide center">
     <div class="eyebrow"><span class="b">aquecimento</span> · joga no chat</div>
     <h1 style="max-width:24ch">O que faz um site parecer <span class="key">profissional</span>?</h1>
-    <p class="lead" style="margin-top:20px">Dica: quase sempre é <strong>espaçamento, alinhamento e consistência</strong> — não “código difícil”.</p>
+    <p class="lead" style="margin-top:20px">Quase sempre: <strong>espaçamento, alinhamento e consistência</strong> — não "código difícil".</p>
   </section>
 
   <!-- 4 AGENDA -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">agenda</span> · 8 horas, com pausas e joguinhos</div>
+    <div class="eyebrow"><span class="b">agenda</span> · 8 horas, hands-on</div>
     <h2>O mapa do dia</h2>
     <div class="agenda">
       <div class="row"><span class="t">08:00</span><span class="d">Boas-vindas + recap + aquecimento</span><span class="tag">warm-up</span></div>
-      <div class="row"><span class="t">08:40</span><span class="d">Ler um design: o olho de dev + tokens</span><span class="tag">hands-on</span></div>
+      <div class="row"><span class="t">08:40</span><span class="d">Ler um design: olho de dev + tokens</span><span class="tag">hands-on</span></div>
       <div class="row brk"><span class="t">09:30</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
-      <div class="row"><span class="t">09:45</span><span class="d">Tipografia, cores e espaçamento</span><span class="tag">hands-on</span></div>
-      <div class="row"><span class="t">11:00</span><span class="d">Flexbox + joguinho (Flexbox Froggy)</span><span class="tag">game</span></div>
+      <div class="row"><span class="t">09:45</span><span class="d">Layout: Flexbox &amp; Grid na prática</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">11:00</span><span class="d">Componentização + mini-desafios</span><span class="tag">desafios</span></div>
       <div class="row brk"><span class="t">12:00</span><span class="d">🍽️ Almoço</span><span class="tag">1h</span></div>
-      <div class="row"><span class="t">13:00</span><span class="d">Grid + joguinho (Grid Garden)</span><span class="tag">game</span></div>
+      <div class="row"><span class="t">13:00</span><span class="d">Componentes que interagem (curtir, filtro, tema)</span><span class="tag">live code</span></div>
       <div class="row brk"><span class="t">14:30</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
-      <div class="row"><span class="t">14:45</span><span class="d">Live code: recriar a tela de perfil juntos</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">14:45</span><span class="d">Montar o portfólio juntos + responsividade</span><span class="tag">live code</span></div>
       <div class="row"><span class="t">16:00</span><span class="d">Desafio + vitrine + encerramento</span><span class="tag">🎉</span></div>
     </div>
   </section>
@@ -267,15 +267,15 @@
   <!-- 5 O QUE É -->
   <section class="slide">
     <div class="eyebrow"><span class="b">design → código</span> · o trabalho de verdade</div>
-    <h2>Como é no dia a dia de um dev</h2>
+    <h2>Como é no dia a dia</h2>
     <div class="flow">
       <div class="node"><div class="ico">🎨</div><b>Designer</b><span class="muted">cria o layout no Figma</span></div>
       <div class="arw">→</div>
       <div class="node"><div class="ico">👀</div><b>Você lê</b><span class="muted">cores, medidas, blocos</span></div>
       <div class="arw">→</div>
-      <div class="node"><div class="ico">💻</div><b>Você coda</b><span class="muted">HTML + CSS fiéis</span></div>
+      <div class="node"><div class="ico">💻</div><b>Você coda</b><span class="muted">HTML + CSS + JS fiéis</span></div>
     </div>
-    <p class="note">Você quase nunca inventa o visual do zero — você <strong>reconstrói</strong> um design com fidelidade.</p>
+    <p class="note">Você não inventa o visual do zero — você <strong>reconstrói</strong> um design com fidelidade.</p>
   </section>
 
   <!-- 6 OLHO DE DEV -->
@@ -283,20 +283,24 @@
     <div class="eyebrow"><span class="b">o olho de dev</span> · antes de codar</div>
     <h2>Leia o design primeiro</h2>
     <ul class="clean">
-      <li><strong>Blocos</strong> — quais são as caixas grandes? (viram <span class="code-inline">div</span>)</li>
-      <li><strong>Repetição</strong> — o que se repete? (vira um componente)</li>
+      <li><strong>Blocos</strong> — as caixas grandes (viram <span class="code-inline">div</span>)</li>
+      <li><strong>Repetição</strong> — o que se repete? (vira um <strong>componente</strong>)</li>
       <li><strong>Alinhamento</strong> — centralizado? em colunas?</li>
-      <li><strong>Espaçamento</strong> — quanto de respiro entre as coisas?</li>
+      <li><strong>Espaçamento</strong> — quanto de respiro?</li>
       <li><strong>Hierarquia</strong> — o que é título? o que é secundário?</li>
     </ul>
   </section>
 
   <!-- 7 DESENHE CAIXAS -->
-  <section class="slide center">
-    <div class="eyebrow"><span class="b">dinâmica</span> · todo mundo junto</div>
-    <div class="big-emoji">📦</div>
-    <h1 style="max-width:22ch">Desenhe <span class="key">caixas</span> por cima do design</h1>
-    <p class="lead" style="margin-top:18px;max-width:40ch">Cada retângulo que você desenhar é uma <span class="code-inline">&lt;div&gt;</span>. Acabou de descobrir sua estrutura HTML.</p>
+  <section class="slide">
+    <div class="eyebrow"><span class="b">dinâmica</span> · olha o design de hoje 👇</div>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <h2 style="margin-bottom:8px">Desenhe <span class="grad">caixas</span></h2>
+        <p>Cada retângulo é uma <span class="code-inline">&lt;div&gt;</span>. E repara: <strong>os cards são todos iguais</strong> na estrutura, só mudam os dados. Isso é um componente!</p>
+      </div>
+      <img class="designimg" src="design-alvo-web.png" alt="Design do portfólio">
+    </div>
   </section>
 
   <!-- 8 TOKENS -->
@@ -304,21 +308,20 @@
     <div class="eyebrow"><span class="b">design tokens</span> · a paleta em variáveis</div>
     <h2>Cores e medidas viram <span class="grad">variáveis</span></h2>
     <div class="grid2">
-      <div class="card"><h3 class="str">No design</h3><p>o designer definiu rosa <span class="code-inline">#F24487</span>, roxo <span class="code-inline">#7B4FD0</span>, cantos de <span class="code-inline">22px</span>...</p></div>
-      <div class="card"><h3 class="key">No CSS</h3><div class="mono" style="font-size:14px;color:var(--muted);line-height:1.8">:root {<br>&nbsp;&nbsp;--rosa: #F24487;<br>&nbsp;&nbsp;--raio: 22px;<br>}</div></div>
+      <div class="card"><h3 class="str">No design</h3><p>o designer definiu rosa <span class="code-inline">#F24487</span>, cantos de <span class="code-inline">18px</span>...</p></div>
+      <div class="card"><h3 class="key">No CSS</h3><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.8">:root {<br>&nbsp;&nbsp;--rosa: #F24487;<br>&nbsp;&nbsp;--raio: 18px;<br>}</div></div>
     </div>
-    <p class="note">Usa com <span class="code-inline">var(--rosa)</span>. Pra trocar o tema todo, muda uma variável só.</p>
+    <p class="note">O tema escuro é só um segundo conjunto de tokens: <span class="code-inline">body.escuro { --bg:#0F0C17; }</span></p>
   </section>
 
   <!-- 9 TIPOGRAFIA -->
   <section class="slide">
     <div class="eyebrow"><span class="b">tipografia</span> · a hierarquia</div>
     <h2>Fonte e tamanho contam a história</h2>
-    <p style="margin-bottom:14px">Pega a fonte no Google Fonts e define os tamanhos do design:</p>
     <div class="card" style="max-width:640px">
       <div style="font-weight:700;font-size:30px">Título forte (700)</div>
       <div style="font-size:17px;margin-top:6px">Texto normal do corpo (400)</div>
-      <div class="muted" style="font-size:13px;margin-top:6px">legenda secundária, menor e mais apagada</div>
+      <div class="muted" style="font-size:13px;margin-top:6px">legenda secundária, menor e apagada</div>
     </div>
     <p class="note">Hierarquia = tamanho + peso + cor. É o que guia o olho de quem lê.</p>
   </section>
@@ -332,40 +335,27 @@
       <div class="card"><h3 class="attr">margin</h3><p>espaço <strong>fora</strong> da caixa.</p></div>
       <div class="card"><h3 class="str">gap</h3><p>espaço <strong>entre</strong> itens de flex/grid.</p></div>
     </div>
-    <p class="note">Dica de ouro: use múltiplos de 8 (<span class="code-inline">8 · 16 · 24 · 32</span>). É o "grid de 8pt" — alinha tudo sem esforço.</p>
+    <p class="note">Use múltiplos de 8 (<span class="code-inline">8 · 16 · 24</span>) — o "grid de 8pt" alinha tudo sem esforço.</p>
   </section>
 
   <!-- 11 FLEXBOX -->
   <section class="slide">
     <div class="eyebrow"><span class="b">flexbox</span> · alinhar numa direção</div>
     <div class="tagtitle"><span class="br">{</span> <span class="nm">display:flex</span> <span class="br">}</span></div>
-    <div class="grid2" style="margin-top:22px">
-      <div class="stack">
-        <p>Flexbox organiza itens num <strong>eixo</strong> (linha ou coluna). É o jeito mais fácil de centralizar e distribuir.</p>
-      </div>
-      <div class="card"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">.barra {<br>&nbsp;&nbsp;<span class="key">display</span>: flex;<br>&nbsp;&nbsp;<span class="key">justify-content</span>: space-between;<br>&nbsp;&nbsp;<span class="key">align-items</span>: center;<br>&nbsp;&nbsp;<span class="key">gap</span>: 12px;<br>}</div></div>
-    </div>
+    <p style="margin-top:22px;max-width:60ch">Uma fileira ou coluna, com alinhamento e distribuição. Perfeito pra <strong>navbar</strong>: logo de um lado, menu do outro.</p>
+    <div class="card" style="max-width:640px;margin-top:16px"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">.nav-in {<br>&nbsp;&nbsp;<span class="key">display</span>: flex;<br>&nbsp;&nbsp;<span class="key">justify-content</span>: space-between;<br>&nbsp;&nbsp;<span class="key">align-items</span>: center;<br>}</div></div>
   </section>
 
   <!-- 12 LIVE FLEX -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">experimenta</span> · muda os valores e vê o layout mudar</div>
+    <div class="eyebrow"><span class="b">experimenta</span> · muda os valores e vê mudar</div>
     <h3 style="margin-bottom:14px">Flexbox ao vivo 👇</h3>
     <div class="live">
       <div class="pane">
         <div class="panehd"><span class="d" style="background:#F24487"></span> index.html</div>
         <textarea id="ed1" spellcheck="false"><style>
-  .barra {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-  }
-  .item {
-    background: #7B4FD0; color:#fff;
-    padding: 20px; border-radius: 10px;
-    font-family: sans-serif;
-  }
+  .barra { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .item { background:#7B4FD0; color:#fff; padding:20px; border-radius:10px; font-family:sans-serif; }
 </style>
 <div class="barra">
   <div class="item">1</div>
@@ -380,43 +370,24 @@
     </div>
   </section>
 
-  <!-- 13 PARADA FROGGY -->
-  <section class="slide parada">
-    <div class="badge">🐸 pausa pra jogar</div>
-    <h1><span class="str">Flexbox Froggy</span></h1>
-    <p class="lead" style="margin-top:14px;max-width:26ch">Aprenda Flexbox ajudando os sapinhos a chegarem nas vitórias-régias.</p>
-    <a class="gamebtn" style="background:var(--str);box-shadow:0 8px 30px rgba(169,140,224,.25)" href="https://flexboxfroggy.com/#pt-br" target="_blank" rel="noopener">Abrir Flexbox Froggy ↗</a>
-  </section>
-
-  <!-- 14 GRID -->
+  <!-- 13 GRID -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">grid</span> · colunas e linhas de verdade</div>
+    <div class="eyebrow"><span class="b">grid</span> · colunas de verdade</div>
     <div class="tagtitle"><span class="br">{</span> <span class="nm">display:grid</span> <span class="br">}</span></div>
-    <div class="grid2" style="margin-top:22px">
-      <div class="stack"><p>Quando precisa de <strong>colunas</strong> (galeria, cards lado a lado), Grid é o ideal.</p>
-        <p class="muted"><span class="code-inline">1fr</span> = uma fração do espaço. <span class="code-inline">repeat(3, 1fr)</span> = 3 colunas iguais.</p>
-      </div>
-      <div class="card"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">.galeria {<br>&nbsp;&nbsp;<span class="key">display</span>: grid;<br>&nbsp;&nbsp;<span class="key">grid-template-columns</span>: repeat(3, 1fr);<br>&nbsp;&nbsp;<span class="key">gap</span>: 12px;<br>}</div></div>
-    </div>
+    <p style="margin-top:22px;max-width:60ch">Pra galerias e cards lado a lado. <span class="code-inline">auto-fill + minmax</span> = colunas que se ajustam sozinhas (responsivo de graça).</p>
+    <div class="card" style="max-width:680px;margin-top:16px"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">#grid {<br>&nbsp;&nbsp;<span class="key">display</span>: grid;<br>&nbsp;&nbsp;<span class="key">grid-template-columns</span>: repeat(auto-fill, minmax(200px, 1fr));<br>&nbsp;&nbsp;<span class="key">gap</span>: 16px;<br>}</div></div>
   </section>
 
-  <!-- 15 LIVE GRID -->
+  <!-- 14 LIVE GRID -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">experimenta</span> · troca o 3 por 2 e vê a grade mudar</div>
+    <div class="eyebrow"><span class="b">experimenta</span> · troca o número de colunas</div>
     <h3 style="margin-bottom:14px">Grid ao vivo 👇</h3>
     <div class="live">
       <div class="pane">
         <div class="panehd"><span class="d" style="background:#F24487"></span> index.html</div>
         <textarea id="ed2" spellcheck="false"><style>
-  .galeria {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .galeria div {
-    height: 60px; border-radius: 10px;
-    background: #F24487;
-  }
+  .galeria { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .galeria div { height:60px; border-radius:10px; background:#F24487; }
 </style>
 <div class="galeria">
   <div></div><div></div><div></div>
@@ -430,97 +401,116 @@
     </div>
   </section>
 
-  <!-- 16 PARADA GRID GARDEN -->
-  <section class="slide parada">
-    <div class="badge">🥕 pausa pra jogar</div>
-    <h1><span class="tagc">Grid Garden</span></h1>
-    <p class="lead" style="margin-top:14px;max-width:26ch">Regue a plantação escrevendo CSS Grid. Vicia!</p>
-    <a class="gamebtn" style="background:var(--tag);box-shadow:0 8px 30px rgba(123,79,208,.25)" href="https://cssgridgarden.com/#pt-br" target="_blank" rel="noopener">Abrir Grid Garden ↗</a>
-  </section>
-
-  <!-- 17 FLEX vs GRID -->
+  <!-- 15 FLEX vs GRID -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>a dúvida de todo mundo</div>
     <h2>Flexbox ou Grid?</h2>
     <div class="grid2">
-      <div class="card"><h3 class="str">Flexbox</h3><p>Uma direção: uma linha <strong>ou</strong> uma coluna. Ex.: uma barra de navegação, botões em fila.</p></div>
-      <div class="card"><h3 class="tagc">Grid</h3><p>Duas direções: linhas <strong>e</strong> colunas, uma grade. Ex.: galeria de fotos, cards em grade.</p></div>
+      <div class="card"><h3 class="str">Flexbox</h3><p>Uma direção: uma fileira <strong>ou</strong> coluna. Ex.: a navbar.</p></div>
+      <div class="card"><h3 class="tagc">Grid</h3><p>Duas direções: uma grade. Ex.: o grid de projetos.</p></div>
     </div>
-    <p class="note">Na dúvida: é uma fileira? Flex. É uma grade? Grid. E pode usar os dois juntos!</p>
+    <p class="note">É uma fileira? Flex. É uma grade? Grid. E pode usar os dois juntos!</p>
   </section>
 
-  <!-- 18 IMAGENS -->
+  <!-- 16 COMPONENTIZAÇÃO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">imagens & assets</span> · o que vem do figma</div>
-    <h2>Fotos, ícones e logos</h2>
+    <div class="eyebrow"><span class="b">componentização</span> · sem framework ainda</div>
+    <h2>Reaproveitar: metade dá pra hoje</h2>
     <div class="grid2">
-      <div class="stack">
-        <p>No Figma você <strong>exporta</strong> as imagens e joga na pasta do projeto.</p>
-        <div class="tags">
-          <span class="pill">SVG · logos e ícones</span>
-          <span class="pill">PNG/JPG · fotos</span>
-          <span class="pill">sempre com alt</span>
-        </div>
-      </div>
-      <div class="card"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85">img {<br>&nbsp;&nbsp;<span class="key">width</span>: 92px;<br>&nbsp;&nbsp;<span class="key">border-radius</span>: 50%;<br>&nbsp;&nbsp;<span class="key">object-fit</span>: cover;<br>}</div><p style="font-size:13px;margin-top:8px">object-fit: cover recorta sem esticar.</p></div>
+      <div class="card"><h3 class="str">✅ O estilo</h3><p>Uma <strong>classe CSS</strong> é um componente: <span class="code-inline">.card</span> escrito uma vez, usado em vários.</p></div>
+      <div class="card" style="border-color:rgba(242,68,135,.4)"><h3 class="key">⚠️ A estrutura</h3><p>Mas o <strong>HTML repete</strong>: você copia e cola o card 6 vezes. Essa é a dor.</p></div>
     </div>
+    <p class="note">Sintam a dor de copiar/colar hoje — é exatamente isso que o <strong>React</strong> vai resolver depois. 😏</p>
   </section>
 
-  <!-- 19 COMPONENTES -->
+  <!-- 17 COMPONENTE = FUNÇÃO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">componentes</span> · pensar em blocos</div>
-    <h2>O que se repete vira um componente</h2>
-    <p style="max-width:60ch">Um botão, um card, uma tag... Cada padrão que aparece várias vezes vira <strong>uma classe</strong> que você reusa. Menos código, mais consistência.</p>
-    <div class="tags" style="margin-top:20px">
-      <span class="pill on">.btn</span><span class="pill on">.card</span><span class="pill on">.tag</span><span class="pill on">.avatar</span>
+    <div class="eyebrow"><span class="b">o pulo do gato</span> · usando o JS da aula 2</div>
+    <h2>Componente = <span class="grad">função que devolve HTML</span></h2>
+    <div class="grid2" style="align-items:start">
+      <div class="card"><div class="mono" style="font-size:13px;color:var(--muted);line-height:1.7"><span class="attr">// dados</span><br>const projetos = [{...}, {...}];<br><br><span class="attr">// o componente</span><br>function <span class="str">criarCard</span>(p) {<br>&nbsp;&nbsp;...devolve um card...<br>}<br><br><span class="attr">// reaproveita a estrutura</span><br>projetos.<span class="str">forEach</span>(p =&gt;<br>&nbsp;&nbsp;grid.appendChild(criarCard(p)));</div></div>
+      <div class="rdemo"><div class="hd">resultado · 3 cards gerados de dados</div><iframe data-demo="comp"></iframe></div>
     </div>
-    <p class="note">Esse pensamento em blocos é o primeiro passo pro <strong>React</strong>, lá na frente.</p>
+    <p class="note">1 função → N cards. Quando vir <span class="code-inline">function Card()</span> no React, vai ser "ah, é a mesma ideia!".</p>
   </section>
 
-  <!-- 20 RESPONSIVO -->
+  <!-- 18 COMPONENTES INTERATIVOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">componentes que interagem</span> · eventos da aula 2</div>
+    <h2>O componente ganha vida</h2>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <p>Guardar um <strong>estado</strong> (curtido? tema? filtro?) e, no clique, <strong>atualizar o estado e a tela</strong>. É o coração de toda interface.</p>
+        <div class="tags"><span class="pill on">curtir ❤️</span><span class="pill on">filtro</span><span class="pill on">tema 🌙</span><span class="pill on">carregar +</span></div>
+      </div>
+      <div class="rdemo"><div class="hd">resultado · clica no ❤️</div><iframe data-demo="curtir" style="height:120px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- 19 MINI-DESAFIOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>mão na massa · antes do almoço</div>
+    <h2>4 mini-desafios ⏱️</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Uma navbar</h3><p>logo à esquerda, dois links à direita, com <span class="code-inline">flex</span> + <span class="code-inline">space-between</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Um grid de 4 caixas</h3><p><span class="code-inline">grid-template-columns: repeat(2, 1fr)</span> e um <span class="code-inline">gap</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>criarTag(texto)</h3><p>uma função que devolve um <span class="code-inline">&lt;span class="tag"&gt;</span> e um <span class="code-inline">forEach</span> criando 3.</p></div></div>
+      <div class="st"><div class="body"><h3>Botão que conta</h3><p>um contador que sobe a cada clique (curtir).</p></div></div>
+    </div>
+    <p class="note">Quem terminar ajuda quem está do lado. 💜</p>
+  </section>
+
+  <!-- 20 RESPONSIVIDADE -->
   <section class="slide">
     <div class="eyebrow"><span class="b">responsividade</span> · o mesmo design, toda tela</div>
-    <h2>Mobile-first + media query</h2>
-    <div class="card" style="max-width:680px"><div class="mono" style="font-size:13.5px;color:var(--muted);line-height:1.85"><span class="attr">/* padrão: celular */</span><br>.galeria { <span class="key">grid-template-columns</span>: 1fr; }<br><br><span class="attr">/* telas maiores */</span><br><span class="key">@media</span> (min-width: 600px) {<br>&nbsp;&nbsp;.galeria { <span class="key">grid-template-columns</span>: 1fr 1fr; }<br>}</div></div>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <h2 style="margin-bottom:8px">Web <span class="muted">→</span> Mobile</h2>
+        <p>O designer entrega as duas versões. Com <strong>media queries</strong> o grid vira menos colunas no celular.</p>
+        <div class="card" style="margin-top:12px"><div class="mono" style="font-size:12.5px;color:var(--muted);line-height:1.7"><span class="key">@media</span> (max-width:620px) {<br>&nbsp;&nbsp;#grid { grid-template-columns:<br>&nbsp;&nbsp;&nbsp;&nbsp;repeat(2, <span class="str">minmax(0,1fr)</span>); }<br>}</div></div>
+      </div>
+      <img class="designimg" style="max-width:min(220px,42vw)" src="design-alvo-mobile.png" alt="Versão mobile">
+    </div>
+    <p class="note"><span class="code-inline">minmax(0, 1fr)</span> é o truque pra coluna encolher sem vazar pro lado.</p>
   </section>
 
-  <!-- 21 FIGMA PRO CSS -->
+  <!-- 21 MÃO NA MASSA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">live code</span> · juntos, do design ao código</div>
+    <div class="big-emoji">🛠️</div>
+    <h1 style="max-width:24ch">Bora montar o <span class="grad">portfólio</span> juntos</h1>
+    <p class="lead" style="margin-top:18px;max-width:44ch">Tokens, navbar, grid, o componente card a partir de dados, e as interações. Passo a passo.</p>
+  </section>
+
+  <!-- 22 FIGMA PRO CSS -->
   <section class="slide">
     <div class="eyebrow"><span class="b">do figma pro css</span> · o modo dev</div>
     <h2>O painel te dá quase tudo</h2>
     <ul class="clean">
       <li><strong>Cores</strong> — clica no elemento e copia o hex</li>
-      <li><strong>Fonte</strong> — nome, tamanho e peso no painel</li>
+      <li><strong>Fonte</strong> — nome, tamanho e peso</li>
       <li><strong>Medidas</strong> — largura, altura, raio</li>
-      <li><strong>Espaçamento</strong> — segure <kbd>Alt</kbd> e passe o mouse pra ver distâncias</li>
+      <li><strong>Espaçamento</strong> — segure <kbd>Alt</kbd> e passe o mouse</li>
       <li><strong>Exportar</strong> — botão direito → Export nas imagens</li>
     </ul>
   </section>
 
-  <!-- 22 MÃO NA MASSA -->
-  <section class="slide center">
-    <div class="eyebrow"><span class="b">live code</span> · juntos, do design ao código</div>
-    <div class="big-emoji">🛠️</div>
-    <h1 style="max-width:22ch">Bora recriar essa <span class="grad">tela de perfil</span></h1>
-    <p class="lead" style="margin-top:18px;max-width:42ch">Do zero: tokens, card, avatar, stats em grid, botão e galeria. Passo a passo, juntos.</p>
-  </section>
-
   <!-- 23 DESAFIO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">desafio</span> · sua vez de reproduzir</div>
+    <div class="eyebrow"><span class="b">desafio</span> · sua vez</div>
     <div class="grid2" style="align-items:center">
       <div class="stack">
-        <h2 style="margin-bottom:8px">Recrie a tela <span class="grad">de perfil</span></h2>
+        <h2 style="margin-bottom:8px">Um portfólio <span class="grad">que reage</span></h2>
         <ul class="clean">
-          <li>Do jeito mais <strong>fiel</strong> possível ao design</li>
-          <li>Com <strong>tokens</strong>, <strong>Flexbox</strong> e <strong>Grid</strong></li>
-          <li>Botão <strong>Seguir</strong> que reage ao clique</li>
+          <li>Reproduza o design (web <strong>e</strong> mobile)</li>
+          <li>Cards por <strong>função + dados</strong></li>
+          <li><strong>Curtir</strong>, <strong>tema</strong> e (extra) <strong>filtros</strong></li>
           <li>Publicado na Vercel 🌍</li>
         </ul>
       </div>
-      <img class="designimg" src="design-alvo.png" alt="Tela de perfil a reproduzir">
+      <img class="designimg" src="design-alvo-web.png" alt="Design do portfólio">
     </div>
-    <p class="note">Brief completo, ficha técnica e o código de referência estão na página da aula.</p>
+    <p class="note">Brief, ficha técnica, guia e código de referência na página da aula.</p>
   </section>
 
   <!-- 24 DEPLOY -->
@@ -529,16 +519,16 @@
     <h2>Publica e compartilha</h2>
     <div class="steps">
       <div class="st"><div class="body"><h3>git push</h3><p>sobe pro GitHub, como sempre.</p></div></div>
-      <div class="st"><div class="body"><h3>A Vercel republica</h3><p>seu design vira um link no ar.</p></div></div>
-      <div class="st"><div class="body"><h3>Vitrine 🎉</h3><p>compare seu resultado com o design e mostre pra turma.</p></div></div>
+      <div class="st"><div class="body"><h3>A Vercel republica</h3><p>seu portfólio vira um link no ar.</p></div></div>
+      <div class="st"><div class="body"><h3>Vitrine 🎉</h3><p>compara com o design e mostra pra turma.</p></div></div>
     </div>
   </section>
 
   <!-- 25 FIM -->
   <section class="slide center">
     <div class="big-emoji">💜</div>
-    <h1>Você transformou design<br><span class="grad">em código.</span></h1>
-    <p class="lead" style="margin-top:18px">Esse é o trabalho de um dev frontend. Mandou bem!</p>
+    <h1>Design → código → <span class="grad">interação.</span></h1>
+    <p class="lead" style="margin-top:18px">Você fez o trabalho de um dev frontend de verdade. Mandou bem!</p>
     <p class="url mono" style="margin-top:18px;color:var(--muted)">NickDev · um leque de tecnologia</p>
   </section>
 
@@ -584,6 +574,24 @@
   }
   renderPair('ed1','pv1');
   renderPair('ed2','pv2');
+
+  // demos renderizados (componente + curtir)
+  const b="<!doctype html><html><head><meta charset='utf-8'><style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#fff;color:#1a1a2e}</style></head><body>";
+  const S="<scr"+"ipt>", E="<\/scr"+"ipt>";
+  const demos={
+    comp: b
+      +"<style>.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.card{border:1px solid #eee;border-radius:12px;overflow:hidden}.capa{height:44px}.corpo{padding:8px 10px}.t{font-size:10px;color:#7B4FD0;background:#F3EEFC;padding:2px 8px;border-radius:100px}.card h4{font-size:12px;margin:6px 0 0}</style>"
+      +"<div class='grid' id='g'></div>"
+      +S+"const dados=[{t:'Web',n:'Site',c:'#FBD3E4'},{t:'Mobile',n:'App',c:'#D9CCF3'},{t:'Design',n:'Marca',c:'#FCE1CC'}];"
+      +"const g=document.getElementById('g');"
+      +"function criarCard(p){const a=document.createElement('article');a.className='card';a.innerHTML='<div class=capa style=\"background:'+p.c+'\"></div><div class=corpo><span class=t>'+p.t+'</span><h4>'+p.n+'</h4></div>';return a;}"
+      +"dados.forEach(p=>g.appendChild(criarCard(p)));"+E+"</body></html>",
+    curtir: b
+      +"<button id='k' style='font:inherit;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #ddd;padding:9px 16px;border-radius:100px;cursor:pointer'><span id='h'>🤍</span> <span id='n'>42</span></button>"
+      +S+"let c=false,t=42;const k=document.getElementById('k'),h=document.getElementById('h'),n=document.getElementById('n');"
+      +"k.addEventListener('click',()=>{c=!c;t+=c?1:-1;n.textContent=t;h.textContent=c?'❤️':'🤍';k.style.color=c?'#F24487':'';k.style.borderColor=c?'#F24487':'#ddd';});"+E+"</body></html>",
+  };
+  document.querySelectorAll("iframe[data-demo]").forEach(f=>{ f.srcdoc=demos[f.dataset.demo]; });
 </script>
 
 </body>

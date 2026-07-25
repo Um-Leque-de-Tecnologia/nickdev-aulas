@@ -96,6 +96,7 @@
     <a href="#grid">Grid</a>
     <a href="#imagens">Imagens & assets</a>
     <a href="#componentes">Componentes</a>
+    <a href="#interativos">Componentes interativos</a>
     <a href="#responsivo">Responsividade</a>
     <div class="grp">Na prática</div>
     <a href="#workflow">Do Figma pro CSS</a>
@@ -214,16 +215,62 @@
   </section>
 
   <section id="componentes">
-    <h2>Pensar em componentes</h2>
-    <p>Repare no que <b>se repete</b> no design: um card, um botão, uma tag. Cada padrão vira uma <b>classe</b> que você reusa.</p>
-    <pre><span class="cm">/* um estilo de botão, usado em vários lugares */</span>
-<span class="sel">.btn</span> {
-  <span class="prop">background</span>: <span class="st">var(--rosa)</span>;
-  <span class="prop">color</span>: <span class="st">#fff</span>;
-  <span class="prop">padding</span>: <span class="st">12px 20px</span>;
-  <span class="prop">border-radius</span>: <span class="st">100px</span>;
-}</pre>
-    <div class="tip">Pensar em blocos reutilizáveis é o primeiro passo pro <b>React</b> (próximos módulos), onde cada componente é um pedacinho independente.</div>
+    <h2>Componentização (sem framework)</h2>
+    <p>"Componente" parece coisa de React — mas dá pra componentizar já no HTML/CSS/JS. Só que <b>pela metade</b>, e entender essa metade é o que faz o React fazer sentido depois.</p>
+
+    <h3>Parte 1 — reaproveitar o <b>estilo</b> (dá pra hoje)</h3>
+    <p>Uma classe CSS <b>é</b> um componente de estilo: escreve uma vez, usa em vários lugares.</p>
+    <pre><span class="sel">.tag</span> { background:<span class="st">#F3EEFC</span>; color:<span class="st">var(--roxo)</span>; padding:<span class="st">6px 12px</span>; border-radius:<span class="st">100px</span>; }
+
+<span class="cm">&lt;!-- o mesmo estilo, reaproveitado --&gt;</span>
+&lt;<span class="sel">span</span> class=<span class="st">"tag"</span>&gt;#dev&lt;/span&gt;  &lt;<span class="sel">span</span> class=<span class="st">"tag"</span>&gt;#design&lt;/span&gt;</pre>
+
+    <h3>Parte 2 — a metade que falta: a <b>estrutura</b></h3>
+    <p>O estilo não repete, mas o <b>HTML</b> repete — você copia e cola <code>&lt;span class="tag"&gt;</code> pra cada tag. Essa dor é real, e é o que um framework resolve.</p>
+    <div class="tip">Deixe a turma <b>sentir</b> a repetição (copiar 6 cards na mão). É o melhor motivador pro React, onde a estrutura também é reaproveitada.</div>
+
+    <h3>Parte 3 — o pulo do gato: componente = <b>função que devolve HTML</b></h3>
+    <p>Com o JavaScript da aula 2, dá pra reaproveitar a estrutura também: uma função cria o pedaço de HTML a partir de dados. Isso é um componente de verdade.</p>
+    <pre><span class="cm">// os dados</span>
+<span class="prop">const</span> tags = [<span class="st">"#dev"</span>, <span class="st">"#design"</span>, <span class="st">"#café"</span>];
+
+<span class="cm">// o COMPONENTE: uma função que devolve um elemento</span>
+<span class="prop">function</span> <span class="sel">criarTag</span>(texto) {
+  <span class="prop">const</span> span = document.<span class="sel">createElement</span>(<span class="st">"span"</span>);
+  span.className = <span class="st">"tag"</span>;
+  span.textContent = texto;
+  <span class="prop">return</span> span;
+}
+
+<span class="cm">// reaproveitando a estrutura (sem copiar e colar!)</span>
+tags.<span class="sel">forEach</span>(t =&gt; container.<span class="sel">appendChild</span>(<span class="sel">criarTag</span>(t)));</pre>
+    <div class="demo"><div class="demo-hd"><span class="d"></span> resultado</div><iframe data-demo="comp" height="90" title="demo componente por função"></iframe></div>
+    <div class="tip"><b>Ponte pro React:</b> quando você vir <code>function Tag() {}</code> no React, vai reconhecer — é a mesma ideia, uma função que devolve um pedaço de tela.</div>
+  </section>
+
+  <section id="interativos">
+    <h2>Componentes que interagem</h2>
+    <p>Um componente fica vivo quando <b>reage</b>. Alguns padrões que você vai usar muito (todos com eventos da aula 2):</p>
+
+    <h3>Botão de curtir (estado + contador)</h3>
+    <pre>btn.<span class="sel">addEventListener</span>(<span class="st">"click"</span>, () =&gt; {
+  curtido = !curtido;                       <span class="cm">// liga/desliga</span>
+  total += curtido ? <span class="st">1</span> : <span class="st">-1</span>;
+  numero.textContent = total;
+  btn.classList.<span class="sel">toggle</span>(<span class="st">"ativo"</span>, curtido);
+});</pre>
+    <div class="demo"><div class="demo-hd"><span class="d"></span> resultado <span style="margin-left:auto;color:var(--purple-light)">clica ❤️</span></div><iframe data-demo="curtir" height="90" title="demo botão curtir"></iframe></div>
+
+    <h3>Filtro (mostrar/esconder por categoria)</h3>
+    <pre><span class="cm">// re-renderiza só com quem passa no filtro</span>
+<span class="prop">const</span> lista = projetos.<span class="sel">filter</span>(p =&gt; p.categoria === categoria);
+<span class="sel">render</span>(lista);</pre>
+
+    <h3>Tema claro/escuro</h3>
+    <pre>botao.<span class="sel">addEventListener</span>(<span class="st">"click"</span>, () =&gt;
+  document.body.classList.<span class="sel">toggle</span>(<span class="st">"escuro"</span>)
+);</pre>
+    <div class="tip">Padrão que se repete: <b>guardar um estado</b> (curtido? tema? filtro?) e, no clique, <b>atualizar o estado e a tela</b>. É o coração de toda interface.</div>
   </section>
 
   <section id="responsivo">
@@ -272,6 +319,19 @@
       + "<div class='box'>1</div><div class='box b'>2</div><div class='box c'>3</div>"
       + "<div class='box c'>4</div><div class='box'>5</div><div class='box b'>6</div></div>"
       + "<p style='margin-top:12px;color:#6B6580;font-size:13px'>display:grid + repeat(3, 1fr)</p>"
+      + "</body></html>",
+    comp: base
+      + "<style>.tag{display:inline-block;background:#F3EEFC;color:#7B4FD0;padding:6px 12px;border-radius:100px;margin:0 6px 6px 0;font-size:13px}</style>"
+      + "<div id='c'></div>"
+      + "<scr"+"ipt>const tags=['#dev','#design','#café','#frontend'];const c=document.getElementById('c');"
+      + "function criarTag(t){const s=document.createElement('span');s.className='tag';s.textContent=t;return s;}"
+      + "tags.forEach(t=>c.appendChild(criarTag(t)));<\/scr"+"ipt>"
+      + "</body></html>",
+    curtir: base
+      + "<button id='b' style='font:inherit;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #ddd;padding:8px 16px;border-radius:100px;cursor:pointer'>"
+      + "<span id='h'>🤍</span> <span id='n'>42</span></button>"
+      + "<scr"+"ipt>let curtido=false,total=42;const b=document.getElementById('b'),h=document.getElementById('h'),n=document.getElementById('n');"
+      + "b.addEventListener('click',()=>{curtido=!curtido;total+=curtido?1:-1;n.textContent=total;h.textContent=curtido?'❤️':'🤍';b.style.color=curtido?'#F24487':'';b.style.borderColor=curtido?'#F24487':'#ddd';});<\/scr"+"ipt>"
       + "</body></html>",
   };
   document.querySelectorAll("iframe[data-demo]").forEach(f => { f.srcdoc = demos[f.dataset.demo]; });

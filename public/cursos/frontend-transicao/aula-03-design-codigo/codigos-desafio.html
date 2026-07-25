@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Código do desafio · Aula 03 · NickDev</title>
-<meta name="description" content="Solução organizada do desafio da aula 03: o HTML, CSS e JS da tela de perfil.">
+<meta name="description" content="Solução organizada do desafio da aula 03: o HTML, CSS e JS do portfólio interativo.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -38,6 +38,7 @@
   .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
   aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
   aside nav a:hover{background:var(--surface);color:var(--text)}
+  aside nav a.star{color:var(--pink-light)}
 
   main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
   .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
@@ -48,6 +49,8 @@
 
   .tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0;font-size:14.5px;color:var(--text-2)}
   .tipbox b{color:var(--purple-light)}
+  .tipbox.star{border-color:var(--magenta)}
+  .tipbox.star b{color:var(--pink-light)}
 
   .part{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .part:first-of-type{border-top:0;padding-top:0}
@@ -85,230 +88,200 @@
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
     <div class="grp">Estrutura</div>
-    <a href="#html">HTML completo</a>
-    <div class="grp">CSS · estilo</div>
-    <a href="#tokens">Tokens (:root)</a>
-    <a href="#base">Base + centralizar</a>
-    <a href="#card">Card + banner</a>
-    <a href="#topo">Topo (avatar)</a>
-    <a href="#stats">Stats (grid)</a>
-    <a href="#botao">Botão Seguir</a>
-    <a href="#galeria">Galeria (grid)</a>
-    <a href="#tags">Tags (flex)</a>
-    <div class="grp">Interação</div>
-    <a href="#js">JS · Seguir</a>
+    <a href="#html">HTML</a>
+    <div class="grp">CSS</div>
+    <a href="#tokens">Tokens + tema</a>
+    <a href="#navbar">Navbar (flex)</a>
+    <a href="#grid">Grid + card</a>
+    <a href="#responsivo">Responsivo</a>
+    <div class="grp">JavaScript</div>
+    <a href="#dados">Os dados</a>
+    <a href="#componente" class="star">★ O componente</a>
+    <a href="#render">Render + filtro</a>
+    <a href="#curtir">Curtir</a>
+    <a href="#tema">Tema + carregar mais</a>
   </nav>
 </aside>
 
 <main>
   <div class="eyebrow">Aula 03 · gabarito</div>
-  <h1>Código do <span class="g">desafio</span></h1>
-  <p class="lead">A tela de perfil, pedaço por pedaço. Junte tudo num <code>index.html</code>: o CSS no <code>&lt;style&gt;</code> (head) e o JS no <code>&lt;script&gt;</code> (fim do body).</p>
+  <h1>Código do <span class="g">portfólio</span></h1>
+  <p class="lead">O portfólio interativo, pedaço por pedaço. Um <code>index.html</code>: CSS no <code>&lt;style&gt;</code>, JS no <code>&lt;script&gt;</code> (fim do body).</p>
   <div class="rule"></div>
 
-  <div class="tipbox"><b>Combinado 🤝</b> Tente reproduzir o design sozinho(a) primeiro. Use isto pra conferir a fidelidade e entender os truques — não pra copiar antes de tentar.</div>
+  <div class="tipbox"><b>Combinado 🤝</b> Reproduza sozinho(a) primeiro. Use isto pra conferir e entender os truques — o ouro da aula está na Parte 3 (o componente).</div>
 
-  <div class="part"><span class="big">🧱</span> Parte 1 · HTML — a estrutura</div>
-
+  <div class="part"><span class="big">🧱</span> Parte 1 · HTML</div>
   <div class="sol" id="html">
-    <h3>HTML completo</h3>
-    <p class="desc">Cada bloco do design vira uma <code>&lt;div&gt;</code> com uma classe.</p>
-    <pre><span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"card"</span><span class="tag">&gt;</span>
+    <h3>A estrutura</h3>
+    <p class="desc">Repare: o grid começa <b>vazio</b>. Os cards são criados pelo JavaScript.</p>
+    <pre><span class="tag">&lt;nav&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"nav-in"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="att">class</span>=<span class="st">"logo"</span><span class="tag">&gt;</span>NickDev<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"nav-links"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;a</span> <span class="att">href</span>=<span class="st">"#"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/a&gt; &lt;a</span> <span class="att">href</span>=<span class="st">"#"</span><span class="tag">&gt;</span>Sobre<span class="tag">&lt;/a&gt;</span>
+    <span class="tag">&lt;button</span> <span class="att">id</span>=<span class="st">"tema"</span><span class="tag">&gt;</span>🌙<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;
+&lt;/div&gt;&lt;/nav&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"container"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;header</span> <span class="att">class</span>=<span class="st">"perfil"</span><span class="tag">&gt;</span> ... avatar + nome ... <span class="tag">&lt;/header&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"topo"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;img</span> <span class="att">class</span>=<span class="st">"avatar"</span> <span class="att">src</span>=<span class="st">"foto.jpg"</span> <span class="att">alt</span>=<span class="st">"Minha foto"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"nome"</span><span class="tag">&gt;</span>Nicoly Almeida<span class="tag">&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"handle"</span><span class="tag">&gt;</span>@nickdeve<span class="tag">&lt;/div&gt;</span>
-    <span class="tag">&lt;p</span> <span class="att">class</span>=<span class="st">"bio"</span><span class="tag">&gt;</span>Desenvolvedora & professora. 💜<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"filtros"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"filtro ativo"</span> <span class="att">data-cat</span>=<span class="st">"Todos"</span><span class="tag">&gt;</span>Todos<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"filtro"</span> <span class="att">data-cat</span>=<span class="st">"Web"</span><span class="tag">&gt;</span>Web<span class="tag">&lt;/button&gt;</span>
+    <span class="cm">&lt;!-- Mobile, Design... --&gt;</span>
   <span class="tag">&lt;/div&gt;</span>
 
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"stats"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>32<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Projetos<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>1.2k<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Seguidores<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"num"</span><span class="tag">&gt;</span>890<span class="tag">&lt;/div&gt;&lt;div</span> <span class="att">class</span>=<span class="st">"lbl"</span><span class="tag">&gt;</span>Curtidas<span class="tag">&lt;/div&gt;&lt;/div&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"acoes"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;button</span> <span class="att">class</span>=<span class="st">"btn-seguir"</span> <span class="att">id</span>=<span class="st">"seguir"</span><span class="tag">&gt;</span>Seguir<span class="tag">&lt;/button&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"galeria-titulo"</span><span class="tag">&gt;</span>Meus projetos<span class="tag">&lt;/div&gt;</span>
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"galeria"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g1"</span><span class="tag">&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g2"</span><span class="tag">&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g3"</span><span class="tag">&gt;&lt;/div&gt;</span>
-    <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"g4"</span><span class="tag">&gt;&lt;/div&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-
-  <span class="tag">&lt;div</span> <span class="att">class</span>=<span class="st">"tags"</span><span class="tag">&gt;</span>
-    <span class="tag">&lt;span&gt;</span>#dev<span class="tag">&lt;/span&gt; &lt;span&gt;</span>#design<span class="tag">&lt;/span&gt; &lt;span&gt;</span>#café<span class="tag">&lt;/span&gt;</span>
-  <span class="tag">&lt;/div&gt;</span>
-
+  <span class="tag">&lt;div</span> <span class="att">id</span>=<span class="st">"grid"</span><span class="tag">&gt;&lt;/div&gt;</span>   <span class="cm">&lt;!-- o JS preenche --&gt;</span>
+  <span class="tag">&lt;button</span> <span class="att">id</span>=<span class="st">"carregar"</span><span class="tag">&gt;</span>Carregar mais<span class="tag">&lt;/button&gt;</span>
 <span class="tag">&lt;/div&gt;</span></pre>
   </div>
 
-  <div class="part"><span class="big">🎨</span> Parte 2 · CSS — o estilo</div>
-
+  <div class="part"><span class="big">🎨</span> Parte 2 · CSS</div>
   <div class="sol" id="tokens">
-    <h3>Tokens (:root)</h3>
-    <p class="desc">As cores e medidas da ficha técnica, guardadas em variáveis.</p>
+    <h3>Tokens + tema escuro</h3>
+    <p class="desc">O tema escuro é só um segundo conjunto de tokens numa classe — o JS liga/desliga.</p>
     <pre><span class="sel">:root</span> {
-  <span class="prop">--rosa</span>: <span class="st">#F24487</span>;
-  <span class="prop">--roxo</span>: <span class="st">#7B4FD0</span>;
-  <span class="prop">--gradiente</span>: <span class="st">linear-gradient(120deg, #F24487, #7B4FD0)</span>;
-  <span class="prop">--fundo</span>: <span class="st">#EEF0F6</span>;
-  <span class="prop">--card</span>: <span class="st">#FFFFFF</span>;
-  <span class="prop">--texto</span>: <span class="st">#1B1830</span>;
-  <span class="prop">--texto-suave</span>: <span class="st">#6B6580</span>;
-  <span class="prop">--raio</span>: <span class="st">22px</span>;
-  <span class="prop">--sombra</span>: <span class="st">0 24px 60px -24px rgba(74,40,120,.45)</span>;
+  <span class="prop">--rosa</span>:<span class="st">#F24487</span>; <span class="prop">--roxo</span>:<span class="st">#7B4FD0</span>;
+  <span class="prop">--bg</span>:<span class="st">#EEF0F6</span>; <span class="prop">--card</span>:<span class="st">#FFFFFF</span>;
+  <span class="prop">--texto</span>:<span class="st">#1B1830</span>; <span class="prop">--suave</span>:<span class="st">#6B6580</span>;
+  <span class="prop">--linha</span>:<span class="st">#E7E4EF</span>; <span class="prop">--raio</span>:<span class="st">18px</span>;
+}
+<span class="sel">body.escuro</span> {
+  <span class="prop">--bg</span>:<span class="st">#0F0C17</span>; <span class="prop">--card</span>:<span class="st">#1A1626</span>;
+  <span class="prop">--texto</span>:<span class="st">#F3F0FA</span>; <span class="prop">--suave</span>:<span class="st">#A79FB8</span>; <span class="prop">--linha</span>:<span class="st">#2A2438</span>;
+}
+<span class="sel">body</span> { background:<span class="st">var(--bg)</span>; color:<span class="st">var(--texto)</span>; transition:<span class="st">.3s</span>; }</pre>
+  </div>
+
+  <div class="sol" id="navbar">
+    <h3>Navbar (Flexbox)</h3>
+    <pre><span class="sel">.nav-in</span> {
+  display:<span class="st">flex</span>;
+  align-items:<span class="st">center</span>;
+  justify-content:<span class="st">space-between</span>;
+  padding:<span class="st">14px 22px</span>;
+}
+<span class="sel">.logo</span> { background:<span class="st">var(--grad)</span>; -webkit-background-clip:<span class="st">text</span>; color:<span class="st">transparent</span>; font-weight:<span class="st">700</span>; }</pre>
+  </div>
+
+  <div class="sol" id="grid">
+    <h3>Grid responsivo + o card</h3>
+    <p class="desc"><code>auto-fill</code> + <code>minmax</code> = colunas que se ajustam sozinhas.</p>
+    <pre><span class="sel">#grid</span> {
+  display:<span class="st">grid</span>;
+  grid-template-columns:<span class="st">repeat(auto-fill, minmax(200px, 1fr))</span>;
+  gap:<span class="st">16px</span>;
+}
+<span class="sel">.card</span> { background:<span class="st">var(--card)</span>; border:<span class="st">1px solid var(--linha)</span>; border-radius:<span class="st">var(--raio)</span>; overflow:<span class="st">hidden</span>; }
+<span class="sel">.card:hover</span> { transform:<span class="st">translateY(-4px)</span>; box-shadow:<span class="st">0 16px 30px -18px rgba(74,40,120,.4)</span>; }
+<span class="sel">.capa</span> { height:<span class="st">92px</span>; }
+<span class="sel">.curtir.ativo</span> { color:<span class="st">var(--rosa)</span>; border-color:<span class="st">var(--rosa)</span>; }</pre>
+  </div>
+
+  <div class="sol" id="responsivo">
+    <h3>Responsivo (web → mobile)</h3>
+    <p class="desc">A mágica: <code>minmax(0, 1fr)</code> deixa a coluna encolher sem vazar.</p>
+    <pre><span class="cm">/* tablet: 2 colunas */</span>
+<span class="prop">@media</span> (max-width:<span class="st">620px</span>) { <span class="sel">#grid</span> { grid-template-columns:<span class="st">repeat(2, minmax(0,1fr))</span>; } }
+
+<span class="cm">/* celular: 1 coluna + esconde os links do menu */</span>
+<span class="prop">@media</span> (max-width:<span class="st">430px</span>) { <span class="sel">#grid</span> { grid-template-columns:<span class="st">minmax(0,1fr)</span>; } }
+<span class="prop">@media</span> (max-width:<span class="st">520px</span>) { <span class="sel">.nav-links a</span> { display:<span class="st">none</span>; } }</pre>
+  </div>
+
+  <div class="part"><span class="big">⚡</span> Parte 3 · JavaScript</div>
+
+  <div class="sol" id="dados">
+    <h3>1 · Os dados</h3>
+    <p class="desc">Uma lista de objetos. O card não é escrito na mão — vem daqui.</p>
+    <pre><span class="kw">const</span> projetos = [
+  { titulo:<span class="st">"Site da NickDev"</span>, categoria:<span class="st">"Web"</span>,    cor:<span class="st">"#FBD3E4"</span>, curtidas:<span class="st">42</span> },
+  { titulo:<span class="st">"App de Hábitos"</span>,  categoria:<span class="st">"Mobile"</span>, cor:<span class="st">"#D9CCF3"</span>, curtidas:<span class="st">31</span> },
+  { titulo:<span class="st">"Identidade Visual"</span>, categoria:<span class="st">"Design"</span>, cor:<span class="st">"#FCE1CC"</span>, curtidas:<span class="st">58</span> },
+];</pre>
+  </div>
+
+  <div class="sol" id="componente">
+    <h3>2 · O componente ★</h3>
+    <p class="desc"><b>Uma função que recebe 1 projeto e devolve 1 card.</b> É isto que a gente reaproveita — a estrutura, não só o estilo. Um componente = função que devolve HTML.</p>
+    <pre><span class="kw">function</span> <span class="fn">criarCard</span>(projeto) {
+  <span class="kw">const</span> card = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"article"</span>);
+  card.className = <span class="st">"card"</span>;
+  card.innerHTML = <span class="st">`
+    &lt;div class="capa" style="background:${projeto.cor}"&gt;&lt;/div&gt;
+    &lt;div class="card-corpo"&gt;
+      &lt;span class="tag"&gt;${projeto.categoria}&lt;/span&gt;
+      &lt;h3&gt;${projeto.titulo}&lt;/h3&gt;
+      &lt;button class="curtir"&gt;
+        &lt;span class="coracao"&gt;🤍&lt;/span&gt; &lt;span class="n"&gt;${projeto.curtidas}&lt;/span&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;`</span>;
+
+  <span class="cm">// a interação do curtir vive DENTRO do componente</span>
+  <span class="kw">const</span> btn = card.<span class="fn">querySelector</span>(<span class="st">".curtir"</span>);
+  <span class="kw">let</span> curtido = <span class="st">false</span>, total = projeto.curtidas;
+  btn.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+    curtido = !curtido;
+    total += curtido ? <span class="st">1</span> : <span class="st">-1</span>;
+    card.<span class="fn">querySelector</span>(<span class="st">".n"</span>).<span class="fn">textContent</span> = total;
+    card.<span class="fn">querySelector</span>(<span class="st">".coracao"</span>).<span class="fn">textContent</span> = curtido ? <span class="st">"❤️"</span> : <span class="st">"🤍"</span>;
+    btn.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"ativo"</span>, curtido);
+  });
+
+  <span class="kw">return</span> card;
 }</pre>
+    <div class="tipbox star" style="margin-top:14px"><b>Ponte pro React:</b> quando você vir <code>function Card() {}</code> no React, é <b>a mesma ideia</b> — uma função que devolve um pedaço de tela. Hoje vocês fizeram no braço; o React automatiza isso.</div>
   </div>
 
-  <div class="sol" id="base">
-    <h3>Base + centralizar (Flexbox)</h3>
-    <p class="desc">O reset e o body que joga o card pro centro da tela.</p>
-    <pre><span class="sel">*</span> { <span class="prop">margin</span>: <span class="st">0</span>; <span class="prop">padding</span>: <span class="st">0</span>; <span class="prop">box-sizing</span>: <span class="st">border-box</span>; }
+  <div class="sol" id="render">
+    <h3>3 · Render + filtro</h3>
+    <p class="desc">Um <code>forEach</code> reaproveita o componente pra cada item. O filtro só muda a lista.</p>
+    <pre><span class="kw">const</span> grid = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#grid"</span>);
+<span class="kw">let</span> filtroAtual = <span class="st">"Todos"</span>;
 
-<span class="sel">body</span> {
-  <span class="prop">font-family</span>: <span class="st">'Poppins', sans-serif</span>;
-  <span class="prop">background</span>: <span class="st">var(--fundo)</span>;
-  <span class="prop">color</span>: <span class="st">var(--texto)</span>;
-  <span class="prop">min-height</span>: <span class="st">100vh</span>;
-  <span class="prop">display</span>: <span class="st">flex</span>;
-  <span class="prop">align-items</span>: <span class="st">center</span>;
-  <span class="prop">justify-content</span>: <span class="st">center</span>;
-}</pre>
-  </div>
-
-  <div class="sol" id="card">
-    <h3>Card + banner</h3>
-    <p class="desc"><code>overflow: hidden</code> faz o banner respeitar os cantos arredondados.</p>
-    <pre><span class="sel">.card</span> {
-  <span class="prop">width</span>: <span class="st">100%</span>;
-  <span class="prop">max-width</span>: <span class="st">380px</span>;
-  <span class="prop">background</span>: <span class="st">var(--card)</span>;
-  <span class="prop">border-radius</span>: <span class="st">var(--raio)</span>;
-  <span class="prop">box-shadow</span>: <span class="st">var(--sombra)</span>;
-  <span class="prop">overflow</span>: <span class="st">hidden</span>;
+<span class="kw">function</span> <span class="fn">render</span>(lista) {
+  grid.innerHTML = <span class="st">""</span>;
+  lista.<span class="fn">forEach</span>(p => grid.<span class="fn">appendChild</span>(<span class="fn">criarCard</span>(p)));
 }
-<span class="sel">.banner</span> {
-  <span class="prop">height</span>: <span class="st">96px</span>;
-  <span class="prop">background</span>: <span class="st">var(--gradiente)</span>;
-}</pre>
-  </div>
 
-  <div class="sol" id="topo">
-    <h3>Topo (avatar sobre o banner)</h3>
-    <p class="desc">O truque: <code>margin-top</code> negativo puxa a foto pra cima do banner.</p>
-    <pre><span class="sel">.topo</span> { <span class="prop">text-align</span>: <span class="st">center</span>; <span class="prop">margin-top</span>: <span class="st">-46px</span>; <span class="prop">padding</span>: <span class="st">0 26px</span>; }
-
-<span class="sel">.avatar</span> {
-  <span class="prop">width</span>: <span class="st">92px</span>;
-  <span class="prop">height</span>: <span class="st">92px</span>;
-  <span class="prop">border-radius</span>: <span class="st">50%</span>;
-  <span class="prop">border</span>: <span class="st">4px solid var(--card)</span>;
-  <span class="prop">object-fit</span>: <span class="st">cover</span>;
+<span class="kw">function</span> <span class="fn">aplicarFiltro</span>() {
+  <span class="kw">const</span> lista = (filtroAtual === <span class="st">"Todos"</span>)
+    ? projetos
+    : projetos.<span class="fn">filter</span>(p => p.categoria === filtroAtual);
+  <span class="fn">render</span>(lista);
 }
-<span class="sel">.nome</span> { <span class="prop">font-size</span>: <span class="st">22px</span>; <span class="prop">font-weight</span>: <span class="st">600</span>; <span class="prop">margin-top</span>: <span class="st">12px</span>; }
-<span class="sel">.handle</span> { <span class="prop">color</span>: <span class="st">var(--texto-suave)</span>; <span class="prop">font-size</span>: <span class="st">14px</span>; }</pre>
-  </div>
 
-  <div class="sol" id="stats">
-    <h3>Stats — Grid de 3 colunas</h3>
-    <p class="desc"><code>repeat(3, 1fr)</code> = 3 colunas de tamanho igual.</p>
-    <pre><span class="sel">.stats</span> {
-  <span class="prop">display</span>: <span class="st">grid</span>;
-  <span class="prop">grid-template-columns</span>: <span class="st">repeat(3, 1fr)</span>;
-  <span class="prop">text-align</span>: <span class="st">center</span>;
-  <span class="prop">margin</span>: <span class="st">22px 26px</span>;
-  <span class="prop">padding</span>: <span class="st">16px 0</span>;
-  <span class="prop">border-top</span>: <span class="st">1px solid var(--linha)</span>;
-  <span class="prop">border-bottom</span>: <span class="st">1px solid var(--linha)</span>;
-}
-<span class="sel">.stats .num</span> { <span class="prop">font-weight</span>: <span class="st">600</span>; <span class="prop">font-size</span>: <span class="st">18px</span>; }
-<span class="sel">.stats .lbl</span> { <span class="prop">color</span>: <span class="st">var(--texto-suave)</span>; <span class="prop">font-size</span>: <span class="st">12px</span>; }</pre>
-  </div>
-
-  <div class="sol" id="botao">
-    <h3>Botão Seguir</h3>
-    <p class="desc">Gradiente, pílula (<code>border-radius: 100px</code>) e um estado alternativo <code>.seguindo</code>.</p>
-    <pre><span class="sel">.btn-seguir</span> {
-  <span class="prop">width</span>: <span class="st">100%</span>;
-  <span class="prop">color</span>: <span class="st">#fff</span>;
-  <span class="prop">background</span>: <span class="st">var(--gradiente)</span>;
-  <span class="prop">border</span>: <span class="st">0</span>;
-  <span class="prop">padding</span>: <span class="st">13px</span>;
-  <span class="prop">border-radius</span>: <span class="st">100px</span>;
-  <span class="prop">cursor</span>: <span class="st">pointer</span>;
-  <span class="prop">transition</span>: <span class="st">transform .15s, box-shadow .25s</span>;
-}
-<span class="sel">.btn-seguir:hover</span> { <span class="prop">transform</span>: <span class="st">translateY(-2px)</span>; }
-
-<span class="cm">/* depois de clicar: vira contornado */</span>
-<span class="sel">.btn-seguir.seguindo</span> {
-  <span class="prop">background</span>: <span class="st">#fff</span>;
-  <span class="prop">color</span>: <span class="st">var(--roxo)</span>;
-  <span class="prop">border</span>: <span class="st">1px solid var(--roxo)</span>;
-}</pre>
-  </div>
-
-  <div class="sol" id="galeria">
-    <h3>Galeria — Grid 2×2</h3>
-    <p class="desc">Duas colunas; cada quadradinho com uma cor.</p>
-    <pre><span class="sel">.galeria</span> {
-  <span class="prop">display</span>: <span class="st">grid</span>;
-  <span class="prop">grid-template-columns</span>: <span class="st">1fr 1fr</span>;
-  <span class="prop">gap</span>: <span class="st">10px</span>;
-  <span class="prop">padding</span>: <span class="st">0 26px</span>;
-}
-<span class="sel">.galeria div</span> { <span class="prop">height</span>: <span class="st">74px</span>; <span class="prop">border-radius</span>: <span class="st">12px</span>; }
-<span class="sel">.g1</span> { <span class="prop">background</span>: <span class="st">#FBD3E4</span>; }
-<span class="sel">.g2</span> { <span class="prop">background</span>: <span class="st">#D9CCF3</span>; }
-<span class="sel">.g3</span> { <span class="prop">background</span>: <span class="st">#FCE1CC</span>; }
-<span class="sel">.g4</span> { <span class="prop">background</span>: <span class="st">#CDEBDD</span>; }</pre>
-  </div>
-
-  <div class="sol" id="tags">
-    <h3>Tags — Flexbox que quebra linha</h3>
-    <p class="desc"><code>flex-wrap: wrap</code> deixa as pílulas pularem pra linha de baixo.</p>
-    <pre><span class="sel">.tags</span> {
-  <span class="prop">display</span>: <span class="st">flex</span>;
-  <span class="prop">flex-wrap</span>: <span class="st">wrap</span>;
-  <span class="prop">gap</span>: <span class="st">8px</span>;
-  <span class="prop">padding</span>: <span class="st">18px 26px 28px</span>;
-}
-<span class="sel">.tags span</span> {
-  <span class="prop">font-size</span>: <span class="st">12px</span>;
-  <span class="prop">color</span>: <span class="st">var(--roxo)</span>;
-  <span class="prop">background</span>: <span class="st">#F3EEFC</span>;
-  <span class="prop">padding</span>: <span class="st">6px 12px</span>;
-  <span class="prop">border-radius</span>: <span class="st">100px</span>;
-}</pre>
-  </div>
-
-  <div class="part"><span class="big">⚡</span> Parte 3 · JavaScript — a interação</div>
-
-  <div class="sol" id="js">
-    <h3>Botão Seguir ↔ Seguindo</h3>
-    <p class="desc">Um evento de clique que liga/desliga a classe <code>.seguindo</code> e troca o texto.</p>
-    <pre><span class="kw">const</span> botao = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#seguir"</span>);
-
-botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
-  botao.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"seguindo"</span>);
-
-  <span class="kw">if</span> (botao.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"seguindo"</span>)) {
-    botao.<span class="fn">textContent</span> = <span class="st">"Seguindo ✓"</span>;
-  } <span class="kw">else</span> {
-    botao.<span class="fn">textContent</span> = <span class="st">"Seguir"</span>;
-  }
+<span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".filtro"</span>).<span class="fn">forEach</span>(botao => {
+  botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+    <span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".filtro"</span>).<span class="fn">forEach</span>(b => b.classList.<span class="fn">remove</span>(<span class="st">"ativo"</span>));
+    botao.classList.<span class="fn">add</span>(<span class="st">"ativo"</span>);
+    filtroAtual = botao.dataset.cat;
+    <span class="fn">aplicarFiltro</span>();
+  });
 });</pre>
   </div>
 
-  <div class="tipbox" style="margin-top:40px">Quer ver tudo junto e <b>funcionando</b>? Abra o resultado completo 👇</div>
-  <a class="cta" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver a tela pronta</a>
+  <div class="sol" id="tema">
+    <h3>4 · Tema + carregar mais</h3>
+    <pre><span class="cm">// tema claro/escuro</span>
+<span class="kw">const</span> tema = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#tema"</span>);
+tema.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  <span class="fn">document</span>.<span class="fn">body</span>.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"escuro"</span>);
+  tema.textContent = <span class="fn">document</span>.<span class="fn">body</span>.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"escuro"</span>) ? <span class="st">"☀️"</span> : <span class="st">"🌙"</span>;
+});
+
+<span class="cm">// carregar mais projetos</span>
+<span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#carregar"</span>).<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  projetos.<span class="fn">push</span>(...extras);   <span class="cm">// junta o lote extra</span>
+  <span class="fn">aplicarFiltro</span>();
+});
+
+<span class="fn">aplicarFiltro</span>();   <span class="cm">// primeira renderização</span></pre>
+  </div>
+
+  <div class="tipbox" style="margin-top:40px">Quer ver tudo junto e <b>funcionando</b>? Abra o portfólio pronto 👇</div>
+  <a class="cta" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver o portfólio rodando</a>
 </main>
 </div>
 </body>
