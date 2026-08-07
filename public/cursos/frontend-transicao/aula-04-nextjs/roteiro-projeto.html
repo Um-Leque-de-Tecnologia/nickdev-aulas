@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro do projeto · Leque de Vagas · Aula 04 · NickDev</title>
+<meta name="description" content="Passo a passo das 8 horas da aula 04: construir o Leque de Vagas do zero com Next.js 16, do create-next-app ao deploy.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,50px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:64ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.aviso{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:20px 22px;margin-top:34px}
+.aviso .ico{font-size:24px;line-height:1}
+.aviso h3{font-size:16.5px;margin-bottom:4px}
+.aviso p{color:var(--text-2);font-size:14.5px}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:52px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.bloco{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.bloco-hd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.bloco .hora{font-family:var(--mono);font-size:12px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:100px;padding:4px 12px;white-space:nowrap}
+.bloco .dur{font-family:var(--mono);font-size:11.5px;color:var(--text-4)}
+.bloco h3{font-size:19px;font-weight:600;flex:1;min-width:200px}
+.bloco > p{color:var(--text-2);font-size:15px;margin:6px 0}
+.bloco ul,.bloco ol{margin:10px 0 4px;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.bloco li{margin:5px 0}
+.bloco li b{color:var(--text)}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-family:var(--mono);font-size:11.5px;color:var(--text-2);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:5px 11px;border-radius:100px}
+.chip.fala{color:var(--pink-light);border-color:rgba(232,139,184,.4)}
+.chip.mao{color:var(--green);border-color:rgba(95,208,138,.4)}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d8d3e6}
+pre .k{color:#F24487}pre .s{color:#A98CE0}pre .f{color:#E88BB8}pre .c{color:#6f6a83}pre .t{color:#7B9FE0}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+.file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:5px 12px;display:inline-block;background:var(--surface-2);margin-top:12px}
+.file + pre{margin-top:-1px;border-radius:0 10px 10px 10px}
+
+.dica{border-left:3px solid var(--magenta);background:rgba(242,68,135,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin-top:14px;font-size:14px;color:var(--text-2)}
+.dica b{color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:9px;padding:0!important;margin-top:14px!important}
+.check li{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text-2);display:flex;gap:11px;align-items:flex-start}
+.check li::before{content:"☐";color:var(--purple-light);font-weight:700}
+
+.pausa{display:flex;align-items:center;gap:14px;background:transparent;border:1px dashed var(--line-strong);border-radius:14px;padding:14px 20px;margin-bottom:16px;color:var(--text-3);font-size:14.5px}
+.pausa .hora{font-family:var(--mono);font-size:12px;color:var(--text-4);border:1px solid var(--line);border-radius:100px;padding:4px 12px}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.bloco{padding:20px 18px}.aviso{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-transicao">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="eyebrow">Aula 04 · roteiro do dia</div>
+  <h1>Construindo o <span class="grad">Leque de Vagas</span> 🪭</h1>
+  <p class="lead">
+    O passo a passo das 8 horas: o que a gente faz junto, em que ordem, e o que
+    a turma faz sozinha em cada parada. Se você perdeu o fio em algum momento da
+    aula, é aqui que você reencontra o ponto exato.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🧭</span>
+    <div>
+      <h3>Como usar este roteiro</h3>
+      <p>
+        Cada bloco tem o horário, a duração e se é <b>demonstração</b> (você
+        assiste) ou <b>mão na massa</b> (você digita). O código final de cada
+        etapa está no repositório
+        <code>Um-Leque-de-Tecnologia/leque-de-vagas</code> — mas
+        <b>tente antes de espiar</b>. É digitando que fixa. 💜
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= MANHÃ ================= -->
+  <div class="label">Manhã · fundamentos e primeiras rotas</div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">08:00</span>
+      <h3>Abertura e a dor do copiar-colar</h3>
+      <span class="dur">30 min</span>
+    </div>
+    <p>Abrimos o portfólio da aula 03 e olhamos com honestidade pro que
+    incomoda: o cabeçalho repetido em cada arquivo, o <code>innerHTML</code>
+    gigante, a impossibilidade de organizar isso com 30 páginas.</p>
+    <ul>
+      <li>Recap rápido das aulas 01 a 03</li>
+      <li>O que é <b>biblioteca</b> x o que é <b>framework</b></li>
+      <li>Quem é React, quem é Next.js, quem é Vercel</li>
+      <li>Apresentação do projeto do módulo: <b>Leque de Vagas</b></li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 1–6</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">08:30</span>
+      <h3>React em 45 minutos</h3>
+      <span class="dur">45 min</span>
+    </div>
+    <p>Só o necessário pra hoje — nada de teoria que não usaremos: componente,
+    JSX, props e listas. Cada conceito ancorado no que a turma já fez na aula 03.</p>
+    <ol>
+      <li><b>Componente</b> — comparação lado a lado com <code>criarCard()</code> da aula passada</li>
+      <li><b>JSX</b> — as cinco diferenças pro HTML (<code>className</code>, <code>htmlFor</code>, <code>onClick</code>, tags fechadas, <code>style</code> objeto)</li>
+      <li><b>Props</b> — os parâmetros de função da aula 02, com outro nome</li>
+      <li><b>.map() e key</b> — o array virando tela</li>
+    </ol>
+    <div class="dica"><b>No quadro:</b> escreva <code>&lt;Selo texto="Remoto" /&gt;</code> e pergunte "quem é a função aqui? quem é o argumento?". Quando a turma responde sozinha, o conceito colou.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 7–10</span><span class="chip">guia: React essencial</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">09:15</span>
+      <h3>Criando o projeto</h3>
+      <span class="dur">45 min</span>
+    </div>
+    <p>Todo mundo digitando junto. Vá devagar: é aqui que aparecem os problemas
+    de ambiente.</p>
+<pre>node -v          <span class="c"># precisa ser v20.9 ou maior</span>
+
+npx create-next-app@latest leque-de-vagas
+<span class="c"># TypeScript: Yes | ESLint: Yes | Tailwind: No</span>
+<span class="c"># App Router: Yes | Turbopack: Yes | alias @/*: Yes</span>
+
+cd leque-de-vagas
+npm run dev</pre>
+    <p>Com o <code>localhost:3000</code> aberto, damos o tour:</p>
+    <ul>
+      <li><code>app/page.tsx</code> — mude um texto e veja a tela mudar <b>sem F5</b></li>
+      <li><code>app/layout.tsx</code> — a moldura</li>
+      <li><code>node_modules/</code> — "nunca mexa, nunca vai pro Git"</li>
+      <li><code>public/</code> — arquivos servidos como estão</li>
+    </ul>
+    <div class="dica"><b>Monitoria:</b> este é o bloco com mais gente travando (Node antigo, terminal na pasta errada, antivírus). Reserve monitores. Quem já rodou ajuda quem está travado.</div>
+    <ul class="check">
+      <li>Todo mundo com <code>localhost:3000</code> aberto</li>
+      <li>Todo mundo trocou um texto e viu a tela atualizar sozinha</li>
+      <li>Todo mundo com o projeto aberto no VS Code</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 11–15</span></div>
+  </div>
+
+  <div class="pausa"><span class="hora">10:00</span> ☕ Café · 15 minutos</div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">10:15</span>
+      <h3>Rotas, layout e navegação</h3>
+      <span class="dur">60 min</span>
+    </div>
+    <p>A parte que encanta. Comece criando a rota <b>na frente da turma, ao
+    vivo</b>: crie a pasta, crie o <code>page.tsx</code>, e mostre a URL
+    existindo instantaneamente.</p>
+
+    <div class="file">📄 app/sobre/page.tsx</div>
+<pre><span class="k">export default function</span> <span class="t">Sobre</span>() {
+  <span class="k">return</span> &lt;<span class="t">h1</span>&gt;Sobre o Leque de Vagas&lt;/<span class="t">h1</span>&gt;;
+}</pre>
+
+    <p>Depois o cabeçalho — o momento "adeus copiar-colar":</p>
+
+    <div class="file">📄 components/Cabecalho.tsx</div>
+<pre><span class="k">import</span> <span class="t">Link</span> <span class="k">from</span> <span class="s">"next/link"</span>;
+
+<span class="k">export default function</span> <span class="t">Cabecalho</span>() {
+  <span class="k">return</span> (
+    &lt;<span class="t">header</span>&gt;
+      &lt;<span class="t">Link</span> href=<span class="s">"/"</span>&gt;🪭 Leque de Vagas&lt;/<span class="t">Link</span>&gt;
+      &lt;<span class="t">nav</span>&gt;
+        &lt;<span class="t">Link</span> href=<span class="s">"/vagas"</span>&gt;Vagas&lt;/<span class="t">Link</span>&gt;
+        &lt;<span class="t">Link</span> href=<span class="s">"/sobre"</span>&gt;Sobre&lt;/<span class="t">Link</span>&gt;
+      &lt;/<span class="t">nav</span>&gt;
+    &lt;/<span class="t">header</span>&gt;
+  );
+}</pre>
+
+    <p>E colocamos ele no <code>layout.tsx</code>, <b>uma vez só</b>:</p>
+<pre>&lt;<span class="t">body</span>&gt;
+  &lt;<span class="t">Cabecalho</span> /&gt;
+  &lt;<span class="t">main</span>&gt;{children}&lt;/<span class="t">main</span>&gt;
+  &lt;<span class="t">Rodape</span> /&gt;
+&lt;/<span class="t">body</span>&gt;</pre>
+
+    <div class="dica"><b>Momento "uau":</b> troque um <code>&lt;Link&gt;</code> por <code>&lt;a&gt;</code> e navegue. A tela pisca. Volte pro <code>&lt;Link&gt;</code>. Não pisca. A turma inteira entende de uma vez.</div>
+
+    <ul class="check">
+      <li>Rotas <code>/</code>, <code>/sobre</code> e <code>/vagas</code> funcionando</li>
+      <li>Cabeçalho e rodapé no layout raiz</li>
+      <li>Navegação com <code>&lt;Link&gt;</code>, sem recarregar</li>
+      <li><code>globals.css</code> com as variáveis de cor da marca</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 16–20</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">11:15</span>
+      <h3>Os dados e o primeiro componente de verdade</h3>
+      <span class="dur">45 min</span>
+    </div>
+    <p>Criamos a camada de dados e o <code>VagaCard</code>. Aqui a turma vê o
+    <code>.map()</code> da aula 02 virando interface.</p>
+
+    <div class="file">📄 lib/dados.ts</div>
+<pre><span class="k">export const</span> VAGAS = [
+  { slug: <span class="s">"estagio-front-end-nuvem-rosa"</span>, titulo: <span class="s">"Estágio em Front-end"</span>,
+    empresa: <span class="s">"Nuvem Rosa"</span>, nivel: <span class="s">"Estágio"</span>, ... },
+  ...
+];</pre>
+
+    <div class="file">📄 lib/vagas.ts</div>
+<pre><span class="k">export async function</span> <span class="f">listarVagas</span>() {
+  <span class="k">return</span> VAGAS;
+}</pre>
+
+    <p>E a página de vagas usando tudo junto:</p>
+<pre><span class="k">export default async function</span> <span class="t">PaginaVagas</span>() {
+  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>();
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span>&gt;
+      {vagas.<span class="f">map</span>((vaga) =&gt; &lt;<span class="t">VagaCard</span> key={vaga.slug} vaga={vaga} /&gt;)}
+    &lt;/<span class="t">div</span>&gt;
+  );
+}</pre>
+
+    <div class="dica"><b>Pergunta pra fazer:</b> "e se a gente adicionar mais uma vaga no array?" — acrescente uma ao vivo. O card aparece sozinho. Este é o pagamento pelo trabalho de componentizar.</div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">guia: Listas e keys</span></div>
+  </div>
+
+  <div class="pausa"><span class="hora">12:00</span> 🍽️ Almoço · 1 hora</div>
+
+  <!-- ================= TARDE ================= -->
+  <div class="label">Tarde · o pulo do gato e o acabamento</div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">13:00</span>
+      <h3>Servidor x Cliente — o conceito central</h3>
+      <span class="dur">75 min</span>
+    </div>
+    <p>O bloco mais importante do dia. Vale ir devagar e conferir se todo mundo
+    acompanhou antes de seguir.</p>
+
+    <p><b>1. Prove que roda no servidor.</b> Coloque um <code>console.log</code>
+    dentro da página e mostre que ele aparece no <b>terminal</b>, não no console
+    do navegador. Silêncio na sala — e então a ficha cai.</p>
+
+    <p><b>2. Mostre o erro acontecer.</b> Adicione <code>useState</code> num
+    componente sem <code>"use client"</code> e deixe o Next reclamar. Leiam a
+    mensagem juntos. Depois adicione a linha e resolva.</p>
+
+    <div class="file">📄 components/SalvarButton.tsx</div>
+<pre><span class="s">"use client"</span>;
+
+<span class="k">import</span> { useState } <span class="k">from</span> <span class="s">"react"</span>;
+
+<span class="k">export default function</span> <span class="t">SalvarButton</span>() {
+  <span class="k">const</span> [salva, setSalva] = <span class="f">useState</span>(<span class="k">false</span>);
+
+  <span class="k">return</span> (
+    &lt;<span class="t">button</span> onClick={() =&gt; <span class="f">setSalva</span>(!salva)}&gt;
+      {salva ? <span class="s">"★"</span> : <span class="s">"☆"</span>}
+    &lt;/<span class="t">button</span>&gt;
+  );
+}</pre>
+
+    <p><b>3. A fronteira.</b> Mostre o "Ver código-fonte" da página: o HTML dos
+    cards está lá, pronto. Só o botão virou JavaScript. Explique por que colocar
+    <code>"use client"</code> na página inteira jogaria isso fora.</p>
+
+    <p><b>4. localStorage e o hydration mismatch.</b> Leia o
+    <code>localStorage</code> fora do <code>useEffect</code>, mostre o erro
+    vermelho, e conserte movendo pro <code>useEffect</code>. É um erro que a
+    turma vai encontrar sozinha depois — melhor ver acontecer aqui.</p>
+
+    <ul class="check">
+      <li>Todo mundo viu o <code>console.log</code> no terminal</li>
+      <li>Todo mundo provocou e leu o erro de <code>useState</code> sem <code>"use client"</code></li>
+      <li>O botão ★ funciona e guarda no <code>localStorage</code></li>
+      <li>A turma consegue responder: "isto aqui é servidor ou cliente?"</li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição + código</span><span class="chip mao">mão na massa</span><span class="chip">slides 21–26</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">14:15</span>
+      <h3>Rota dinâmica, metadata e os estados da tela</h3>
+      <span class="dur">45 min</span>
+    </div>
+    <p>A página de detalhe da vaga. Comece criando a pasta com colchetes
+    e deixe a turma reagir ao nome estranho.</p>
+
+    <div class="file">📄 app/vagas/[slug]/page.tsx</div>
+<pre><span class="k">import</span> { notFound } <span class="k">from</span> <span class="s">"next/navigation"</span>;
+
+<span class="k">export default async function</span> <span class="t">PaginaVaga</span>({
+  params,
+}: {
+  params: <span class="t">Promise</span>&lt;{ slug: <span class="t">string</span> }&gt;;
+}) {
+  <span class="k">const</span> { slug } = <span class="k">await</span> params;   <span class="c">← Next 16!</span>
+  <span class="k">const</span> vaga = <span class="k">await</span> <span class="f">buscarVagaPorSlug</span>(slug);
+  <span class="k">if</span> (!vaga) <span class="f">notFound</span>();
+
+  <span class="k">return</span> &lt;<span class="t">h1</span>&gt;{vaga.titulo}&lt;/<span class="t">h1</span>&gt;;
+}</pre>
+
+    <p>Na sequência, sem pressa:</p>
+    <ul>
+      <li>Fazer o card linkar pro detalhe com <code>href={`/vagas/${vaga.slug}`}</code></li>
+      <li>Digitar uma URL inventada e ver o <code>notFound()</code> agir</li>
+      <li>Criar <code>not-found.tsx</code> com a cara do projeto</li>
+      <li>Criar <code>loading.tsx</code> — e mostrar ele aparecendo (o <code>demora()</code> em <code>lib/vagas.ts</code> existe exatamente pra isso)</li>
+      <li><code>generateMetadata</code> — abrir a aba do navegador e ver o título mudar por vaga</li>
+      <li><code>generateStaticParams</code> — rodar <code>npm run build</code> e mostrar as 9 páginas geradas na tabela do terminal</li>
+    </ul>
+    <div class="dica"><b>Momento forte:</b> o <code>npm run build</code> mostrando <code>● (SSG) /vagas/[slug]</code> com as 9 rotas listadas. "Você escreveu um arquivo. O Next fez nove páginas."</div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 27–29</span></div>
+  </div>
+
+  <div class="pausa"><span class="hora">15:00</span> ☕ Café · 15 minutos</div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">15:15</span>
+      <h3>Busca e filtros na URL</h3>
+      <span class="dur">60 min</span>
+    </div>
+    <p>Comece perguntando: "como vocês fariam a busca?". Quase todo mundo vai
+    responder <code>useState</code>. Aí você mostra o caminho melhor.</p>
+
+<pre><span class="k">export default async function</span> <span class="t">PaginaVagas</span>({
+  searchParams,
+}: {
+  searchParams: <span class="t">Promise</span>&lt;{ busca?: <span class="t">string</span>; area?: <span class="t">string</span> }&gt;;
+}) {
+  <span class="k">const</span> { busca = <span class="s">""</span>, area = <span class="s">""</span> } = <span class="k">await</span> searchParams;
+  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>({ busca, area });
+  ...
+}</pre>
+
+<pre>&lt;<span class="t">form</span> action=<span class="s">"/vagas"</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="s">"search"</span> name=<span class="s">"busca"</span> defaultValue={busca} /&gt;
+  &lt;<span class="t">button</span>&gt;Buscar&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">form</span>&gt;</pre>
+
+    <p>Depois de funcionar, faça as três demonstrações que vendem a ideia:</p>
+    <ol>
+      <li><b>Copie a URL filtrada</b> e cole em outra aba — o filtro veio junto</li>
+      <li><b>Aperte voltar</b> — o filtro desfaz sozinho</li>
+      <li><b>Desligue o JavaScript</b> no DevTools — a busca continua funcionando</li>
+    </ol>
+    <p>Feche o bloco com a tabela do que mudou no <b>Next.js 16</b>: por que
+    <code>params</code> e <code>searchParams</code> são Promise, e por que
+    tutoriais antigos vão quebrar.</p>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 30–32</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">16:15</span>
+      <h3>Deploy, desafio e vitrine</h3>
+      <span class="dur">45 min</span>
+    </div>
+    <ol>
+      <li><code>npm run build</code> local — resolvemos os erros juntos <b>antes</b> de subir</li>
+      <li><code>git init</code>, commit e push pro GitHub</li>
+      <li>Vercel → Add New → Project → importar → Deploy</li>
+      <li>Cada pessoa manda o link no grupo 🎉</li>
+      <li>Apresentação do desafio e do que vem na aula 05</li>
+    </ol>
+    <div class="dica"><b>Vitrine:</b> abra 4 ou 5 projetos da turma no telão. Ver o próprio nome numa URL <code>.vercel.app</code> é o que faz a pessoa voltar semana que vem.</div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 33–35</span></div>
+  </div>
+
+  <!-- ================= EXTRAS ================= -->
+  <div class="label">Se sobrar tempo · bônus</div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <h3>Cartas na manga</h3>
+    </div>
+    <ul>
+      <li><b>Layout aninhado</b> — criar <code>app/vagas/layout.tsx</code> com um subtítulo e ver ele aparecer só nas rotas de vaga</li>
+      <li><b>&lt;Image&gt;</b> — trocar o emoji da empresa por logo de verdade em <code>public/</code></li>
+      <li><b>&lt;Suspense&gt;</b> — deixar o cabeçalho aparecer na hora e só a lista carregar depois</li>
+      <li><b>Ordenação</b> — mais um parâmetro na URL: <code>?ordem=salario</code></li>
+      <li><b>Página /salvas</b> — lendo o <code>localStorage</code> (é um bom aquecimento pro desafio)</li>
+    </ul>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <h3>Se a turma travar</h3>
+    </div>
+    <ul>
+      <li><b>Alguém não conseguiu instalar o Node</b> — coloque em dupla com quem conseguiu. Ninguém fica de fora do dia por causa de instalador.</li>
+      <li><b>Ritmos muito diferentes</b> — quem terminou vira monitor. Explicar é o melhor jeito de fixar.</li>
+      <li><b>Erro de TypeScript no meio do live coding</b> — leia a mensagem em voz alta e traduza. Normalizar erro é parte da aula.</li>
+      <li><b>Atrasou o cronograma</b> — corte primeiro os bônus, depois o bloco de busca/filtros (vira desafio). Nunca corte o bloco de Servidor x Cliente.</li>
+    </ul>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Desafio da aula</a>
+    <a class="btn" href="guia-nextjs.html">📘 Guia de Next.js</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Códigos comentados</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+    <a class="btn" href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas" target="_blank" rel="noopener noreferrer">💻 Repositório</a>
+  </div>
+
+  <div class="foot">Roteiro da Aula 04 · Frontend — Transição de Carreira · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

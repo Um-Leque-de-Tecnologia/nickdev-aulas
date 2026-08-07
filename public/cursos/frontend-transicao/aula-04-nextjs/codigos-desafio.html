@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do projeto · Leque de Vagas · Aula 04 · NickDev</title>
+<meta name="description" content="Todo o código do Leque de Vagas comentado: layout, componentes de servidor e cliente, rotas dinâmicas e camada de dados em Next.js 16.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono)}
+  p code, li code{font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:26px 18px;display:flex;flex-direction:column;gap:3px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:12px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:6px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 10px;border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--text-2);transition:.15s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:42px clamp(20px,3.4vw,52px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(28px,4.6vw,44px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.6vw,18px);margin-top:14px;max-width:66ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .aviso{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:18px 20px;margin-top:30px;max-width:900px}
+  .aviso .ico{font-size:22px;line-height:1}
+  .aviso h3{font-size:16px;margin-bottom:3px}
+  .aviso p{color:var(--text-2);font-size:14.5px}
+  .aviso a{color:var(--pink-light);text-decoration:underline}
+
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:54px 0 6px;display:flex;align-items:center;gap:12px;scroll-margin-top:20px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  section{margin-top:34px;scroll-margin-top:20px}
+  section > h2{font-family:var(--mono);font-size:19px;font-weight:500;letter-spacing:-.01em;display:flex;align-items:center;gap:11px}
+  section > h2::before{content:"";width:8px;height:20px;background:var(--grad);border-radius:3px;flex:none}
+  section > p{color:var(--text-2);margin:9px 0 0;max-width:74ch;font-size:15px}
+  section > p b{color:var(--text)}
+
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;
+    border-radius:9px 9px 0 0;padding:6px 13px;display:inline-flex;gap:12px;align-items:center;background:var(--surface);margin-top:14px}
+  .file .linhas{color:var(--text-4)}
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:0 12px 12px 12px;padding:16px 18px;margin-top:-1px;
+    overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;max-width:1000px}
+  pre code{background:none;border:0;padding:0;color:inherit;font-size:inherit}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4);max-width:900px}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;
+    border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-transicao">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Estrutura e configuração</div>
+    <a href="#package-json">package.json</a>
+    <a href="#next-config">next.config.ts</a>
+    <div class="grp">Os dados</div>
+    <a href="#tipos">lib/tipos.ts</a>
+    <a href="#vagas-lib">lib/vagas.ts</a>
+    <div class="grp">O esqueleto</div>
+    <a href="#layout">app/layout.tsx</a>
+    <a href="#cabecalho">components/Cabecalho.tsx</a>
+    <a href="#rodape">components/Rodape.tsx</a>
+    <div class="grp">Componentes</div>
+    <a href="#vagacard">components/VagaCard.tsx</a>
+    <a href="#vagacard-css">components/VagaCard.module.css</a>
+    <a href="#salvar">components/SalvarButton.tsx</a>
+    <a href="#filtros">components/Filtros.tsx</a>
+    <div class="grp">As páginas</div>
+    <a href="#home">app/page.tsx</a>
+    <a href="#lista">app/vagas/page.tsx</a>
+    <a href="#detalhe">app/vagas/[slug]/page.tsx</a>
+    <a href="#loading">app/vagas/loading.tsx</a>
+    <a href="#notfound">app/not-found.tsx</a>
+    <a href="#erro">app/error.tsx</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 04 · código do projeto</div>
+  <h1>Leque de Vagas, <span class="g">linha por linha</span></h1>
+  <p class="lead">
+    Todo o código do projeto que construímos na aula, comentado. Use como
+    referência quando travar — mas <b>tente antes</b>. O erro que você resolve
+    sozinha(o) é o que fica. 💜
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">💻</span>
+    <div>
+      <h3>O código vivo está no GitHub</h3>
+      <p>
+        Esta página é um retrato do projeto na aula 04. A versão que continua
+        crescendo (e que você deve clonar) está em
+        <a href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas" target="_blank" rel="noopener noreferrer">Um-Leque-de-Tecnologia/leque-de-vagas</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="divisor" id="config">Estrutura e configuração</div>
+  <section id="package-json">
+    <h2>package.json</h2>
+    <p>O RG do projeto: nome, comandos e dependências. Repare que os <code>scripts</code> são só três — <code>dev</code>, <code>build</code> e <code>start</code>. No Next 16 não existe mais <code>next lint</code>.</p>
+    <div class="file">📄 package.json <span class="linhas">22 linhas</span></div>
+<pre><code>{
+  "name": "leque-de-vagas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mural de vagas tech — projeto-base do curso Frontend: Transição de Carreira (NickDev).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^16.2.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}</code></pre>
+  </section>
+
+  <section id="next-config">
+    <h2>next.config.ts</h2>
+    <p>Configuração do Next. Num projeto de aula, quase sempre fica quase vazio mesmo — o Next já vem com bons padrões.</p>
+    <div class="file">📄 next.config.ts <span class="linhas">16 linhas</span></div>
+<pre><code>import path from "node:path";
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  // Avisa duas vezes sobre efeitos colaterais em desenvolvimento —
+  // ajuda a pegar bugs que só apareceriam em produção.
+  reactStrictMode: true,
+
+  turbopack: {
+    // Diz ao Turbopack que a raiz do projeto é ESTA pasta. Sem isso, se você
+    // tiver um package.json solto na pasta do usuário, ele reclama.
+    root: path.resolve(import.meta.dirname),
+  },
+};
+
+export default nextConfig;</code></pre>
+  </section>
+
+  <div class="divisor" id="dados">Os dados</div>
+  <section id="tipos">
+    <h2>lib/tipos.ts</h2>
+    <p>Os moldes dos dados. TypeScript não muda o que o código faz — ele avisa quando você escreve algo diferente do combinado, <b>antes</b> de você abrir o navegador.</p>
+    <div class="file">📄 lib/tipos.ts <span class="linhas">39 linhas</span></div>
+<pre><code>// ============================================================================
+// Os "moldes" dos nossos dados.
+// TypeScript não muda o que o código faz — ele avisa quando a gente escreve
+// algo diferente do combinado (ex.: `nivel: "Sênior "` com espaço no fim).
+// ============================================================================
+
+export type Area = "Front-end" | "Back-end" | "Dados" | "Design" | "QA";
+export type Nivel = "Estágio" | "Júnior" | "Pleno" | "Sênior";
+export type Modelo = "Remoto" | "Híbrido" | "Presencial";
+
+export type Vaga = {
+  /** identificador que vira URL: /vagas/dev-front-end-junior-lumia */
+  slug: string;
+  titulo: string;
+  empresa: string;
+  /** emoji usado como "logo" — sem depender de imagem externa */
+  logo: string;
+  local: string;
+  modelo: Modelo;
+  nivel: Nivel;
+  area: Area;
+  salario: string;
+  /** data no formato ISO (AAAA-MM-DD) */
+  publicadaEm: string;
+  tags: string[];
+  resumo: string;
+  descricao: string;
+  requisitos: string[];
+  beneficios: string[];
+  /** cor de destaque do card (vem "do design") */
+  cor: string;
+};
+
+/** O que a busca aceita receber pela URL (?busca=react&amp;area=Front-end) */
+export type FiltroVagas = {
+  busca?: string;
+  area?: string;
+  nivel?: string;
+};</code></pre>
+  </section>
+
+  <section id="vagas-lib">
+    <h2>lib/vagas.ts</h2>
+    <p>A camada de dados. Todas as funções são <code>async</code> de propósito: hoje elas leem um array, na aula 05 vão ler um banco de verdade. Como as páginas já usam <code>await</code>, no dia da troca <b>nenhuma página muda</b>.</p>
+    <div class="file">📄 lib/vagas.ts <span class="linhas">106 linhas</span></div>
+<pre><code>import { VAGAS } from "./dados";
+import type { Area, FiltroVagas, Nivel, Vaga } from "./tipos";
+
+// ============================================================================
+// A camada de dados.
+//
+// Todas as funções são `async` de propósito: hoje elas leem um array, mas
+// amanhã vão ler um banco de dados de verdade. Como as páginas já usam
+// `await`, no dia da troca NENHUMA página precisa mudar. 💜
+// ============================================================================
+
+/** Simula a demora de uma consulta ao banco, pra a gente ver o `loading.tsx`. */
+function demora(ms: number) {
+  return new Promise((resolve) =&gt; setTimeout(resolve, ms));
+}
+
+/** Tira acentos e deixa minúsculo — assim "junior" acha "Júnior". */
+function normalizar(texto: string) {
+  return texto
+    .normalize("NFD") // separa a letra do acento: "á" vira "a" + "´"
+    .replace(/[\u0300-\u036f]/g, "") // remove os acentos que sobraram
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Lista as vagas, aplicando busca por texto e filtros de área/nível.
+ * Tudo é opcional: sem filtro, devolve todas (mais recentes primeiro).
+ */
+export async function listarVagas(filtro: FiltroVagas = {}): Promise&lt;Vaga[]&gt; {
+  await demora(400);
+
+  const busca = normalizar(filtro.busca ?? "");
+
+  return VAGAS.filter((vaga) =&gt; {
+    const combinaArea = !filtro.area || vaga.area === filtro.area;
+    const combinaNivel = !filtro.nivel || vaga.nivel === filtro.nivel;
+
+    const textoDaVaga = normalizar(
+      [vaga.titulo, vaga.empresa, vaga.local, ...vaga.tags].join(" "),
+    );
+    const combinaBusca = !busca || textoDaVaga.includes(busca);
+
+    return combinaArea &amp;&amp; combinaNivel &amp;&amp; combinaBusca;
+  }).sort((a, b) =&gt; b.publicadaEm.localeCompare(a.publicadaEm));
+}
+
+/** As N vagas mais recentes — usado na home. */
+export async function listarVagasEmDestaque(quantidade = 3): Promise&lt;Vaga[]&gt; {
+  const vagas = await listarVagas();
+  return vagas.slice(0, quantidade);
+}
+
+/**
+ * Busca UMA vaga pelo slug.
+ * Devolve `undefined` quando não existe — quem chama decide o que fazer
+ * (na página de detalhe, a gente chama `notFound()`).
+ */
+export async function buscarVagaPorSlug(
+  slug: string,
+): Promise&lt;Vaga | undefined&gt; {
+  await demora(200);
+  return VAGAS.find((vaga) =&gt; vaga.slug === slug);
+}
+
+/** Todos os slugs — usado pelo `generateStaticParams` pra pré-gerar as páginas. */
+export async function listarSlugs(): Promise&lt;string[]&gt; {
+  return VAGAS.map((vaga) =&gt; vaga.slug);
+}
+
+/** As áreas que existem hoje, sem repetir — vira a barra de filtros. */
+export async function listarAreas(): Promise&lt;Area[]&gt; {
+  return [...new Set(VAGAS.map((vaga) =&gt; vaga.area))].sort();
+}
+
+/** Os níveis, na ordem de carreira (e não em ordem alfabética). */
+export async function listarNiveis(): Promise&lt;Nivel[]&gt; {
+  const ordem: Nivel[] = ["Estágio", "Júnior", "Pleno", "Sênior"];
+  return ordem.filter((nivel) =&gt; VAGAS.some((vaga) =&gt; vaga.nivel === nivel));
+}
+
+/** Números da home: total de vagas, quantas são remotas, quantas pra quem começa. */
+export async function resumoDoMural() {
+  return {
+    total: VAGAS.length,
+    remotas: VAGAS.filter((vaga) =&gt; vaga.modelo === "Remoto").length,
+    paraComecar: VAGAS.filter(
+      (vaga) =&gt; vaga.nivel === "Estágio" || vaga.nivel === "Júnior",
+    ).length,
+    empresas: new Set(VAGAS.map((vaga) =&gt; vaga.empresa)).size,
+  };
+}
+
+/** "publicada há 3 dias" — a partir da data ISO da vaga. */
+export function formatarPublicacao(dataISO: string): string {
+  const publicada = new Date(`${dataISO}T12:00:00`);
+  const hoje = new Date();
+  const dias = Math.round(
+    (hoje.getTime() - publicada.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  if (dias &lt;= 0) return "publicada hoje";
+  if (dias === 1) return "publicada ontem";
+  if (dias &lt; 30) return `publicada há ${dias} dias`;
+  return `publicada em ${publicada.toLocaleDateString("pt-BR")}`;
+}</code></pre>
+  </section>
+
+  <div class="divisor" id="esqueleto">O esqueleto</div>
+  <section id="layout">
+    <h2>app/layout.tsx</h2>
+    <p>O layout raiz: a moldura de <b>todas</b> as páginas. É o único lugar com <code>&lt;html&gt;</code> e <code>&lt;body&gt;</code>. Ao navegar entre rotas ele não é remontado — só o <code>children</code> troca, e por isso o cabeçalho não pisca.</p>
+    <div class="file">📄 app/layout.tsx <span class="linhas">55 linhas</span></div>
+<pre><code>import type { Metadata } from "next";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import Cabecalho from "@/components/Cabecalho";
+import Rodape from "@/components/Rodape";
+import "./globals.css";
+
+// `next/font` baixa a fonte no build e serve ela do seu próprio domínio.
+// Resultado: zero requisição pro Google em produção e nada de "pisca-texto".
+const grotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--fonte-titulo",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--fonte-mono",
+  display: "swap",
+});
+
+// O `metadata` vira as tags do &lt;head&gt;. Não precisa escrever &lt;title&gt; na mão.
+// O `template` do title é aplicado nas páginas filhas:
+//   página com title "Vagas"  →  &lt;title&gt;Vagas · Leque de Vagas&lt;/title&gt;
+export const metadata: Metadata = {
+  title: {
+    default: "Leque de Vagas · vagas tech pra quem está começando",
+    template: "%s · Leque de Vagas",
+  },
+  description:
+    "Mural de vagas de tecnologia com foco em quem está em transição de carreira: estágio, júnior e remoto.",
+};
+
+// Este é o layout raiz: ele envolve TODAS as páginas do site.
+// Quando você navega de /vagas pra /sobre, o layout NÃO é remontado —
+// só o `children` troca. Por isso o cabeçalho não pisca.
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    &lt;html lang="pt-BR" className={`${grotesk.variable} ${mono.variable}`}&gt;
+      &lt;body style={{ fontFamily: "var(--fonte-titulo), system-ui, sans-serif" }}&gt;
+        &lt;div className="ambiente" aria-hidden="true"&gt;
+          &lt;span className="magenta" /&gt;
+          &lt;span className="roxo" /&gt;
+        &lt;/div&gt;
+
+        &lt;Cabecalho /&gt;
+        &lt;main className="principal"&gt;{children}&lt;/main&gt;
+        &lt;Rodape /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="cabecalho">
+    <h2>components/Cabecalho.tsx</h2>
+    <p>Componente de Servidor. Ele não tem estado nem clique, então não precisa de <code>"use client"</code> — o HTML dele já chega pronto no navegador.</p>
+    <div class="file">📄 components/Cabecalho.tsx <span class="linhas">32 linhas</span></div>
+<pre><code>import Link from "next/link";
+import estilos from "./Cabecalho.module.css";
+
+// Componente de Servidor (o padrão no App Router).
+// Ele não usa estado nem evento de clique, então NÃO precisa de "use client" —
+// o HTML dele já chega pronto no navegador. Zero JavaScript enviado por ele.
+export default function Cabecalho() {
+  return (
+    &lt;header className={estilos.cabecalho}&gt;
+      &lt;div className={`container ${estilos.interno}`}&gt;
+        {/* &lt;Link&gt; troca de página SEM recarregar o site inteiro (e já faz
+            prefetch do destino quando o link aparece na tela). */}
+        &lt;Link href="/" className={estilos.marca}&gt;
+          &lt;span className={estilos.leque} aria-hidden="true"&gt;
+            🪭
+          &lt;/span&gt;
+          &lt;span&gt;
+            Leque de &lt;strong className="grad-text"&gt;Vagas&lt;/strong&gt;
+          &lt;/span&gt;
+        &lt;/Link&gt;
+
+        &lt;nav className={estilos.nav} aria-label="Navegação principal"&gt;
+          &lt;Link href="/vagas"&gt;Vagas&lt;/Link&gt;
+          &lt;Link href="/sobre"&gt;Sobre&lt;/Link&gt;
+          &lt;Link href="/vagas?nivel=Estágio" className={estilos.destaque}&gt;
+            Pra quem começa
+          &lt;/Link&gt;
+        &lt;/nav&gt;
+      &lt;/div&gt;
+    &lt;/header&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="rodape">
+    <h2>components/Rodape.tsx</h2>
+    <p>Repare no <code>new Date().getFullYear()</code>: ele roda <b>no servidor</b>, na hora de renderizar. O navegador recebe o ano já escrito no HTML.</p>
+    <div class="file">📄 components/Rodape.tsx <span class="linhas">28 linhas</span></div>
+<pre><code>import Link from "next/link";
+import estilos from "./Rodape.module.css";
+
+export default function Rodape() {
+  // `new Date()` roda NO SERVIDOR, na hora de renderizar.
+  // O navegador recebe o ano já escrito no HTML.
+  const ano = new Date().getFullYear();
+
+  return (
+    &lt;footer className={estilos.rodape}&gt;
+      &lt;div className={`container ${estilos.interno}`}&gt;
+        &lt;div&gt;
+          &lt;strong&gt;Leque de Vagas&lt;/strong&gt;
+          &lt;p&gt;Projeto do curso Frontend — Transição de Carreira · NickDev 💜&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;nav className={estilos.links} aria-label="Links do rodapé"&gt;
+          &lt;Link href="/vagas"&gt;Todas as vagas&lt;/Link&gt;
+          &lt;Link href="/sobre"&gt;Sobre o projeto&lt;/Link&gt;
+        &lt;/nav&gt;
+
+        &lt;p className={`mono ${estilos.copy}`}&gt;
+          © {ano} · feito com Next.js pra treinar de verdade
+        &lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/footer&gt;
+  );
+}</code></pre>
+  </section>
+
+  <div class="divisor" id="componentes">Componentes</div>
+  <section id="vagacard">
+    <h2>components/VagaCard.tsx</h2>
+    <p>O <code>criarCard()</code> da aula 03, agora em React. Componente de Servidor que recebe uma vaga por prop — e que <b>contém</b> um Componente de Cliente (o botão ★) sem virar cliente por isso.</p>
+    <div class="file">📄 components/VagaCard.tsx <span class="linhas">56 linhas</span></div>
+<pre><code>import Link from "next/link";
+import { formatarPublicacao } from "@/lib/vagas";
+import type { Vaga } from "@/lib/tipos";
+import SalvarButton from "./SalvarButton";
+import estilos from "./VagaCard.module.css";
+
+// Lembra da aula 03, quando a gente escreveu `function criarCard(projeto)` e
+// montou o HTML com template string? Isto aqui é a MESMA ideia — só que agora
+// a linguagem entende HTML nativamente (isso se chama JSX) e o React cuida de
+// colocar na tela. Componente = função que recebe dados e devolve interface.
+export default function VagaCard({ vaga }: { vaga: Vaga }) {
+  const paraQuemComeca = vaga.nivel === "Estágio" || vaga.nivel === "Júnior";
+
+  return (
+    &lt;article className={estilos.card} style={{ "--cor": vaga.cor } as React.CSSProperties}&gt;
+      &lt;div className={estilos.topo}&gt;
+        &lt;span className={estilos.logo} aria-hidden="true"&gt;
+          {vaga.logo}
+        &lt;/span&gt;
+        &lt;div className={estilos.empresa}&gt;
+          &lt;strong&gt;{vaga.empresa}&lt;/strong&gt;
+          &lt;span&gt;{vaga.local}&lt;/span&gt;
+        &lt;/div&gt;
+
+        {/* ↓ a única parte interativa do card. Ela é um Componente de Cliente. */}
+        &lt;SalvarButton slug={vaga.slug} titulo={vaga.titulo} /&gt;
+      &lt;/div&gt;
+
+      &lt;h3 className={estilos.titulo}&gt;
+        {/* O link cobre o card inteiro (veja o ::after no CSS) */}
+        &lt;Link href={`/vagas/${vaga.slug}`} className={estilos.link}&gt;
+          {vaga.titulo}
+        &lt;/Link&gt;
+      &lt;/h3&gt;
+
+      &lt;p className={estilos.resumo}&gt;{vaga.resumo}&lt;/p&gt;
+
+      &lt;div className={estilos.selos}&gt;
+        &lt;span className={`badge ${vaga.modelo === "Remoto" ? "badge-remoto" : ""}`}&gt;
+          {vaga.modelo}
+        &lt;/span&gt;
+        &lt;span className={`badge ${paraQuemComeca ? "badge-inicio" : ""}`}&gt;
+          {vaga.nivel}
+        &lt;/span&gt;
+        &lt;span className="badge"&gt;{vaga.area}&lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div className={estilos.rodape}&gt;
+        &lt;span className={estilos.salario}&gt;{vaga.salario}&lt;/span&gt;
+        &lt;span className={`mono ${estilos.data}`}&gt;
+          {formatarPublicacao(vaga.publicadaEm)}
+        &lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="vagacard-css">
+    <h2>components/VagaCard.module.css</h2>
+    <p>CSS Module: no HTML final, <code>.card</code> vira <code>VagaCard_card__x7f2q</code>. Sua <code>.card</code> nunca vai brigar com a de outro componente.</p>
+    <div class="file">📄 components/VagaCard.module.css <span class="linhas">107 linhas</span></div>
+<pre><code>.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--raio);
+  padding: 22px 22px 20px;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+  /* --cor chega do componente via style={{ "--cor": vaga.cor }} */
+  border-top: 3px solid var(--cor, var(--purple));
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-strong);
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 26px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+}
+
+.empresa {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.empresa strong {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.empresa span {
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.titulo {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+/* O truque do "card clicável": o ::after do link cobre o card todo.
+   O botão de salvar fica por cima porque tem z-index maior. */
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--raio);
+}
+.link:hover {
+  color: var(--pink-light);
+}
+
+.resumo {
+  font-size: 14px;
+  color: var(--text-2);
+  flex: 1;
+}
+
+.selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.rodape {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
+  margin-top: 2px;
+}
+
+.salario {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--cor, var(--purple-light));
+}
+
+.data {
+  font-size: 11.5px;
+  color: var(--text-4);
+}</code></pre>
+  </section>
+
+  <section id="salvar">
+    <h2>components/SalvarButton.tsx</h2>
+    <p>⭐ <b>O único arquivo do projeto com <code>"use client"</code>.</b> Ele precisa disso por dois motivos: tem estado (<code>useState</code>) e tem evento (<code>onClick</code>). Repare por que o <code>localStorage</code> é lido dentro do <code>useEffect</code> — o comentário no código explica.</p>
+    <div class="file">📄 components/SalvarButton.tsx <span class="linhas">66 linhas</span></div>
+<pre><code>"use client";
+
+import { useEffect, useState } from "react";
+import estilos from "./SalvarButton.module.css";
+
+// ============================================================================
+// "use client" na primeira linha = este componente também roda NO NAVEGADOR.
+//
+// Precisamos disso porque ele tem duas coisas que só existem no navegador:
+//   • estado que muda (useState)
+//   • um evento de clique (onClick)
+//
+// Regra de bolso: deixe "use client" o mais FUNDO possível na árvore.
+// Aqui, só o botãozinho é cliente — o card inteiro continua sendo servidor.
+// ============================================================================
+
+const CHAVE = "leque-de-vagas:salvas";
+
+function lerSalvas(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+export default function SalvarButton({
+  slug,
+  titulo,
+}: {
+  slug: string;
+  titulo: string;
+}) {
+  const [salva, setSalva] = useState(false);
+
+  // O servidor não tem `localStorage`. Se a gente lesse ele direto no corpo do
+  // componente, o HTML do servidor sairia diferente do que o navegador desenha
+  // e o React reclamaria ("hydration mismatch"). Por isso lemos no useEffect,
+  // que só roda depois que o componente já apareceu na tela.
+  useEffect(() =&gt; {
+    setSalva(lerSalvas().includes(slug));
+  }, [slug]);
+
+  function alternar() {
+    const salvas = lerSalvas();
+    const novas = salva
+      ? salvas.filter((s) =&gt; s !== slug)
+      : [...salvas, slug];
+
+    localStorage.setItem(CHAVE, JSON.stringify(novas));
+    setSalva(!salva);
+  }
+
+  return (
+    &lt;button
+      type="button"
+      onClick={alternar}
+      className={`${estilos.botao} ${salva ? estilos.ativo : ""}`}
+      aria-pressed={salva}
+      aria-label={salva ? `Remover ${titulo} das salvas` : `Salvar ${titulo}`}
+      title={salva ? "Remover das salvas" : "Salvar vaga"}
+    &gt;
+      {salva ? "★" : "☆"}
+    &lt;/button&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="filtros">
+    <h2>components/Filtros.tsx</h2>
+    <p>Interativo <b>e</b> Componente de Servidor. Como? A busca é um <code>&lt;form&gt;</code> com method GET e os filtros são <code>&lt;Link&gt;</code> que trocam a query string. Funciona até com o JavaScript desligado.</p>
+    <div class="file">📄 components/Filtros.tsx <span class="linhas">118 linhas</span></div>
+<pre><code>import Link from "next/link";
+import type { Area, Nivel } from "@/lib/tipos";
+import estilos from "./Filtros.module.css";
+
+// Este componente é de SERVIDOR e mesmo assim é interativo. Como?
+//   • a busca é um &lt;form&gt; com method GET → o próprio navegador monta a URL
+//     /vagas?busca=react e o Next re-renderiza a página no servidor
+//   • os filtros são &lt;Link&gt; que trocam a query string
+//
+// Ou seja: filtro e busca funcionam ATÉ COM O JAVASCRIPT DESLIGADO, e o
+// estado da tela fica guardado na URL (dá pra copiar e mandar pra alguém).
+
+type Props = {
+  areas: Area[];
+  niveis: Nivel[];
+  busca: string;
+  areaAtiva: string;
+  nivelAtivo: string;
+};
+
+/** Monta uma URL /vagas mantendo os filtros atuais e trocando só um deles. */
+function montarUrl(
+  atual: { busca: string; area: string; nivel: string },
+  troca: Partial&lt;{ area: string; nivel: string }&gt;,
+) {
+  const params = new URLSearchParams();
+  const alvo = { ...atual, ...troca };
+
+  if (alvo.busca) params.set("busca", alvo.busca);
+  if (alvo.area) params.set("area", alvo.area);
+  if (alvo.nivel) params.set("nivel", alvo.nivel);
+
+  const query = params.toString();
+  return query ? `/vagas?${query}` : "/vagas";
+}
+
+export default function Filtros({
+  areas,
+  niveis,
+  busca,
+  areaAtiva,
+  nivelAtivo,
+}: Props) {
+  const atual = { busca, area: areaAtiva, nivel: nivelAtivo };
+  const temFiltro = Boolean(busca || areaAtiva || nivelAtivo);
+
+  return (
+    &lt;section className={estilos.painel} aria-label="Buscar e filtrar vagas"&gt;
+      &lt;form className={estilos.busca} action="/vagas"&gt;
+        &lt;input
+          type="search"
+          name="busca"
+          defaultValue={busca}
+          placeholder="Busque por cargo, empresa, tecnologia…"
+          aria-label="Buscar vagas"
+        /&gt;
+        {/* mantemos os filtros ativos ao enviar a busca */}
+        {areaAtiva &amp;&amp; &lt;input type="hidden" name="area" value={areaAtiva} /&gt;}
+        {nivelAtivo &amp;&amp; &lt;input type="hidden" name="nivel" value={nivelAtivo} /&gt;}
+        &lt;button type="submit" className="btn btn-primario"&gt;
+          Buscar
+        &lt;/button&gt;
+      &lt;/form&gt;
+
+      &lt;div className={estilos.grupo}&gt;
+        &lt;span className={estilos.rotulo}&gt;Área&lt;/span&gt;
+        &lt;div className={estilos.chips}&gt;
+          &lt;Link
+            href={montarUrl(atual, { area: "" })}
+            className={`${estilos.chip} ${!areaAtiva ? estilos.chipAtivo : ""}`}
+          &gt;
+            Todas
+          &lt;/Link&gt;
+          {areas.map((area) =&gt; (
+            &lt;Link
+              key={area}
+              href={montarUrl(atual, { area })}
+              className={`${estilos.chip} ${
+                areaAtiva === area ? estilos.chipAtivo : ""
+              }`}
+            &gt;
+              {area}
+            &lt;/Link&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div className={estilos.grupo}&gt;
+        &lt;span className={estilos.rotulo}&gt;Nível&lt;/span&gt;
+        &lt;div className={estilos.chips}&gt;
+          &lt;Link
+            href={montarUrl(atual, { nivel: "" })}
+            className={`${estilos.chip} ${!nivelAtivo ? estilos.chipAtivo : ""}`}
+          &gt;
+            Todos
+          &lt;/Link&gt;
+          {niveis.map((nivel) =&gt; (
+            &lt;Link
+              key={nivel}
+              href={montarUrl(atual, { nivel })}
+              className={`${estilos.chip} ${
+                nivelAtivo === nivel ? estilos.chipAtivo : ""
+              }`}
+            &gt;
+              {nivel}
+            &lt;/Link&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {temFiltro &amp;&amp; (
+        &lt;Link href="/vagas" className={estilos.limpar}&gt;
+          ✕ limpar filtros
+        &lt;/Link&gt;
+      )}
+    &lt;/section&gt;
+  );
+}</code></pre>
+  </section>
+
+  <div class="divisor" id="paginas">As páginas</div>
+  <section id="home">
+    <h2>app/page.tsx  →  /</h2>
+    <p>A home. <code>async</code> + <code>await</code> direto no componente, e <code>Promise.all</code> pra disparar as duas buscas ao mesmo tempo em vez de uma esperar a outra.</p>
+    <div class="file">📄 app/page.tsx <span class="linhas">81 linhas</span></div>
+<pre><code>import Link from "next/link";
+import VagaCard from "@/components/VagaCard";
+import { listarVagasEmDestaque, resumoDoMural } from "@/lib/vagas";
+import estilos from "./page.module.css";
+
+// Repare em duas coisas nesta linha:
+//   1. `export default function` → o Next transforma este arquivo na rota "/"
+//   2. `async` → dá pra usar `await` DIRETO no componente. Isso só é possível
+//      porque ele é um Componente de Servidor: o código roda no servidor,
+//      pega os dados, e manda pro navegador o HTML já pronto.
+export default async function Home() {
+  // `Promise.all` dispara as duas buscas ao mesmo tempo (400ms no total),
+  // em vez de uma esperar a outra (800ms). Detalhe pequeno, diferença real.
+  const [destaques, resumo] = await Promise.all([
+    listarVagasEmDestaque(3),
+    resumoDoMural(),
+  ]);
+
+  return (
+    &lt;div className="container"&gt;
+      &lt;section className={estilos.hero}&gt;
+        &lt;p className="olho"&gt;Mural de vagas · atualizado toda semana&lt;/p&gt;
+        &lt;h1 className={estilos.titulo}&gt;
+          A sua próxima vaga em tech
+          &lt;br /&gt;
+          &lt;span className="grad-text"&gt;começa aqui.&lt;/span&gt;
+        &lt;/h1&gt;
+        &lt;p className={estilos.lead}&gt;
+          Um mural feito pra quem está entrando na área agora: estágio, júnior e
+          remoto em destaque, sem exigir 5 anos de experiência pra uma vaga de
+          início de carreira.
+        &lt;/p&gt;
+
+        &lt;div className={estilos.acoes}&gt;
+          &lt;Link href="/vagas" className="btn btn-primario"&gt;
+            Ver todas as vagas →
+          &lt;/Link&gt;
+          &lt;Link href="/vagas?nivel=Estágio" className="btn"&gt;
+            Só estágios
+          &lt;/Link&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section className={estilos.numeros} aria-label="Números do mural"&gt;
+        &lt;div&gt;
+          &lt;strong&gt;{resumo.total}&lt;/strong&gt;
+          &lt;span&gt;vagas abertas&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+          &lt;strong&gt;{resumo.paraComecar}&lt;/strong&gt;
+          &lt;span&gt;pra quem está começando&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+          &lt;strong&gt;{resumo.remotas}&lt;/strong&gt;
+          &lt;span&gt;100% remotas&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+          &lt;strong&gt;{resumo.empresas}&lt;/strong&gt;
+          &lt;span&gt;empresas parceiras&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section&gt;
+        &lt;div className={estilos.cabecalhoSecao}&gt;
+          &lt;h2 className="titulo-secao"&gt;Publicadas recentemente&lt;/h2&gt;
+          &lt;Link href="/vagas" className={estilos.verTodas}&gt;
+            ver todas →
+          &lt;/Link&gt;
+        &lt;/div&gt;
+
+        &lt;div className={estilos.grade}&gt;
+          {/* Mesmo `.map` que a gente usou na aula 02 com arrays.
+              A `key` ajuda o React a saber qual card é qual quando a lista muda. */}
+          {destaques.map((vaga) =&gt; (
+            &lt;VagaCard key={vaga.slug} vaga={vaga} /&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/section&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="lista">
+    <h2>app/vagas/page.tsx  →  /vagas</h2>
+    <p>A listagem. ⚠️ <b>Next 16:</b> <code>searchParams</code> é uma <code>Promise</code> — sempre <code>await</code>. Todo o estado da tela (busca e filtros) vive na URL.</p>
+    <div class="file">📄 app/vagas/page.tsx <span class="linhas">61 linhas</span></div>
+<pre><code>import type { Metadata } from "next";
+import Filtros from "@/components/Filtros";
+import VagaCard from "@/components/VagaCard";
+import { listarAreas, listarNiveis, listarVagas } from "@/lib/vagas";
+import estilos from "./vagas.module.css";
+
+export const metadata: Metadata = {
+  title: "Vagas",
+  description: "Todas as vagas do mural, com busca e filtro por área e nível.",
+};
+
+// ⚠️ NEXT.JS 16: `searchParams` é uma Promise. Sempre `await`.
+//
+// Por quê? Porque a página pode começar a renderizar a parte estática antes
+// mesmo de saber o que veio na URL. Quem precisa da URL espera por ela.
+// (No Next 14 dava pra ler direto; no 16 isso é erro.)
+export default async function PaginaVagas({
+  searchParams,
+}: {
+  searchParams: Promise&lt;{ busca?: string; area?: string; nivel?: string }&gt;;
+}) {
+  const { busca = "", area = "", nivel = "" } = await searchParams;
+
+  const [vagas, areas, niveis] = await Promise.all([
+    listarVagas({ busca, area, nivel }),
+    listarAreas(),
+    listarNiveis(),
+  ]);
+
+  return (
+    &lt;div className="container"&gt;
+      &lt;header className={estilos.cabecalho}&gt;
+        &lt;p className="olho"&gt;{vagas.length} vaga(s) encontrada(s)&lt;/p&gt;
+        &lt;h1 className={estilos.titulo}&gt;
+          Todas as &lt;span className="grad-text"&gt;vagas&lt;/span&gt;
+        &lt;/h1&gt;
+      &lt;/header&gt;
+
+      &lt;Filtros
+        areas={areas}
+        niveis={niveis}
+        busca={busca}
+        areaAtiva={area}
+        nivelAtivo={nivel}
+      /&gt;
+
+      {vagas.length === 0 ? (
+        &lt;div className="vazio"&gt;
+          &lt;strong&gt;Nenhuma vaga com esses filtros 😔&lt;/strong&gt;
+          Tente uma busca mais curta ou limpe os filtros ali em cima.
+        &lt;/div&gt;
+      ) : (
+        &lt;div className={estilos.grade}&gt;
+          {vagas.map((vaga) =&gt; (
+            &lt;VagaCard key={vaga.slug} vaga={vaga} /&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="detalhe">
+    <h2>app/vagas/[slug]/page.tsx  →  /vagas/qualquer-coisa</h2>
+    <p>A rota dinâmica. Um arquivo, nove páginas. Repare em três coisas: <code>await params</code>, <code>generateStaticParams</code> (pré-gera as páginas no build) e <code>generateMetadata</code> (título próprio por vaga).</p>
+    <div class="file">📄 app/vagas/[slug]/page.tsx <span class="linhas">127 linhas</span></div>
+<pre><code>import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import SalvarButton from "@/components/SalvarButton";
+import { buscarVagaPorSlug, formatarPublicacao, listarSlugs } from "@/lib/vagas";
+import estilos from "./vaga.module.css";
+
+// O nome da pasta entre colchetes — [slug] — cria uma rota dinâmica.
+// Uma pasta só, e o site ganha uma página por vaga:
+//   /vagas/estagio-front-end-nuvem-rosa
+//   /vagas/dev-react-pleno-orbita
+type Props = { params: Promise&lt;{ slug: string }&gt; };
+
+// Diz ao Next quais slugs existem, pra ele gerar essas páginas JÁ no build
+// (ficam prontas, estáticas, instantâneas). Slug novo que aparecer depois é
+// renderizado sob demanda na primeira visita.
+export async function generateStaticParams() {
+  const slugs = await listarSlugs();
+  return slugs.map((slug) =&gt; ({ slug }));
+}
+
+// Metadata dinâmica: cada vaga tem seu próprio &lt;title&gt; e descrição.
+// É isso que faz o link ficar bonito quando alguém compartilha no WhatsApp.
+export async function generateMetadata({ params }: Props): Promise&lt;Metadata&gt; {
+  const { slug } = await params;
+  const vaga = await buscarVagaPorSlug(slug);
+
+  if (!vaga) return { title: "Vaga não encontrada" };
+
+  return {
+    title: `${vaga.titulo} — ${vaga.empresa}`,
+    description: vaga.resumo,
+    openGraph: {
+      title: `${vaga.titulo} · ${vaga.empresa}`,
+      description: vaga.resumo,
+      type: "article",
+    },
+  };
+}
+
+export default async function PaginaVaga({ params }: Props) {
+  // ⚠️ NEXT.JS 16: `params` também é uma Promise.
+  const { slug } = await params;
+  const vaga = await buscarVagaPorSlug(slug);
+
+  // Slug que não existe → 404 de verdade (renderiza o app/not-found.tsx)
+  if (!vaga) notFound();
+
+  return (
+    &lt;div className="container"&gt;
+      &lt;Link href="/vagas" className={estilos.voltar}&gt;
+        ← voltar para as vagas
+      &lt;/Link&gt;
+
+      &lt;article className={estilos.folha} style={{ "--cor": vaga.cor } as React.CSSProperties}&gt;
+        &lt;header className={estilos.topo}&gt;
+          &lt;span className={estilos.logo} aria-hidden="true"&gt;
+            {vaga.logo}
+          &lt;/span&gt;
+
+          &lt;div className={estilos.identidade}&gt;
+            &lt;p className="olho"&gt;
+              {vaga.empresa} · {vaga.local}
+            &lt;/p&gt;
+            &lt;h1 className={estilos.titulo}&gt;{vaga.titulo}&lt;/h1&gt;
+          &lt;/div&gt;
+
+          &lt;SalvarButton slug={vaga.slug} titulo={vaga.titulo} /&gt;
+        &lt;/header&gt;
+
+        &lt;div className={estilos.selos}&gt;
+          &lt;span className="badge badge-remoto"&gt;{vaga.modelo}&lt;/span&gt;
+          &lt;span className="badge badge-inicio"&gt;{vaga.nivel}&lt;/span&gt;
+          &lt;span className="badge"&gt;{vaga.area}&lt;/span&gt;
+          {vaga.tags.map((tag) =&gt; (
+            &lt;span key={tag} className="badge"&gt;
+              {tag}
+            &lt;/span&gt;
+          ))}
+        &lt;/div&gt;
+
+        &lt;p className={estilos.salario}&gt;{vaga.salario}&lt;/p&gt;
+        &lt;p className={`mono ${estilos.data}`}&gt;
+          {formatarPublicacao(vaga.publicadaEm)}
+        &lt;/p&gt;
+
+        &lt;section className={estilos.bloco}&gt;
+          &lt;h2&gt;Sobre a vaga&lt;/h2&gt;
+          &lt;p&gt;{vaga.descricao}&lt;/p&gt;
+        &lt;/section&gt;
+
+        &lt;div className={estilos.duasColunas}&gt;
+          &lt;section className={estilos.bloco}&gt;
+            &lt;h2&gt;O que pedem&lt;/h2&gt;
+            &lt;ul className={estilos.lista}&gt;
+              {vaga.requisitos.map((item) =&gt; (
+                &lt;li key={item}&gt;{item}&lt;/li&gt;
+              ))}
+            &lt;/ul&gt;
+          &lt;/section&gt;
+
+          &lt;section className={estilos.bloco}&gt;
+            &lt;h2&gt;O que oferecem&lt;/h2&gt;
+            &lt;ul className={`${estilos.lista} ${estilos.listaPositiva}`}&gt;
+              {vaga.beneficios.map((item) =&gt; (
+                &lt;li key={item}&gt;{item}&lt;/li&gt;
+              ))}
+            &lt;/ul&gt;
+          &lt;/section&gt;
+        &lt;/div&gt;
+
+        &lt;footer className={estilos.cta}&gt;
+          &lt;div&gt;
+            &lt;strong&gt;Bateu com o seu momento?&lt;/strong&gt;
+            &lt;p&gt;
+              Na próxima aula este botão vai enviar sua candidatura de verdade,
+              com Server Actions. 😏
+            &lt;/p&gt;
+          &lt;/div&gt;
+          &lt;button type="button" className="btn btn-primario" disabled&gt;
+            Candidatar-se (em breve)
+          &lt;/button&gt;
+        &lt;/footer&gt;
+      &lt;/article&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="loading">
+    <h2>app/vagas/loading.tsx</h2>
+    <p>Você não escreve <code>if (carregando)</code> em lugar nenhum. Basta o arquivo existir: o Next mostra ele enquanto o <code>page.tsx</code> da mesma pasta busca os dados.</p>
+    <div class="file">📄 app/vagas/loading.tsx <span class="linhas">18 linhas</span></div>
+<pre><code>import estilos from "./vagas.module.css";
+
+// Arquivo mágico do App Router: enquanto o `page.tsx` desta pasta está
+// buscando os dados no servidor, o Next mostra ISTO automaticamente.
+// Você não escreve `if (carregando)` em lugar nenhum — é só existir o arquivo.
+export default function Carregando() {
+  return (
+    &lt;div className="container"&gt;
+      &lt;p className="olho"&gt;carregando vagas…&lt;/p&gt;
+      &lt;div className={estilos.grade} style={{ marginTop: 24 }}&gt;
+        {/* seis retângulos pulsando, do tamanho de um card */}
+        {Array.from({ length: 6 }).map((_, i) =&gt; (
+          &lt;div key={i} className={estilos.esqueleto} /&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="notfound">
+    <h2>app/not-found.tsx</h2>
+    <p>Aparece quando a URL não existe <b>ou</b> quando alguma página chama <code>notFound()</code>.</p>
+    <div class="file">📄 app/not-found.tsx <span class="linhas">30 linhas</span></div>
+<pre><code>import Link from "next/link";
+
+// Este arquivo aparece em duas situações:
+//   • alguém digita uma URL que não existe
+//   • uma página chama `notFound()` (é o que a página de vaga faz)
+export default function NaoEncontrado() {
+  return (
+    &lt;div className="container" style={{ textAlign: "center", paddingBlock: 60 }}&gt;
+      &lt;p className="olho"&gt;erro 404&lt;/p&gt;
+      &lt;h1
+        style={{
+          fontSize: "clamp(30px, 6vw, 52px)",
+          fontWeight: 700,
+          letterSpacing: "-0.03em",
+          marginTop: 12,
+        }}
+      &gt;
+        Essa vaga &lt;span className="grad-text"&gt;saiu do ar&lt;/span&gt;
+      &lt;/h1&gt;
+      &lt;p style={{ color: "var(--text-2)", marginTop: 16 }}&gt;
+        Ou o endereço está errado, ou a vaga foi preenchida. Acontece! 🙃
+      &lt;/p&gt;
+      &lt;div style={{ marginTop: 28 }}&gt;
+        &lt;Link href="/vagas" className="btn btn-primario"&gt;
+          Ver as vagas abertas →
+        &lt;/Link&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="erro">
+    <h2>app/error.tsx</h2>
+    <p>A rede de proteção. Precisa de <code>"use client"</code> porque tem um botão de "tentar de novo". Se algo explodir ao renderizar, só este bloco aparece — o site não cai.</p>
+    <div class="file">📄 app/error.tsx <span class="linhas">44 linhas</span></div>
+<pre><code>"use client";
+
+// Um `error.tsx` PRECISA ser Componente de Cliente: ele tem um botão de
+// "tentar de novo" e precisa reagir ao clique.
+//
+// Ele funciona como uma rede de proteção: se qualquer coisa explodir ao
+// renderizar uma página, o site inteiro não cai — só este bloco aparece.
+export default function Erro({
+  error,
+  reset,
+}: {
+  error: Error &amp; { digest?: string };
+  reset: () =&gt; void;
+}) {
+  return (
+    &lt;div className="container" style={{ textAlign: "center", paddingBlock: 60 }}&gt;
+      &lt;p className="olho"&gt;algo quebrou&lt;/p&gt;
+      &lt;h1
+        style={{
+          fontSize: "clamp(28px, 5vw, 44px)",
+          fontWeight: 700,
+          letterSpacing: "-0.03em",
+          marginTop: 12,
+        }}
+      &gt;
+        Deu ruim por aqui 😅
+      &lt;/h1&gt;
+      &lt;p style={{ color: "var(--text-2)", marginTop: 14 }}&gt;
+        Erro capturado pelo Next. Em produção a mensagem técnica fica escondida
+        de quem usa — e vai só pro seu log.
+      &lt;/p&gt;
+
+      &lt;p className="mono" style={{ fontSize: 12, color: "var(--text-4)", marginTop: 8 }}&gt;
+        {error.digest ? `id: ${error.digest}` : error.message}
+      &lt;/p&gt;
+
+      &lt;div style={{ marginTop: 26 }}&gt;
+        &lt;button type="button" onClick={reset} className="btn btn-primario"&gt;
+          Tentar de novo
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <div style="margin-top:56px">
+    <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
+    <a class="cta" href="guia-nextjs.html">📘 Guia de Next.js 16</a>
+    <a class="cta" href="roteiro-projeto.html">🛠️ Roteiro do projeto</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Código da Aula 04 · Frontend — Transição de Carreira · NickDev 💜</div>
+</main>
+</div>
+</body>
+</html>

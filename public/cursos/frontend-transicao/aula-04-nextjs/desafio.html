@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 04 — Next.js 16 · NickDev</title>
+<meta name="description" content="Desafio da aula 04: crescer o Leque de Vagas com rotas novas, filtros na URL e a página de vagas salvas — em Next.js 16.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:880px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:64ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:38px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.partida{background:var(--surface-2);border:1px solid var(--line-strong);border-radius:16px;padding:22px 24px;margin-bottom:18px}
+.partida h3{font-size:17px;margin-bottom:8px}
+.partida p{color:var(--text-2);font-size:14.5px}
+
+.step{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px 24px 30px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step .nivel{font-family:var(--mono);font-size:11px;padding:4px 11px;border-radius:100px;border:1px solid var(--line);color:var(--text-3);white-space:nowrap}
+.step .nivel.f1{color:var(--green);border-color:rgba(95,208,138,.4)}
+.step .nivel.f2{color:var(--pink-light);border-color:rgba(232,139,184,.4)}
+.step .nivel.f3{color:var(--purple-light);border-color:rgba(169,140,224,.45)}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d8d3e6}
+pre .k{color:#F24487}pre .s{color:#A98CE0}pre .f{color:#E88BB8}pre .c{color:#6f6a83}pre .t{color:#7B9FE0}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text)}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-transicao">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="eyebrow">Desafio · Aula 04</div>
+  <h1>Faça o <span class="grad">Leque de Vagas</span> crescer 🪭⚡</h1>
+  <p class="lead">
+    Na aula a gente construiu a base juntos. Agora o projeto é seu: novas rotas,
+    um filtro que você inventa, a página das vagas salvas e tudo publicado na
+    Vercel. Este é o mesmo projeto que vamos usar até o fim do módulo —
+    <b>capriche, porque ele vai pro seu portfólio</b>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo</h3>
+      <p>Provar que você consegue <b>criar rotas sozinha(o)</b>, decidir o que é
+      Componente de Servidor e o que é de Cliente, e manter o estado da tela na
+      URL. Não é sobre escrever muito código — é sobre entender <b>onde cada
+      coisa mora</b>.</p>
+    </div>
+  </div>
+
+  <div class="partida">
+    <h3>📦 De onde começar</h3>
+    <p>
+      Continue o projeto que você fez na aula. Se perdeu o fio em algum ponto,
+      clone o repositório de referência e siga a partir dele — sem culpa, o
+      importante é você conseguir avançar:
+    </p>
+<pre>git clone https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas.git
+cd leque-de-vagas
+npm install
+npm run dev</pre>
+  </div>
+
+  <div class="label">Nível 1 · o essencial (todo mundo faz)</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><h3>A rota /empresas</h3><span class="nivel f1">essencial</span></div>
+    <p>Uma página que lista as <b>empresas</b> do mural — cada uma com o nome, o
+    logo (emoji) e quantas vagas ela tem abertas.</p>
+    <ul>
+      <li>Crie <code>app/empresas/page.tsx</code></li>
+      <li>Crie a função <code>listarEmpresas()</code> em <code>lib/vagas.ts</code></li>
+      <li>Adicione o link no cabeçalho</li>
+    </ul>
+<pre><span class="c">// dica: agrupar as vagas por empresa</span>
+<span class="k">export async function</span> <span class="f">listarEmpresas</span>() {
+  <span class="k">const</span> nomes = [...<span class="k">new</span> <span class="t">Set</span>(VAGAS.<span class="f">map</span>((v) =&gt; v.empresa))];
+
+  <span class="k">return</span> nomes.<span class="f">map</span>((nome) =&gt; {
+    <span class="k">const</span> vagas = VAGAS.<span class="f">filter</span>((v) =&gt; v.empresa === nome);
+    <span class="k">return</span> { nome, logo: vagas[<span class="s">0</span>].logo, total: vagas.length };
+  });
+}</pre>
+    <p class="tip"><b>Lembre:</b> a página é Componente de Servidor. Ela pode ser <code>async</code> e dar <code>await</code> direto.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><h3>A rota dinâmica /empresas/[empresa]</h3><span class="nivel f1">essencial</span></div>
+    <p>Clicando numa empresa, você vê <b>só as vagas dela</b>.</p>
+    <ul>
+      <li>Crie a pasta <code>[empresa]</code> dentro de <code>app/empresas/</code></li>
+      <li>Lembre do <code>await params</code> — Next 16!</li>
+      <li>Empresa que não existe → <code>notFound()</code></li>
+      <li>Use <code>generateMetadata</code> pro título ser o nome da empresa</li>
+    </ul>
+    <p class="tip"><b>Atenção ao acento e ao espaço:</b> "Farol Analytics" na URL vira <code>Farol%20Analytics</code>. Ou você usa <code>encodeURIComponent()</code> ao montar o link, ou cria um slug pra empresa no <code>lib/dados.ts</code> (mais elegante — e é o que faríamos de verdade).</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><h3>Um filtro novo, vivendo na URL</h3><span class="nivel f1">essencial</span></div>
+    <p>Além de área e nível, adicione o filtro de <b>modelo de trabalho</b>
+    (Remoto / Híbrido / Presencial) na página <code>/vagas</code>.</p>
+    <ul>
+      <li>O filtro vira <code>?modelo=Remoto</code> na URL</li>
+      <li>Nada de <code>useState</code> — o estado é a URL</li>
+      <li>Ele precisa <b>combinar</b> com os filtros que já existem</li>
+    </ul>
+    <p class="tip"><b>Teste que vale ponto:</b> aplique dois filtros, copie a URL, cole numa aba anônima. Chegou igual? Passou. 🎉</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><h3>Os estados da tela em todas as rotas</h3><span class="nivel f1">essencial</span></div>
+    <p>Nenhuma rota nova pode ficar sem:</p>
+    <div class="grid2">
+      <div class="mini"><b>loading.tsx</b> — de preferência um skeleton, não só a palavra "carregando"</div>
+      <div class="mini"><b>Estado vazio</b> — "nenhuma vaga com esses filtros", com um jeito de voltar</div>
+      <div class="mini"><b>metadata</b> — <code>title</code> e <code>description</code> próprios</div>
+      <div class="mini"><b>404</b> — <code>notFound()</code> onde faz sentido</div>
+    </div>
+  </div>
+
+  <div class="label">Nível 2 · pra consolidar (recomendado)</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>A página /salvas</h3><span class="nivel f2">recomendado</span></div>
+    <p>O botão ★ já guarda no <code>localStorage</code>. Agora mostre essas vagas
+    numa página.</p>
+    <ul>
+      <li>Como o <code>localStorage</code> só existe no navegador, esta página
+      precisa de um <b>Componente de Cliente</b></li>
+      <li>Leia o <code>localStorage</code> dentro do <code>useEffect</code> — nunca no corpo do componente</li>
+      <li>Trate o caso "nenhuma vaga salva ainda" com um link pra <code>/vagas</code></li>
+    </ul>
+    <p class="tip"><b>Pense antes de codar:</b> a lista de todas as vagas vem do servidor; só o "quais estão salvas" vem do navegador. Onde exatamente fica a fronteira <code>"use client"</code>? Essa é a pergunta do desafio.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">06</span><h3>Contador de salvas no cabeçalho</h3><span class="nivel f2">recomendado</span></div>
+    <p>Um <code>★ 3</code> no cabeçalho, mostrando quantas vagas você salvou.</p>
+    <p class="tip"><b>Spoiler honesto:</b> fazer o número atualizar <b>na hora</b> em que você clica na estrela de um card é difícil hoje — os dois componentes não conversam. Resolva do jeito que der (atualizar ao trocar de página já vale) e guarde a inquietação: é exatamente esse problema que Context e estado global resolvem, mais pra frente. 😏</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">07</span><h3>Deixe com a sua cara</h3><span class="nivel f2">recomendado</span></div>
+    <p>O projeto é seu. Mexa no visual com CSS Modules:</p>
+    <ul>
+      <li>Troque a paleta em <code>globals.css</code> (é tudo variável CSS — muda num lugar, reflete no site inteiro)</li>
+      <li>Troque a fonte com <code>next/font/google</code></li>
+      <li>Adicione pelo menos <b>três vagas suas</b> em <code>lib/dados.ts</code> — inclusive uma da área que você quer trabalhar</li>
+      <li>Ajuste o texto da <code>/sobre</code> pra falar de você</li>
+    </ul>
+  </div>
+
+  <div class="label">Nível 3 · pra brilhar ✨</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">08</span><h3>Extras</h3><span class="nivel f3">opcional</span></div>
+    <ul>
+      <li><b>Ordenação</b> por salário ou data, também na URL (<code>?ordem=recentes</code>)</li>
+      <li><b>Layout aninhado</b>: <code>app/vagas/layout.tsx</code> com um sub-cabeçalho só das rotas de vaga</li>
+      <li><b>&lt;Suspense&gt;</b>: o cabeçalho da lista aparece na hora, só os cards esperam</li>
+      <li><b>&lt;Image&gt;</b> com logos reais em <code>public/</code>, no lugar dos emojis</li>
+      <li><b>Paginação</b>: <code>?pagina=2</code> mostrando 6 vagas por vez</li>
+      <li><b>Acessibilidade</b>: navegue o site inteiro só com <code>Tab</code>. Dá pra ver onde você está? O botão ★ é anunciado?</li>
+    </ul>
+  </div>
+
+  <div class="label">Requisitos mínimos pra entrega</div>
+  <ul class="check">
+    <li>Rota <code>/empresas</code> funcionando, linkada no cabeçalho</li>
+    <li>Rota dinâmica <code>/empresas/[empresa]</code> com <code>await params</code></li>
+    <li>Filtro de <b>modelo</b> funcionando pela URL e combinando com os outros</li>
+    <li><code>loading.tsx</code> e <code>metadata</code> nas rotas novas</li>
+    <li>Pelo menos <b>3 vagas novas</b> criadas por você</li>
+    <li><code>npm run build</code> passando <b>sem erro</b></li>
+    <li>Publicado na Vercel, com o link no grupo 🌍</li>
+    <li>Código no GitHub, com commits que descrevem o que foi feito</li>
+  </ul>
+
+  <div class="label">O que NÃO pode 🚫</div>
+  <ul class="check no">
+    <li><code>"use client"</code> em página que não precisa (procure e apague os que sobraram)</li>
+    <li><code>&lt;a href&gt;</code> pra link interno — use <code>&lt;Link&gt;</code></li>
+    <li><code>.map()</code> sem <code>key</code></li>
+    <li><code>params.slug</code> sem <code>await</code> (vai nem buildar 😅)</li>
+    <li>Lista sem tratar o caso vazio</li>
+  </ul>
+
+  <div class="label">Como entregar</div>
+  <div class="entrega">
+    <ol>
+      <li>Rode <code>npm run build</code> e resolva o que aparecer</li>
+      <li>Suba pro GitHub (repositório <b>público</b>, pra virar portfólio)</li>
+      <li>Publique na Vercel</li>
+      <li>Mande no grupo: o <b>link do site</b> + o <b>link do repositório</b></li>
+      <li>Escreva uma frase sobre o que foi mais difícil — a gente revisa isso junto na aula 05 💜</li>
+    </ol>
+  </div>
+
+  <div class="label">Materiais de apoio</div>
+  <p class="lead" style="margin-top:0">
+    Travou? Antes de espiar o código pronto, releia a seção do guia sobre o
+    assunto e tente de novo. O erro que você resolve sozinha(o) é o que fica.
+  </p>
+  <div class="cta-row">
+    <a class="btn primary" href="guia-nextjs.html">📘 Guia de Next.js 16</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="btn" href="roteiro-projeto.html">🛠️ Roteiro do projeto</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+    <a class="btn" href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas" target="_blank" rel="noopener noreferrer">💻 Repositório base</a>
+  </div>
+
+  <div class="foot">Desafio 04 · Frontend — Transição de Carreira · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

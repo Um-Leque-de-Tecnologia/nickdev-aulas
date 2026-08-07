@@ -6,12 +6,14 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Frontend — Transição de Carreira · NickDev",
   description:
-    "Curso de frontend para transição de carreira: HTML, CSS, responsividade e deploy.",
+    "Curso de frontend para transição de carreira: HTML, CSS, JavaScript, design, React e Next.js — do primeiro site ao projeto publicado.",
 };
 
 const AULA_01 = "/cursos/frontend-transicao/aula-01-abertura";
 const AULA_02 = "/cursos/frontend-transicao/aula-02-javascript";
 const AULA_03 = "/cursos/frontend-transicao/aula-03-design-codigo";
+const AULA_04 = "/cursos/frontend-transicao/aula-04-nextjs";
+const REPO_PROJETO = "https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas";
 
 export default function FrontendTransicao() {
   return (
@@ -115,6 +117,44 @@ export default function FrontendTransicao() {
               </a>
               <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
                 🧑‍💻 Modelo de resposta
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="lesson">
+          <div className="idx">04</div>
+          <div className="body">
+            <h3>Introdução ao Next.js 16</h3>
+            <p>
+              Do site à aplicação: React, App Router, Componentes de Servidor e
+              de Cliente, rotas dinâmicas e deploy — 8 horas construindo o{" "}
+              <strong>Leque de Vagas</strong>, o projeto que acompanha todas as
+              próximas aulas.
+            </p>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_04}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_04}/guia-nextjs.html`}>
+                📘 Guia de Next.js 16
+              </a>
+              <a className="mat" href={`${AULA_04}/roteiro-projeto.html`}>
+                🛠️ Roteiro do projeto
+              </a>
+              <a className="mat" href={`${AULA_04}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_04}/codigos-desafio.html`}>
+                🧩 Código do projeto
+              </a>
+              <a
+                className="mat"
+                href={REPO_PROJETO}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                💻 Repositório no GitHub
               </a>
             </div>
           </div>

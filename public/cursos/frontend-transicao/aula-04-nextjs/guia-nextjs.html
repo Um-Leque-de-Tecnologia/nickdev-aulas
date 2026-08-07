@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · Next.js 16 · Aula 04 · NickDev</title>
+<meta name="description" content="Guia da aula 04: React essencial, App Router, Server e Client Components, rotas dinâmicas, metadata, CSS Modules e deploy — com Next.js 16.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:264px 1fr;max-width:1300px;margin:0 auto;gap:0}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:64ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0;max-width:72ch}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2);max-width:72ch}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .k{color:#F24487}
+  .s{color:#A98CE0}
+  .f{color:#E88BB8}
+  .t{color:#7B9FE0}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2);max-width:72ch}
+  .tip b{color:var(--purple-light)}
+  .warn{border-left-color:var(--magenta)}
+  .warn b{color:var(--pink-light)}
+
+  table{border-collapse:collapse;width:100%;max-width:860px;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;max-width:900px}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-transicao">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de codar</div>
+    <a href="#preparo">Preparando a máquina</a>
+    <a href="#framework">Framework, React e Next</a>
+    <div class="grp">React essencial</div>
+    <a href="#componente">Componente</a>
+    <a href="#jsx">JSX</a>
+    <a href="#props">Props</a>
+    <a href="#listas">Listas e keys</a>
+    <div class="grp">O projeto</div>
+    <a href="#criar">Criar o projeto</a>
+    <a href="#estrutura">Estrutura de pastas</a>
+    <div class="grp">App Router</div>
+    <a href="#rotas">Rotas por pasta</a>
+    <a href="#layout">layout.tsx</a>
+    <a href="#link">Navegação com Link</a>
+    <a href="#dinamica">Rota dinâmica [slug]</a>
+    <a href="#searchparams">Busca e filtros na URL</a>
+    <div class="grp">Servidor x Cliente</div>
+    <a href="#server">Componentes de Servidor</a>
+    <a href="#client">Componentes de Cliente</a>
+    <a href="#fronteira">A fronteira</a>
+    <a href="#dados">Buscando dados</a>
+    <div class="grp">Estados da tela</div>
+    <a href="#loading">loading.tsx</a>
+    <a href="#erros">error.tsx e 404</a>
+    <div class="grp">Acabamento</div>
+    <a href="#metadata">Metadata e SEO</a>
+    <a href="#estilo">CSS Modules e fontes</a>
+    <a href="#imagens">Imagens</a>
+    <a href="#typescript">TypeScript no básico</a>
+    <div class="grp">Fechando</div>
+    <a href="#next16">O que mudou no Next 16</a>
+    <a href="#deploy">Deploy na Vercel</a>
+    <a href="#erros-comuns">Erros comuns 🔧</a>
+    <a href="#cola">Cola rápida</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 04 · guia de apoio</div>
+  <h1>Introdução ao <span class="g">Next.js 16</span></h1>
+  <p class="lead">
+    Do primeiro <code>npx create-next-app</code> ao site publicado. Este guia é
+    sua cola: consulte durante a aula, durante o desafio e nas próximas semanas
+    enquanto o projeto <b>Leque de Vagas</b> cresce.
+  </p>
+  <div class="rule"></div>
+
+  <!-- ==================================================================== -->
+  <section id="preparo">
+    <h2>Preparando a máquina</h2>
+    <p>Três coisas antes de qualquer linha de código:</p>
+
+    <h3>1. Node.js 20.9 ou mais novo</h3>
+    <p>O Next.js 16 <b>não roda</b> em versões antigas. Confira no terminal:</p>
+<pre>node -v
+<span class="cm"># precisa aparecer v20.9.0 ou maior (v22 e v24 também servem)</span></pre>
+    <p>Se aparecer menos que isso (ou "comando não encontrado"), baixe a versão
+    <b>LTS</b> em <code>nodejs.org</code> e reinicie o terminal.</p>
+
+    <h3>2. VS Code + duas extensões</h3>
+    <ul>
+      <li><b>ES7+ React/Redux snippets</b> — atalhos como <code>rafce</code> que geram um componente inteiro</li>
+      <li><b>Prettier</b> — formata o código sozinho ao salvar (ative "Format on Save" nas configurações)</li>
+    </ul>
+
+    <h3>3. Git configurado</h3>
+    <p>Você já usou nas aulas anteriores. Vamos precisar dele de novo pro deploy.</p>
+
+    <div class="tip"><b>Terminal integrado:</b> no VS Code, <code>Ctrl</code> + <code>'</code> abre um terminal já na pasta do projeto. Use ele — evita 90% dos "não achei o arquivo".</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="framework">
+    <h2>Framework, React e Next: quem é quem</h2>
+
+    <table>
+      <tr><th>Nome</th><th>O que é</th><th>Analogia</th></tr>
+      <tr><td><b>React</b></td><td>Uma biblioteca pra construir interfaces com componentes.</td><td>O motor</td></tr>
+      <tr><td><b>Next.js</b></td><td>Um framework que usa React e resolve tudo em volta: rotas, servidor, build, imagens, SEO.</td><td>O carro inteiro</td></tr>
+      <tr><td><b>Vercel</b></td><td>A empresa que criou o Next e a plataforma onde a gente publica.</td><td>A estrada</td></tr>
+    </table>
+
+    <h3>Biblioteca x framework</h3>
+    <div class="duo">
+      <div class="box">
+        <h4>📚 Biblioteca</h4>
+        <b>Você chama ela.</b> O Bootstrap (aula 03) é uma biblioteca: você decide quando usar a classe <code>card</code>.
+      </div>
+      <div class="box">
+        <h4>🏗️ Framework</h4>
+        <b>Ela chama você.</b> O Next define onde os arquivos ficam e quando suas funções rodam. Você preenche os espaços.
+      </div>
+    </div>
+
+    <h3>Por que aprender Next.js agora</h3>
+    <ul>
+      <li>É o que mais aparece em <b>vaga de front-end júnior no Brasil</b></li>
+      <li>Nubank, iFood, Netflix, TikTok, Spotify, Notion e OpenAI usam</li>
+      <li>Você continua escrevendo HTML, CSS e JavaScript — só que organizados</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="componente">
+    <h2>Componente = função que devolve tela</h2>
+    <p>Você já fez isso na aula 03, sem saber o nome bonito:</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>Aula 03 — JavaScript puro</h4>
+<pre><span class="k">function</span> <span class="f">criarCard</span>(p) {
+  <span class="k">const</span> d = document.<span class="f">createElement</span>(<span class="s">"div"</span>);
+  d.innerHTML = <span class="s">`&lt;h3&gt;${p.titulo}&lt;/h3&gt;`</span>;
+  <span class="k">return</span> d;
+}</pre>
+      </div>
+      <div class="box ok">
+        <h4>Hoje — React</h4>
+<pre><span class="k">function</span> <span class="t">VagaCard</span>({ vaga }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">article</span>&gt;
+      &lt;<span class="t">h3</span>&gt;{vaga.titulo}&lt;/<span class="t">h3</span>&gt;
+    &lt;/<span class="t">article</span>&gt;
+  );
+}</pre>
+      </div>
+    </div>
+
+    <p>Três regras de componente:</p>
+    <ol>
+      <li>O nome começa com <b>letra maiúscula</b> — é assim que o React sabe que é seu componente e não uma tag HTML</li>
+      <li>Ele <b>devolve</b> a interface (com <code>return</code>)</li>
+      <li>Um arquivo, um componente principal, exportado com <code>export default</code></li>
+    </ol>
+
+    <div class="tip"><b>Atalho:</b> no VS Code, digite <code>rafce</code> num arquivo <code>.tsx</code> vazio e aperte Tab. Ele escreve o esqueleto do componente pra você.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="jsx">
+    <h2>JSX — HTML dentro do JavaScript</h2>
+    <p>JSX é HTML escrito direto no meio do JavaScript. Quase igual ao que você
+    já sabe, com <b>cinco diferenças</b>:</p>
+
+    <table>
+      <tr><th>No HTML</th><th>No JSX</th><th>Por quê</th></tr>
+      <tr><td><code>class="card"</code></td><td><code>className="card"</code></td><td><code>class</code> já é palavra reservada do JS</td></tr>
+      <tr><td><code>for="email"</code></td><td><code>htmlFor="email"</code></td><td><code>for</code> também é</td></tr>
+      <tr><td><code>onclick="f()"</code></td><td><code>onClick={f}</code></td><td>passa a função em si, não um texto</td></tr>
+      <tr><td><code>&lt;br&gt;</code> <code>&lt;img&gt;</code></td><td><code>&lt;br /&gt;</code> <code>&lt;img /&gt;</code></td><td>toda tag precisa fechar</td></tr>
+      <tr><td><code>style="color:red"</code></td><td><code>style={{ color: "red" }}</code></td><td>vira objeto JavaScript</td></tr>
+    </table>
+
+    <h3>As chaves { } são o portal pro JavaScript</h3>
+<pre><span class="k">const</span> nome = <span class="s">"Nicoly"</span>;
+<span class="k">const</span> vagas = 9;
+
+&lt;<span class="t">p</span>&gt;Oi, {nome}! Temos {vagas} vagas.&lt;/<span class="t">p</span>&gt;
+&lt;<span class="t">p</span>&gt;Metade disso é {vagas / <span class="s">2</span>}.&lt;/<span class="t">p</span>&gt;
+&lt;<span class="t">p</span>&gt;{nome.<span class="f">toUpperCase</span>()}&lt;/<span class="t">p</span>&gt;</pre>
+
+    <h3>Mostrar algo só às vezes</h3>
+<pre><span class="cm">// só aparece se for verdadeiro</span>
+{vaga.remoto &amp;&amp; &lt;<span class="t">span</span>&gt;🏠 Remoto&lt;/<span class="t">span</span>&gt;}
+
+<span class="cm">// um ou outro (if/else em uma linha)</span>
+{salva ? <span class="s">"★"</span> : <span class="s">"☆"</span>}</pre>
+
+    <h3>Um return, um elemento só</h3>
+    <p>Se precisar devolver dois elementos lado a lado, envolva num
+    <b>fragmento</b> — a tag vazia <code>&lt;&gt; &lt;/&gt;</code>, que não vira nada no HTML:</p>
+<pre>&lt;&gt;
+  &lt;<span class="t">h1</span>&gt;Título&lt;/<span class="t">h1</span>&gt;
+  &lt;<span class="t">p</span>&gt;Texto&lt;/<span class="t">p</span>&gt;
+&lt;/&gt;</pre>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="props">
+    <h2>Props — os parâmetros do componente</h2>
+    <p>Props são os dados que um componente recebe de quem o usa. É exatamente
+    a mesma ideia dos parâmetros de função da aula 02.</p>
+
+<pre><span class="cm">// definindo</span>
+<span class="k">function</span> <span class="t">Selo</span>({ texto, cor }) {
+  <span class="k">return</span> &lt;<span class="t">span</span> style={{ color: cor }}&gt;{texto}&lt;/<span class="t">span</span>&gt;;
+}
+
+<span class="cm">// usando (parece uma tag HTML sua)</span>
+&lt;<span class="t">Selo</span> texto=<span class="s">"Remoto"</span> cor=<span class="s">"#A98CE0"</span> /&gt;
+&lt;<span class="t">Selo</span> texto=<span class="s">"Júnior"</span> cor=<span class="s">"#F24487"</span> /&gt;</pre>
+
+    <p>Texto vai entre aspas; qualquer outra coisa (número, objeto, array,
+    função, variável) vai entre chaves:</p>
+<pre>&lt;<span class="t">VagaCard</span> vaga={vaga} destaque={<span class="k">true</span>} posicao={<span class="s">1</span>} /&gt;</pre>
+
+    <h3>Com TypeScript</h3>
+<pre><span class="k">function</span> <span class="t">Selo</span>({ texto, cor }: { texto: <span class="t">string</span>; cor: <span class="t">string</span> }) {
+  <span class="k">return</span> &lt;<span class="t">span</span> style={{ color: cor }}&gt;{texto}&lt;/<span class="t">span</span>&gt;;
+}</pre>
+    <div class="tip"><b>Vale o esforço:</b> com os tipos escritos, o VS Code passa a completar os nomes pra você e avisa na hora quando você digita <code>vaga.titlo</code>.</div>
+
+    <h3>children — o conteúdo entre as tags</h3>
+<pre><span class="k">function</span> <span class="t">Caixa</span>({ children }) {
+  <span class="k">return</span> &lt;<span class="t">div</span> className=<span class="s">"caixa"</span>&gt;{children}&lt;/<span class="t">div</span>&gt;;
+}
+
+&lt;<span class="t">Caixa</span>&gt;&lt;<span class="t">p</span>&gt;isto aqui vira o children&lt;/<span class="t">p</span>&gt;&lt;/<span class="t">Caixa</span>&gt;</pre>
+    <p>É exatamente assim que o <code>layout.tsx</code> funciona. 😉</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="listas">
+    <h2>Listas e keys</h2>
+    <p>O <code>.map()</code> da aula 02 continua sendo a ferramenta — só que
+    agora ele devolve componentes:</p>
+
+<pre>&lt;<span class="t">div</span> className={estilos.grade}&gt;
+  {vagas.<span class="f">map</span>((vaga) =&gt; (
+    &lt;<span class="t">VagaCard</span> key={vaga.slug} vaga={vaga} /&gt;
+  ))}
+&lt;/<span class="t">div</span>&gt;</pre>
+
+    <div class="tip warn"><b>A key é obrigatória.</b> Ela é o "RG" de cada item: é como o React sabe qual card é qual quando a lista muda de ordem ou tamanho. Use algo <b>único e estável</b> — o <code>slug</code>, o <code>id</code>. Evite o índice do array quando a lista puder ser reordenada ou filtrada.</div>
+
+    <h3>Lista vazia</h3>
+<pre>{vagas.length === <span class="s">0</span> ? (
+  &lt;<span class="t">p</span>&gt;Nenhuma vaga com esses filtros 😔&lt;/<span class="t">p</span>&gt;
+) : (
+  vagas.<span class="f">map</span>((v) =&gt; &lt;<span class="t">VagaCard</span> key={v.slug} vaga={v} /&gt;)
+)}</pre>
+    <p>Nunca esqueça deste caso — é o que separa um projeto de estudo de um
+    projeto que parece profissional.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="criar">
+    <h2>Criar o projeto</h2>
+<pre>npx create-next-app@latest leque-de-vagas</pre>
+
+    <p>Ele faz algumas perguntas. Respostas da nossa aula:</p>
+    <table>
+      <tr><th>Pergunta</th><th>Resposta</th><th>Por quê</th></tr>
+      <tr><td>TypeScript?</td><td><b>Yes</b></td><td>avisa erros antes de você abrir o navegador</td></tr>
+      <tr><td>ESLint?</td><td><b>Yes</b></td><td>aponta código suspeito</td></tr>
+      <tr><td>Tailwind CSS?</td><td><b>No</b></td><td>hoje usamos CSS Modules, com o CSS que você já sabe</td></tr>
+      <tr><td>App Router?</td><td><b>Yes</b></td><td>é o jeito atual do Next</td></tr>
+      <tr><td>Turbopack?</td><td><b>Yes</b></td><td>já é o padrão no 16</td></tr>
+      <tr><td>Import alias <code>@/*</code>?</td><td><b>Yes</b></td><td>permite <code>@/components/...</code> em vez de <code>../../..</code></td></tr>
+    </table>
+
+<pre>cd leque-de-vagas
+npm run dev
+<span class="cm"># → http://localhost:3000</span></pre>
+
+    <table>
+      <tr><th>Comando</th><th>Quando usar</th></tr>
+      <tr><td><code>npm run dev</code></td><td>o dia todo, enquanto desenvolve. Recarrega ao salvar.</td></tr>
+      <tr><td><code>npm run build</code></td><td>antes de publicar — mostra os erros que só aparecem em produção</td></tr>
+      <tr><td><code>npm start</code></td><td>roda o build de produção na sua máquina</td></tr>
+    </table>
+    <div class="tip"><b>Rode <code>npm run build</code> antes de dar push.</b> É a mesma coisa que a Vercel faz. Se passar aqui, passa lá.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="estrutura">
+    <h2>Estrutura de pastas</h2>
+<pre>leque-de-vagas/
+├── <b>app/</b>              <span class="cm">← 90% do seu tempo é aqui. Cada pasta vira uma URL.</span>
+│   ├── layout.tsx     <span class="cm">a moldura de todas as páginas</span>
+│   ├── page.tsx       <span class="cm">a home ("/")</span>
+│   └── globals.css    <span class="cm">tokens da marca e utilitários</span>
+├── <b>components/</b>       <span class="cm">suas peças reutilizáveis</span>
+├── <b>lib/</b>              <span class="cm">dados e funções (nada de interface aqui)</span>
+├── <b>public/</b>           <span class="cm">imagens e arquivos servidos como estão</span>
+├── node_modules/      <span class="cm">as dependências. Nunca mexa, nunca vai pro Git.</span>
+├── package.json       <span class="cm">nome do projeto, comandos e dependências</span>
+├── next.config.ts     <span class="cm">configurações do Next</span>
+└── tsconfig.json      <span class="cm">configurações do TypeScript</span></pre>
+
+    <p><code>components/</code> e <code>lib/</code> não são obrigatórias — o
+    Next não liga. Mas <b>separar é o que mantém o projeto navegável</b> daqui a
+    dois meses:</p>
+    <ul>
+      <li><b>app/</b> — rotas e páginas</li>
+      <li><b>components/</b> — peças de interface reutilizáveis</li>
+      <li><b>lib/</b> — dados, tipos e funções que não desenham nada</li>
+    </ul>
+
+    <h3>O atalho @/</h3>
+<pre><span class="cm">// em vez disto:</span>
+<span class="k">import</span> <span class="t">VagaCard</span> <span class="k">from</span> <span class="s">"../../../components/VagaCard"</span>;
+
+<span class="cm">// escreva isto (@ = a raiz do projeto):</span>
+<span class="k">import</span> <span class="t">VagaCard</span> <span class="k">from</span> <span class="s">"@/components/VagaCard"</span>;</pre>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="rotas">
+    <h2>Rotas por pasta</h2>
+    <p>A regra do App Router cabe numa frase: <b>pasta = rota, arquivo
+    <code>page.tsx</code> = a página</b>. Não existe arquivo de configuração de
+    rotas.</p>
+
+    <table>
+      <tr><th>Você cria</th><th>URL que nasce</th></tr>
+      <tr><td><code>app/page.tsx</code></td><td><code>/</code></td></tr>
+      <tr><td><code>app/sobre/page.tsx</code></td><td><code>/sobre</code></td></tr>
+      <tr><td><code>app/vagas/page.tsx</code></td><td><code>/vagas</code></td></tr>
+      <tr><td><code>app/vagas/[slug]/page.tsx</code></td><td><code>/vagas/qualquer-coisa</code></td></tr>
+    </table>
+
+    <div class="tip warn"><b>Pegadinha nº 1 da aula:</b> criar <code>app/sobre.tsx</code> em vez de <code>app/sobre/page.tsx</code>. Sem o arquivo chamado exatamente <code>page.tsx</code> dentro da pasta, a rota <b>não existe</b> e você toma 404.</div>
+
+    <h3>Os arquivos com nome reservado</h3>
+    <table>
+      <tr><th>Arquivo</th><th>O que faz</th></tr>
+      <tr><td><code>page.tsx</code></td><td>a página. Só ela cria a rota.</td></tr>
+      <tr><td><code>layout.tsx</code></td><td>moldura ao redor da página e de tudo abaixo dela</td></tr>
+      <tr><td><code>loading.tsx</code></td><td>aparece automaticamente enquanto a página busca dados</td></tr>
+      <tr><td><code>error.tsx</code></td><td>aparece se algo quebrar (precisa de <code>"use client"</code>)</td></tr>
+      <tr><td><code>not-found.tsx</code></td><td>seu 404</td></tr>
+    </table>
+
+    <h3>Pastas que NÃO viram rota</h3>
+    <p>Uma pasta entre parênteses serve só pra organizar:
+    <code>app/(institucional)/sobre/page.tsx</code> continua sendo
+    <code>/sobre</code>. Útil quando um grupo de páginas precisa de um layout
+    próprio.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="layout">
+    <h2>layout.tsx — escreva o cabeçalho uma vez</h2>
+    <p>Aquela dor de copiar a <code>&lt;nav&gt;</code> em todo arquivo HTML?
+    Resolvida:</p>
+
+    <div class="file">📄 app/layout.tsx</div>
+<pre><span class="k">import</span> <span class="t">Cabecalho</span> <span class="k">from</span> <span class="s">"@/components/Cabecalho"</span>;
+<span class="k">import</span> <span class="t">Rodape</span> <span class="k">from</span> <span class="s">"@/components/Rodape"</span>;
+<span class="k">import</span> <span class="s">"./globals.css"</span>;
+
+<span class="k">export default function</span> <span class="t">RootLayout</span>({
+  children,
+}: {
+  children: <span class="t">React.ReactNode</span>;
+}) {
+  <span class="k">return</span> (
+    &lt;<span class="t">html</span> lang=<span class="s">"pt-BR"</span>&gt;
+      &lt;<span class="t">body</span>&gt;
+        &lt;<span class="t">Cabecalho</span> /&gt;
+        &lt;<span class="t">main</span>&gt;{children}&lt;/<span class="t">main</span>&gt;   <span class="cm">← a página entra aqui</span>
+        &lt;<span class="t">Rodape</span> /&gt;
+      &lt;/<span class="t">body</span>&gt;
+    &lt;/<span class="t">html</span>&gt;
+  );
+}</pre>
+
+    <p>Pontos importantes:</p>
+    <ul>
+      <li>O layout <b>raiz</b> é obrigatório e é o único lugar com <code>&lt;html&gt;</code> e <code>&lt;body&gt;</code></li>
+      <li>Ao navegar entre páginas, o layout <b>não é remontado</b> — por isso o cabeçalho não pisca</li>
+      <li>Layouts se aninham: <code>app/vagas/layout.tsx</code> envolve tudo dentro de <code>/vagas</code>, dentro do layout raiz</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="link">
+    <h2>Navegação com &lt;Link&gt;</h2>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>❌ &lt;a href="/vagas"&gt;</h4>
+        Recarrega o site inteiro. Tela branca, JavaScript do zero, tudo de novo.
+      </div>
+      <div class="box ok">
+        <h4>✅ &lt;Link href="/vagas"&gt;</h4>
+        Troca só o que mudou e já baixa a página antes de você clicar (prefetch).
+      </div>
+    </div>
+
+<pre><span class="k">import</span> <span class="t">Link</span> <span class="k">from</span> <span class="s">"next/link"</span>;
+
+&lt;<span class="t">Link</span> href=<span class="s">"/vagas"</span>&gt;Ver as vagas&lt;/<span class="t">Link</span>&gt;
+&lt;<span class="t">Link</span> href={<span class="s">`/vagas/${vaga.slug}`</span>}&gt;{vaga.titulo}&lt;/<span class="t">Link</span>&gt;
+&lt;<span class="t">Link</span> href=<span class="s">"/vagas?nivel=Estágio"</span>&gt;Só estágios&lt;/<span class="t">Link</span>&gt;</pre>
+
+    <div class="tip"><b>Regra:</b> link <b>interno</b> do seu site → sempre <code>&lt;Link&gt;</code>. Link pra <b>fora</b> (GitHub, LinkedIn) → <code>&lt;a&gt;</code> normal com <code>target="_blank" rel="noopener noreferrer"</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="dinamica">
+    <h2>Rota dinâmica [slug]</h2>
+    <p>Uma pasta com o nome entre colchetes cria <b>uma página por item</b>.
+    Nove vagas no array = nove páginas no site, e você escreveu um arquivo só.</p>
+
+    <div class="file">📄 app/vagas/[slug]/page.tsx</div>
+<pre><span class="k">import</span> { notFound } <span class="k">from</span> <span class="s">"next/navigation"</span>;
+<span class="k">import</span> { buscarVagaPorSlug, listarSlugs } <span class="k">from</span> <span class="s">"@/lib/vagas"</span>;
+
+<span class="k">type</span> <span class="t">Props</span> = { params: <span class="t">Promise</span>&lt;{ slug: <span class="t">string</span> }&gt; };
+
+<span class="cm">// Diz ao Next quais slugs existem → ele pré-gera essas páginas no build.</span>
+<span class="k">export async function</span> <span class="f">generateStaticParams</span>() {
+  <span class="k">const</span> slugs = <span class="k">await</span> <span class="f">listarSlugs</span>();
+  <span class="k">return</span> slugs.<span class="f">map</span>((slug) =&gt; ({ slug }));
+}
+
+<span class="k">export default async function</span> <span class="t">PaginaVaga</span>({ params }: <span class="t">Props</span>) {
+  <span class="k">const</span> { slug } = <span class="k">await</span> params;        <span class="cm">← Next 16: params é Promise!</span>
+  <span class="k">const</span> vaga = <span class="k">await</span> <span class="f">buscarVagaPorSlug</span>(slug);
+
+  <span class="k">if</span> (!vaga) <span class="f">notFound</span>();               <span class="cm">← renderiza o not-found.tsx</span>
+
+  <span class="k">return</span> &lt;<span class="t">h1</span>&gt;{vaga.titulo}&lt;/<span class="t">h1</span>&gt;;
+}</pre>
+
+    <div class="tip warn"><b>Pegadinha nº 2 da aula:</b> no Next 16, <code>params</code> é uma <b>Promise</b>. Escrever <code>params.slug</code> direto (como em todo tutorial de 2024) dá erro. Sempre <code>const { slug } = await params;</code>.</div>
+
+    <h3>Variações</h3>
+    <table>
+      <tr><th>Pasta</th><th>Casa com</th></tr>
+      <tr><td><code>[slug]</code></td><td>um pedaço: <code>/vagas/abc</code></td></tr>
+      <tr><td><code>[...slug]</code></td><td>vários: <code>/docs/a/b/c</code></td></tr>
+      <tr><td><code>[[...slug]]</code></td><td>vários ou nenhum</td></tr>
+    </table>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="searchparams">
+    <h2>Busca e filtros na URL</h2>
+    <p>Quem vem do JavaScript puro pensa em <code>useState</code> pra guardar o
+    filtro. No App Router existe um caminho melhor: <b>guardar na própria
+    URL</b>.</p>
+
+    <div class="file">📄 app/vagas/page.tsx</div>
+<pre><span class="cm">// /vagas?busca=react&amp;area=Front-end</span>
+<span class="k">export default async function</span> <span class="t">PaginaVagas</span>({
+  searchParams,
+}: {
+  searchParams: <span class="t">Promise</span>&lt;{ busca?: <span class="t">string</span>; area?: <span class="t">string</span> }&gt;;
+}) {
+  <span class="k">const</span> { busca = <span class="s">""</span>, area = <span class="s">""</span> } = <span class="k">await</span> searchParams;
+  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>({ busca, area });
+  ...
+}</pre>
+
+    <p>E a busca é um formulário HTML comum, sem JavaScript nenhum:</p>
+<pre>&lt;<span class="t">form</span> action=<span class="s">"/vagas"</span>&gt;
+  &lt;<span class="t">input</span> type=<span class="s">"search"</span> name=<span class="s">"busca"</span> defaultValue={busca} /&gt;
+  &lt;<span class="t">button</span> type=<span class="s">"submit"</span>&gt;Buscar&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">form</span>&gt;</pre>
+
+    <p>O navegador monta <code>/vagas?busca=react</code> sozinho. E os filtros
+    viram simples <code>&lt;Link&gt;</code> que trocam a query string.</p>
+
+    <h3>Por que isso é melhor que useState</h3>
+    <ul>
+      <li>🔗 dá pra <b>compartilhar</b> o link com o filtro aplicado</li>
+      <li>⬅️ o botão <b>voltar</b> do navegador desfaz o filtro, de graça</li>
+      <li>🔌 funciona <b>sem JavaScript</b></li>
+      <li>⚡ a filtragem acontece no <b>servidor</b> — o navegador só recebe o resultado</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="server">
+    <h2>Componentes de Servidor</h2>
+    <p>Este é o conceito mais importante da aula. No App Router, <b>todo
+    componente é de servidor por padrão</b>.</p>
+
+    <p>Isso significa que o código dele roda no servidor, monta o HTML, e o
+    navegador recebe a página já pronta. O componente em si <b>não vira
+    JavaScript</b> enviado pro navegador.</p>
+
+    <table>
+      <tr><th>Você ganha</th><th>Na prática</th></tr>
+      <tr><td>Página leve</td><td>menos JavaScript pra baixar = abre rápido no 4G</td></tr>
+      <tr><td>SEO</td><td>o Google lê o conteúdo já no HTML</td></tr>
+      <tr><td>Segurança</td><td>chave de API e senha de banco ficam no servidor</td></tr>
+      <tr><td><code>await</code> direto</td><td>sem <code>useEffect</code>, sem estado de "carregando" na mão</td></tr>
+    </table>
+
+    <h3>O que ele NÃO pode fazer</h3>
+    <ul>
+      <li><code>useState</code>, <code>useEffect</code> e outros hooks</li>
+      <li><code>onClick</code>, <code>onChange</code> e outros eventos</li>
+      <li><code>window</code>, <code>document</code>, <code>localStorage</code></li>
+    </ul>
+    <p>Pra isso existe o Componente de Cliente. 👇</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="client">
+    <h2>Componentes de Cliente — "use client"</h2>
+    <p>Quando o componente precisa <b>reagir</b> a quem usa, ele também precisa
+    rodar no navegador. Você marca isso com uma linha:</p>
+
+    <div class="file">📄 components/SalvarButton.tsx</div>
+<pre><span class="s">"use client"</span>;   <span class="cm">← tem que ser a PRIMEIRA linha do arquivo</span>
+
+<span class="k">import</span> { useState } <span class="k">from</span> <span class="s">"react"</span>;
+
+<span class="k">export default function</span> <span class="t">SalvarButton</span>() {
+  <span class="k">const</span> [salva, setSalva] = <span class="f">useState</span>(<span class="k">false</span>);
+
+  <span class="k">return</span> (
+    &lt;<span class="t">button</span> onClick={() =&gt; <span class="f">setSalva</span>(!salva)}&gt;
+      {salva ? <span class="s">"★"</span> : <span class="s">"☆"</span>}
+    &lt;/<span class="t">button</span>&gt;
+  );
+}</pre>
+
+    <h3>useState em 30 segundos</h3>
+<pre><span class="k">const</span> [valor, setValor] = <span class="f">useState</span>(inicial);</pre>
+    <ul>
+      <li><code>valor</code> — o dado atual</li>
+      <li><code>setValor(novo)</code> — troca o dado <b>e redesenha a tela</b></li>
+      <li>Nunca faça <code>valor = novo</code> na mão: o React não fica sabendo</li>
+    </ul>
+
+    <h3>useEffect: pra depois que a tela apareceu</h3>
+<pre><span class="f">useEffect</span>(() =&gt; {
+  <span class="cm">// só roda no navegador, depois de renderizar</span>
+  <span class="f">setSalva</span>(<span class="f">lerDoLocalStorage</span>(slug));
+}, [slug]);   <span class="cm">← roda de novo quando slug mudar</span></pre>
+
+    <div class="tip warn"><b>Por que não ler <code>localStorage</code> direto no corpo do componente?</b> Porque o servidor não tem <code>localStorage</code>. O HTML do servidor sairia diferente do que o navegador desenha, e o React reclama: <i>"hydration mismatch"</i>. Leia sempre dentro do <code>useEffect</code>.</div>
+
+    <h3>Quando precisa de "use client"</h3>
+    <table>
+      <tr><th>Preciso de…</th><th>Qual componente</th></tr>
+      <tr><td>Buscar dados, ler banco, usar chave secreta</td><td><b>Servidor</b> (padrão)</td></tr>
+      <tr><td>Só mostrar conteúdo</td><td><b>Servidor</b> (padrão)</td></tr>
+      <tr><td><code>useState</code>, <code>useEffect</code></td><td><b>Cliente</b></td></tr>
+      <tr><td><code>onClick</code>, <code>onChange</code>, <code>onSubmit</code></td><td><b>Cliente</b></td></tr>
+      <tr><td><code>window</code>, <code>localStorage</code>, animação</td><td><b>Cliente</b></td></tr>
+    </table>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="fronteira">
+    <h2>A fronteira: empurre o "use client" pra baixo</h2>
+    <p>Este é o erro mais comum de quem está começando: colocar
+    <code>"use client"</code> no topo da página. Aí <b>tudo</b> dentro dela vira
+    cliente, e você perde as vantagens do servidor.</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>❌ "use client" na página</h4>
+        A página, a lista, os 9 cards — tudo vira JavaScript baixado pelo navegador.
+<pre><span class="s">"use client"</span>;
+<span class="k">export default function</span> <span class="t">Pagina</span>() {
+  ...9 cards...
+}</pre>
+      </div>
+      <div class="box ok">
+        <h4>✅ "use client" só no botão</h4>
+        A página e os cards continuam no servidor. Só a estrela vai pro navegador.
+<pre><span class="cm">// SalvarButton.tsx</span>
+<span class="s">"use client"</span>;
+<span class="k">export default function</span> <span class="t">SalvarButton</span>() {...}</pre>
+      </div>
+    </div>
+
+    <p><b>No Leque de Vagas há um único arquivo com <code>"use client"</code>:
+    o <code>SalvarButton</code>.</b> O resto do projeto inteiro é servidor.</p>
+
+    <h3>Regras da fronteira</h3>
+    <ul>
+      <li>Um componente de cliente <b>não pode importar</b> um de servidor diretamente</li>
+      <li>Mas ele <b>pode receber</b> um de servidor como <code>children</code> ou prop</li>
+      <li>Props que atravessam a fronteira precisam ser "serializáveis": texto, número, array, objeto simples. <b>Função não atravessa.</b></li>
+      <li><code>"use client"</code> contamina pra baixo: tudo que ele importa também vira cliente</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="dados">
+    <h2>Buscando dados</h2>
+    <p>Em Componente de Servidor, é só colocar <code>async</code> na função e
+    usar <code>await</code>. Só isso.</p>
+
+<pre><span class="k">export default async function</span> <span class="t">PaginaVagas</span>() {
+  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>();
+  <span class="k">return</span> &lt;<span class="t">div</span>&gt;{vagas.<span class="f">map</span>(...)}&lt;/<span class="t">div</span>&gt;;
+}</pre>
+
+    <h3>Duas buscas ao mesmo tempo</h3>
+<pre><span class="cm">// ❌ uma espera a outra: 400ms + 400ms = 800ms</span>
+<span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>();
+<span class="k">const</span> areas = <span class="k">await</span> <span class="f">listarAreas</span>();
+
+<span class="cm">// ✅ as duas ao mesmo tempo: 400ms no total</span>
+<span class="k">const</span> [vagas, areas] = <span class="k">await</span> <span class="t">Promise</span>.<span class="f">all</span>([
+  <span class="f">listarVagas</span>(),
+  <span class="f">listarAreas</span>(),
+]);</pre>
+
+    <h3>A camada de dados</h3>
+    <p>Repare que nenhuma página do projeto conhece o arquivo
+    <code>lib/dados.ts</code> (o array). Todas passam por
+    <code>lib/vagas.ts</code>:</p>
+
+    <div class="file">📄 lib/vagas.ts</div>
+<pre><span class="k">export async function</span> <span class="f">listarVagas</span>(filtro = {}) {
+  <span class="cm">// hoje: filtra um array</span>
+  <span class="cm">// aula 05: consulta um banco de verdade</span>
+  <span class="cm">// as páginas NÃO mudam — elas já usam await</span>
+}</pre>
+    <div class="tip"><b>Por que isso importa:</b> na aula 05 a gente troca o array por um banco. Só <b>um arquivo</b> muda. Isso é o que separa código que aguenta crescer de código que precisa ser reescrito.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="loading">
+    <h2>loading.tsx — carregamento sem escrever um if</h2>
+    <p>Crie o arquivo, e pronto. O Next mostra ele automaticamente enquanto o
+    <code>page.tsx</code> da mesma pasta busca os dados.</p>
+
+    <div class="file">📄 app/vagas/loading.tsx</div>
+<pre><span class="k">export default function</span> <span class="t">Carregando</span>() {
+  <span class="k">return</span> &lt;<span class="t">p</span>&gt;carregando vagas…&lt;/<span class="t">p</span>&gt;;
+}</pre>
+
+    <p>Você <b>nunca</b> escreve <code>if (carregando)</code>. Não existe estado
+    de loading pra gerenciar.</p>
+
+    <div class="tip"><b>UX de gente grande:</b> em vez de "carregando…", desenhe retângulos cinzas com a forma dos cards (skeleton). A espera parece bem menor. É o que o <code>loading.tsx</code> do nosso projeto faz.</div>
+
+    <h3>Suspense: carregar só um pedaço</h3>
+    <p>Se só uma parte da página é lenta, envolva ela em <code>&lt;Suspense&gt;</code>
+    — o resto aparece na hora:</p>
+<pre><span class="k">import</span> { <span class="t">Suspense</span> } <span class="k">from</span> <span class="s">"react"</span>;
+
+&lt;<span class="t">h1</span>&gt;Vagas&lt;/<span class="t">h1</span>&gt;                       <span class="cm">← aparece já</span>
+&lt;<span class="t">Suspense</span> fallback={&lt;<span class="t">p</span>&gt;buscando…&lt;/<span class="t">p</span>&gt;}&gt;
+  &lt;<span class="t">ListaDeVagas</span> /&gt;                    <span class="cm">← chega depois</span>
+&lt;/<span class="t">Suspense</span>&gt;</pre>
+    <p>Aprofundamos isso na aula 05.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="erros">
+    <h2>error.tsx e not-found.tsx</h2>
+
+    <h3>404 personalizado</h3>
+    <div class="file">📄 app/not-found.tsx</div>
+<pre><span class="k">export default function</span> <span class="t">NaoEncontrado</span>() {
+  <span class="k">return</span> &lt;<span class="t">h1</span>&gt;Essa vaga saiu do ar 🙃&lt;/<span class="t">h1</span>&gt;;
+}</pre>
+    <p>Ele aparece quando a URL não existe <b>ou</b> quando alguma página chama
+    <code>notFound()</code>.</p>
+
+    <h3>Rede de proteção</h3>
+    <div class="file">📄 app/error.tsx</div>
+<pre><span class="s">"use client"</span>;   <span class="cm">← error.tsx é SEMPRE cliente</span>
+
+<span class="k">export default function</span> <span class="t">Erro</span>({ error, reset }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span>&gt;
+      &lt;<span class="t">h1</span>&gt;Deu ruim por aqui 😅&lt;/<span class="t">h1</span>&gt;
+      &lt;<span class="t">button</span> onClick={reset}&gt;Tentar de novo&lt;/<span class="t">button</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  );
+}</pre>
+    <p>Se qualquer coisa explodir ao renderizar, só este bloco aparece — o site
+    inteiro não cai. Em produção a mensagem técnica fica escondida de quem usa
+    (você recebe só um <code>digest</code> pra achar no log).</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="metadata">
+    <h2>Metadata e SEO</h2>
+    <p>Você não escreve <code>&lt;head&gt;</code>. Você exporta um objeto e o
+    Next monta as tags.</p>
+
+    <h3>Página fixa</h3>
+<pre><span class="k">import type</span> { <span class="t">Metadata</span> } <span class="k">from</span> <span class="s">"next"</span>;
+
+<span class="k">export const</span> metadata: <span class="t">Metadata</span> = {
+  title: <span class="s">"Vagas"</span>,
+  description: <span class="s">"Todas as vagas do mural."</span>,
+};</pre>
+
+    <h3>Página dinâmica</h3>
+<pre><span class="k">export async function</span> <span class="f">generateMetadata</span>({ params }: <span class="t">Props</span>) {
+  <span class="k">const</span> { slug } = <span class="k">await</span> params;
+  <span class="k">const</span> vaga = <span class="k">await</span> <span class="f">buscarVagaPorSlug</span>(slug);
+  <span class="k">if</span> (!vaga) <span class="k">return</span> { title: <span class="s">"Vaga não encontrada"</span> };
+
+  <span class="k">return</span> {
+    title: <span class="s">`${vaga.titulo} — ${vaga.empresa}`</span>,
+    description: vaga.resumo,
+    openGraph: { title: vaga.titulo, description: vaga.resumo },
+  };
+}</pre>
+
+    <h3>Template de título no layout raiz</h3>
+<pre><span class="k">export const</span> metadata = {
+  title: {
+    default: <span class="s">"Leque de Vagas"</span>,
+    template: <span class="s">"%s · Leque de Vagas"</span>,   <span class="cm">← %s vira o title da página</span>
+  },
+};</pre>
+    <p>Página com <code>title: "Vagas"</code> vira
+    <code>&lt;title&gt;Vagas · Leque de Vagas&lt;/title&gt;</code>.</p>
+
+    <div class="tip"><b>Por que se importar:</b> é o <code>openGraph</code> que faz seu link aparecer bonito quando alguém cola no WhatsApp ou no LinkedIn. Em portfólio, isso conta ponto.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="estilo">
+    <h2>CSS Modules e fontes</h2>
+    <p>É o mesmo CSS da aula 01 e 03. A única novidade é o nome do arquivo
+    terminar em <code>.module.css</code>.</p>
+
+<pre><span class="cm">/* components/VagaCard.module.css */</span>
+.card { border-radius: 16px; padding: 22px; }
+.titulo { font-size: 18px; font-weight: 600; }</pre>
+
+<pre><span class="cm">// components/VagaCard.tsx</span>
+<span class="k">import</span> estilos <span class="k">from</span> <span class="s">"./VagaCard.module.css"</span>;
+
+&lt;<span class="t">article</span> className={estilos.card}&gt;
+  &lt;<span class="t">h3</span> className={estilos.titulo}&gt;...&lt;/<span class="t">h3</span>&gt;
+&lt;/<span class="t">article</span>&gt;</pre>
+
+    <p>No HTML final, <code>.card</code> vira
+    <code>VagaCard_card__x7f2q</code>. Ou seja: sua <code>.card</code>
+    <b>nunca</b> vai brigar com a <code>.card</code> de outro componente. Adeus,
+    <code>!important</code>.</p>
+
+    <h3>Juntando classes</h3>
+<pre>className={<span class="s">`${estilos.card} ${ativo ? estilos.ativo : <span class="s">""</span>}`</span>}
+className={<span class="s">`container ${estilos.interno}`</span>}   <span class="cm">← global + módulo</span></pre>
+
+    <h3>Onde fica o global</h3>
+    <p><code>app/globals.css</code>, importado uma única vez no layout raiz.
+    Coloque ali só o que é do site inteiro: variáveis de cor, reset e
+    utilitários.</p>
+
+    <h3>next/font</h3>
+<pre><span class="k">import</span> { <span class="t">Space_Grotesk</span> } <span class="k">from</span> <span class="s">"next/font/google"</span>;
+
+<span class="k">const</span> grotesk = <span class="f">Space_Grotesk</span>({
+  subsets: [<span class="s">"latin"</span>],
+  variable: <span class="s">"--fonte-titulo"</span>,
+  display: <span class="s">"swap"</span>,
+});
+
+&lt;<span class="t">html</span> className={grotesk.variable}&gt;</pre>
+    <p>O Next baixa a fonte no build e serve do seu próprio domínio: sem
+    requisição pro Google e sem o "pisca-texto" ao carregar.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="imagens">
+    <h2>Imagens</h2>
+<pre><span class="k">import</span> <span class="t">Image</span> <span class="k">from</span> <span class="s">"next/image"</span>;
+
+&lt;<span class="t">Image</span> src=<span class="s">"/logo.png"</span> alt=<span class="s">"Logo"</span> width={<span class="s">120</span>} height={<span class="s">40</span>} /&gt;</pre>
+    <p>O <code>&lt;Image&gt;</code> converte pra formato moderno, gera vários
+    tamanhos e só carrega quando a imagem chega perto da tela. <code>width</code>
+    e <code>height</code> são obrigatórios (é o que evita a página "pular"
+    enquanto carrega).</p>
+    <ul>
+      <li>Imagens locais ficam em <code>public/</code> e o caminho começa com <code>/</code></li>
+      <li>Imagem de outro site precisa ser liberada em <code>images.remotePatterns</code> no <code>next.config.ts</code></li>
+      <li><code>alt</code> sempre. Sempre.</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="typescript">
+    <h2>TypeScript: o mínimo que você precisa hoje</h2>
+    <p>TypeScript não muda o que o código faz. Ele só avisa quando você escreve
+    algo diferente do combinado — <b>antes</b> de você abrir o navegador.</p>
+
+<pre><span class="cm">// um "molde" pros dados</span>
+<span class="k">export type</span> <span class="t">Vaga</span> = {
+  slug: <span class="t">string</span>;
+  titulo: <span class="t">string</span>;
+  remoto: <span class="t">boolean</span>;
+  tags: <span class="t">string</span>[];
+  nivel: <span class="s">"Estágio"</span> | <span class="s">"Júnior"</span> | <span class="s">"Pleno"</span>;   <span class="cm">← só esses três valores</span>
+  salario?: <span class="t">string</span>;                          <span class="cm">← o ? = opcional</span>
+};
+
+<span class="cm">// usando no componente</span>
+<span class="k">function</span> <span class="t">VagaCard</span>({ vaga }: { vaga: <span class="t">Vaga</span> }) { ... }</pre>
+
+    <p>O ganho imediato: você digita <code>vaga.</code> e o VS Code lista todos
+    os campos. Digitou <code>vaga.titlo</code>? Sublinhado vermelho na hora.</p>
+
+    <div class="tip"><b>Travou num erro de tipo?</b> Não perca a aula por causa disso. Escreva o código, chame a monitoria, seguimos. TypeScript se aprende usando, não decorando.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="next16">
+    <h2>O que mudou no Next.js 16</h2>
+    <p>Boa parte dos tutoriais na internet é de Next 13/14. Se você copiar de
+    lá, vai quebrar. Guarde esta tabela:</p>
+
+    <table>
+      <tr><th>Antes (Next 14)</th><th>Agora (Next 16)</th></tr>
+      <tr><td><code>params.slug</code></td><td><code>const { slug } = await params</code></td></tr>
+      <tr><td><code>searchParams.busca</code></td><td><code>const { busca } = await searchParams</code></td></tr>
+      <tr><td><code>cookies().get()</code></td><td><code>(await cookies()).get()</code></td></tr>
+      <tr><td><code>headers().get()</code></td><td><code>(await headers()).get()</code></td></tr>
+      <tr><td><code>middleware.ts</code></td><td><code>proxy.ts</code> (mesma lógica, nome novo)</td></tr>
+      <tr><td>webpack por padrão</td><td><b>Turbopack</b> por padrão</td></tr>
+      <tr><td><code>next lint</code></td><td>não existe mais — use ESLint direto</td></tr>
+      <tr><td>Node 18 servia</td><td><b>Node 20.9+</b> obrigatório</td></tr>
+    </table>
+
+    <h3>Novidades que você vai ver por aí</h3>
+    <ul>
+      <li><b>Turbopack estável</b> — builds 2 a 5x mais rápidos, Fast Refresh até 10x</li>
+      <li><b>Cache Components</b> — a diretiva <code>"use cache"</code>, habilitada com <code>cacheComponents: true</code> no <code>next.config.ts</code>. Todo cache virou explícito: nada é guardado sem você pedir. <b>Vemos na aula 05.</b></li>
+      <li><b>React 19.2</b> — View Transitions, <code>useEffectEvent</code>, <code>&lt;Activity /&gt;</code></li>
+      <li><b>Next DevTools MCP</b> — a IA do seu editor consegue ler os logs e erros do seu app</li>
+    </ul>
+
+    <div class="tip"><b>Achou um tutorial ótimo mas antigo?</b> Aproveite as ideias, mas confira <code>params</code>/<code>searchParams</code>: se não tem <code>await</code>, é de antes do 16.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="deploy">
+    <h2>Deploy na Vercel</h2>
+    <ol>
+      <li>Rode <code>npm run build</code> local. Passou? Ótimo.</li>
+      <li><code>git push</code> pro GitHub</li>
+      <li>Em <code>vercel.com</code> → <b>Add New… → Project</b> → importe o repositório</li>
+      <li><b>Não mexa em nada.</b> A Vercel reconhece o Next sozinha.</li>
+      <li><b>Deploy</b> 🎉</li>
+    </ol>
+    <p>A partir daí, todo <code>git push</code> na <code>main</code> republica o
+    site automaticamente. E cada Pull Request ganha um link de pré-visualização
+    próprio.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="erros-comuns">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>"You're importing a component that needs useState…"</h4>
+    <p>Faltou <code>"use client"</code> na primeira linha do arquivo. Coloque no
+    componente <b>menor</b> possível, não na página.</p>
+
+    <h4>"params should be awaited before using its properties"</h4>
+    <p>Clássico do Next 16. Troque <code>params.slug</code> por
+    <code>const { slug } = await params;</code> e deixe a função
+    <code>async</code>.</p>
+
+    <h4>404 numa página que eu acabei de criar</h4>
+    <p>O arquivo precisa se chamar exatamente <code>page.tsx</code>, dentro da
+    pasta. <code>app/sobre.tsx</code> não vira rota.</p>
+
+    <h4>"Hydration failed" / "Text content did not match"</h4>
+    <p>O HTML do servidor saiu diferente do navegador. Causas quase sempre:
+    <code>localStorage</code>/<code>window</code> lidos fora do
+    <code>useEffect</code>, ou <code>Math.random()</code> / hora atual no meio da
+    renderização.</p>
+
+    <h4>"Module not found: Can't resolve '@/components/…'"</h4>
+    <p>Confira a maiúscula no nome do arquivo. No Windows funciona
+    <code>vagacard</code>, no servidor da Vercel (Linux) <b>não</b>. Escreva
+    igualzinho.</p>
+
+    <h4>Meu CSS não aparece</h4>
+    <p>Em CSS Module você precisa importar e usar
+    <code>className={estilos.card}</code> — <code>className="card"</code> puro
+    não funciona ali.</p>
+
+    <h4>"Cannot read properties of undefined"</h4>
+    <p>Você acessou um campo de algo que ainda não existe. Use
+    <code>vaga?.titulo</code> ou verifique antes com <code>if (!vaga) …</code>.</p>
+
+    <h4>Mudei o arquivo e nada mudou na tela</h4>
+    <p>Salvou? O <code>npm run dev</code> ainda está rodando? Se sim, pare
+    (<code>Ctrl</code>+<code>C</code>), apague a pasta <code>.next</code> e rode
+    de novo.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="cola">
+    <h2>Cola rápida</h2>
+
+<pre><span class="cm">// ---------- rotas ----------</span>
+app/page.tsx                 <span class="cm">→ /</span>
+app/vagas/page.tsx           <span class="cm">→ /vagas</span>
+app/vagas/[slug]/page.tsx    <span class="cm">→ /vagas/qualquer-coisa</span>
+layout.tsx  loading.tsx  error.tsx  not-found.tsx
+
+<span class="cm">// ---------- página de servidor com dados ----------</span>
+<span class="k">export default async function</span> <span class="t">Pagina</span>() {
+  <span class="k">const</span> dados = <span class="k">await</span> <span class="f">buscar</span>();
+  <span class="k">return</span> &lt;<span class="t">div</span>&gt;{dados.<span class="f">map</span>(d =&gt; &lt;<span class="t">Card</span> key={d.id} item={d} /&gt;)}&lt;/<span class="t">div</span>&gt;;
+}
+
+<span class="cm">// ---------- rota dinâmica (Next 16) ----------</span>
+<span class="k">const</span> { slug } = <span class="k">await</span> params;
+<span class="k">const</span> { busca } = <span class="k">await</span> searchParams;
+
+<span class="cm">// ---------- componente de cliente ----------</span>
+<span class="s">"use client"</span>;
+<span class="k">const</span> [x, setX] = <span class="f">useState</span>(<span class="k">false</span>);
+
+<span class="cm">// ---------- navegação ----------</span>
+<span class="k">import</span> <span class="t">Link</span> <span class="k">from</span> <span class="s">"next/link"</span>;
+&lt;<span class="t">Link</span> href=<span class="s">"/vagas"</span>&gt;Vagas&lt;/<span class="t">Link</span>&gt;
+
+<span class="cm">// ---------- 404 na mão ----------</span>
+<span class="k">import</span> { notFound } <span class="k">from</span> <span class="s">"next/navigation"</span>;
+<span class="k">if</span> (!vaga) <span class="f">notFound</span>();
+
+<span class="cm">// ---------- estilo ----------</span>
+<span class="k">import</span> estilos <span class="k">from</span> <span class="s">"./Card.module.css"</span>;
+&lt;<span class="t">div</span> className={estilos.card}&gt;
+
+<span class="cm">// ---------- comandos ----------</span>
+npm run dev     <span class="cm">desenvolver</span>
+npm run build   <span class="cm">conferir antes do push</span></pre>
+
+    <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
+    <a class="cta" href="roteiro-projeto.html">🛠️ Roteiro do projeto</a>
+    <a class="cta" href="codigos-desafio.html">🧩 Códigos comentados</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+
+    <div class="foot">Guia da Aula 04 · Frontend — Transição de Carreira · NickDev 💜</div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>
