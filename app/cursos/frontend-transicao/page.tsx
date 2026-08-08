@@ -128,7 +128,8 @@ export default function FrontendTransicao() {
             <h3>Introdução ao Next.js 16</h3>
             <p>
               Do site à aplicação: React, App Router, Componentes de Servidor e
-              de Cliente, rotas dinâmicas e deploy — 8 horas construindo o{" "}
+              de Cliente, <span className="mono">useState</span> e formulários
+              com validação — 8 horas de frontend construindo o{" "}
               <strong>Leque de Vagas</strong>, o projeto que acompanha todas as
               próximas aulas.
             </p>

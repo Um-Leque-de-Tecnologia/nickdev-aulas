@@ -118,6 +118,21 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     </div>
   </div>
 
+  <div class="aviso" style="border-left-color:var(--magenta)">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O recorte do dia: frontend</h3>
+      <p>
+        A aula 04 <b>não consome nenhum backend</b>. As vagas moram num arquivo
+        do projeto e os formulários validam sem enviar nada. Tudo que exige
+        buscar dados de fora — <code>async</code>/<code>await</code>,
+        <code>loading.tsx</code>, <code>&lt;Suspense&gt;</code>, filtro na URL —
+        é a <b>aula 05</b>. Se a turma perguntar, a resposta é: "semana que vem,
+        e sem refazer nada do que a gente fez hoje".
+      </p>
+    </div>
+  </div>
+
   <!-- ================= MANHÃ ================= -->
   <div class="label">Manhã · fundamentos e primeiras rotas</div>
 
@@ -295,7 +310,7 @@ npm run dev</pre>
     <div class="bloco-hd">
       <span class="hora">13:00</span>
       <h3>Servidor x Cliente — o conceito central</h3>
-      <span class="dur">75 min</span>
+      <span class="dur">60 min</span>
     </div>
     <p>O bloco mais importante do dia. Vale ir devagar e conferir se todo mundo
     acompanhou antes de seguir.</p>
@@ -338,13 +353,55 @@ npm run dev</pre>
       <li>O botão ★ funciona e guarda no <code>localStorage</code></li>
       <li>A turma consegue responder: "isto aqui é servidor ou cliente?"</li>
     </ul>
-    <div class="meta"><span class="chip fala">exposição + código</span><span class="chip mao">mão na massa</span><span class="chip">slides 21–26</span></div>
+    <div class="meta"><span class="chip fala">exposição + código</span><span class="chip mao">mão na massa</span><span class="chip">slides 21–25</span></div>
   </div>
 
   <div class="bloco">
     <div class="bloco-hd">
-      <span class="hora">14:15</span>
-      <h3>Rota dinâmica, metadata e os estados da tela</h3>
+      <span class="hora">14:00</span>
+      <h3>Busca e filtros na tela, com useState</h3>
+      <span class="dur">45 min</span>
+    </div>
+    <p>Aplicação imediata do que acabou de ser explicado. Pergunte antes de
+    codar: "onde tem que ficar o <code>useState</code> pra busca funcionar?".
+    Deixe a turma errar — é a melhor forma de entender a fronteira.</p>
+
+    <div class="file">📄 components/MuralDeVagas.tsx</div>
+<pre><span class="s">"use client"</span>;
+
+<span class="k">const</span> [busca, setBusca] = <span class="f">useState</span>(<span class="s">""</span>);
+
+<span class="c">// estado DERIVADO: calculado, nunca guardado</span>
+<span class="k">const</span> visiveis = <span class="f">filtrarVagas</span>(vagas, { busca });</pre>
+
+    <p><b>A conversa que vale ouro:</b> proponha em voz alta a versão errada —
+    um segundo <code>useState</code> guardando a lista filtrada. Escreva ela.
+    Depois mostre o buraco: mexer no filtro de área e esquecer de atualizar a
+    lista. A tela mente. Aí apague e faça derivado.</p>
+
+    <div class="dica"><b>Regra pra turma levar:</b> "dois estados que precisam combinar um com o outro são uma dupla que um dia vai brigar". Se dá pra calcular, calcule.</div>
+
+    <p>Na sequência:</p>
+    <ul>
+      <li>Passar <code>busca</code> e <code>aoMudarBusca</code> pro <code>&lt;Filtros&gt;</code> — apresentar <b>componente controlado</b></li>
+      <li>Mostrar que o <code>Filtros.tsx</code> <b>não tem</b> <code>"use client"</code> e mesmo assim roda no navegador (contágio)</li>
+      <li>Tratar a lista vazia — "nenhuma vaga com esses filtros"</li>
+    </ul>
+
+    <div class="dica"><b>Honestidade que prepara a aula 05:</b> abra a aba Network e mostre que a lista inteira viajou pro navegador. "Funciona lindamente com 9 vagas. Com 9 mil, não. Semana que vem a gente devolve isso pro servidor."</div>
+
+    <ul class="check">
+      <li>Digitar na busca filtra a lista na hora</li>
+      <li>Ninguém tem um <code>useState</code> guardando a lista filtrada</li>
+      <li>A turma sabe dizer por que o <code>Filtros</code> é cliente sem ter a diretiva</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 25b–26b</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd">
+      <span class="hora">14:45</span>
+      <h3>Rota dinâmica, metadata e 404</h3>
       <span class="dur">45 min</span>
     </div>
     <p>A página de detalhe da vaga. Comece criando a pasta com colchetes
@@ -359,18 +416,19 @@ npm run dev</pre>
   params: <span class="t">Promise</span>&lt;{ slug: <span class="t">string</span> }&gt;;
 }) {
   <span class="k">const</span> { slug } = <span class="k">await</span> params;   <span class="c">← Next 16!</span>
-  <span class="k">const</span> vaga = <span class="k">await</span> <span class="f">buscarVagaPorSlug</span>(slug);
+  <span class="k">const</span> vaga = <span class="f">buscarVagaPorSlug</span>(slug);
   <span class="k">if</span> (!vaga) <span class="f">notFound</span>();
 
   <span class="k">return</span> &lt;<span class="t">h1</span>&gt;{vaga.titulo}&lt;/<span class="t">h1</span>&gt;;
 }</pre>
+
+    <div class="dica"><b>Antecipe a pergunta:</b> "por que tem <code>await</code> aqui se você disse que hoje não tem espera?". Resposta: este <code>await</code> é de <b>roteamento</b> — descobrir qual slug a pessoa pediu. Não é busca de dados. A busca em si (<code>buscarVagaPorSlug</code>) é instantânea.</div>
 
     <p>Na sequência, sem pressa:</p>
     <ul>
       <li>Fazer o card linkar pro detalhe com <code>href={`/vagas/${vaga.slug}`}</code></li>
       <li>Digitar uma URL inventada e ver o <code>notFound()</code> agir</li>
       <li>Criar <code>not-found.tsx</code> com a cara do projeto</li>
-      <li>Criar <code>loading.tsx</code> — e mostrar ele aparecendo (o <code>demora()</code> em <code>lib/vagas.ts</code> existe exatamente pra isso)</li>
       <li><code>generateMetadata</code> — abrir a aba do navegador e ver o título mudar por vaga</li>
       <li><code>generateStaticParams</code> — rodar <code>npm run build</code> e mostrar as 9 páginas geradas na tabela do terminal</li>
     </ul>
@@ -378,47 +436,78 @@ npm run dev</pre>
     <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 27–29</span></div>
   </div>
 
-  <div class="pausa"><span class="hora">15:00</span> ☕ Café · 15 minutos</div>
+  <div class="pausa"><span class="hora">15:30</span> ☕ Café · 15 minutos</div>
 
   <div class="bloco">
     <div class="bloco-hd">
-      <span class="hora">15:15</span>
-      <h3>Busca e filtros na URL</h3>
+      <span class="hora">15:45</span>
+      <h3>Telas de login e cadastro — o assunto novo</h3>
       <span class="dur">60 min</span>
     </div>
-    <p>Comece perguntando: "como vocês fariam a busca?". Quase todo mundo vai
-    responder <code>useState</code>. Aí você mostra o caminho melhor.</p>
+    <p>O bloco mais aplicável do dia: formulário é onde quase todo mundo trava, e
+    é o pedaço de interface que mais cai em teste técnico de vaga júnior.</p>
 
-<pre><span class="k">export default async function</span> <span class="t">PaginaVagas</span>({
-  searchParams,
-}: {
-  searchParams: <span class="t">Promise</span>&lt;{ busca?: <span class="t">string</span>; area?: <span class="t">string</span> }&gt;;
-}) {
-  <span class="k">const</span> { busca = <span class="s">""</span>, area = <span class="s">""</span> } = <span class="k">await</span> searchParams;
-  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>({ busca, area });
-  ...
+    <p><b>Deixe claro de saída:</b> "estas telas não fazem login. Elas validam,
+    dão feedback e param aí. O miolo chega na aula 05 — e a interface não vai
+    precisar ser refeita." Isso evita a frustração de descobrir depois.</p>
+
+    <p><b>1. O grupo de rotas.</b> Crie <code>app/(conta)/</code> com parênteses
+    e mostre que a URL continua <code>/entrar</code>. Crie o
+    <code>layout.tsx</code> ali dentro e mostre o cartão centralizado
+    aparecendo — dentro do cabeçalho e rodapé do layout raiz. Layouts se
+    aninham.</p>
+
+    <p><b>2. Input controlado.</b> Escreva primeiro o input <b>errado</b>: com
+    <code>value={email}</code> e sem <code>onChange</code>. Peça pra turma
+    digitar. Nada acontece. Silêncio. Aí adicione o <code>onChange</code>.</p>
+
+<pre>&lt;<span class="t">input</span>
+  value={email}
+  onChange={(evento) =&gt; <span class="f">setEmail</span>(evento.target.value)}
+/&gt;</pre>
+
+    <p><b>3. preventDefault.</b> Mesma técnica: envie o formulário sem ele e
+    mostre a página recarregando e apagando tudo. Depois conserte.</p>
+
+    <p><b>4. Validação.</b> Uma função que devolve um objeto de erros:</p>
+
+<pre><span class="k">function</span> <span class="f">validar</span>() {
+  <span class="k">const</span> novos = {};
+  <span class="k">if</span> (!email.<span class="f">trim</span>()) novos.email = <span class="s">"Escreva seu e-mail."</span>;
+  <span class="k">if</span> (senha.length &lt; <span class="s">6</span>) novos.senha = <span class="s">"A senha tem pelo menos 6 caracteres."</span>;
+  <span class="k">return</span> novos;   <span class="c">← vazio = está tudo certo</span>
 }</pre>
 
-<pre>&lt;<span class="t">form</span> action=<span class="s">"/vagas"</span>&gt;
-  &lt;<span class="t">input</span> type=<span class="s">"search"</span> name=<span class="s">"busca"</span> defaultValue={busca} /&gt;
-  &lt;<span class="t">button</span>&gt;Buscar&lt;/<span class="t">button</span>&gt;
-&lt;/<span class="t">form</span>&gt;</pre>
+    <p><b>5. O CampoTexto.</b> Depois de escrever o segundo campo na mão, pare e
+    pergunte: "vamos escrever isso mais quatro vezes no cadastro?". A turma
+    responde sozinha. Extraia o componente ali, na frente deles — é a
+    componentização da aula 03 valendo de novo.</p>
 
-    <p>Depois de funcionar, faça as três demonstrações que vendem a ideia:</p>
-    <ol>
-      <li><b>Copie a URL filtrada</b> e cole em outra aba — o filtro veio junto</li>
-      <li><b>Aperte voltar</b> — o filtro desfaz sozinho</li>
-      <li><b>Desligue o JavaScript</b> no DevTools — a busca continua funcionando</li>
-    </ol>
-    <p>Feche o bloco com a tabela do que mudou no <b>Next.js 16</b>: por que
-    <code>params</code> e <code>searchParams</code> são Promise, e por que
-    tutoriais antigos vão quebrar.</p>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 30–32</span></div>
+    <p><b>6. Estado de enviando.</b> <code>setTimeout</code> fingindo o servidor,
+    botão com <code>disabled={enviando}</code> e o texto virando "Entrando…".
+    Explique por que o <code>disabled</code> não é enfeite: clique duplo ansioso
+    cria duas contas.</p>
+
+    <p><b>7. Acessibilidade em 4 linhas.</b> <code>label htmlFor</code>,
+    <code>aria-invalid</code>, <code>aria-describedby</code>,
+    <code>type="email"</code>. Navegue o formulário só com <code>Tab</code> na
+    frente da turma.</p>
+
+    <div class="dica"><b>Se der tempo:</b> o medidor de força de senha no <code>/cadastro</code> é o melhor exemplo de estado derivado que existe — ele é <b>calculado</b> da senha, nunca guardado.</div>
+
+    <ul class="check">
+      <li><code>/entrar</code> e <code>/cadastro</code> funcionando, com layout compartilhado</li>
+      <li>Todo mundo viu o campo travado (sem <code>onChange</code>) e consertou</li>
+      <li>Todo mundo viu a página recarregar por falta de <code>preventDefault</code></li>
+      <li>Erros aparecem por campo e somem ao digitar</li>
+      <li>A turma entendeu que validação no navegador <b>não é segurança</b></li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição + código</span><span class="chip mao">mão na massa</span><span class="chip">slides 30–35</span></div>
   </div>
 
   <div class="bloco">
     <div class="bloco-hd">
-      <span class="hora">16:15</span>
+      <span class="hora">16:45</span>
       <h3>Deploy, desafio e vitrine</h3>
       <span class="dur">45 min</span>
     </div>
@@ -430,7 +519,8 @@ npm run dev</pre>
       <li>Apresentação do desafio e do que vem na aula 05</li>
     </ol>
     <div class="dica"><b>Vitrine:</b> abra 4 ou 5 projetos da turma no telão. Ver o próprio nome numa URL <code>.vercel.app</code> é o que faz a pessoa voltar semana que vem.</div>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 33–35</span></div>
+    <div class="dica"><b>Feche costurando com a aula 05:</b> mostre a tabela "hoje x semana que vem" (slide 33b). A mensagem é uma só — <b>nada do que foi feito hoje será jogado fora</b>. Os formulários já estão prontos e só vão ganhar o miolo.</div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 36–43</span></div>
   </div>
 
   <!-- ================= EXTRAS ================= -->
@@ -443,10 +533,11 @@ npm run dev</pre>
     <ul>
       <li><b>Layout aninhado</b> — criar <code>app/vagas/layout.tsx</code> com um subtítulo e ver ele aparecer só nas rotas de vaga</li>
       <li><b>&lt;Image&gt;</b> — trocar o emoji da empresa por logo de verdade em <code>public/</code></li>
-      <li><b>&lt;Suspense&gt;</b> — deixar o cabeçalho aparecer na hora e só a lista carregar depois</li>
-      <li><b>Ordenação</b> — mais um parâmetro na URL: <code>?ordem=salario</code></li>
+      <li><b>Ordenação</b> — mais um <code>useState</code> e um <code>&lt;select&gt;</code>: por salário ou por data</li>
+      <li><b>Botão desabilitado</b> — só habilitar "Entrar" quando os dois campos tiverem algo</li>
       <li><b>Página /salvas</b> — lendo o <code>localStorage</code> (é um bom aquecimento pro desafio)</li>
     </ul>
+    <div class="dica"><b>Não puxe pra aula 05:</b> se alguém perguntar de <code>&lt;Suspense&gt;</code>, <code>loading.tsx</code> ou como conectar numa API, anote no quadro numa lista de "semana que vem". Guardar a pergunta visível vale mais que responder pela metade.</div>
   </div>
 
   <div class="bloco">
@@ -457,7 +548,7 @@ npm run dev</pre>
       <li><b>Alguém não conseguiu instalar o Node</b> — coloque em dupla com quem conseguiu. Ninguém fica de fora do dia por causa de instalador.</li>
       <li><b>Ritmos muito diferentes</b> — quem terminou vira monitor. Explicar é o melhor jeito de fixar.</li>
       <li><b>Erro de TypeScript no meio do live coding</b> — leia a mensagem em voz alta e traduza. Normalizar erro é parte da aula.</li>
-      <li><b>Atrasou o cronograma</b> — corte primeiro os bônus, depois o bloco de busca/filtros (vira desafio). Nunca corte o bloco de Servidor x Cliente.</li>
+      <li><b>Atrasou o cronograma</b> — corte nesta ordem: os bônus, depois o <code>/cadastro</code> (o <code>/entrar</code> já ensina tudo, e o cadastro vira desafio), depois a rota dinâmica. <b>Nunca</b> corte Servidor x Cliente nem o <code>/entrar</code>.</li>
     </ul>
   </div>
 

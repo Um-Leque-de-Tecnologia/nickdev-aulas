@@ -93,23 +93,31 @@
     <div class="grp">Estrutura e configuração</div>
     <a href="#package-json">package.json</a>
     <a href="#next-config">next.config.ts</a>
-    <div class="grp">Os dados</div>
+    <div class="grp">Os dados (sem backend)</div>
     <a href="#tipos">lib/tipos.ts</a>
     <a href="#vagas-lib">lib/vagas.ts</a>
     <div class="grp">O esqueleto</div>
     <a href="#layout">app/layout.tsx</a>
     <a href="#cabecalho">components/Cabecalho.tsx</a>
     <a href="#rodape">components/Rodape.tsx</a>
-    <div class="grp">Componentes</div>
+    <div class="grp">O mural: componentes e estado</div>
     <a href="#vagacard">components/VagaCard.tsx</a>
     <a href="#vagacard-css">components/VagaCard.module.css</a>
-    <a href="#salvar">components/SalvarButton.tsx</a>
+    <a href="#mural-vagas">components/MuralDeVagas.tsx</a>
     <a href="#filtros">components/Filtros.tsx</a>
+    <a href="#salvar">components/SalvarButton.tsx</a>
+    <div class="grp">Formulários (o assunto novo)</div>
+    <a href="#campotexto">components/CampoTexto.tsx</a>
+    <a href="#form-entrar">components/FormEntrar.tsx</a>
+    <a href="#form-cadastro">components/FormCadastro.tsx</a>
+    <a href="#form-css">components/formulario.module.css</a>
     <div class="grp">As páginas</div>
     <a href="#home">app/page.tsx</a>
     <a href="#lista">app/vagas/page.tsx</a>
     <a href="#detalhe">app/vagas/[slug]/page.tsx</a>
-    <a href="#loading">app/vagas/loading.tsx</a>
+    <a href="#conta-layout">app/(conta)/layout.tsx</a>
+    <a href="#entrar">app/(conta)/entrar/page.tsx</a>
+    <a href="#cadastro">app/(conta)/cadastro/page.tsx</a>
     <a href="#notfound">app/not-found.tsx</a>
     <a href="#erro">app/error.tsx</a>
   </nav>
@@ -121,7 +129,9 @@
   <p class="lead">
     Todo o código do projeto que construímos na aula, comentado. Use como
     referência quando travar — mas <b>tente antes</b>. O erro que você resolve
-    sozinha(o) é o que fica. 💜
+    sozinha(o) é o que fica. 💜<br><br>
+    <b>Nada aqui consome backend:</b> as vagas moram num arquivo do projeto e os
+    formulários validam sem enviar. Buscar dados de fora é a aula 05.
   </p>
   <div class="rule"></div>
 
@@ -140,7 +150,7 @@
   <div class="divisor" id="config">Estrutura e configuração</div>
   <section id="package-json">
     <h2>package.json</h2>
-    <p>O RG do projeto: nome, comandos e dependências. Repare que os <code>scripts</code> são só três — <code>dev</code>, <code>build</code> e <code>start</code>. No Next 16 não existe mais <code>next lint</code>.</p>
+    <p>O RG do projeto: nome, comandos e dependências. No Next 16 não existe mais <code>next lint</code>.</p>
     <div class="file">📄 package.json <span class="linhas">22 linhas</span></div>
 <pre><code>{
   "name": "leque-de-vagas",
@@ -168,7 +178,7 @@
 
   <section id="next-config">
     <h2>next.config.ts</h2>
-    <p>Configuração do Next. Num projeto de aula, quase sempre fica quase vazio mesmo — o Next já vem com bons padrões.</p>
+    <p>Configuração do Next. Num projeto de aula fica quase vazio mesmo — o Next já vem com bons padrões.</p>
     <div class="file">📄 next.config.ts <span class="linhas">16 linhas</span></div>
 <pre><code>import path from "node:path";
 import type { NextConfig } from "next";
@@ -188,11 +198,11 @@ const nextConfig: NextConfig = {
 export default nextConfig;</code></pre>
   </section>
 
-  <div class="divisor" id="dados">Os dados</div>
+  <div class="divisor" id="dados">Os dados (sem backend)</div>
   <section id="tipos">
     <h2>lib/tipos.ts</h2>
-    <p>Os moldes dos dados. TypeScript não muda o que o código faz — ele avisa quando você escreve algo diferente do combinado, <b>antes</b> de você abrir o navegador.</p>
-    <div class="file">📄 lib/tipos.ts <span class="linhas">39 linhas</span></div>
+    <p>Os moldes dos dados. TypeScript não muda o que o código faz — ele avisa quando você escreve algo diferente do combinado, <b>antes</b> de abrir o navegador.</p>
+    <div class="file">📄 lib/tipos.ts <span class="linhas">40 linhas</span></div>
 <pre><code>// ============================================================================
 // Os "moldes" dos nossos dados.
 // TypeScript não muda o que o código faz — ele avisa quando a gente escreve
@@ -226,69 +236,76 @@ export type Vaga = {
   cor: string;
 };
 
-/** O que a busca aceita receber pela URL (?busca=react&amp;area=Front-end) */
+/** O que o filtro do mural aceita. Campo vazio = "não filtra por isso". */
 export type FiltroVagas = {
   busca?: string;
   area?: string;
   nivel?: string;
+  modelo?: string;
 };</code></pre>
   </section>
 
   <section id="vagas-lib">
     <h2>lib/vagas.ts</h2>
-    <p>A camada de dados. Todas as funções são <code>async</code> de propósito: hoje elas leem um array, na aula 05 vão ler um banco de verdade. Como as páginas já usam <code>await</code>, no dia da troca <b>nenhuma página muda</b>.</p>
-    <div class="file">📄 lib/vagas.ts <span class="linhas">106 linhas</span></div>
+    <p>A camada de dados. Tudo aqui é <b>síncrono</b>: os dados já estão na memória, não há nada pra esperar. Na aula 05 estas mesmas funções vão buscar de fora e virar <code>async</code> — e como nenhuma página conhece o <code>dados.ts</code> diretamente, <b>só este arquivo muda</b>.</p>
+    <div class="file">📄 lib/vagas.ts <span class="linhas">109 linhas</span></div>
 <pre><code>import { VAGAS } from "./dados";
 import type { Area, FiltroVagas, Nivel, Vaga } from "./tipos";
 
 // ============================================================================
 // A camada de dados.
 //
-// Todas as funções são `async` de propósito: hoje elas leem um array, mas
-// amanhã vão ler um banco de dados de verdade. Como as páginas já usam
-// `await`, no dia da troca NENHUMA página precisa mudar. 💜
+// Hoje (aula 04) tudo aqui é SÍNCRONO: os dados já estão na memória, num array.
+// Ninguém precisa esperar por nada — a gente só lê, filtra e devolve.
+//
+// Na aula 05 essas mesmas funções vão buscar os dados de fora (uma API, um
+// banco). Aí elas viram `async` e quem chama passa a usar `await`. É por isso
+// que NENHUMA página conhece o `dados.ts` diretamente: todas passam por aqui.
+// No dia da troca, só este arquivo muda. 💜
 // ============================================================================
 
-/** Simula a demora de uma consulta ao banco, pra a gente ver o `loading.tsx`. */
-function demora(ms: number) {
-  return new Promise((resolve) =&gt; setTimeout(resolve, ms));
-}
-
 /** Tira acentos e deixa minúsculo — assim "junior" acha "Júnior". */
-function normalizar(texto: string) {
+export function normalizar(texto: string) {
   return texto
     .normalize("NFD") // separa a letra do acento: "á" vira "a" + "´"
-    .replace(/[\u0300-\u036f]/g, "") // remove os acentos que sobraram
+    .replace(/[̀-ͯ]/g, "") // remove os acentos que sobraram
     .toLowerCase()
     .trim();
 }
 
 /**
- * Lista as vagas, aplicando busca por texto e filtros de área/nível.
+ * Filtra as vagas por texto, área e nível.
  * Tudo é opcional: sem filtro, devolve todas (mais recentes primeiro).
+ *
+ * Esta função é usada nos dois lados: no servidor (pra montar a página) e no
+ * navegador (pelo filtro em tempo real). Como ela só recebe dados e devolve
+ * dados, funciona igual nos dois lugares — isso se chama "função pura".
  */
-export async function listarVagas(filtro: FiltroVagas = {}): Promise&lt;Vaga[]&gt; {
-  await demora(400);
-
+export function filtrarVagas(vagas: Vaga[], filtro: FiltroVagas = {}): Vaga[] {
   const busca = normalizar(filtro.busca ?? "");
 
-  return VAGAS.filter((vaga) =&gt; {
+  return vagas.filter((vaga) =&gt; {
     const combinaArea = !filtro.area || vaga.area === filtro.area;
     const combinaNivel = !filtro.nivel || vaga.nivel === filtro.nivel;
+    const combinaModelo = !filtro.modelo || vaga.modelo === filtro.modelo;
 
     const textoDaVaga = normalizar(
       [vaga.titulo, vaga.empresa, vaga.local, ...vaga.tags].join(" "),
     );
     const combinaBusca = !busca || textoDaVaga.includes(busca);
 
-    return combinaArea &amp;&amp; combinaNivel &amp;&amp; combinaBusca;
-  }).sort((a, b) =&gt; b.publicadaEm.localeCompare(a.publicadaEm));
+    return combinaArea &amp;&amp; combinaNivel &amp;&amp; combinaModelo &amp;&amp; combinaBusca;
+  });
+}
+
+/** Todas as vagas, das mais recentes pras mais antigas. */
+export function listarVagas(): Vaga[] {
+  return [...VAGAS].sort((a, b) =&gt; b.publicadaEm.localeCompare(a.publicadaEm));
 }
 
 /** As N vagas mais recentes — usado na home. */
-export async function listarVagasEmDestaque(quantidade = 3): Promise&lt;Vaga[]&gt; {
-  const vagas = await listarVagas();
-  return vagas.slice(0, quantidade);
+export function listarVagasEmDestaque(quantidade = 3): Vaga[] {
+  return listarVagas().slice(0, quantidade);
 }
 
 /**
@@ -296,31 +313,28 @@ export async function listarVagasEmDestaque(quantidade = 3): Promise&lt;Vaga[]&g
  * Devolve `undefined` quando não existe — quem chama decide o que fazer
  * (na página de detalhe, a gente chama `notFound()`).
  */
-export async function buscarVagaPorSlug(
-  slug: string,
-): Promise&lt;Vaga | undefined&gt; {
-  await demora(200);
+export function buscarVagaPorSlug(slug: string): Vaga | undefined {
   return VAGAS.find((vaga) =&gt; vaga.slug === slug);
 }
 
 /** Todos os slugs — usado pelo `generateStaticParams` pra pré-gerar as páginas. */
-export async function listarSlugs(): Promise&lt;string[]&gt; {
+export function listarSlugs(): string[] {
   return VAGAS.map((vaga) =&gt; vaga.slug);
 }
 
 /** As áreas que existem hoje, sem repetir — vira a barra de filtros. */
-export async function listarAreas(): Promise&lt;Area[]&gt; {
+export function listarAreas(): Area[] {
   return [...new Set(VAGAS.map((vaga) =&gt; vaga.area))].sort();
 }
 
 /** Os níveis, na ordem de carreira (e não em ordem alfabética). */
-export async function listarNiveis(): Promise&lt;Nivel[]&gt; {
+export function listarNiveis(): Nivel[] {
   const ordem: Nivel[] = ["Estágio", "Júnior", "Pleno", "Sênior"];
   return ordem.filter((nivel) =&gt; VAGAS.some((vaga) =&gt; vaga.nivel === nivel));
 }
 
 /** Números da home: total de vagas, quantas são remotas, quantas pra quem começa. */
-export async function resumoDoMural() {
+export function resumoDoMural() {
   return {
     total: VAGAS.length,
     remotas: VAGAS.filter((vaga) =&gt; vaga.modelo === "Remoto").length,
@@ -349,7 +363,7 @@ export function formatarPublicacao(dataISO: string): string {
   <div class="divisor" id="esqueleto">O esqueleto</div>
   <section id="layout">
     <h2>app/layout.tsx</h2>
-    <p>O layout raiz: a moldura de <b>todas</b> as páginas. É o único lugar com <code>&lt;html&gt;</code> e <code>&lt;body&gt;</code>. Ao navegar entre rotas ele não é remontado — só o <code>children</code> troca, e por isso o cabeçalho não pisca.</p>
+    <p>O layout raiz: a moldura de <b>todas</b> as páginas. É o único lugar com <code>&lt;html&gt;</code> e <code>&lt;body&gt;</code>. Ao navegar entre rotas ele não é remontado — por isso o cabeçalho não pisca.</p>
     <div class="file">📄 app/layout.tsx <span class="linhas">55 linhas</span></div>
 <pre><code>import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
@@ -410,8 +424,8 @@ export default function RootLayout({
 
   <section id="cabecalho">
     <h2>components/Cabecalho.tsx</h2>
-    <p>Componente de Servidor. Ele não tem estado nem clique, então não precisa de <code>"use client"</code> — o HTML dele já chega pronto no navegador.</p>
-    <div class="file">📄 components/Cabecalho.tsx <span class="linhas">32 linhas</span></div>
+    <p>Componente de Servidor. Sem estado nem clique, então não precisa da diretiva de cliente — o HTML já chega pronto no navegador.</p>
+    <div class="file">📄 components/Cabecalho.tsx <span class="linhas">33 linhas</span></div>
 <pre><code>import Link from "next/link";
 import estilos from "./Cabecalho.module.css";
 
@@ -436,8 +450,9 @@ export default function Cabecalho() {
         &lt;nav className={estilos.nav} aria-label="Navegação principal"&gt;
           &lt;Link href="/vagas"&gt;Vagas&lt;/Link&gt;
           &lt;Link href="/sobre"&gt;Sobre&lt;/Link&gt;
-          &lt;Link href="/vagas?nivel=Estágio" className={estilos.destaque}&gt;
-            Pra quem começa
+          &lt;Link href="/entrar"&gt;Entrar&lt;/Link&gt;
+          &lt;Link href="/cadastro" className={estilos.destaque}&gt;
+            Criar conta
           &lt;/Link&gt;
         &lt;/nav&gt;
       &lt;/div&gt;
@@ -448,7 +463,7 @@ export default function Cabecalho() {
 
   <section id="rodape">
     <h2>components/Rodape.tsx</h2>
-    <p>Repare no <code>new Date().getFullYear()</code>: ele roda <b>no servidor</b>, na hora de renderizar. O navegador recebe o ano já escrito no HTML.</p>
+    <p>Repare no <code>new Date().getFullYear()</code>: roda <b>no servidor</b>, na hora de renderizar. O navegador recebe o ano já escrito no HTML.</p>
     <div class="file">📄 components/Rodape.tsx <span class="linhas">28 linhas</span></div>
 <pre><code>import Link from "next/link";
 import estilos from "./Rodape.module.css";
@@ -480,10 +495,10 @@ export default function Rodape() {
 }</code></pre>
   </section>
 
-  <div class="divisor" id="componentes">Componentes</div>
+  <div class="divisor" id="mural">O mural: componentes e estado</div>
   <section id="vagacard">
     <h2>components/VagaCard.tsx</h2>
-    <p>O <code>criarCard()</code> da aula 03, agora em React. Componente de Servidor que recebe uma vaga por prop — e que <b>contém</b> um Componente de Cliente (o botão ★) sem virar cliente por isso.</p>
+    <p>O <code>criarCard()</code> da aula 03, agora em React: uma função que recebe dados e devolve interface.</p>
     <div class="file">📄 components/VagaCard.tsx <span class="linhas">56 linhas</span></div>
 <pre><code>import Link from "next/link";
 import { formatarPublicacao } from "@/lib/vagas";
@@ -545,7 +560,7 @@ export default function VagaCard({ vaga }: { vaga: Vaga }) {
 
   <section id="vagacard-css">
     <h2>components/VagaCard.module.css</h2>
-    <p>CSS Module: no HTML final, <code>.card</code> vira <code>VagaCard_card__x7f2q</code>. Sua <code>.card</code> nunca vai brigar com a de outro componente.</p>
+    <p>CSS Module: no HTML final <code>.card</code> vira <code>VagaCard_card__x7f2q</code>. Sua <code>.card</code> nunca briga com a de outro componente.</p>
     <div class="file">📄 components/VagaCard.module.css <span class="linhas">107 linhas</span></div>
 <pre><code>.card {
   position: relative;
@@ -656,9 +671,213 @@ export default function VagaCard({ vaga }: { vaga: Vaga }) {
 }</code></pre>
   </section>
 
+  <section id="mural-vagas">
+    <h2>components/MuralDeVagas.tsx</h2>
+    <p>⭐ <b>A fronteira do projeto.</b> É aqui que mora o <code>useState</code> da busca e dos filtros. Leia com atenção o comentário sobre <b>estado derivado</b>: a lista filtrada é <b>calculada</b>, nunca guardada — é o erro nº 1 de quem começa.</p>
+    <div class="file">📄 components/MuralDeVagas.tsx <span class="linhas">80 linhas</span></div>
+<pre><code>"use client";
+
+import { useState } from "react";
+import { filtrarVagas } from "@/lib/vagas";
+import type { Area, Nivel, Vaga } from "@/lib/tipos";
+import Filtros from "./Filtros";
+import VagaCard from "./VagaCard";
+import estilos from "./MuralDeVagas.module.css";
+
+// ============================================================================
+// O mural com busca e filtros — tudo acontecendo NO NAVEGADOR.
+//
+// A página manda a lista completa de vagas por prop. Aqui a gente guarda o que
+// a pessoa digitou/escolheu e recalcula o que aparece na tela. Sem recarregar,
+// sem esperar servidor: você digita e a lista muda na mesma hora.
+// ============================================================================
+
+type Props = { vagas: Vaga[]; areas: Area[]; niveis: Nivel[] };
+
+export default function MuralDeVagas({ vagas, areas, niveis }: Props) {
+  // Um estado por "coisa que a pessoa controla". Só isso.
+  const [busca, setBusca] = useState("");
+  const [area, setArea] = useState("");
+  const [nivel, setNivel] = useState("");
+
+  // ⚠️ ESTADO DERIVADO — leia com atenção, é o erro nº 1 de quem começa.
+  //
+  // A lista filtrada NÃO é um useState. Ela é CALCULADA a partir dos outros
+  // estados, a cada renderização. Se você criasse um `useState(vagasFiltradas)`
+  // teria que lembrar de atualizar ele em todo lugar que mexe num filtro — e
+  // um dia esqueceria. Regra: se dá pra calcular, não guarde em estado.
+  const visiveis = filtrarVagas(vagas, { busca, area, nivel });
+
+  const temFiltro = Boolean(busca || area || nivel);
+
+  function limpar() {
+    setBusca("");
+    setArea("");
+    setNivel("");
+  }
+
+  return (
+    &lt;&gt;
+      &lt;Filtros
+        areas={areas}
+        niveis={niveis}
+        busca={busca}
+        area={area}
+        nivel={nivel}
+        aoMudarBusca={setBusca}
+        aoMudarArea={setArea}
+        aoMudarNivel={setNivel}
+        aoLimpar={temFiltro ? limpar : undefined}
+      /&gt;
+
+      &lt;p className={estilos.contador} aria-live="polite"&gt;
+        {visiveis.length === vagas.length
+          ? `${vagas.length} vagas abertas`
+          : `${visiveis.length} de ${vagas.length} vagas`}
+      &lt;/p&gt;
+
+      {visiveis.length === 0 ? (
+        &lt;div className="vazio"&gt;
+          &lt;strong&gt;Nenhuma vaga com esses filtros 😔&lt;/strong&gt;
+          Tente uma busca mais curta ou{" "}
+          &lt;button type="button" onClick={limpar} className={estilos.linkBotao}&gt;
+            limpe os filtros
+          &lt;/button&gt;
+          .
+        &lt;/div&gt;
+      ) : (
+        &lt;div className={estilos.grade}&gt;
+          {visiveis.map((vaga) =&gt; (
+            &lt;VagaCard key={vaga.slug} vaga={vaga} /&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="filtros">
+    <h2>components/Filtros.tsx</h2>
+    <p>Repare: este arquivo <b>não tem</b> a diretiva de cliente e mesmo assim roda no navegador. Quem importa ele é o MuralDeVagas, que é de cliente — a diretiva contamina pra baixo. Ele também não guarda estado nenhum: recebe valores e funções por prop. Isso é um <b>componente controlado</b>.</p>
+    <div class="file">📄 components/Filtros.tsx <span class="linhas">112 linhas</span></div>
+<pre><code>import type { Area, Nivel } from "@/lib/tipos";
+import estilos from "./Filtros.module.css";
+
+// ============================================================================
+// Repare: este arquivo NÃO tem "use client" — e mesmo assim roda no navegador.
+//
+// Por quê? Porque quem importa ele é o MuralDeVagas, que é de cliente. A
+// diretiva "contamina" pra baixo: tudo que um componente de cliente importa
+// também vira cliente. Você só precisa escrever "use client" na FRONTEIRA.
+//
+// Este componente não guarda estado nenhum. Ele recebe os valores atuais e as
+// funções pra avisar quem manda. Isso se chama "componente controlado" — a
+// mesma ideia dos inputs controlados dos formulários.
+// ============================================================================
+
+type Props = {
+  areas: Area[];
+  niveis: Nivel[];
+  busca: string;
+  area: string;
+  nivel: string;
+  aoMudarBusca: (valor: string) =&gt; void;
+  aoMudarArea: (valor: string) =&gt; void;
+  aoMudarNivel: (valor: string) =&gt; void;
+  /** quando não vem, o botão de limpar nem aparece */
+  aoLimpar?: () =&gt; void;
+};
+
+export default function Filtros({
+  areas,
+  niveis,
+  busca,
+  area,
+  nivel,
+  aoMudarBusca,
+  aoMudarArea,
+  aoMudarNivel,
+  aoLimpar,
+}: Props) {
+  return (
+    &lt;section className={estilos.painel} aria-label="Buscar e filtrar vagas"&gt;
+      &lt;div className={estilos.busca}&gt;
+        &lt;label className={estilos.rotuloBusca} htmlFor="busca"&gt;
+          🔎
+        &lt;/label&gt;
+        &lt;input
+          id="busca"
+          type="search"
+          value={busca}
+          onChange={(evento) =&gt; aoMudarBusca(evento.target.value)}
+          placeholder="Busque por cargo, empresa, tecnologia…"
+        /&gt;
+      &lt;/div&gt;
+
+      &lt;div className={estilos.grupo}&gt;
+        &lt;span className={estilos.rotulo}&gt;Área&lt;/span&gt;
+        &lt;div className={estilos.chips}&gt;
+          &lt;button
+            type="button"
+            onClick={() =&gt; aoMudarArea("")}
+            className={`${estilos.chip} ${!area ? estilos.chipAtivo : ""}`}
+            aria-pressed={!area}
+          &gt;
+            Todas
+          &lt;/button&gt;
+          {areas.map((opcao) =&gt; (
+            &lt;button
+              key={opcao}
+              type="button"
+              onClick={() =&gt; aoMudarArea(opcao)}
+              className={`${estilos.chip} ${area === opcao ? estilos.chipAtivo : ""}`}
+              aria-pressed={area === opcao}
+            &gt;
+              {opcao}
+            &lt;/button&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div className={estilos.grupo}&gt;
+        &lt;span className={estilos.rotulo}&gt;Nível&lt;/span&gt;
+        &lt;div className={estilos.chips}&gt;
+          &lt;button
+            type="button"
+            onClick={() =&gt; aoMudarNivel("")}
+            className={`${estilos.chip} ${!nivel ? estilos.chipAtivo : ""}`}
+            aria-pressed={!nivel}
+          &gt;
+            Todos
+          &lt;/button&gt;
+          {niveis.map((opcao) =&gt; (
+            &lt;button
+              key={opcao}
+              type="button"
+              onClick={() =&gt; aoMudarNivel(opcao)}
+              className={`${estilos.chip} ${nivel === opcao ? estilos.chipAtivo : ""}`}
+              aria-pressed={nivel === opcao}
+            &gt;
+              {opcao}
+            &lt;/button&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {aoLimpar &amp;&amp; (
+        &lt;button type="button" onClick={aoLimpar} className={estilos.limpar}&gt;
+          ✕ limpar filtros
+        &lt;/button&gt;
+      )}
+    &lt;/section&gt;
+  );
+}</code></pre>
+  </section>
+
   <section id="salvar">
     <h2>components/SalvarButton.tsx</h2>
-    <p>⭐ <b>O único arquivo do projeto com <code>"use client"</code>.</b> Ele precisa disso por dois motivos: tem estado (<code>useState</code>) e tem evento (<code>onClick</code>). Repare por que o <code>localStorage</code> é lido dentro do <code>useEffect</code> — o comentário no código explica.</p>
+    <p><code>useState</code> + <code>localStorage</code>. Veja por que o <code>localStorage</code> é lido dentro do <code>useEffect</code> — o comentário no código explica o <i>hydration mismatch</i>.</p>
     <div class="file">📄 components/SalvarButton.tsx <span class="linhas">66 linhas</span></div>
 <pre><code>"use client";
 
@@ -728,152 +947,693 @@ export default function SalvarButton({
 }</code></pre>
   </section>
 
-  <section id="filtros">
-    <h2>components/Filtros.tsx</h2>
-    <p>Interativo <b>e</b> Componente de Servidor. Como? A busca é um <code>&lt;form&gt;</code> com method GET e os filtros são <code>&lt;Link&gt;</code> que trocam a query string. Funciona até com o JavaScript desligado.</p>
-    <div class="file">📄 components/Filtros.tsx <span class="linhas">118 linhas</span></div>
-<pre><code>import Link from "next/link";
-import type { Area, Nivel } from "@/lib/tipos";
-import estilos from "./Filtros.module.css";
+  <div class="divisor" id="formularios">Formulários (o assunto novo)</div>
+  <section id="campotexto">
+    <h2>components/CampoTexto.tsx</h2>
+    <p>Rótulo + input + mensagem de erro, num componente só. Usado <b>seis vezes</b> entre as duas telas — a componentização da aula 03 valendo de novo. Repare no <code>aria-invalid</code> e no <code>aria-describedby</code>: acessibilidade custa 2 linhas.</p>
+    <div class="file">📄 components/CampoTexto.tsx <span class="linhas">74 linhas</span></div>
+<pre><code>import estilos from "./formulario.module.css";
 
-// Este componente é de SERVIDOR e mesmo assim é interativo. Como?
-//   • a busca é um &lt;form&gt; com method GET → o próprio navegador monta a URL
-//     /vagas?busca=react e o Next re-renderiza a página no servidor
-//   • os filtros são &lt;Link&gt; que trocam a query string
+// ============================================================================
+// Um campo de formulário reutilizável: rótulo + input + mensagem de erro.
 //
-// Ou seja: filtro e busca funcionam ATÉ COM O JAVASCRIPT DESLIGADO, e o
-// estado da tela fica guardado na URL (dá pra copiar e mandar pra alguém).
+// Sem "use client" aqui — quem usa este componente são os formulários, que já
+// são de cliente. A diretiva contamina pra baixo.
+//
+// Este é o mesmo componente usado no /entrar e no /cadastro. Escreveu uma vez,
+// usou seis. É a componentização da aula 03, agora de verdade.
+// ============================================================================
 
 type Props = {
-  areas: Area[];
-  niveis: Nivel[];
-  busca: string;
-  areaAtiva: string;
-  nivelAtivo: string;
+  id: string;
+  rotulo: string;
+  tipo?: string;
+  valor: string;
+  aoMudar: (valor: string) =&gt; void;
+  /** quando existe, o campo fica vermelho e a mensagem aparece embaixo */
+  erro?: string;
+  dica?: string;
+  placeholder?: string;
+  autoComplete?: string;
+  /** conteúdo extra dentro do campo, tipo o botão de mostrar senha */
+  acessorio?: React.ReactNode;
 };
 
-/** Monta uma URL /vagas mantendo os filtros atuais e trocando só um deles. */
-function montarUrl(
-  atual: { busca: string; area: string; nivel: string },
-  troca: Partial&lt;{ area: string; nivel: string }&gt;,
-) {
-  const params = new URLSearchParams();
-  const alvo = { ...atual, ...troca };
-
-  if (alvo.busca) params.set("busca", alvo.busca);
-  if (alvo.area) params.set("area", alvo.area);
-  if (alvo.nivel) params.set("nivel", alvo.nivel);
-
-  const query = params.toString();
-  return query ? `/vagas?${query}` : "/vagas";
-}
-
-export default function Filtros({
-  areas,
-  niveis,
-  busca,
-  areaAtiva,
-  nivelAtivo,
+export default function CampoTexto({
+  id,
+  rotulo,
+  tipo = "text",
+  valor,
+  aoMudar,
+  erro,
+  dica,
+  placeholder,
+  autoComplete,
+  acessorio,
 }: Props) {
-  const atual = { busca, area: areaAtiva, nivel: nivelAtivo };
-  const temFiltro = Boolean(busca || areaAtiva || nivelAtivo);
+  const idErro = `${id}-erro`;
+  const idDica = `${id}-dica`;
 
   return (
-    &lt;section className={estilos.painel} aria-label="Buscar e filtrar vagas"&gt;
-      &lt;form className={estilos.busca} action="/vagas"&gt;
+    &lt;div className={estilos.campo}&gt;
+      &lt;label htmlFor={id}&gt;{rotulo}&lt;/label&gt;
+
+      &lt;div className={`${estilos.caixa} ${erro ? estilos.caixaErro : ""}`}&gt;
         &lt;input
-          type="search"
-          name="busca"
-          defaultValue={busca}
-          placeholder="Busque por cargo, empresa, tecnologia…"
-          aria-label="Buscar vagas"
+          id={id}
+          type={tipo}
+          value={valor}
+          onChange={(evento) =&gt; aoMudar(evento.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          // Estes dois avisam o leitor de tela que o campo está inválido
+          // e qual texto explica o erro. Acessibilidade custa 2 linhas.
+          aria-invalid={Boolean(erro)}
+          aria-describedby={erro ? idErro : dica ? idDica : undefined}
         /&gt;
-        {/* mantemos os filtros ativos ao enviar a busca */}
-        {areaAtiva &amp;&amp; &lt;input type="hidden" name="area" value={areaAtiva} /&gt;}
-        {nivelAtivo &amp;&amp; &lt;input type="hidden" name="nivel" value={nivelAtivo} /&gt;}
-        &lt;button type="submit" className="btn btn-primario"&gt;
-          Buscar
-        &lt;/button&gt;
-      &lt;/form&gt;
-
-      &lt;div className={estilos.grupo}&gt;
-        &lt;span className={estilos.rotulo}&gt;Área&lt;/span&gt;
-        &lt;div className={estilos.chips}&gt;
-          &lt;Link
-            href={montarUrl(atual, { area: "" })}
-            className={`${estilos.chip} ${!areaAtiva ? estilos.chipAtivo : ""}`}
-          &gt;
-            Todas
-          &lt;/Link&gt;
-          {areas.map((area) =&gt; (
-            &lt;Link
-              key={area}
-              href={montarUrl(atual, { area })}
-              className={`${estilos.chip} ${
-                areaAtiva === area ? estilos.chipAtivo : ""
-              }`}
-            &gt;
-              {area}
-            &lt;/Link&gt;
-          ))}
-        &lt;/div&gt;
+        {acessorio}
       &lt;/div&gt;
 
-      &lt;div className={estilos.grupo}&gt;
-        &lt;span className={estilos.rotulo}&gt;Nível&lt;/span&gt;
-        &lt;div className={estilos.chips}&gt;
-          &lt;Link
-            href={montarUrl(atual, { nivel: "" })}
-            className={`${estilos.chip} ${!nivelAtivo ? estilos.chipAtivo : ""}`}
-          &gt;
-            Todos
-          &lt;/Link&gt;
-          {niveis.map((nivel) =&gt; (
-            &lt;Link
-              key={nivel}
-              href={montarUrl(atual, { nivel })}
-              className={`${estilos.chip} ${
-                nivelAtivo === nivel ? estilos.chipAtivo : ""
-              }`}
-            &gt;
-              {nivel}
-            &lt;/Link&gt;
-          ))}
-        &lt;/div&gt;
-      &lt;/div&gt;
-
-      {temFiltro &amp;&amp; (
-        &lt;Link href="/vagas" className={estilos.limpar}&gt;
-          ✕ limpar filtros
-        &lt;/Link&gt;
-      )}
-    &lt;/section&gt;
+      {erro ? (
+        &lt;p className={estilos.erro} id={idErro} role="alert"&gt;
+          {erro}
+        &lt;/p&gt;
+      ) : dica ? (
+        &lt;p className={estilos.dica} id={idDica}&gt;
+          {dica}
+        &lt;/p&gt;
+      ) : null}
+    &lt;/div&gt;
   );
+}</code></pre>
+  </section>
+
+  <section id="form-entrar">
+    <h2>components/FormEntrar.tsx</h2>
+    <p>⭐ <b>O coração da aula.</b> Input controlado, <code>preventDefault</code>, validação que devolve um objeto de erros, erro que some ao digitar, mostrar/ocultar senha e estado de enviando. Ele valida de verdade — mas não envia nada a lugar nenhum.</p>
+    <div class="file">📄 components/FormEntrar.tsx <span class="linhas">140 linhas</span></div>
+<pre><code>"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import CampoTexto from "./CampoTexto";
+import estilos from "./formulario.module.css";
+
+// ============================================================================
+// O formulário de login.
+//
+// ⚠️ Ele NÃO faz login de verdade — não existe servidor, senha ou conta ainda.
+// Hoje o assunto é FRONTEND: input controlado, validação, mensagem de erro e
+// estado de carregando. Na aula 05 este mesmo formulário passa a conversar com
+// o servidor de verdade, e o que muda é só o miolo do `enviar()`.
+// ============================================================================
+
+/** O formato dos erros: uma mensagem por campo (ou nenhuma). */
+type Erros = { email?: string; senha?: string };
+
+export default function FormEntrar() {
+  // Um estado por campo. É o que "input controlado" significa: o valor que
+  // aparece na tela vem do estado, e toda tecla digitada atualiza o estado.
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const [erros, setErros] = useState&lt;Erros&gt;({});
+  const [verSenha, setVerSenha] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+
+  /** Devolve um objeto com os erros encontrados. Vazio = está tudo certo. */
+  function validar(): Erros {
+    const novos: Erros = {};
+
+    if (!email.trim()) {
+      novos.email = "Escreva seu e-mail.";
+    } else if (!email.includes("@") || !email.includes(".")) {
+      novos.email = "Esse e-mail não parece completo.";
+    }
+
+    if (!senha) {
+      novos.senha = "Escreva sua senha.";
+    } else if (senha.length &lt; 6) {
+      novos.senha = "A senha tem pelo menos 6 caracteres.";
+    }
+
+    return novos;
+  }
+
+  function enviar(evento: React.FormEvent) {
+    // Sem isto o navegador recarrega a página inteira ao enviar o formulário.
+    evento.preventDefault();
+
+    const novos = validar();
+    setErros(novos);
+
+    // Object.keys transforma o objeto numa lista de chaves.
+    // Lista vazia = nenhum erro = pode seguir.
+    if (Object.keys(novos).length &gt; 0) return;
+
+    setEnviando(true);
+
+    // Fingindo a demora de um servidor, só pra você ver o estado de carregando
+    // funcionando. Na aula 05, aqui vai entrar a chamada de verdade.
+    setTimeout(() =&gt; {
+      setEnviando(false);
+      setEnviado(true);
+    }, 1200);
+  }
+
+  if (enviado) {
+    return (
+      &lt;div className={estilos.sucesso}&gt;
+        &lt;span&gt;✅&lt;/span&gt;
+        &lt;div&gt;
+          &lt;strong&gt;Formulário validado!&lt;/strong&gt;
+          Os dados de &lt;b&gt;{email}&lt;/b&gt; passaram por toda a validação. Na{" "}
+          &lt;b&gt;aula 05&lt;/b&gt; este botão vai falar com o servidor e te deixar entrar
+          de verdade. 💜
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+
+  return (
+    &lt;form className={estilos.form} onSubmit={enviar} noValidate&gt;
+      &lt;CampoTexto
+        id="email"
+        rotulo="E-mail"
+        tipo="email"
+        valor={email}
+        // Ao digitar, o erro daquele campo some: corrigir tem que dar
+        // sensação de progresso, não de castigo.
+        aoMudar={(valor) =&gt; {
+          setEmail(valor);
+          setErros((atuais) =&gt; ({ ...atuais, email: undefined }));
+        }}
+        erro={erros.email}
+        placeholder="voce@email.com"
+        autoComplete="email"
+      /&gt;
+
+      &lt;CampoTexto
+        id="senha"
+        rotulo="Senha"
+        tipo={verSenha ? "text" : "password"}
+        valor={senha}
+        aoMudar={(valor) =&gt; {
+          setSenha(valor);
+          setErros((atuais) =&gt; ({ ...atuais, senha: undefined }));
+        }}
+        erro={erros.senha}
+        placeholder="••••••"
+        autoComplete="current-password"
+        acessorio={
+          &lt;button
+            type="button"
+            className={estilos.olho}
+            onClick={() =&gt; setVerSenha(!verSenha)}
+            aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
+          &gt;
+            {verSenha ? "🙈" : "👁️"}
+          &lt;/button&gt;
+        }
+      /&gt;
+
+      &lt;button
+        type="submit"
+        className={`btn btn-primario ${estilos.enviar}`}
+        disabled={enviando}
+      &gt;
+        {enviando ? "Entrando…" : "Entrar"}
+      &lt;/button&gt;
+
+      &lt;p className={estilos.alternativa}&gt;
+        Ainda não tem conta? &lt;Link href="/cadastro"&gt;Criar conta&lt;/Link&gt;
+      &lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="form-cadastro">
+    <h2>components/FormCadastro.tsx</h2>
+    <p>Mesma estrutura, com duas coisas novas: validação que compara <b>dois campos</b> (senha x confirmação) e o medidor de força de senha — que é <b>estado derivado</b>, calculado da senha e nunca guardado.</p>
+    <div class="file">📄 components/FormCadastro.tsx <span class="linhas">230 linhas</span></div>
+<pre><code>"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import CampoTexto from "./CampoTexto";
+import estilos from "./formulario.module.css";
+
+// ============================================================================
+// O formulário de cadastro.
+//
+// Mesma estrutura do /entrar, com mais campos e duas coisas novas:
+//   • validação que compara DOIS campos (senha x confirmação)
+//   • um medidor de força de senha, que é ESTADO DERIVADO — calculado a partir
+//     da senha, nunca guardado num useState próprio
+// ============================================================================
+
+type Erros = {
+  nome?: string;
+  email?: string;
+  senha?: string;
+  confirmacao?: string;
+  termos?: string;
+};
+
+/** Devolve 0 a 3 conforme o que a senha tem. Função pura, fácil de testar. */
+function medirForca(senha: string): number {
+  let pontos = 0;
+  if (senha.length &gt;= 8) pontos++;
+  if (/[A-Z]/.test(senha) &amp;&amp; /[a-z]/.test(senha)) pontos++;
+  if (/[0-9]/.test(senha) || /[^A-Za-z0-9]/.test(senha)) pontos++;
+  return pontos;
+}
+
+const ROTULO_FORCA = ["muito fraca", "fraca", "média", "forte"];
+const CLASSE_FORCA = ["fraca", "fraca", "media", "forte"];
+
+export default function FormCadastro() {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmacao, setConfirmacao] = useState("");
+  const [aceitou, setAceitou] = useState(false);
+
+  const [erros, setErros] = useState&lt;Erros&gt;({});
+  const [verSenha, setVerSenha] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+
+  // ESTADO DERIVADO: calculado a cada renderização, direto da senha.
+  // Se fosse um useState, você teria que lembrar de atualizar ele em todo
+  // lugar que mexe na senha — e um dia esqueceria.
+  const forca = medirForca(senha);
+
+  function validar(): Erros {
+    const novos: Erros = {};
+
+    if (nome.trim().length &lt; 2) novos.nome = "Como podemos te chamar?";
+
+    if (!email.trim()) {
+      novos.email = "Escreva seu e-mail.";
+    } else if (!email.includes("@") || !email.includes(".")) {
+      novos.email = "Esse e-mail não parece completo.";
+    }
+
+    if (senha.length &lt; 6) {
+      novos.senha = "A senha precisa de pelo menos 6 caracteres.";
+    }
+
+    if (!confirmacao) {
+      novos.confirmacao = "Repita a senha.";
+    } else if (confirmacao !== senha) {
+      novos.confirmacao = "As senhas não são iguais.";
+    }
+
+    if (!aceitou) novos.termos = "Precisamos do seu aceite pra continuar.";
+
+    return novos;
+  }
+
+  function enviar(evento: React.FormEvent) {
+    evento.preventDefault();
+
+    const novos = validar();
+    setErros(novos);
+    if (Object.keys(novos).length &gt; 0) return;
+
+    setEnviando(true);
+    setTimeout(() =&gt; {
+      setEnviando(false);
+      setEnviado(true);
+    }, 1200);
+  }
+
+  if (enviado) {
+    return (
+      &lt;div className={estilos.sucesso}&gt;
+        &lt;span&gt;🎉&lt;/span&gt;
+        &lt;div&gt;
+          &lt;strong&gt;Tudo certo, {nome.split(" ")[0]}!&lt;/strong&gt;
+          O formulário passou por toda a validação. Nenhuma conta foi criada —
+          isso vira realidade na &lt;b&gt;aula 05&lt;/b&gt;, quando o servidor entrar na
+          história. 💜
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+
+  return (
+    &lt;form className={estilos.form} onSubmit={enviar} noValidate&gt;
+      &lt;CampoTexto
+        id="nome"
+        rotulo="Nome"
+        valor={nome}
+        aoMudar={(valor) =&gt; {
+          setNome(valor);
+          setErros((atuais) =&gt; ({ ...atuais, nome: undefined }));
+        }}
+        erro={erros.nome}
+        placeholder="Como você quer ser chamada(o)"
+        autoComplete="name"
+      /&gt;
+
+      &lt;CampoTexto
+        id="email"
+        rotulo="E-mail"
+        tipo="email"
+        valor={email}
+        aoMudar={(valor) =&gt; {
+          setEmail(valor);
+          setErros((atuais) =&gt; ({ ...atuais, email: undefined }));
+        }}
+        erro={erros.email}
+        placeholder="voce@email.com"
+        autoComplete="email"
+      /&gt;
+
+      &lt;CampoTexto
+        id="senha"
+        rotulo="Senha"
+        tipo={verSenha ? "text" : "password"}
+        valor={senha}
+        aoMudar={(valor) =&gt; {
+          setSenha(valor);
+          setErros((atuais) =&gt; ({ ...atuais, senha: undefined }));
+        }}
+        erro={erros.senha}
+        dica="Pelo menos 6 caracteres."
+        placeholder="••••••"
+        autoComplete="new-password"
+        acessorio={
+          &lt;button
+            type="button"
+            className={estilos.olho}
+            onClick={() =&gt; setVerSenha(!verSenha)}
+            aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
+          &gt;
+            {verSenha ? "🙈" : "👁️"}
+          &lt;/button&gt;
+        }
+      /&gt;
+
+      {/* O medidor só faz sentido depois que a pessoa começou a digitar */}
+      {senha.length &gt; 0 &amp;&amp; (
+        &lt;div className={estilos.forca}&gt;
+          &lt;div className={estilos.barras}&gt;
+            {[0, 1, 2].map((indice) =&gt; (
+              &lt;span
+                key={indice}
+                className={`${estilos.barra} ${
+                  indice &lt; forca ? estilos[CLASSE_FORCA[forca]] : ""
+                }`}
+              /&gt;
+            ))}
+          &lt;/div&gt;
+          &lt;span className={estilos.forcaTexto}&gt;
+            força: {ROTULO_FORCA[forca]}
+          &lt;/span&gt;
+        &lt;/div&gt;
+      )}
+
+      &lt;CampoTexto
+        id="confirmacao"
+        rotulo="Repita a senha"
+        tipo={verSenha ? "text" : "password"}
+        valor={confirmacao}
+        aoMudar={(valor) =&gt; {
+          setConfirmacao(valor);
+          setErros((atuais) =&gt; ({ ...atuais, confirmacao: undefined }));
+        }}
+        erro={erros.confirmacao}
+        placeholder="••••••"
+        autoComplete="new-password"
+      /&gt;
+
+      &lt;div&gt;
+        &lt;label className={estilos.checkbox}&gt;
+          &lt;input
+            type="checkbox"
+            checked={aceitou}
+            onChange={(evento) =&gt; {
+              setAceitou(evento.target.checked);
+              setErros((atuais) =&gt; ({ ...atuais, termos: undefined }));
+            }}
+          /&gt;
+          &lt;span&gt;
+            Li e aceito os &lt;Link href="/sobre"&gt;termos de uso&lt;/Link&gt; do Leque de
+            Vagas.
+          &lt;/span&gt;
+        &lt;/label&gt;
+        {erros.termos &amp;&amp; (
+          &lt;p className={estilos.erro} role="alert" style={{ marginTop: 6 }}&gt;
+            {erros.termos}
+          &lt;/p&gt;
+        )}
+      &lt;/div&gt;
+
+      &lt;button
+        type="submit"
+        className={`btn btn-primario ${estilos.enviar}`}
+        disabled={enviando}
+      &gt;
+        {enviando ? "Criando conta…" : "Criar conta"}
+      &lt;/button&gt;
+
+      &lt;p className={estilos.alternativa}&gt;
+        Já tem conta? &lt;Link href="/entrar"&gt;Entrar&lt;/Link&gt;
+      &lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="form-css">
+    <h2>components/formulario.module.css</h2>
+    <p>Os estilos compartilhados pelas duas telas: campo, campo com erro, medidor de força e botão de enviar.</p>
+    <div class="file">📄 components/formulario.module.css <span class="linhas">199 linhas</span></div>
+<pre><code>/* Estilos compartilhados pelos formulários de /entrar e /cadastro. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.caixa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 0 14px;
+  transition: border-color 0.15s ease;
+}
+
+.caixa:focus-within {
+  border-color: var(--purple-light);
+}
+
+.caixa input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  padding: 12px 0;
+}
+
+.caixa input::placeholder {
+  color: var(--text-4);
+}
+
+.caixa input:focus {
+  outline: none;
+}
+
+.caixaErro {
+  border-color: var(--magenta);
+  background: rgba(242, 68, 135, 0.05);
+}
+
+.erro {
+  font-size: 12.5px;
+  color: var(--pink-light);
+  display: flex;
+  gap: 6px;
+}
+
+.erro::before {
+  content: "⚠";
+}
+
+.dica {
+  font-size: 12.5px;
+  color: var(--text-4);
+}
+
+/* botão de mostrar/ocultar senha, dentro do campo */
+.olho {
+  background: none;
+  border: 0;
+  padding: 4px;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-3);
+  border-radius: 6px;
+}
+
+.olho:hover {
+  color: var(--pink-light);
+}
+
+/* checkbox de termos */
+.checkbox {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.checkbox input {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--magenta);
+  flex: none;
+}
+
+.checkbox a {
+  color: var(--pink-light);
+  text-decoration: underline;
+}
+
+/* medidor de força da senha */
+.forca {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.barras {
+  display: flex;
+  gap: 4px;
+}
+
+.barra {
+  height: 4px;
+  flex: 1;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.2s ease;
+}
+
+.barra.fraca {
+  background: #f24487;
+}
+.barra.media {
+  background: #e8a33d;
+}
+.barra.forte {
+  background: #5fd08a;
+}
+
+.forcaTexto {
+  font-family: var(--fonte-mono), monospace;
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+/* botão principal do formulário */
+.enviar {
+  margin-top: 4px;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 22px;
+}
+
+.enviar:disabled {
+  opacity: 0.6;
+  cursor: progress;
+  transform: none;
+  box-shadow: none;
+}
+
+/* aviso de sucesso (falso, por enquanto) */
+.sucesso {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(95, 208, 138, 0.08);
+  border: 1px solid rgba(95, 208, 138, 0.35);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.sucesso strong {
+  display: block;
+  color: #5fd08a;
+  margin-bottom: 2px;
+}
+
+/* rodapé do formulário: "não tem conta? cadastre-se" */
+.alternativa {
+  font-size: 14px;
+  color: var(--text-3);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.alternativa a {
+  color: var(--pink-light);
+  font-weight: 600;
+}
+
+.alternativa a:hover {
+  text-decoration: underline;
 }</code></pre>
   </section>
 
   <div class="divisor" id="paginas">As páginas</div>
   <section id="home">
     <h2>app/page.tsx  →  /</h2>
-    <p>A home. <code>async</code> + <code>await</code> direto no componente, e <code>Promise.all</code> pra disparar as duas buscas ao mesmo tempo em vez de uma esperar a outra.</p>
-    <div class="file">📄 app/page.tsx <span class="linhas">81 linhas</span></div>
+    <p>A home. Componente de Servidor, sem <code>async</code>: os dados já estão na memória, a leitura é instantânea.</p>
+    <div class="file">📄 app/page.tsx <span class="linhas">78 linhas</span></div>
 <pre><code>import Link from "next/link";
 import VagaCard from "@/components/VagaCard";
 import { listarVagasEmDestaque, resumoDoMural } from "@/lib/vagas";
 import estilos from "./page.module.css";
 
-// Repare em duas coisas nesta linha:
-//   1. `export default function` → o Next transforma este arquivo na rota "/"
-//   2. `async` → dá pra usar `await` DIRETO no componente. Isso só é possível
-//      porque ele é um Componente de Servidor: o código roda no servidor,
-//      pega os dados, e manda pro navegador o HTML já pronto.
-export default async function Home() {
-  // `Promise.all` dispara as duas buscas ao mesmo tempo (400ms no total),
-  // em vez de uma esperar a outra (800ms). Detalhe pequeno, diferença real.
-  const [destaques, resumo] = await Promise.all([
-    listarVagasEmDestaque(3),
-    resumoDoMural(),
-  ]);
+// `export default function` neste arquivo → o Next transforma ele na rota "/".
+//
+// Este é um Componente de Servidor (o padrão): o código roda no servidor e o
+// navegador recebe o HTML já pronto. Como os dados estão num array em memória,
+// a leitura é instantânea — não precisa de `async` nem de `await`.
+// Na aula 05, quando os dados vierem de fora, é aqui que o `await` entra.
+export default function Home() {
+  const destaques = listarVagasEmDestaque(3);
+  const resumo = resumoDoMural();
 
   return (
     &lt;div className="container"&gt;
@@ -894,8 +1654,8 @@ export default async function Home() {
           &lt;Link href="/vagas" className="btn btn-primario"&gt;
             Ver todas as vagas →
           &lt;/Link&gt;
-          &lt;Link href="/vagas?nivel=Estágio" className="btn"&gt;
-            Só estágios
+          &lt;Link href="/cadastro" className="btn"&gt;
+            Criar minha conta
           &lt;/Link&gt;
         &lt;/div&gt;
       &lt;/section&gt;
@@ -942,11 +1702,10 @@ export default async function Home() {
 
   <section id="lista">
     <h2>app/vagas/page.tsx  →  /vagas</h2>
-    <p>A listagem. ⚠️ <b>Next 16:</b> <code>searchParams</code> é uma <code>Promise</code> — sempre <code>await</code>. Todo o estado da tela (busca e filtros) vive na URL.</p>
-    <div class="file">📄 app/vagas/page.tsx <span class="linhas">61 linhas</span></div>
+    <p>A listagem. A página é de <b>servidor</b> e só monta a casca; a parte que reage está no <code>&lt;MuralDeVagas /&gt;</code>. Sem <code>searchParams</code>, esta rota fica <b>totalmente estática</b> no build.</p>
+    <div class="file">📄 app/vagas/page.tsx <span class="linhas">31 linhas</span></div>
 <pre><code>import type { Metadata } from "next";
-import Filtros from "@/components/Filtros";
-import VagaCard from "@/components/VagaCard";
+import MuralDeVagas from "@/components/MuralDeVagas";
 import { listarAreas, listarNiveis, listarVagas } from "@/lib/vagas";
 import estilos from "./vagas.module.css";
 
@@ -955,62 +1714,33 @@ export const metadata: Metadata = {
   description: "Todas as vagas do mural, com busca e filtro por área e nível.",
 };
 
-// ⚠️ NEXT.JS 16: `searchParams` é uma Promise. Sempre `await`.
-//
-// Por quê? Porque a página pode começar a renderizar a parte estática antes
-// mesmo de saber o que veio na URL. Quem precisa da URL espera por ela.
-// (No Next 14 dava pra ler direto; no 16 isso é erro.)
-export default async function PaginaVagas({
-  searchParams,
-}: {
-  searchParams: Promise&lt;{ busca?: string; area?: string; nivel?: string }&gt;;
-}) {
-  const { busca = "", area = "", nivel = "" } = await searchParams;
-
-  const [vagas, areas, niveis] = await Promise.all([
-    listarVagas({ busca, area, nivel }),
-    listarAreas(),
-    listarNiveis(),
-  ]);
+// Esta página é Componente de Servidor: ela só lê os dados e monta a casca.
+// A parte que reage a quem usa (busca e filtros) está dentro do MuralDeVagas,
+// que é de cliente. A fronteira fica no menor pedaço possível.
+export default function PaginaVagas() {
+  const vagas = listarVagas();
+  const areas = listarAreas();
+  const niveis = listarNiveis();
 
   return (
     &lt;div className="container"&gt;
       &lt;header className={estilos.cabecalho}&gt;
-        &lt;p className="olho"&gt;{vagas.length} vaga(s) encontrada(s)&lt;/p&gt;
+        &lt;p className="olho"&gt;mural completo&lt;/p&gt;
         &lt;h1 className={estilos.titulo}&gt;
           Todas as &lt;span className="grad-text"&gt;vagas&lt;/span&gt;
         &lt;/h1&gt;
       &lt;/header&gt;
 
-      &lt;Filtros
-        areas={areas}
-        niveis={niveis}
-        busca={busca}
-        areaAtiva={area}
-        nivelAtivo={nivel}
-      /&gt;
-
-      {vagas.length === 0 ? (
-        &lt;div className="vazio"&gt;
-          &lt;strong&gt;Nenhuma vaga com esses filtros 😔&lt;/strong&gt;
-          Tente uma busca mais curta ou limpe os filtros ali em cima.
-        &lt;/div&gt;
-      ) : (
-        &lt;div className={estilos.grade}&gt;
-          {vagas.map((vaga) =&gt; (
-            &lt;VagaCard key={vaga.slug} vaga={vaga} /&gt;
-          ))}
-        &lt;/div&gt;
-      )}
+      &lt;MuralDeVagas vagas={vagas} areas={areas} niveis={niveis} /&gt;
     &lt;/div&gt;
   );
 }</code></pre>
   </section>
 
   <section id="detalhe">
-    <h2>app/vagas/[slug]/page.tsx  →  /vagas/qualquer-coisa</h2>
-    <p>A rota dinâmica. Um arquivo, nove páginas. Repare em três coisas: <code>await params</code>, <code>generateStaticParams</code> (pré-gera as páginas no build) e <code>generateMetadata</code> (título próprio por vaga).</p>
-    <div class="file">📄 app/vagas/[slug]/page.tsx <span class="linhas">127 linhas</span></div>
+    <h2>app/vagas/[slug]/page.tsx</h2>
+    <p>A rota dinâmica: um arquivo, nove páginas. O <code>await params</code> aqui é sobre <b>roteamento</b> (descobrir qual slug foi pedido), não sobre buscar dados. Veja também <code>generateStaticParams</code> e <code>generateMetadata</code>.</p>
+    <div class="file">📄 app/vagas/[slug]/page.tsx <span class="linhas">129 linhas</span></div>
 <pre><code>import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -1027,16 +1757,15 @@ type Props = { params: Promise&lt;{ slug: string }&gt; };
 // Diz ao Next quais slugs existem, pra ele gerar essas páginas JÁ no build
 // (ficam prontas, estáticas, instantâneas). Slug novo que aparecer depois é
 // renderizado sob demanda na primeira visita.
-export async function generateStaticParams() {
-  const slugs = await listarSlugs();
-  return slugs.map((slug) =&gt; ({ slug }));
+export function generateStaticParams() {
+  return listarSlugs().map((slug) =&gt; ({ slug }));
 }
 
 // Metadata dinâmica: cada vaga tem seu próprio &lt;title&gt; e descrição.
 // É isso que faz o link ficar bonito quando alguém compartilha no WhatsApp.
 export async function generateMetadata({ params }: Props): Promise&lt;Metadata&gt; {
   const { slug } = await params;
-  const vaga = await buscarVagaPorSlug(slug);
+  const vaga = buscarVagaPorSlug(slug);
 
   if (!vaga) return { title: "Vaga não encontrada" };
 
@@ -1052,9 +1781,12 @@ export async function generateMetadata({ params }: Props): Promise&lt;Metadata&g
 }
 
 export default async function PaginaVaga({ params }: Props) {
-  // ⚠️ NEXT.JS 16: `params` também é uma Promise.
+  // ⚠️ NEXT.JS 16: `params` é uma Promise — sempre `await`.
+  // Repare que este `await` é sobre ROTEAMENTO (descobrir qual slug a pessoa
+  // pediu), não sobre buscar dados. A busca em si é instantânea: o array já
+  // está aqui. Buscar dados de fora é assunto da aula 05.
   const { slug } = await params;
-  const vaga = await buscarVagaPorSlug(slug);
+  const vaga = buscarVagaPorSlug(slug);
 
   // Slug que não existe → 404 de verdade (renderiza o app/not-found.tsx)
   if (!vaga) notFound();
@@ -1140,26 +1872,112 @@ export default async function PaginaVaga({ params }: Props) {
 }</code></pre>
   </section>
 
-  <section id="loading">
-    <h2>app/vagas/loading.tsx</h2>
-    <p>Você não escreve <code>if (carregando)</code> em lugar nenhum. Basta o arquivo existir: o Next mostra ele enquanto o <code>page.tsx</code> da mesma pasta busca os dados.</p>
-    <div class="file">📄 app/vagas/loading.tsx <span class="linhas">18 linhas</span></div>
-<pre><code>import estilos from "./vagas.module.css";
+  <section id="conta-layout">
+    <h2>app/(conta)/layout.tsx</h2>
+    <p>Um <b>layout aninhado</b> dentro de um <b>grupo de rotas</b>. A pasta entre parênteses não entra na URL: as rotas continuam <code>/entrar</code> e <code>/cadastro</code>. E o cabeçalho e o rodapé do layout raiz continuam por fora — layouts se aninham.</p>
+    <div class="file">📄 app/(conta)/layout.tsx <span class="linhas">37 linhas</span></div>
+<pre><code>import Link from "next/link";
+import estilos from "./conta.module.css";
 
-// Arquivo mágico do App Router: enquanto o `page.tsx` desta pasta está
-// buscando os dados no servidor, o Next mostra ISTO automaticamente.
-// Você não escreve `if (carregando)` em lugar nenhum — é só existir o arquivo.
-export default function Carregando() {
+// ============================================================================
+// Um LAYOUT ANINHADO, dentro de um GRUPO DE ROTAS.
+//
+// A pasta se chama "(conta)" — com parênteses. Isso faz o Next usá-la só pra
+// organizar: ela NÃO vira pedaço da URL. As rotas continuam sendo
+// /entrar e /cadastro, não /conta/entrar.
+//
+// O que ela dá: um layout compartilhado só pelas telas de conta. O cabeçalho e
+// o rodapé do layout raiz continuam aparecendo — layouts se aninham, um dentro
+// do outro.
+// ============================================================================
+
+export default function LayoutConta({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    &lt;div className="container"&gt;
-      &lt;p className="olho"&gt;carregando vagas…&lt;/p&gt;
-      &lt;div className={estilos.grade} style={{ marginTop: 24 }}&gt;
-        {/* seis retângulos pulsando, do tamanho de um card */}
-        {Array.from({ length: 6 }).map((_, i) =&gt; (
-          &lt;div key={i} className={estilos.esqueleto} /&gt;
-        ))}
+    &lt;div className={estilos.palco}&gt;
+      &lt;div className={estilos.cartao}&gt;
+        &lt;Link href="/" className={estilos.marca}&gt;
+          &lt;span aria-hidden="true"&gt;🪭&lt;/span&gt; Leque de Vagas
+        &lt;/Link&gt;
+
+        {children}
       &lt;/div&gt;
+
+      &lt;p className={estilos.rodapinho}&gt;
+        🔒 Nenhum dado é enviado a lugar nenhum: estas telas são só a interface.
+        O login de verdade chega na aula 05.
+      &lt;/p&gt;
     &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="entrar">
+    <h2>app/(conta)/entrar/page.tsx  →  /entrar</h2>
+    <p>A página é de servidor e só monta o título. Tudo que reage está no <code>&lt;FormEntrar /&gt;</code>. A fronteira fica no menor pedaço possível.</p>
+    <div class="file">📄 app/(conta)/entrar/page.tsx <span class="linhas">28 linhas</span></div>
+<pre><code>import type { Metadata } from "next";
+import FormEntrar from "@/components/FormEntrar";
+import estilos from "../conta.module.css";
+
+export const metadata: Metadata = {
+  title: "Entrar",
+  description: "Acesse sua conta no Leque de Vagas.",
+};
+
+// A página é Componente de Servidor: ela só monta o título e o texto.
+// Toda a parte que reage (digitar, validar, enviar) está no &lt;FormEntrar /&gt;,
+// que é o Componente de Cliente. A fronteira fica no menor pedaço possível.
+export default function Entrar() {
+  return (
+    &lt;&gt;
+      &lt;div&gt;
+        &lt;h1 className={estilos.titulo}&gt;
+          Bom te ver de &lt;span className="grad-text"&gt;volta&lt;/span&gt;
+        &lt;/h1&gt;
+        &lt;p className={estilos.subtitulo}&gt;
+          Entre pra acompanhar as vagas que você salvou.
+        &lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;FormEntrar /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section id="cadastro">
+    <h2>app/(conta)/cadastro/page.tsx  →  /cadastro</h2>
+    <p>Mesmo padrão da tela de entrar.</p>
+    <div class="file">📄 app/(conta)/cadastro/page.tsx <span class="linhas">27 linhas</span></div>
+<pre><code>import type { Metadata } from "next";
+import FormCadastro from "@/components/FormCadastro";
+import estilos from "../conta.module.css";
+
+export const metadata: Metadata = {
+  title: "Criar conta",
+  description:
+    "Crie sua conta no Leque de Vagas e acompanhe as oportunidades que combinam com você.",
+};
+
+export default function Cadastro() {
+  return (
+    &lt;&gt;
+      &lt;div&gt;
+        &lt;h1 className={estilos.titulo}&gt;
+          Comece sua &lt;span className="grad-text"&gt;transição&lt;/span&gt;
+        &lt;/h1&gt;
+        &lt;p className={estilos.subtitulo}&gt;
+          Leva menos de um minuto — e a gente avisa quando aparecer vaga com a
+          sua cara.
+        &lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;FormCadastro /&gt;
+    &lt;/&gt;
   );
 }</code></pre>
   </section>
@@ -1202,7 +2020,7 @@ export default function NaoEncontrado() {
 
   <section id="erro">
     <h2>app/error.tsx</h2>
-    <p>A rede de proteção. Precisa de <code>"use client"</code> porque tem um botão de "tentar de novo". Se algo explodir ao renderizar, só este bloco aparece — o site não cai.</p>
+    <p>A rede de proteção. Precisa de ser Componente de Cliente por causa do botão de tentar de novo. Se algo explodir ao renderizar, só este bloco aparece — o site não cai.</p>
     <div class="file">📄 app/error.tsx <span class="linhas">44 linhas</span></div>
 <pre><code>"use client";
 

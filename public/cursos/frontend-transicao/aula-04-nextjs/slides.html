@@ -210,17 +210,18 @@
     <h2>O mapa do dia</h2>
     <div class="agenda">
       <div class="row"><span class="t">08:00</span><span class="d">Boas-vindas · a dor do copiar-colar · o que é framework</span><span class="tag">warm-up</span></div>
-      <div class="row"><span class="t">08:30</span><span class="d">React em 30 min: componente, JSX, props e listas</span><span class="tag">base</span></div>
+      <div class="row"><span class="t">08:30</span><span class="d">React em 45 min: componente, JSX, props e listas</span><span class="tag">base</span></div>
       <div class="row"><span class="t">09:15</span><span class="d">Criando o projeto <b>Leque de Vagas</b> · a estrutura de pastas</span><span class="tag">hands-on</span></div>
       <div class="row brk"><span class="t">10:00</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
       <div class="row"><span class="t">10:15</span><span class="d">Rotas por pasta · layout · &lt;Link&gt; · página /sobre</span><span class="tag">live code</span></div>
       <div class="row"><span class="t">11:15</span><span class="d">Componentes: cabeçalho, rodapé e o card de vaga</span><span class="tag">live code</span></div>
       <div class="row brk"><span class="t">12:00</span><span class="d">🍽️ Almoço</span><span class="tag">1h</span></div>
-      <div class="row"><span class="t">13:00</span><span class="d">Servidor x Cliente · <span class="mono">"use client"</span> · buscar dados com await</span><span class="tag">o pulo do gato</span></div>
-      <div class="row"><span class="t">14:15</span><span class="d">Rota dinâmica <span class="mono">[slug]</span> · metadata · loading · 404</span><span class="tag">live code</span></div>
-      <div class="row brk"><span class="t">15:00</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
-      <div class="row"><span class="t">15:15</span><span class="d">Busca e filtros na URL · o que mudou no Next 16</span><span class="tag">live code</span></div>
-      <div class="row"><span class="t">16:15</span><span class="d">Deploy na Vercel · desafio · vitrine</span><span class="tag">🎉</span></div>
+      <div class="row"><span class="t">13:00</span><span class="d">Servidor x Cliente · <span class="mono">"use client"</span> · <span class="mono">useState</span></span><span class="tag">o pulo do gato</span></div>
+      <div class="row"><span class="t">14:00</span><span class="d">Busca e filtros na tela, com <span class="mono">useState</span></span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">14:45</span><span class="d">Rota dinâmica <span class="mono">[slug]</span> · metadata · 404</span><span class="tag">live code</span></div>
+      <div class="row brk"><span class="t">15:30</span><span class="d">☕ Café</span><span class="tag">15 min</span></div>
+      <div class="row"><span class="t">15:45</span><span class="d">Telas de <b>login e cadastro</b>: formulário, validação e feedback</span><span class="tag">o assunto novo</span></div>
+      <div class="row"><span class="t">16:45</span><span class="d">Deploy na Vercel · desafio · vitrine</span><span class="tag">🎉</span></div>
     </div>
   </section>
 
@@ -431,12 +432,12 @@ leque-de-vagas/<br>
       <div class="stack">
         <div class="card"><h3 class="tagc">page.tsx</h3><p>a página em si. Sem ela, a pasta não vira rota.</p></div>
         <div class="card"><h3 class="attr">layout.tsx</h3><p>a moldura ao redor. Não remonta ao navegar.</p></div>
-        <div class="card"><h3 class="str">loading.tsx</h3><p>aparece sozinho enquanto a página busca dados.</p></div>
+        <div class="card"><h3 class="key">error.tsx</h3><p>rede de proteção: algo quebrou, o site não cai.</p></div>
       </div>
       <div class="stack">
-        <div class="card"><h3 class="key">error.tsx</h3><p>rede de proteção: algo quebrou, o site não cai.</p></div>
         <div class="card"><h3 class="str">not-found.tsx</h3><p>o seu 404, com a cara do seu projeto.</p></div>
-        <div class="card ok"><h3 class="attr">✨ o pulo</h3><p>Você nunca escreve <span class="code-inline">if (carregando)</span>. Basta o arquivo existir.</p></div>
+        <div class="card" style="opacity:.62"><h3 class="muted">loading.tsx</h3><p>aparece sozinho enquanto a página espera dados de fora. <strong>Aula 05</strong> — hoje não temos o que esperar.</p></div>
+        <div class="card ok"><h3 class="attr">✨ o pulo</h3><p>Você não configura nada: <strong>basta o arquivo existir</strong> com o nome certo.</p></div>
       </div>
     </div>
   </section>
@@ -496,17 +497,26 @@ leque-de-vagas/<br>
     <p class="note">No App Router, <strong>todo componente é de servidor por padrão</strong>. Ele não manda JavaScript nenhum pro navegador — a página fica leve e o Google lê o conteúdo.</p>
   </section>
 
-  <!-- 22 ASYNC -->
+  <!-- 22 DE ONDE VEM OS DADOS -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">buscar dados</span> · sem useEffect, sem fetch no navegador</div>
-    <h2><span class="grad">await</span> direto no componente</h2>
-    <span class="filetab">📄 app/vagas/page.tsx</span>
-<pre><span class="k">export default async function</span> <span class="t">PaginaVagas</span>() {
-  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>();   <span class="c">← roda no servidor!</span>
-
-  <span class="k">return</span> &lt;<span class="t">div</span>&gt;{vagas.<span class="f">map</span>(v =&gt; &lt;<span class="t">VagaCard</span> key={v.slug} vaga={v} /&gt;)}&lt;/<span class="t">div</span>&gt;;
-}</pre>
-    <p class="note">É só colocar <strong>async</strong> na função e usar <strong>await</strong>. Como roda no servidor, dá pra falar com banco de dados e usar senha de API sem expor nada.</p>
+    <div class="eyebrow"><span class="b">os dados de hoje</span> · combinado importante 🤝</div>
+    <h2>Hoje não tem <span class="grad">backend</span></h2>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <span class="filetab">📄 lib/dados.ts</span>
+<pre><span class="k">export const</span> VAGAS = [
+  { slug: <span class="s">"estagio-front-end-nuvem-rosa"</span>,
+    titulo: <span class="s">"Estágio em Front-end"</span>,
+    empresa: <span class="s">"Nuvem Rosa"</span>, ... },
+  ...
+];</pre>
+      </div>
+      <div class="stack">
+        <div class="card ok"><h3 class="str">Um arquivo do projeto</h3><p>As vagas moram <strong>dentro do código</strong>. Nada é buscado de fora. Zero espera.</p></div>
+        <div class="card"><h3 class="attr">Por que assim?</h3><p>Hoje o assunto é <strong>interface</strong>. Buscar dados de fora é a aula 05 inteira.</p></div>
+      </div>
+    </div>
+    <p class="note">Mas repare: <strong>nenhuma página conhece o <span class="code-inline">dados.ts</span></strong> — todas passam pelo <span class="code-inline">lib/vagas.ts</span>. No dia que os dados vierem de uma API, <strong>só um arquivo muda</strong>. 😏</p>
   </section>
 
   <!-- 23 CLIENT -->
@@ -566,19 +576,71 @@ leque-de-vagas/<br>
         <p>Só a estrela é cliente. O card, a lista e a página continuam no servidor.</p>
       </div>
     </div>
-    <p class="note">No nosso projeto: <strong>1 único</strong> arquivo tem <span class="code-inline">"use client"</span> — o <span class="code-inline">SalvarButton</span>. Todo o resto é servidor.</p>
+    <p class="note">A diretiva <strong>contamina pra baixo</strong>: tudo que um componente de cliente importa também vira cliente. Por isso ela vai na <strong>fronteira</strong> — e o <span class="code-inline">Filtros.tsx</span> do projeto é cliente <strong>sem ter a linha</strong>.</p>
   </section>
 
-  <!-- 26 LOADING -->
+  <!-- 25b O MURAL COM USESTATE -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">loading.tsx</span> · carregamento sem escrever um if</div>
-    <h2>O esqueleto que aparece sozinho</h2>
-    <span class="filetab">📄 app/vagas/loading.tsx</span>
-<pre><span class="k">export default function</span> <span class="t">Carregando</span>() {
-  <span class="k">return</span> &lt;<span class="t">p</span>&gt;carregando vagas…&lt;/<span class="t">p</span>&gt;;
+    <div class="eyebrow"><span class="b">live code</span> · busca e filtros na tela</div>
+    <h2>A fronteira do nosso mural</h2>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <span class="filetab">📄 app/vagas/page.tsx <span style="color:#A98CE0">servidor</span></span>
+<pre><span class="k">export default function</span> <span class="t">PaginaVagas</span>() {
+  <span class="k">const</span> vagas = <span class="f">listarVagas</span>();
+
+  <span class="k">return</span> &lt;<span class="t">MuralDeVagas</span> vagas={vagas} /&gt;;
 }</pre>
-    <p style="margin-top:16px">Pronto. Enquanto o <span class="code-inline">page.tsx</span> da mesma pasta busca os dados, o Next mostra isso automaticamente e troca quando ficar pronto.</p>
-    <p class="note">Dica de UX: em vez de "carregando…", desenhe <strong>retângulos cinzas no formato dos cards</strong> (skeleton). A espera parece menor.</p>
+        <span class="filetab">📄 components/MuralDeVagas.tsx <span style="color:#F24487">cliente</span></span>
+<pre><span class="s">"use client"</span>;
+
+<span class="k">const</span> [busca, setBusca] = <span class="f">useState</span>(<span class="s">""</span>);
+<span class="k">const</span> visiveis = <span class="f">filtrarVagas</span>(vagas, { busca });</pre>
+      </div>
+      <div class="stack">
+        <div class="card ok"><h3 class="str">Você digita, a lista muda</h3><p>Sem recarregar, sem esperar ninguém. Tudo acontece no navegador.</p></div>
+        <div class="card"><h3 class="attr">O preço 🧾</h3><p>Filtrar no cliente obriga <strong>a lista inteira</strong> a ir junto pro navegador.</p></div>
+        <div class="card" style="border-color:rgba(232,139,184,.45)"><h3 class="attr">Na aula 05 😏</h3><p>O filtro vai morar na <strong>URL</strong> e voltar pro servidor. Aí dá pra compartilhar o link filtrado.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 26 USESTATE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">useState</span> · a memória do componente</div>
+    <h2>Uma linha, três coisas</h2>
+<pre><span class="k">const</span> [busca, setBusca] = <span class="f">useState</span>(<span class="s">""</span>);
+<span class="c">        ↑        ↑                  ↑</span>
+<span class="c">   o valor   como mudar      o valor inicial</span></pre>
+    <div class="grid3" style="margin-top:18px">
+      <div class="card"><h3 class="str">busca</h3><p>o dado agora. Você <strong>lê</strong>, nunca escreve nele direto.</p></div>
+      <div class="card"><h3 class="attr">setBusca(novo)</h3><p>troca o dado <strong>e redesenha a tela</strong>. É esse o pulo.</p></div>
+      <div class="card no"><h3 class="key">busca = "x"</h3><p>❌ nunca. O React não fica sabendo e a tela não muda.</p></div>
+    </div>
+    <p class="note">Regra de bolso: um <span class="code-inline">useState</span> pra cada <strong>coisa que a pessoa controla</strong>. Nem mais, nem menos.</p>
+  </section>
+
+  <!-- 26b ESTADO DERIVADO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">estado derivado</span> · o erro nº 1 de quem começa</div>
+    <h2>Se dá pra <span class="grad">calcular</span>, não guarde</h2>
+    <div class="grid2">
+      <div class="card no">
+        <h3 class="key">❌ dois estados que precisam combinar</h3>
+<pre style="margin-top:10px;font-size:11.5px"><span class="k">const</span> [busca, setBusca] = <span class="f">useState</span>(<span class="s">""</span>);
+<span class="k">const</span> [lista, setLista] = <span class="f">useState</span>(vagas);
+<span class="c">// e agora você tem que lembrar de</span>
+<span class="c">// atualizar `lista` em TODO lugar 😰</span></pre>
+      </div>
+      <div class="card ok">
+        <h3 class="str">✅ um estado, o resto é conta</h3>
+<pre style="margin-top:10px;font-size:11.5px"><span class="k">const</span> [busca, setBusca] = <span class="f">useState</span>(<span class="s">""</span>);
+
+<span class="c">// calculado a cada renderização</span>
+<span class="k">const</span> visiveis = <span class="f">filtrarVagas</span>(vagas, { busca });</pre>
+      </div>
+    </div>
+    <p class="note">Dois estados que precisam "combinar" um com o outro é uma dupla que <strong>um dia vai brigar</strong>. Guarde só o mínimo; derive o resto.</p>
   </section>
 
   <!-- 27 ROTA DINAMICA -->
@@ -630,28 +692,100 @@ leque-de-vagas/<br>
     <p class="lead" style="margin-top:20px;max-width:48ch">Crie a pasta <span class="code-inline">[slug]</span>, faça o card linkar pra ela, use <span class="code-inline">notFound()</span> e dê um título próprio pra cada vaga.</p>
   </section>
 
-  <!-- 30 SEARCH PARAMS -->
+  <!-- 30 FORMULARIOS: ABERTURA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">o assunto novo do dia</span> · a tela mais pedida em entrevista</div>
+    <div class="big-emoji">🔐</div>
+    <h1 style="max-width:22ch">Telas de <span class="grad">login e cadastro</span></h1>
+    <p class="lead" style="margin-top:18px;max-width:48ch">Formulário é onde quase todo mundo trava. E é o pedaço de interface que mais aparece em teste técnico de vaga júnior.</p>
+  </section>
+
+  <!-- 31 INPUT CONTROLADO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">estado na url</span> · o truque que ninguém ensina</div>
-    <h2>Busca e filtro <span class="grad">sem useState</span></h2>
+    <div class="eyebrow"><span class="b">input controlado</span> · o estado manda na tela</div>
+    <h2>O valor vem do <span class="grad">estado</span></h2>
     <div class="grid2">
       <div>
-<pre><span class="c">// /vagas?busca=react&amp;area=Front-end</span>
-<span class="k">export default async function</span> <span class="t">PaginaVagas</span>({ searchParams }) {
-  <span class="k">const</span> { busca = <span class="s">""</span>, area = <span class="s">""</span> } = <span class="k">await</span> searchParams;
-  <span class="k">const</span> vagas = <span class="k">await</span> <span class="f">listarVagas</span>({ busca, area });
-  ...
-}
+<pre><span class="k">const</span> [email, setEmail] = <span class="f">useState</span>(<span class="s">""</span>);
 
-<span class="c">&lt;!-- o form é HTML puro, method GET --&gt;</span>
-&lt;<span class="t">form</span> action=<span class="s">"/vagas"</span>&gt;&lt;<span class="t">input</span> name=<span class="s">"busca"</span> /&gt;&lt;/<span class="t">form</span>&gt;</pre>
+&lt;<span class="t">input</span>
+  value={email}
+  onChange={(e) =&gt; <span class="f">setEmail</span>(e.target.value)}
+/&gt;</pre>
       </div>
       <div class="stack">
-        <div class="card ok"><h3 class="str">Dá pra compartilhar 🔗</h3><p>O link com o filtro aplicado funciona pra qualquer pessoa.</p></div>
-        <div class="card ok"><h3 class="tagc">Voltar funciona ⬅️</h3><p>O botão "voltar" do navegador desfaz o filtro. De graça.</p></div>
-        <div class="card ok"><h3 class="attr">Funciona sem JS 🔌</h3><p>Um <span class="code-inline">&lt;form&gt;</span> comum. Nada de JavaScript envolvido.</p></div>
+        <div class="card"><h3 class="str">O ciclo</h3><p>digita → <span class="code-inline">onChange</span> → muda o estado → React redesenha → o input mostra o novo valor.</p></div>
+        <div class="card no"><h3 class="key">Esqueceu o onChange?</h3><p>O campo <strong>trava</strong>: você digita e nada aparece. O valor está preso no estado que ninguém atualiza.</p></div>
       </div>
     </div>
+    <p class="note">Parece volta desnecessária, mas é o que te dá <strong>controle</strong>: dá pra validar, formatar e desabilitar o botão a cada tecla.</p>
+  </section>
+
+  <!-- 32 VALIDACAO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">validação</span> · avisar sem irritar</div>
+    <h2>Um erro por campo</h2>
+<pre><span class="k">function</span> <span class="f">validar</span>() {
+  <span class="k">const</span> novos = {};
+
+  <span class="k">if</span> (!email.<span class="f">trim</span>())            novos.email = <span class="s">"Escreva seu e-mail."</span>;
+  <span class="k">else if</span> (!email.<span class="f">includes</span>(<span class="s">"@"</span>)) novos.email = <span class="s">"Esse e-mail não parece completo."</span>;
+
+  <span class="k">if</span> (senha.length &lt; <span class="s">6</span>)         novos.senha = <span class="s">"A senha tem pelo menos 6 caracteres."</span>;
+
+  <span class="k">return</span> novos;   <span class="c">← objeto vazio = está tudo certo</span>
+}</pre>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card ok"><h3 class="str">Valide no envio</h3><p>não a cada tecla — ninguém merece "e-mail inválido" na primeira letra.</p></div>
+      <div class="card ok"><h3 class="attr">Limpe ao digitar</h3><p>corrigir tem que dar sensação de progresso, não de castigo.</p></div>
+      <div class="card ok"><h3 class="tagc">Diga o que fazer</h3><p>"Escreva seu e-mail" &gt; "Campo obrigatório".</p></div>
+    </div>
+  </section>
+
+  <!-- 33 PREVENTDEFAULT + ENVIANDO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">enviar</span> · duas armadilhas clássicas</div>
+    <h2>preventDefault e o botão travado</h2>
+    <div class="grid2" style="align-items:start">
+      <div>
+<pre><span class="k">function</span> <span class="f">enviar</span>(evento) {
+  evento.<span class="f">preventDefault</span>();   <span class="c">← senão recarrega tudo!</span>
+
+  <span class="k">const</span> novos = <span class="f">validar</span>();
+  <span class="f">setErros</span>(novos);
+  <span class="k">if</span> (<span class="t">Object</span>.<span class="f">keys</span>(novos).length &gt; <span class="s">0</span>) <span class="k">return</span>;
+
+  <span class="f">setEnviando</span>(<span class="k">true</span>);
+  <span class="c">// aula 05: aqui fala com o servidor</span>
+}</pre>
+      </div>
+      <div class="stack">
+        <div class="card no"><h3 class="key">Sem preventDefault</h3><p>o navegador recarrega a página no envio e você perde tudo.</p></div>
+        <div class="card ok"><h3 class="str">Botão desabilitado</h3><p><span class="code-inline">disabled={enviando}</span> evita o clique duplo — e o cadastro em dobro.</p></div>
+      </div>
+    </div>
+    <p class="note">Hoje o <span class="code-inline">setTimeout</span> finge a demora do servidor, só pra você <strong>ver</strong> o estado de "Entrando…". Na aula 05 vira de verdade.</p>
+  </section>
+
+  <!-- 34 ACESSIBILIDADE DO FORM -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">acessibilidade</span> · 4 linhas que mudam tudo</div>
+    <h2>Formulário que <span class="grad">todo mundo</span> usa</h2>
+    <ul class="clean">
+      <li><span class="code-inline">&lt;label htmlFor="email"&gt;</span> — clicar no rótulo foca o campo (e o leitor de tela anuncia)</li>
+      <li><span class="code-inline">aria-invalid</span> — avisa que o campo está com erro</li>
+      <li><span class="code-inline">aria-describedby</span> — aponta qual texto explica o erro</li>
+      <li><span class="code-inline">type="email"</span> — no celular, abre o teclado com o @</li>
+      <li><span class="code-inline">autoComplete</span> — deixa o navegador preencher sozinho</li>
+    </ul>
+    <p class="note">Nunca use <strong>só a cor vermelha</strong> pra indicar erro: quem não distingue cores fica sem saber o que aconteceu. Cor + ícone + texto.</p>
+  </section>
+
+  <!-- 35 PARADA 4 -->
+  <section class="slide parada">
+    <div class="badge">⏱️ MÃO NA MASSA · 60 min</div>
+    <h1>Suas telas de <span class="grad">login e cadastro</span></h1>
+    <p class="lead" style="margin-top:20px;max-width:48ch">Crie <span class="code-inline">/entrar</span> e <span class="code-inline">/cadastro</span>, com campo controlado, validação, erro por campo e o botão mostrando "Entrando…".</p>
   </section>
 
   <!-- 31 NEXT 16 -->
@@ -703,15 +837,30 @@ leque-de-vagas/<br>
     <p class="note">A Vercel é a empresa que criou o Next.js — por isso o deploy é literalmente 3 cliques.</p>
   </section>
 
+  <!-- 33b O QUE FICA PRA AULA 05 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o combinado</span> · o que a gente deixou pra depois</div>
+    <h2>Na aula 05, o <span class="grad">servidor</span> entra</h2>
+    <table>
+      <tr><th>Hoje (frontend)</th><th>Aula 05 (com backend)</th></tr>
+      <tr><td>as vagas vêm de <code>lib/dados.ts</code></td><td>vêm de uma <b>API de verdade</b></td></tr>
+      <tr><td>leitura instantânea</td><td><code>async</code> / <code>await</code> e a espera real</td></tr>
+      <tr><td>nada pra esperar</td><td><code>loading.tsx</code> e <code>&lt;Suspense&gt;</code></td></tr>
+      <tr><td>filtro com <code>useState</code></td><td>filtro na <b>URL</b>, processado no servidor</td></tr>
+      <tr><td>login valida e para por aí</td><td>login que <b>entra</b> de verdade</td></tr>
+    </table>
+    <p class="note">Nada do que você fez hoje será jogado fora: os formulários já estão prontos e só ganham o miolo. <strong>Interface e backend evoluem em ritmos diferentes</strong> — é assim no trabalho também.</p>
+  </section>
+
   <!-- 34 DESAFIO -->
   <section class="slide">
     <div class="eyebrow"><span class="b">desafio</span> · sua vez de crescer o projeto</div>
     <h2>Leque de Vagas, do <span class="grad">seu jeito</span></h2>
     <ul class="clean">
       <li>Uma rota nova: <span class="code-inline">/empresas</span> e <span class="code-inline">/empresas/[empresa]</span></li>
+      <li>Um filtro novo (modelo de trabalho) no mural, com <span class="code-inline">useState</span></li>
+      <li>Uma tela de <strong>recuperar senha</strong>, no padrão das outras duas</li>
       <li>Página <span class="code-inline">/salvas</span> lendo o que o botão ★ guardou</li>
-      <li>Um filtro novo (modelo de trabalho) vivendo na URL</li>
-      <li><span class="code-inline">loading.tsx</span>, <span class="code-inline">not-found.tsx</span> e metadata em todas as rotas</li>
       <li>Publicado na Vercel com o link no grupo 🌍</li>
     </ul>
     <p class="note">Brief completo, ficha técnica e código de referência na página da aula.</p>
@@ -730,7 +879,7 @@ leque-de-vagas/<br>
 <div class="progress" id="progress"></div>
 <div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
 <div class="nav">
-  <span id="counter">01 / 35</span>
+  <span id="counter">01 / 43</span>
   <button id="prev" aria-label="anterior">‹</button>
   <button id="next" aria-label="próximo">›</button>
 </div>

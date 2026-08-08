@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Desafio 04 — Next.js 16 · NickDev</title>
-<meta name="description" content="Desafio da aula 04: crescer o Leque de Vagas com rotas novas, filtros na URL e a página de vagas salvas — em Next.js 16.">
+<meta name="description" content="Desafio da aula 04: crescer o Leque de Vagas com rotas novas, filtro com useState e uma tela de recuperar senha — frontend puro, em Next.js 16.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -105,7 +105,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <h1>Faça o <span class="grad">Leque de Vagas</span> crescer 🪭⚡</h1>
   <p class="lead">
     Na aula a gente construiu a base juntos. Agora o projeto é seu: novas rotas,
-    um filtro que você inventa, a página das vagas salvas e tudo publicado na
+    um filtro que você inventa, mais uma tela de formulário e tudo publicado na
     Vercel. Este é o mesmo projeto que vamos usar até o fim do módulo —
     <b>capriche, porque ele vai pro seu portfólio</b>.
   </p>
@@ -116,9 +116,20 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <div>
       <h3>O objetivo</h3>
       <p>Provar que você consegue <b>criar rotas sozinha(o)</b>, decidir o que é
-      Componente de Servidor e o que é de Cliente, e manter o estado da tela na
-      URL. Não é sobre escrever muito código — é sobre entender <b>onde cada
-      coisa mora</b>.</p>
+      Componente de Servidor e o que é de Cliente, e montar um <b>formulário
+      controlado com validação</b>. Não é sobre escrever muito código — é sobre
+      entender <b>onde cada coisa mora</b>.</p>
+    </div>
+  </div>
+
+  <div class="goal" style="border-left-color:var(--purple)">
+    <span class="ico">🧩</span>
+    <div>
+      <h3>Sem backend — de propósito</h3>
+      <p>Assim como na aula, <b>nada aqui busca dados de fora</b>. As vagas
+      continuam num arquivo do projeto e os formulários validam sem enviar
+      nada. Se você travar pensando "mas como isso salva de verdade?" — não
+      salva ainda, e está tudo bem. É o assunto da <b>aula 05</b>.</p>
     </div>
   </div>
 
@@ -171,32 +182,45 @@ npm run dev</pre>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">03</span><h3>Um filtro novo, vivendo na URL</h3><span class="nivel f1">essencial</span></div>
+    <div class="step-head"><span class="n">03</span><h3>Um filtro novo no mural</h3><span class="nivel f1">essencial</span></div>
     <p>Além de área e nível, adicione o filtro de <b>modelo de trabalho</b>
-    (Remoto / Híbrido / Presencial) na página <code>/vagas</code>.</p>
+    (Remoto / Híbrido / Presencial) no <code>MuralDeVagas</code>.</p>
     <ul>
-      <li>O filtro vira <code>?modelo=Remoto</code> na URL</li>
-      <li>Nada de <code>useState</code> — o estado é a URL</li>
+      <li>Mais um <code>useState</code> — e só um</li>
       <li>Ele precisa <b>combinar</b> com os filtros que já existem</li>
+      <li>A função <code>filtrarVagas</code> já aceita <code>modelo</code>: leia ela antes de escrever qualquer coisa 😉</li>
     </ul>
-    <p class="tip"><b>Teste que vale ponto:</b> aplique dois filtros, copie a URL, cole numa aba anônima. Chegou igual? Passou. 🎉</p>
+    <p class="tip"><b>Armadilha:</b> se você criar um <code>useState</code> pra guardar a lista filtrada, o filtro novo vai funcionar sozinho e quebrar os outros. A lista é <b>calculada</b>, nunca guardada.</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">04</span><h3>Os estados da tela em todas as rotas</h3><span class="nivel f1">essencial</span></div>
+    <div class="step-head"><span class="n">04</span><h3>A tela de recuperar senha</h3><span class="nivel f1">essencial</span></div>
+    <p>Uma terceira tela em <code>app/(conta)/recuperar-senha/</code>, no mesmo
+    padrão das outras duas. Um campo de e-mail e um botão.</p>
+    <ul>
+      <li>Reaproveite o <code>&lt;CampoTexto /&gt;</code> — não escreva o campo de novo</li>
+      <li>Valide o e-mail e mostre erro por campo</li>
+      <li>Estado de enviando, e depois: "se esse e-mail existir, enviamos um link"</li>
+      <li>Link pra ela no rodapé do <code>/entrar</code></li>
+    </ul>
+    <p class="tip"><b>Detalhe de gente grande:</b> a mensagem é "<b>se</b> esse e-mail existir" de propósito. Dizer "e-mail não cadastrado" entrega pra qualquer um quais e-mails têm conta no site.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>Os estados da tela em todas as rotas</h3><span class="nivel f1">essencial</span></div>
     <p>Nenhuma rota nova pode ficar sem:</p>
     <div class="grid2">
-      <div class="mini"><b>loading.tsx</b> — de preferência um skeleton, não só a palavra "carregando"</div>
-      <div class="mini"><b>Estado vazio</b> — "nenhuma vaga com esses filtros", com um jeito de voltar</div>
+      <div class="mini"><b>Estado vazio</b> — "nenhuma vaga com esses filtros", com um jeito de limpar</div>
       <div class="mini"><b>metadata</b> — <code>title</code> e <code>description</code> próprios</div>
       <div class="mini"><b>404</b> — <code>notFound()</code> onde faz sentido</div>
+      <div class="mini"><b>Erro por campo</b> — em todo formulário, com texto que diz o que fazer</div>
     </div>
   </div>
 
   <div class="label">Nível 2 · pra consolidar (recomendado)</div>
 
   <div class="step">
-    <div class="step-head"><span class="n">05</span><h3>A página /salvas</h3><span class="nivel f2">recomendado</span></div>
+    <div class="step-head"><span class="n">06</span><h3>A página /salvas</h3><span class="nivel f2">recomendado</span></div>
     <p>O botão ★ já guarda no <code>localStorage</code>. Agora mostre essas vagas
     numa página.</p>
     <ul>
@@ -209,13 +233,13 @@ npm run dev</pre>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">06</span><h3>Contador de salvas no cabeçalho</h3><span class="nivel f2">recomendado</span></div>
+    <div class="step-head"><span class="n">07</span><h3>Contador de salvas no cabeçalho</h3><span class="nivel f2">recomendado</span></div>
     <p>Um <code>★ 3</code> no cabeçalho, mostrando quantas vagas você salvou.</p>
     <p class="tip"><b>Spoiler honesto:</b> fazer o número atualizar <b>na hora</b> em que você clica na estrela de um card é difícil hoje — os dois componentes não conversam. Resolva do jeito que der (atualizar ao trocar de página já vale) e guarde a inquietação: é exatamente esse problema que Context e estado global resolvem, mais pra frente. 😏</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">07</span><h3>Deixe com a sua cara</h3><span class="nivel f2">recomendado</span></div>
+    <div class="step-head"><span class="n">08</span><h3>Deixe com a sua cara</h3><span class="nivel f2">recomendado</span></div>
     <p>O projeto é seu. Mexa no visual com CSS Modules:</p>
     <ul>
       <li>Troque a paleta em <code>globals.css</code> (é tudo variável CSS — muda num lugar, reflete no site inteiro)</li>
@@ -228,14 +252,14 @@ npm run dev</pre>
   <div class="label">Nível 3 · pra brilhar ✨</div>
 
   <div class="step">
-    <div class="step-head"><span class="n">08</span><h3>Extras</h3><span class="nivel f3">opcional</span></div>
+    <div class="step-head"><span class="n">09</span><h3>Extras</h3><span class="nivel f3">opcional</span></div>
     <ul>
-      <li><b>Ordenação</b> por salário ou data, também na URL (<code>?ordem=recentes</code>)</li>
+      <li><b>Ordenação</b> por salário ou data, com um <code>&lt;select&gt;</code> e mais um <code>useState</code></li>
       <li><b>Layout aninhado</b>: <code>app/vagas/layout.tsx</code> com um sub-cabeçalho só das rotas de vaga</li>
-      <li><b>&lt;Suspense&gt;</b>: o cabeçalho da lista aparece na hora, só os cards esperam</li>
+      <li><b>Botão inteligente</b>: "Entrar" só habilita quando os dois campos têm algo</li>
       <li><b>&lt;Image&gt;</b> com logos reais em <code>public/</code>, no lugar dos emojis</li>
-      <li><b>Paginação</b>: <code>?pagina=2</code> mostrando 6 vagas por vez</li>
-      <li><b>Acessibilidade</b>: navegue o site inteiro só com <code>Tab</code>. Dá pra ver onde você está? O botão ★ é anunciado?</li>
+      <li><b>Paginação</b>: um "carregar mais" que mostra 6 vagas por vez</li>
+      <li><b>Acessibilidade</b>: navegue o site inteiro só com <code>Tab</code>. Dá pra ver onde você está? O botão ★ é anunciado? Os erros do formulário são lidos?</li>
     </ul>
   </div>
 
@@ -243,8 +267,9 @@ npm run dev</pre>
   <ul class="check">
     <li>Rota <code>/empresas</code> funcionando, linkada no cabeçalho</li>
     <li>Rota dinâmica <code>/empresas/[empresa]</code> com <code>await params</code></li>
-    <li>Filtro de <b>modelo</b> funcionando pela URL e combinando com os outros</li>
-    <li><code>loading.tsx</code> e <code>metadata</code> nas rotas novas</li>
+    <li>Filtro de <b>modelo</b> com <code>useState</code>, combinando com os outros</li>
+    <li>Tela <code>/recuperar-senha</code> reaproveitando o <code>&lt;CampoTexto /&gt;</code></li>
+    <li><code>metadata</code> própria em todas as rotas novas</li>
     <li>Pelo menos <b>3 vagas novas</b> criadas por você</li>
     <li><code>npm run build</code> passando <b>sem erro</b></li>
     <li>Publicado na Vercel, com o link no grupo 🌍</li>
@@ -257,6 +282,9 @@ npm run dev</pre>
     <li><code>&lt;a href&gt;</code> pra link interno — use <code>&lt;Link&gt;</code></li>
     <li><code>.map()</code> sem <code>key</code></li>
     <li><code>params.slug</code> sem <code>await</code> (vai nem buildar 😅)</li>
+    <li>Um <code>useState</code> guardando a lista filtrada — ela é <b>calculada</b></li>
+    <li><code>&lt;input value={x}&gt;</code> sem <code>onChange</code> (o campo trava)</li>
+    <li>Formulário sem <code>preventDefault</code> no envio</li>
     <li>Lista sem tratar o caso vazio</li>
   </ul>
 
