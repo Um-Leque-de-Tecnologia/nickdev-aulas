@@ -118,6 +118,7 @@
     <a href="#listas">Listas e keys</a>
     <div class="grp">O projeto</div>
     <a href="#criar">Criar o projeto</a>
+    <a href="#instalacao">npm install e dependências</a>
     <a href="#estrutura">Estrutura de pastas</a>
     <div class="grp">App Router</div>
     <a href="#rotas">Rotas por pasta</a>
@@ -347,6 +348,8 @@
   <!-- ==================================================================== -->
   <section id="criar">
     <h2>Criar o projeto</h2>
+    <p>Você <b>não</b> instala o React e o Next na mão. Um comando só cria a
+    pasta, escreve os arquivos iniciais e instala tudo:</p>
 <pre>npx create-next-app@latest leque-de-vagas</pre>
 
     <p>Ele faz algumas perguntas. Respostas da nossa aula:</p>
@@ -364,8 +367,45 @@
 npm run dev
 <span class="cm"># → http://localhost:3000</span></pre>
 
+    <h3 id="instalacao" style="scroll-margin-top:20px">Onde o React foi instalado?</h3>
+    <p>Boa pergunta — e a resposta desmistifica metade do "mundo Node". O
+    <code>create-next-app</code> instalou <b>três pacotes</b> pra você:</p>
+<pre><span class="cm">// package.json — o que o seu projeto depende</span>
+<span class="s">"dependencies"</span>: {
+  <span class="s">"next"</span>: <span class="s">"^16.2.10"</span>,        <span class="cm">o framework</span>
+  <span class="s">"react"</span>: <span class="s">"^19.2.7"</span>,       <span class="cm">a biblioteca de componentes</span>
+  <span class="s">"react-dom"</span>: <span class="s">"^19.2.7"</span>    <span class="cm">o que põe o React na tela do navegador</span>
+}</pre>
+    <p>Duas coisas nascem daí:</p>
+    <ul>
+      <li><code>package.json</code> — a <b>lista de compras</b>. Diz o que o projeto precisa. Vai pro Git.</li>
+      <li><code>node_modules/</code> — as <b>compras em si</b>. Milhares de arquivos baixados. <b>Nunca</b> vai pro Git (o <code>.gitignore</code> já bloqueia).</li>
+    </ul>
+    <div class="tip"><b>Por isso o <code>node_modules</code> não vai pro Git:</b> ele é gerado. Com o <code>package.json</code> na mão, qualquer pessoa reconstrói a pasta inteira com um comando. Mandar 300 MB pro GitHub pra quê? 😄</div>
+
+    <h3>E quando eu clono um projeto que já existe?</h3>
+    <p>É o caso do desafio: você clona o <code>leque-de-vagas</code> do GitHub.
+    Como o <code>node_modules</code> não veio junto, você precisa instalar as
+    dependências antes de rodar:</p>
+<pre>git clone https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas.git
+cd leque-de-vagas
+
+npm install      <span class="cm"># lê o package.json e baixa tudo (demora 1–2 min)</span>
+npm run dev</pre>
+    <div class="tip warn"><b>Esqueceu o <code>npm install</code>?</b> O erro é bem característico: <code>Error: Cannot find module 'next'</code> ou <code>'next' não é reconhecido como um comando</code>. Sempre que clonar um projeto Node, o primeiro comando é <code>npm install</code>.</div>
+
+    <h3>Instalando um pacote novo depois</h3>
+    <p>Quando você quiser adicionar uma biblioteca ao projeto (numa aula futura
+    vamos adicionar algumas), é assim:</p>
+<pre>npm install nome-do-pacote        <span class="cm"># vai pra dependencies</span>
+npm install -D nome-do-pacote     <span class="cm"># só pra desenvolver (devDependencies)</span></pre>
+    <p>O comando já atualiza o <code>package.json</code> sozinho. Você não edita
+    esse arquivo na mão pra instalar coisa.</p>
+
+    <h3>Os comandos do dia a dia</h3>
     <table>
       <tr><th>Comando</th><th>Quando usar</th></tr>
+      <tr><td><code>npm install</code></td><td>uma vez, ao clonar o projeto (ou quando alguém adiciona uma dependência nova)</td></tr>
       <tr><td><code>npm run dev</code></td><td>o dia todo, enquanto desenvolve. Recarrega ao salvar.</td></tr>
       <tr><td><code>npm run build</code></td><td>antes de publicar — mostra os erros que só aparecem em produção</td></tr>
       <tr><td><code>npm start</code></td><td>roda o build de produção na sua máquina</td></tr>
@@ -954,6 +994,12 @@ className={<span class="s">`container ${estilos.interno}`</span>}   <span class=
   <section id="erros-comuns">
     <h2>Erros comuns 🔧</h2>
 
+    <h4>"Cannot find module 'next'" / "'next' não é reconhecido…"</h4>
+    <p>Faltou o <code>npm install</code>. Acontece sempre que você clona um
+    projeto: o <code>node_modules</code> não vem no Git, você precisa
+    reconstruí-lo. Rode <code>npm install</code> na pasta do projeto e tente de
+    novo.</p>
+
     <h4>"You're importing a component that needs useState…"</h4>
     <p>Faltou <code>"use client"</code> na primeira linha do arquivo. Coloque no
     componente <b>menor</b> possível, não na página.</p>
@@ -1030,8 +1076,10 @@ layout.tsx  loading.tsx  error.tsx  not-found.tsx
 &lt;<span class="t">div</span> className={estilos.card}&gt;
 
 <span class="cm">// ---------- comandos ----------</span>
-npm run dev     <span class="cm">desenvolver</span>
-npm run build   <span class="cm">conferir antes do push</span></pre>
+npx create-next-app@latest nome   <span class="cm">criar projeto do zero</span>
+npm install                       <span class="cm">ao clonar um projeto existente</span>
+npm run dev                       <span class="cm">desenvolver</span>
+npm run build                     <span class="cm">conferir antes do push</span></pre>
 
     <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
     <a class="cta" href="roteiro-projeto.html">🛠️ Roteiro do projeto</a>

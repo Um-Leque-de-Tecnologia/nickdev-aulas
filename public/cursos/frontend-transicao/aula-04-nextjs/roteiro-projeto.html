@@ -173,11 +173,21 @@ npx create-next-app@latest leque-de-vagas
 
 cd leque-de-vagas
 npm run dev</pre>
+    <p>Enquanto instala (leva 1–2 min), aproveite pra explicar <b>o que está
+    acontecendo na tela</b> — é a hora perfeita, porque a turma está vendo os
+    pacotes baixando:</p>
+    <ul>
+      <li>Ninguém instala React na mão: o <code>create-next-app</code> baixou <code>next</code>, <code>react</code> e <code>react-dom</code></li>
+      <li><code>package.json</code> = a <b>lista de compras</b> (vai pro Git)</li>
+      <li><code>node_modules/</code> = as <b>compras</b> (nunca vai pro Git — é gerado)</li>
+      <li>Quem clona um projeto do GitHub roda <code>npm install</code> pra reconstruir essa pasta</li>
+    </ul>
+    <div class="dica"><b>Provoque o erro:</b> renomeie <code>node_modules</code> pra <code>node_modules_x</code> e rode <code>npm run dev</code>. Aparece <code>Cannot find module 'next'</code>. Rode <code>npm install</code> e volta a funcionar. São 30 segundos que economizam uma dúvida recorrente pelo resto do módulo.</div>
+
     <p>Com o <code>localhost:3000</code> aberto, damos o tour:</p>
     <ul>
       <li><code>app/page.tsx</code> — mude um texto e veja a tela mudar <b>sem F5</b></li>
       <li><code>app/layout.tsx</code> — a moldura</li>
-      <li><code>node_modules/</code> — "nunca mexa, nunca vai pro Git"</li>
       <li><code>public/</code> — arquivos servidos como estão</li>
     </ul>
     <div class="dica"><b>Monitoria:</b> este é o bloco com mais gente travando (Node antigo, terminal na pasta errada, antivírus). Reserve monitores. Quem já rodou ajuda quem está travado.</div>
