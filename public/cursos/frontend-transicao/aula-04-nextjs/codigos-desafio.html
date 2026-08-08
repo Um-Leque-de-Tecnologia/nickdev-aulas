@@ -425,8 +425,9 @@ export default function RootLayout({
   <section id="cabecalho">
     <h2>components/Cabecalho.tsx</h2>
     <p>Componente de Servidor. Sem estado nem clique, então não precisa da diretiva de cliente — o HTML já chega pronto no navegador.</p>
-    <div class="file">📄 components/Cabecalho.tsx <span class="linhas">33 linhas</span></div>
+    <div class="file">📄 components/Cabecalho.tsx <span class="linhas">32 linhas</span></div>
 <pre><code>import Link from "next/link";
+import Marca from "./Marca";
 import estilos from "./Cabecalho.module.css";
 
 // Componente de Servidor (o padrão no App Router).
@@ -439,9 +440,7 @@ export default function Cabecalho() {
         {/* &lt;Link&gt; troca de página SEM recarregar o site inteiro (e já faz
             prefetch do destino quando o link aparece na tela). */}
         &lt;Link href="/" className={estilos.marca}&gt;
-          &lt;span className={estilos.leque} aria-hidden="true"&gt;
-            🪭
-          &lt;/span&gt;
+          &lt;Marca tamanho={30} /&gt;
           &lt;span&gt;
             Leque de &lt;strong className="grad-text"&gt;Vagas&lt;/strong&gt;
           &lt;/span&gt;
@@ -1875,8 +1874,9 @@ export default async function PaginaVaga({ params }: Props) {
   <section id="conta-layout">
     <h2>app/(conta)/layout.tsx</h2>
     <p>Um <b>layout aninhado</b> dentro de um <b>grupo de rotas</b>. A pasta entre parênteses não entra na URL: as rotas continuam <code>/entrar</code> e <code>/cadastro</code>. E o cabeçalho e o rodapé do layout raiz continuam por fora — layouts se aninham.</p>
-    <div class="file">📄 app/(conta)/layout.tsx <span class="linhas">37 linhas</span></div>
+    <div class="file">📄 app/(conta)/layout.tsx <span class="linhas">38 linhas</span></div>
 <pre><code>import Link from "next/link";
+import Marca from "@/components/Marca";
 import estilos from "./conta.module.css";
 
 // ============================================================================
@@ -1900,7 +1900,7 @@ export default function LayoutConta({
     &lt;div className={estilos.palco}&gt;
       &lt;div className={estilos.cartao}&gt;
         &lt;Link href="/" className={estilos.marca}&gt;
-          &lt;span aria-hidden="true"&gt;🪭&lt;/span&gt; Leque de Vagas
+          &lt;Marca tamanho={22} /&gt; Leque de Vagas
         &lt;/Link&gt;
 
         {children}
