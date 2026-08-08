@@ -15,6 +15,25 @@ npm run dev      # http://localhost:3000
 Outros scripts: `npm run build` (build de produção) e `npm run start` (serve o
 build).
 
+### Scripts de deploy (Cloudflare / OpenNext)
+
+| Script | O que faz |
+| --- | --- |
+| `npm run build` | build do Next puro (`.next/`) — usado pra conferir erros |
+| `npm run build:cf` | build do OpenNext (`.open-next/worker.js` + `assets`) |
+| `npm run preview` | build do OpenNext + roda no workerd local |
+| `npm run deploy` | build do OpenNext + publica no Cloudflare |
+
+> ⚠️ **Não aponte `build` para `opennextjs-cloudflare build`.** O
+> `opennextjs-cloudflare build` executa `npm run build` internamente pra buildar
+> o Next — apontar um pro outro cria recursão infinita. É por isso que existe o
+> `build:cf` separado.
+
+**Cloudflare Workers Builds:** o comando de build configurado no painel precisa
+ser `npm run build:cf`. Se for só `npm run build`, o CI gera apenas `.next/`, o
+`opennextjs-cloudflare deploy` não encontra `.open-next/` e o deploy falha com
+_"Could not find compiled Open Next config"_.
+
 ## Estrutura
 
 ```
