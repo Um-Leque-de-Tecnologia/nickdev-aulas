@@ -187,7 +187,7 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);pa
     <p>Baixe a versão <b>Community</b> (gratuita) e crie um novo projeto Java,
     selecionando o JDK 21 que você acabou de instalar.</p>
     <p class="tip"><b>Nome sugerido do projeto:</b> <code>orientacao-objetos-java</code> —
-    é nele que você vai criar os arquivos de todas as aulas do semestre.</p>
+    é nele que você vai criar os arquivos de todas as aulas do curso.</p>
   </div>
 
   <!-- 3 -->
@@ -205,12 +205,22 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);pa
 
     <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, meu nome é "</span> + nome + <span class="st">"!"</span>);
     <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Tenho "</span> + idade + <span class="st">" anos."</span>);
-    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Estou cursando "</span> + curso + <span class="st">" na UNIESP."</span>);
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Estou estudando "</span> + curso + <span class="st">"."</span>);
   }
 }</pre>
     <p class="tip"><b>Vale personalizar:</b> troque por informações reais suas — o que
     você estuda, trabalha, ou por que escolheu programação. O importante é
     usar variáveis + concatenação (<code>+</code>), não só texto fixo.</p>
+    <p class="tip"><b>Atenção, isto ainda não é OO 👀</b> — e é de propósito.
+    Repare no que você escreveu: variáveis soltas e comandos em sequência,
+    tudo dentro do <code>main</code>. É <b>exatamente o paradigma estruturado</b>
+    do começo da aula, aquele que a gente viu em Python. A palavra
+    <code>class</code> aparece aqui só porque o Java <b>obriga</b>: todo método
+    precisa morar dentro de uma classe, inclusive o <code>main</code>.
+    <code>SobreMim</code> ainda não é um objeto — não tem estado próprio, e
+    ninguém vai escrever <code>new SobreMim()</code>. Ela é só a porta de
+    entrada do programa. Objeto de verdade — com atributos e comportamento
+    juntos, como o <code>Livro</code> dos slides — começa na <b>aula 03</b>.</p>
   </div>
 
   <!-- 4 -->
@@ -222,7 +232,7 @@ code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);pa
 <span class="p">$</span> java SobreMim
 <span class="out">Olá, meu nome é ...!
 Tenho ... anos.
-Estou cursando Orientação a Objetos com Java na UNIESP.</span></div>
+Estou estudando Orientação a Objetos com Java.</span></div>
     <p class="tip"><b>Por quê pelo terminal?</b> É a prova de que você entendeu o
     fluxo <code>.java → javac → .class → java</code> — e não só decorou onde
     fica o botão verde.</p>
