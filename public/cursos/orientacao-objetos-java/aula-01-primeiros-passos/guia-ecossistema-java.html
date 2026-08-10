@@ -124,23 +124,48 @@
     <h2>Paradigma estruturado × orientado a objetos</h2>
     <p>Um <b>paradigma de programação</b> é um jeito de organizar o pensamento (e o código) pra resolver problemas. Os dois que mais aparecem no início da carreira são o <b>estruturado</b> e o <b>orientado a objetos (OO)</b>.</p>
 
-    <h3>Estruturado: dados de um lado, funções de outro</h3>
-    <p>No paradigma estruturado (típico de C, Pascal ou scripts simples), você tem <b>variáveis soltas</b> e <b>funções</b> que recebem essas variáveis como parâmetro pra operar sobre elas. Dados e comportamento vivem separados.</p>
-    <pre><span class="cm">// estilo estruturado: dados e função separados</span>
-<span class="ty">String</span> nome = <span class="st">"Duna"</span>;
-<span class="kw">boolean</span> emprestado = <span class="kw">false</span>;
+    <p>Os exemplos desta seção estão em <b>Python</b> de propósito: a ideia de paradigma é a mesma em qualquer linguagem, e é mais fácil enxergá-la numa sintaxe enxuta. Java entra logo depois, com o mesmo exemplo.</p>
 
-<span class="kw">static void</span> <span class="fn">emprestarLivro</span>(<span class="ty">String</span> nomeLivro) {
-  <span class="cm">// precisa saber, de fora, quais variáveis mexer</span>
-  <span class="ty">System</span>.out.<span class="fn">println</span>(nomeLivro + <span class="st">" foi emprestado."</span>);
-}</pre>
+    <h3>Estruturado: dados de um lado, funções de outro</h3>
+    <p>No paradigma estruturado você tem <b>variáveis soltas</b> e <b>funções</b> que recebem essas variáveis como parâmetro pra operar sobre elas. Dados e comportamento vivem separados.</p>
+    <pre><span class="cm"># estilo estruturado: dados soltos + funções que mexem neles</span>
+nome = <span class="st">"Duna"</span>
+emprestado = <span class="kw">False</span>
+
+<span class="kw">def</span> <span class="fn">emprestar</span>(titulo):
+    <span class="cm"># a função não sabe nada sobre `emprestado`</span>
+    <span class="fn">print</span>(titulo + <span class="st">" foi emprestado."</span>)
+
+<span class="fn">emprestar</span>(nome)
+emprestado = <span class="kw">True</span>   <span class="cm"># quem tem que lembrar disso é você, de fora</span></pre>
 
     <h3>Orientado a objetos: dados e comportamento juntos</h3>
     <p>Em OO, cada <b>entidade do mundo real</b> (um livro, uma pessoa, um pedido) vira uma <b>classe</b>, que agrupa seus próprios dados (<b>atributos</b>) e ações (<b>métodos</b>). O objeto sabe cuidar de si mesmo.</p>
-    <pre><span class="cm">// estilo orientado a objetos: dados + comportamento na mesma classe</span>
+    <pre><span class="cm"># estilo orientado a objetos: dados + comportamento na mesma classe</span>
+<span class="kw">class</span> <span class="ty">Livro</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nome):
+        self.nome = nome
+        self.emprestado = <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">emprestar</span>(self):
+        self.emprestado = <span class="kw">True</span>   <span class="cm"># o próprio objeto cuida do seu estado</span>
+        <span class="fn">print</span>(self.nome + <span class="st">" foi emprestado."</span>)
+
+duna = <span class="ty">Livro</span>(<span class="st">"Duna"</span>)
+duna.<span class="fn">emprestar</span>()</pre>
+
+    <div class="tip"><b>OO não é exclusividade do Java.</b> O exemplo acima é Python e é orientado a objetos do mesmo jeito. A diferença é que em Python a classe é <i>opcional</i> — dá pra escrever o programa inteiro sem nenhuma. Em Java ela é <i>obrigatória</i>: até o <code>main</code> mora dentro de uma.</div>
+
+    <h3>A mesma classe, agora em Java</h3>
+    <p>Compare linha a linha com a versão em Python. A ideia é idêntica; muda a escrita.</p>
+    <pre><span class="cm">// a mesma classe Livro, em Java</span>
 <span class="kw">class</span> <span class="ty">Livro</span> {
-  <span class="ty">String</span> nome;
-  <span class="kw">boolean</span> emprestado;
+  <span class="ty">String</span> nome;                 <span class="cm">// todo dado declara o tipo</span>
+  <span class="kw">boolean</span> emprestado = <span class="kw">false</span>;
+
+  <span class="ty">Livro</span>(<span class="ty">String</span> nome) {         <span class="cm">// o construtor tem o nome da classe</span>
+    <span class="kw">this</span>.nome = nome;           <span class="cm">// `this` faz o papel do `self`</span>
+  }
 
   <span class="kw">void</span> <span class="fn">emprestar</span>() {
     emprestado = <span class="kw">true</span>;
@@ -149,9 +174,19 @@
 }
 
 <span class="cm">// usando o objeto</span>
-<span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
-duna.nome = <span class="st">"Duna"</span>;
+<span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>);
 duna.<span class="fn">emprestar</span>();</pre>
+
+    <table>
+      <thead><tr><th>Em Python</th><th>Em Java</th></tr></thead>
+      <tbody>
+        <tr><td>Indentação delimita o bloco</td><td><code>{ }</code> delimitam o bloco, e cada linha fecha com <code>;</code></td></tr>
+        <tr><td><code>self</code>, escrito como primeiro parâmetro</td><td><code>this</code>, implícito</td></tr>
+        <tr><td><code>__init__</code></td><td>Um método com o <b>mesmo nome da classe</b> (construtor)</td></tr>
+        <tr><td>Tipo descoberto ao rodar</td><td>Tipo declarado no código e conferido ao compilar</td></tr>
+        <tr><td>Classe é opcional</td><td>Classe é obrigatória — inclusive pro <code>main</code></td></tr>
+      </tbody>
+    </table>
     <div class="tip star"><b>Por que isso importa:</b> à medida que um sistema cresce, "dados soltos + funções que mexem em tudo" vira uma bagunça difícil de manter. Agrupar dados e comportamento em objetos é o que permite os quatro pilares que você vai ver nas próximas aulas: <b>encapsulamento</b> (aula 04), <b>herança</b> (aula 06), <b>polimorfismo</b> (aula 07) e <b>abstração</b> (já começando hoje, na ideia de classe).</div>
   </section>
 
@@ -174,7 +209,7 @@ duna.<span class="fn">emprestar</span>();</pre>
     <p>Quando você compila um arquivo <code>.java</code>, o <code>javac</code> não gera código de máquina direto pro seu processador — ele gera <b>bytecode</b>, salvo num arquivo <code>.class</code>. O bytecode é um "idioma intermediário": não é o código-fonte que você escreveu, nem é o binário nativo do seu processador.</p>
     <pre><span class="fn">Aula.java</span>  <span class="cm">→ (javac) →</span>  <span class="fn">Aula.class</span>  <span class="cm">→ (JVM) →</span>  <span class="cm">executando</span></pre>
     <p>Quem entende bytecode é a <b>JVM</b> — e existe uma implementação de JVM pra Windows, outra pra Linux, outra pra macOS. Por isso o mesmo arquivo <code>.class</code> roda em qualquer sistema operacional que tenha uma JVM instalada. É a ideia por trás do lema <i>"write once, run anywhere"</i> ("escreva uma vez, rode em qualquer lugar").</p>
-    <div class="tip"><b>Compare com C:</b> um programa em C é compilado direto pra binário nativo daquele processador/sistema operacional — pra rodar em outro SO, você recompila. Em Java, você compila <b>uma vez</b> e o <code>.class</code> roda em qualquer JVM.</div>
+    <div class="tip"><b>Compare com Python:</b> lá não existe esse passo — você roda <code>python programa.py</code> e o interpretador lê o seu código-fonte e executa, toda vez. Em Java há uma etapa a mais no meio: o <code>javac</code> traduz pra bytecode <b>uma vez</b>, e a JVM executa esse bytecode depois. É trabalho extra que compra duas coisas: o compilador pega erros antes de o programa rodar, e o mesmo <code>.class</code> roda em qualquer sistema operacional sem recompilar.</div>
   </section>
 
   <section id="instalar-jdk">

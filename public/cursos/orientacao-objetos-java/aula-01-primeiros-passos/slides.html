@@ -257,7 +257,7 @@
     <h2>O mapa de hoje</h2>
     <div class="agenda">
       <div class="row"><span class="t">19:00</span><span class="d">Boas-vindas, plano de ensino e critérios de avaliação</span><span class="tag">abertura</span></div>
-      <div class="row"><span class="t">19:20</span><span class="d">Paradigma estruturado × orientado a objetos</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">19:20</span><span class="d">Paradigma estruturado × OO — em Python, antes de entrar em Java</span><span class="tag">conceitos</span></div>
       <div class="row"><span class="t">19:45</span><span class="d">Ecossistema Java: JDK, JVM, JRE e bytecode</span><span class="tag">conceitos</span></div>
       <div class="row brk"><span class="t">20:10</span><span class="d">☕ Intervalo</span><span class="tag">10 min</span></div>
       <div class="row"><span class="t">20:20</span><span class="d">Setup: instalar JDK 21 + IntelliJ IDEA Community</span><span class="tag">hands-on</span></div>
@@ -275,36 +275,63 @@
 
   <!-- 8 PARADIGMA ESTRUTURADO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">paradigma estruturado</span> · o jeito "de cima pra baixo"</div>
+    <div class="eyebrow"><span class="b">paradigma estruturado</span> · em Python, pra começar de onde você já esteve</div>
     <h2>Código como uma sequência de passos</h2>
-    <p>No paradigma <strong>estruturado</strong> (C, Pascal, scripts simples), o programa é uma sequência de instruções e funções que operam sobre <strong>dados separados</strong>. Dados de um lado, funções do outro.</p>
-    <div class="code" style="margin-top:18px"><span class="cm">// estilo estruturado: dados e funções separados</span>
-<span class="kw">String</span> nome = <span class="st">"Duna"</span>;
-<span class="kw">boolean</span> emprestado = <span class="kw">false</span>;
+    <p>No paradigma <strong>estruturado</strong>, o programa é uma sequência de instruções e funções que operam sobre <strong>dados separados</strong>. Dados de um lado, funções do outro. Em Python fica assim:</p>
+    <div class="code" style="margin-top:18px"><span class="cm"># estilo estruturado: dados soltos + funções que mexem neles</span>
+nome = <span class="st">"Duna"</span>
+emprestado = <span class="kw">False</span>
 
-<span class="kw">void</span> <span class="fn">emprestarLivro</span>() {
-  emprestado = <span class="kw">true</span>;
-  <span class="ty">System</span>.out.<span class="fn">println</span>(nome + <span class="st">" foi emprestado."</span>);
-}</div>
-    <p class="note">Funciona bem em scripts pequenos — mas cresce mal: qualquer função pode mexer em qualquer dado.</p>
+<span class="kw">def</span> <span class="fn">emprestar</span>(titulo):
+    <span class="fn">print</span>(titulo + <span class="st">" foi emprestado."</span>)
+
+<span class="fn">emprestar</span>(nome)</div>
+    <p class="note">Repare: a função <span class="code-inline">emprestar</span> não sabe nada sobre <span class="code-inline">emprestado</span>. Quem precisa lembrar de atualizar essa variável é <strong>você</strong>, de fora.</p>
   </section>
 
   <!-- 9 PARADIGMA OO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">paradigma orientado a objetos</span> · o jeito "por entidades"</div>
+    <div class="eyebrow"><span class="b">paradigma orientado a objetos</span> · ainda em Python</div>
     <h2>Código como um conjunto de <span class="grad">objetos</span></h2>
-    <p>Em <strong>OO</strong>, dados (atributos) e comportamentos (métodos) que pertencem à mesma ideia ficam <strong>juntos</strong>, dentro de uma classe. Um <span class="code-inline">Livro</span> sabe emprestar a si mesmo.</p>
-    <div class="code" style="margin-top:18px"><span class="cm">// estilo orientado a objetos: dados + comportamento juntos</span>
+    <p>Em <strong>OO</strong>, dados (atributos) e comportamentos (métodos) que pertencem à mesma ideia ficam <strong>juntos</strong>, dentro de uma classe. Um <span class="code-inline">Livro</span> sabe emprestar a si mesmo:</p>
+    <div class="code" style="margin-top:18px"><span class="cm"># estilo orientado a objetos: dados + comportamento juntos</span>
+<span class="kw">class</span> <span class="ty">Livro</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nome):
+        self.nome = nome
+        self.emprestado = <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">emprestar</span>(self):
+        self.emprestado = <span class="kw">True</span>
+        <span class="fn">print</span>(self.nome + <span class="st">" foi emprestado."</span>)
+
+duna = <span class="ty">Livro</span>(<span class="st">"Duna"</span>)
+duna.<span class="fn">emprestar</span>()</div>
+    <p class="note">Agora ninguém precisa lembrar de nada de fora: o próprio livro atualiza o seu estado. <strong>OO não é coisa de Java</strong> — Python também faz.</p>
+  </section>
+
+  <!-- 9b A MESMA CLASSE, AGORA EM JAVA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">a ponte</span> · a mesma classe, agora em Java</div>
+    <h2>Então o que muda em <span class="grad">Java</span>?</h2>
+    <div class="code"><span class="cm">// a mesma Livro da tela anterior, escrita em Java</span>
 <span class="kw">class</span> <span class="ty">Livro</span> {
-  <span class="kw">String</span> nome;
-  <span class="kw">boolean</span> emprestado;
+  <span class="ty">String</span> nome;
+  <span class="kw">boolean</span> emprestado = <span class="kw">false</span>;
+
+  <span class="ty">Livro</span>(<span class="ty">String</span> nome) {
+    <span class="kw">this</span>.nome = nome;
+  }
 
   <span class="kw">void</span> <span class="fn">emprestar</span>() {
     emprestado = <span class="kw">true</span>;
     <span class="ty">System</span>.out.<span class="fn">println</span>(nome + <span class="st">" foi emprestado."</span>);
   }
 }</div>
-    <p class="note">Mesma ideia do sistema de biblioteca — só que agora <span class="code-inline">Livro</span> é a unidade que organiza tudo.</p>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card"><h3 class="attr">Igual</h3><p>A <strong>ideia</strong> é a mesma: classe, atributos, métodos, criar objeto e chamar comportamento.</p></div>
+      <div class="card"><h3 class="tagc">Diferente</h3><p>Java exige <strong>tipo</strong> em tudo (<span class="code-inline">String</span>, <span class="code-inline">boolean</span>), usa <span class="code-inline">{ }</span> em vez de indentação e <strong>obriga</strong> a classe — em Python ela é opcional.</p></div>
+    </div>
+    <p class="note">É por isso que a gente começou em Python: o conceito você já viu. Daqui pra frente só muda a <strong>escrita</strong>.</p>
   </section>
 
   <!-- 10 COMPARAÇÃO LADO A LADO -->
@@ -312,7 +339,7 @@
     <div class="eyebrow"><span class="b">// </span>a mesma ideia, dois paradigmas</div>
     <h2>Estruturado × orientado a objetos</h2>
     <div class="grid2">
-      <div class="card"><h3 class="attr">Estruturado</h3><p>Dados soltos + funções que operam sobre eles. Bom pra scripts pequenos; difícil de crescer com organização.</p></div>
+      <div class="card"><h3 class="attr">Estruturado</h3><p>Dados soltos + funções que operam sobre eles. Bom pra script pequeno; cresce mal, porque <strong>quem lembra das regras é você</strong>.</p></div>
       <div class="card"><h3 class="tagc">Orientado a objetos</h3><p>Dados e comportamento agrupados em <strong>classes</strong>. Cada objeto cuida de si mesmo — mais fácil de crescer e reaproveitar.</p></div>
     </div>
     <p class="note">Ao longo do semestre você vai ver por que sistemas médios/grandes quase sempre usam OO: encapsulamento, herança e polimorfismo (aulas 4, 6 e 7).</p>
@@ -437,7 +464,7 @@
 <div class="progress" id="progress"></div>
 <div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
 <div class="nav">
-  <span id="counter">01 / 19</span>
+  <span id="counter">01 / 20</span>
   <button id="prev" aria-label="anterior">‹</button>
   <button id="next" aria-label="próximo">›</button>
 </div>
