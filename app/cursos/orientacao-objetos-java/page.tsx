@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Orientação a Objetos com Java · NickDev",
   description:
-    "Curso de graduação de Orientação a Objetos com Java: do ecossistema Java e primeiro programa até coleções, exceções, generics, lambdas, persistência, arquitetura em camadas e um projeto prático em equipe.",
+    "Curso de Orientação a Objetos com Java: do ecossistema Java e primeiro programa até coleções, exceções, generics, lambdas, persistência, arquitetura em camadas e um projeto prático em equipe.",
 };
 
 const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
@@ -20,21 +20,18 @@ export default function OrientacaoObjetosJava() {
 
       <SiteHeader />
 
-      <div className="eyebrow">Curso · graduação</div>
+      <div className="eyebrow">Curso · 18 aulas</div>
       <h1>
         Orientação a Objetos <span className="grad-text">com Java</span>
       </h1>
       <p className="lead">
-        Disciplina de graduação na <strong>UNIESP</strong>, semestre{" "}
-        <span className="mono">2026.2</span>, às terças-feiras das{" "}
-        <span className="mono">19h às 21h30</span>. Do paradigma orientado a
-        objetos aos pilares clássicos, passando por coleções, exceções,
-        generics, lambdas/streams e persistência, até uma arquitetura em
-        camadas com testes — tudo aplicado num projeto prático em equipe.
-        Duas unidades: <strong>Unidade 1 — Fundamentos de OO</strong>{" "}
-        (encerra com a <span className="mono">AV1</span>, prova escrita/prática)
-        e <strong>Unidade 2 — OO aplicada</strong> (encerra com a{" "}
-        <span className="mono">AV2</span>, projeto prático em equipe).
+        Do paradigma orientado a objetos aos pilares clássicos, passando por
+        coleções, exceções, generics, lambdas/streams e persistência, até uma
+        arquitetura em camadas com testes — tudo aplicado num projeto prático
+        em equipe. Dois módulos:{" "}
+        <strong>Módulo 1 — Fundamentos de OO</strong> (fecha com uma avaliação
+        prática) e <strong>Módulo 2 — OO aplicada</strong> (fecha com o projeto
+        final em equipe). Sem pré-requisito de Java.
       </p>
       <div className="brand-rule" />
 
@@ -46,8 +43,8 @@ export default function OrientacaoObjetosJava() {
           <div className="body">
             <h3>Primeiros passos: paradigma OO e ecossistema Java</h3>
             <p>
-              Plano de ensino e critérios de avaliação. Paradigma estruturado
-              × orientado a objetos, com os exemplos em{" "}
+              Como o curso funciona e como você é avaliada(o). Paradigma
+              estruturado × orientado a objetos, com os exemplos em{" "}
               <strong>Python</strong> antes de entrar em Java. Ecossistema Java
               (JDK, JVM, JRE, bytecode). Setup do ambiente com JDK 21 +
               IntelliJ IDEA Community. Primeiro programa: Hello World,
@@ -121,7 +118,7 @@ export default function OrientacaoObjetosJava() {
             <p>
               Associação, agregação e composição. Coleção de objetos com{" "}
               <span className="mono">ArrayList</span>. Marco: apresentação do
-              projeto da disciplina e formação das equipes.
+              projeto do curso e formação das equipes.
             </p>
             <span className="soon-tag">em breve</span>
           </div>
@@ -163,8 +160,8 @@ export default function OrientacaoObjetosJava() {
             <h3>Interfaces e revisão</h3>
             <p>
               Interfaces (contratos, implementação múltipla, default
-              methods), interface × classe abstrata, revisão geral para a
-              AV1.
+              methods), interface × classe abstrata e revisão geral que fecha
+              o módulo 1.
             </p>
             <span className="soon-tag">em breve</span>
           </div>
@@ -173,10 +170,10 @@ export default function OrientacaoObjetosJava() {
         <div className="lesson soon">
           <div className="idx">09</div>
           <div className="body">
-            <h3>AV1 corrigida e tratamento de exceções</h3>
+            <h3>Tratamento de exceções</h3>
             <p>
-              Correção comentada da AV1. Tratamento de exceções
-              (try/catch/finally, throw/throws, checked × unchecked,
+              Retomada comentada da avaliação do módulo 1. Tratamento de
+              exceções (try/catch/finally, throw/throws, checked × unchecked,
               exceções personalizadas, try-with-resources).
             </p>
             <span className="soon-tag">em breve</span>
@@ -285,8 +282,8 @@ export default function OrientacaoObjetosJava() {
         <div className="lesson soon">
           <div className="idx">18</div>
           <div className="body">
-            <h3>Encerramento do semestre</h3>
-            <p>Notas, feedback individual e retrospectiva do semestre.</p>
+            <h3>Encerramento do curso</h3>
+            <p>Feedback individual, retrospectiva e por onde seguir depois daqui.</p>
             <span className="soon-tag">em breve</span>
           </div>
         </div>

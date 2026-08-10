@@ -128,11 +128,11 @@ pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono)
     <span class="kw">int</span> idade = <span class="st">24</span>;
     <span class="kw">boolean</span> gostaDeCafe = <span class="kw">true</span>;
     <span class="ty">String</span> curso = <span class="st">"Orientação a Objetos com Java"</span>;
-    <span class="ty">String</span> instituicao = <span class="st">"UNIESP"</span>;
+    <span class="ty">String</span> cidade = <span class="st">"João Pessoa"</span>;
 
     <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, meu nome é "</span> + nome + <span class="st">"!"</span>);
     <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Tenho "</span> + idade + <span class="st">" anos e estou aprendendo Java."</span>);
-    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Estou cursando "</span> + curso + <span class="st">" na "</span> + instituicao + <span class="st">"."</span>);
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Estou estudando "</span> + curso + <span class="st">", de "</span> + cidade + <span class="st">"."</span>);
     <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Gosto de café? "</span> + gostaDeCafe);
   }
 }</pre>
@@ -146,7 +146,7 @@ pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono)
 <span class="p">$</span> <span class="cmdline">java SobreMim</span>
 <span class="out">Olá, meu nome é Nicoly!
 Tenho 24 anos e estou aprendendo Java.
-Estou cursando Orientação a Objetos com Java na UNIESP.
+Estou estudando Orientação a Objetos com Java, de João Pessoa.
 Gosto de café? true</span>
       </div>
     </div>
@@ -157,6 +157,7 @@ Gosto de café? true</span>
     <div class="card"><h3>4 variáveis, 4 tipos</h3><p><code>String</code>, <code>int</code> e <code>boolean</code> — mostrando que Java é fortemente tipado desde a primeira linha.</p></div>
     <div class="card"><h3>Concatenação de verdade</h3><p>Cada <code>println</code> junta texto fixo com o valor de uma variável usando <code>+</code> — não é só texto "chumbado".</p></div>
     <div class="card"><h3>Terminal, não IDE</h3><p><code>javac</code> gerou o <code>.class</code> (bytecode) e <code>java</code> pediu pra JVM executar — o fluxo completo, na mão.</p></div>
+    <div class="card"><h3>E ainda não é OO 👀</h3><p>Variáveis soltas e comandos em sequência dentro do <code>main</code>: isso é o <b>paradigma estruturado</b>, o mesmo que vimos em Python. A <code>class</code> está aqui só porque o Java obriga — <code>SobreMim</code> não é um objeto. Objeto de verdade começa na <b>aula 03</b>.</p></div>
   </div>
 
   <div class="label">Checklist batido</div>
