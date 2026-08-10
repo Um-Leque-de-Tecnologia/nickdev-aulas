@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Orientação a Objetos com Java · NickDev",
   description:
-    "Curso de Orientação a Objetos com Java: do ecossistema Java e primeiro programa até coleções, exceções, generics, lambdas, persistência, arquitetura em camadas e um projeto prático em equipe.",
+    "Curso de Orientação a Objetos com Java: do ecossistema Java e do primeiro programa aos quatro pilares de OO, coleções, exceções, generics, lambdas, persistência e arquitetura em camadas.",
 };
 
 const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
@@ -25,13 +25,10 @@ export default function OrientacaoObjetosJava() {
         Orientação a Objetos <span className="grad-text">com Java</span>
       </h1>
       <p className="lead">
-        Do paradigma orientado a objetos aos pilares clássicos, passando por
-        coleções, exceções, generics, lambdas/streams e persistência, até uma
-        arquitetura em camadas com testes — tudo aplicado num projeto prático
-        em equipe. Dois módulos:{" "}
-        <strong>Módulo 1 — Fundamentos de OO</strong> (fecha com uma avaliação
-        prática) e <strong>Módulo 2 — OO aplicada</strong> (fecha com o projeto
-        final em equipe). Sem pré-requisito de Java.
+        Do paradigma orientado a objetos aos quatro pilares — abstração,
+        encapsulamento, herança e polimorfismo — passando por coleções,
+        exceções, generics, lambdas e persistência, até uma arquitetura em
+        camadas com testes. Sem pré-requisito de Java.
       </p>
       <div className="brand-rule" />
 
