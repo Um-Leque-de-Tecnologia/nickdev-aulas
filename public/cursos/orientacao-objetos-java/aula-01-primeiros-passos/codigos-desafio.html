@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio · Aula 01 · NickDev</title>
+<meta name="description" content="Esqueleto e solução comentada do desafio da aula 01: a classe SobreMim, compilada e executada pelo terminal.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1240px;margin:0 auto;gap:0}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+  aside nav a.star{color:var(--pink-light)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0;font-size:14.5px;color:var(--text-2)}
+  .tipbox b{color:var(--purple-light)}
+  .tipbox.star{border-color:var(--magenta)}
+  .tipbox.star b{color:var(--pink-light)}
+
+  .part{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .part:first-of-type{border-top:0;padding-top:0}
+  .part .big{color:var(--pink-light)}
+
+  .sol{margin-top:28px;scroll-margin-top:18px}
+  .sol h3{font-size:19px;font-weight:600}
+  .sol .desc{color:var(--text-3);font-size:14.5px;margin:6px 0 0}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.85}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  .filetree{font-family:var(--mono);font-size:13.5px;color:var(--text-2);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0;line-height:1.9}
+  .filetree b{color:var(--text)}
+  .filetree .dim{color:var(--text-3)}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Preparação</div>
+    <a href="#estrutura">Estrutura do projeto</a>
+    <div class="grp">Esqueleto</div>
+    <a href="#esqueleto">SobreMim.java (esqueleto)</a>
+    <div class="grp">Solução comentada</div>
+    <a href="#variaveis" class="star">★ Variáveis + concatenação</a>
+    <a href="#solucao">SobreMim.java completo</a>
+    <div class="grp">Terminal</div>
+    <a href="#compilar">javac — compilar</a>
+    <a href="#rodar">java — rodar</a>
+    <a href="#erros">Erros comuns</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · gabarito</div>
+  <h1>Código do <span class="g">desafio</span></h1>
+  <p class="lead">O esqueleto e a solução comentada da classe <code>SobreMim</code>, pedaço por pedaço — mais o passo a passo de compilar e rodar pelo terminal, e os erros mais comuns de quem está começando.</p>
+  <div class="rule"></div>
+
+  <div class="tipbox"><b>Combinado 🤝</b> Escreva sua versão sozinho(a) primeiro. Use isto pra conferir, entender os porquês e destravar se algo der erro.</div>
+
+  <div class="part"><span class="big">📁</span> Preparação</div>
+
+  <div class="sol" id="estrutura">
+    <h3>Estrutura do projeto</h3>
+    <p class="desc">Depois de criar o projeto no IntelliJ e o arquivo <code>SobreMim.java</code> dentro de <code>src/</code>, a estrutura fica assim:</p>
+    <div class="filetree">orientacao-objetos-java<span class="dim">/</span>
+├── .idea<span class="dim">/</span>          <span class="dim">← configuração da IDE (não mexe)</span>
+├── src<span class="dim">/</span>
+│   └── <b>SobreMim.java</b>  <span class="dim">← seu código-fonte</span>
+├── out<span class="dim">/</span>            <span class="dim">← .class gerados pela IDE (pode ignorar)</span>
+└── orientacao-objetos-java.iml</div>
+    <p class="desc">Pra compilar pelo terminal (fora da IDE), você vai navegar até a pasta <code>src</code> e rodar os comandos de lá — é onde o <code>SobreMim.java</code> está.</p>
+  </div>
+
+  <div class="part"><span class="big">🧩</span> Esqueleto</div>
+
+  <div class="sol" id="esqueleto">
+    <h3>SobreMim.java — ponto de partida</h3>
+    <p class="desc">Comece daqui e complete com suas informações. Repare que o nome do arquivo (<code>SobreMim.java</code>) tem que bater com o nome da classe (<code>SobreMim</code>).</p>
+    <pre><span class="kw">public class</span> <span class="ty">SobreMim</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="cm">// TODO: declare pelo menos 3 variáveis (nome, idade, curso...)</span>
+
+    <span class="cm">// TODO: pelo menos 3 System.out.println usando essas variáveis</span>
+  }
+}</pre>
+  </div>
+
+  <div class="part"><span class="big">✅</span> Solução comentada</div>
+
+  <div class="sol" id="variaveis">
+    <h3>1 · Variáveis + concatenação ★</h3>
+    <p class="desc">O ponto-chave do desafio: não é só imprimir texto fixo, é usar <b>variáveis</b> dentro do <code>println</code>, juntando texto e valor com o operador <code>+</code> (concatenação).</p>
+    <pre><span class="ty">String</span> nome = <span class="st">"Nicoly"</span>;
+<span class="kw">int</span> idade = <span class="st">24</span>;
+<span class="ty">String</span> curso = <span class="st">"Orientação a Objetos com Java"</span>;
+
+<span class="cm">// concatenação: texto + variável + texto...</span>
+<span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, meu nome é "</span> + nome + <span class="st">"!"</span>);</pre>
+    <p class="desc">Repare que <code>idade</code> é um número (<code>int</code>), mas o <code>+</code> com uma <code>String</code> do lado converte ele pra texto automaticamente na hora de imprimir.</p>
+  </div>
+
+  <div class="sol" id="solucao">
+    <h3>2 · SobreMim.java completo</h3>
+    <p class="desc">Juntando tudo: 3 variáveis de tipos diferentes, 3 <code>println</code>, cada um com concatenação.</p>
+    <pre><span class="kw">public class</span> <span class="ty">SobreMim</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">String</span> nome = <span class="st">"Nicoly"</span>;
+    <span class="kw">int</span> idade = <span class="st">24</span>;
+    <span class="ty">String</span> curso = <span class="st">"Orientação a Objetos com Java"</span>;
+    <span class="ty">String</span> instituicao = <span class="st">"UNIESP"</span>;
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, meu nome é "</span> + nome + <span class="st">"!"</span>);
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Tenho "</span> + idade + <span class="st">" anos."</span>);
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Estou cursando "</span> + curso + <span class="st">" na "</span> + instituicao + <span class="st">"."</span>);
+  }
+}</pre>
+    <div class="tipbox star" style="margin-top:14px"><b>Por que <code>static</code>?</b> O método <code>main</code> precisa ser <code>static</code> porque a JVM chama ele <b>sem ter criado nenhum objeto</b> ainda — é o ponto de partida do programa. A gente entende <code>static</code> com calma na aula 04 (encapsulamento).</div>
+  </div>
+
+  <div class="part"><span class="big">⌨️</span> Terminal</div>
+
+  <div class="sol" id="compilar">
+    <h3>3 · Compilar com javac</h3>
+    <p class="desc">Dentro da pasta onde está o <code>SobreMim.java</code>:</p>
+    <div class="terminal"><span class="p">$</span> javac SobreMim.java</div>
+    <p class="desc">Se não aparecer nenhuma mensagem de erro, deu certo — e um novo arquivo <code>SobreMim.class</code> (o bytecode) foi criado do lado do <code>.java</code>.</p>
+  </div>
+
+  <div class="sol" id="rodar">
+    <h3>4 · Rodar com java</h3>
+    <p class="desc">Agora peça pra JVM executar o bytecode — repare que <b>não</b> tem <code>.class</code> no comando:</p>
+    <div class="terminal"><span class="p">$</span> java SobreMim
+<span class="out">Olá, meu nome é Nicoly!
+Tenho 24 anos.
+Estou cursando Orientação a Objetos com Java na UNIESP.</span></div>
+  </div>
+
+  <div class="sol" id="erros">
+    <h3>5 · Erros comuns</h3>
+    <pre><span class="cm">error: class SobreMim is public, should be declared in a file named SobreMim.java</span></pre>
+    <p class="desc">O nome do arquivo não bate com o nome da classe <code>public</code>. Renomeie um dos dois pra ficarem iguais.</p>
+    <pre><span class="cm">Error: Could not find or load main class SobreMim</span></pre>
+    <p class="desc">Você tentou rodar <code>java SobreMim</code> antes de compilar (não existe o <code>.class</code> ainda), ou está numa pasta diferente de onde ele foi gerado. Rode <code>javac</code> primeiro e confira com <code>ls</code>/<code>dir</code>.</p>
+    <pre><span class="cm">error: ';' expected</span></pre>
+    <p class="desc">Faltou um ponto e vírgula no fim de uma linha — em Java, quase toda instrução termina com <code>;</code>.</p>
+  </div>
+
+  <div class="tipbox" style="margin-top:40px">Quer ver a versão final, com a saída completa no terminal? 👇</div>
+  <a class="cta" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver o modelo de resposta</a>
+</main>
+</div>
+</body>
+</html>

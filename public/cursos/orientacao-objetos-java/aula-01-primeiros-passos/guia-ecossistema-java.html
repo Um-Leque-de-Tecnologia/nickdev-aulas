@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · Ecossistema Java &amp; primeiros passos · Aula 01 · NickDev</title>
+<meta name="description" content="Guia da aula 01: paradigma orientado a objetos, JDK/JRE/JVM, bytecode e como instalar o ambiente (JDK 21 + IntelliJ IDEA Community).">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1240px;margin:0 auto;gap:0}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:6px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:14px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 80px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:52px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17px;margin:22px 0 6px;color:var(--text)}
+  ul{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--text-2)}
+  th{color:var(--text);font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em}
+  td b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.star{border-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13.5px;line-height:1.8}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Paradigmas</div>
+    <a href="#paradigmas">Estruturado × objetos</a>
+    <div class="grp">Ecossistema Java</div>
+    <a href="#jdk-jre-jvm">JDK, JRE e JVM</a>
+    <a href="#bytecode">Bytecode e portabilidade</a>
+    <div class="grp">Preparar o ambiente</div>
+    <a href="#instalar-jdk">Instalar o JDK 21</a>
+    <a href="#instalar-intellij">Instalar o IntelliJ IDEA</a>
+    <div class="grp">Primeiro programa</div>
+    <a href="#hello-world">Hello, World!</a>
+    <a href="#compilar-rodar">Compilar e rodar (javac/java)</a>
+    <div class="grp">Na prática</div>
+    <a href="#proximos-passos">Próximos passos</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · guia de apoio</div>
+  <h1>Ecossistema Java &amp; <span class="g">primeiros passos</span></h1>
+  <p class="lead">Como o paradigma orientado a objetos se diferencia do estruturado, o que são JDK/JRE/JVM/bytecode, e o passo a passo pra instalar tudo e rodar seu primeiro programa Java.</p>
+  <div class="rule"></div>
+
+  <section id="paradigmas">
+    <h2>Paradigma estruturado × orientado a objetos</h2>
+    <p>Um <b>paradigma de programação</b> é um jeito de organizar o pensamento (e o código) pra resolver problemas. Os dois que mais aparecem no início da carreira são o <b>estruturado</b> e o <b>orientado a objetos (OO)</b>.</p>
+
+    <h3>Estruturado: dados de um lado, funções de outro</h3>
+    <p>No paradigma estruturado (típico de C, Pascal ou scripts simples), você tem <b>variáveis soltas</b> e <b>funções</b> que recebem essas variáveis como parâmetro pra operar sobre elas. Dados e comportamento vivem separados.</p>
+    <pre><span class="cm">// estilo estruturado: dados e função separados</span>
+<span class="ty">String</span> nome = <span class="st">"Duna"</span>;
+<span class="kw">boolean</span> emprestado = <span class="kw">false</span>;
+
+<span class="kw">static void</span> <span class="fn">emprestarLivro</span>(<span class="ty">String</span> nomeLivro) {
+  <span class="cm">// precisa saber, de fora, quais variáveis mexer</span>
+  <span class="ty">System</span>.out.<span class="fn">println</span>(nomeLivro + <span class="st">" foi emprestado."</span>);
+}</pre>
+
+    <h3>Orientado a objetos: dados e comportamento juntos</h3>
+    <p>Em OO, cada <b>entidade do mundo real</b> (um livro, uma pessoa, um pedido) vira uma <b>classe</b>, que agrupa seus próprios dados (<b>atributos</b>) e ações (<b>métodos</b>). O objeto sabe cuidar de si mesmo.</p>
+    <pre><span class="cm">// estilo orientado a objetos: dados + comportamento na mesma classe</span>
+<span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> nome;
+  <span class="kw">boolean</span> emprestado;
+
+  <span class="kw">void</span> <span class="fn">emprestar</span>() {
+    emprestado = <span class="kw">true</span>;
+    <span class="ty">System</span>.out.<span class="fn">println</span>(nome + <span class="st">" foi emprestado."</span>);
+  }
+}
+
+<span class="cm">// usando o objeto</span>
+<span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+duna.nome = <span class="st">"Duna"</span>;
+duna.<span class="fn">emprestar</span>();</pre>
+    <div class="tip star"><b>Por que isso importa:</b> à medida que um sistema cresce, "dados soltos + funções que mexem em tudo" vira uma bagunça difícil de manter. Agrupar dados e comportamento em objetos é o que permite os quatro pilares que você vai ver nas próximas aulas: <b>encapsulamento</b> (aula 04), <b>herança</b> (aula 06), <b>polimorfismo</b> (aula 07) e <b>abstração</b> (já começando hoje, na ideia de classe).</div>
+  </section>
+
+  <section id="jdk-jre-jvm">
+    <h2>JDK, JRE e JVM</h2>
+    <p>Três siglas que aparecem juntas e confundem no começo. A relação entre elas é de <b>conjunto contido</b>: o JDK contém o JRE, que contém a JVM.</p>
+    <table>
+      <thead><tr><th>Sigla</th><th>Nome</th><th>Pra que serve</th></tr></thead>
+      <tbody>
+        <tr><td><b>JDK</b></td><td>Java Development Kit</td><td>Kit completo pra <b>desenvolver</b>: compilador (<code>javac</code>), ferramentas de linha de comando e o JRE embutido. É o que você instala pra programar.</td></tr>
+        <tr><td><b>JRE</b></td><td>Java Runtime Environment</td><td>O necessário pra <b>rodar</b> programas Java já prontos: bibliotecas padrão (<code>java.lang</code>, <code>java.util</code>...) + a JVM.</td></tr>
+        <tr><td><b>JVM</b></td><td>Java Virtual Machine</td><td>A máquina virtual que de fato <b>executa</b> o bytecode, dentro de qualquer sistema operacional. É o "motor".</td></tr>
+      </tbody>
+    </table>
+    <div class="tip"><b>Regra prática:</b> quem só quer <i>rodar</i> um programa Java precisa apenas do JRE. Quem vai <i>programar</i> (nosso caso, o semestre todo) precisa do <b>JDK</b> — e ele já traz o JRE e a JVM dentro.</div>
+  </section>
+
+  <section id="bytecode">
+    <h2>Bytecode e portabilidade</h2>
+    <p>Quando você compila um arquivo <code>.java</code>, o <code>javac</code> não gera código de máquina direto pro seu processador — ele gera <b>bytecode</b>, salvo num arquivo <code>.class</code>. O bytecode é um "idioma intermediário": não é o código-fonte que você escreveu, nem é o binário nativo do seu processador.</p>
+    <pre><span class="fn">Aula.java</span>  <span class="cm">→ (javac) →</span>  <span class="fn">Aula.class</span>  <span class="cm">→ (JVM) →</span>  <span class="cm">executando</span></pre>
+    <p>Quem entende bytecode é a <b>JVM</b> — e existe uma implementação de JVM pra Windows, outra pra Linux, outra pra macOS. Por isso o mesmo arquivo <code>.class</code> roda em qualquer sistema operacional que tenha uma JVM instalada. É a ideia por trás do lema <i>"write once, run anywhere"</i> ("escreva uma vez, rode em qualquer lugar").</p>
+    <div class="tip"><b>Compare com C:</b> um programa em C é compilado direto pra binário nativo daquele processador/sistema operacional — pra rodar em outro SO, você recompila. Em Java, você compila <b>uma vez</b> e o <code>.class</code> roda em qualquer JVM.</div>
+  </section>
+
+  <section id="instalar-jdk">
+    <h2>Instalar o JDK 21</h2>
+    <p>Vamos usar o <b>JDK 21</b> (versão LTS — suporte de longo prazo) durante todo o semestre. Baixe a distribuição <b>Eclipse Temurin</b> (OpenJDK, gratuita) ou a <b>Oracle JDK</b> — ambas funcionam igual pra essa disciplina.</p>
+    <div class="osgrid">
+      <div class="os"><h4>🪟 Windows</h4><p>Baixe o instalador <code>.msi</code>, execute e siga o assistente. Marque a opção de adicionar ao <code>PATH</code>, se ela aparecer.</p></div>
+      <div class="os"><h4>🍎 macOS</h4><p>Baixe o instalador <code>.pkg</code> e execute. Ou, com Homebrew: <code>brew install --cask temurin21</code>.</p></div>
+      <div class="os"><h4>🐧 Linux</h4><p>Pelo gerenciador de pacotes, ex.: <code>sudo apt install temurin-21-jdk</code>, ou extraindo o <code>.tar.gz</code> e ajustando o <code>PATH</code>.</p></div>
+    </div>
+    <h3>Conferindo a instalação</h3>
+    <p>Abra o terminal (Prompt de Comando, PowerShell ou Terminal) e rode:</p>
+    <div class="terminal"><span class="p">$</span> java -version
+<span class="out">openjdk version "21.0.x" ...</span>
+<span class="p">$</span> javac -version
+<span class="out">javac 21.0.x</span></div>
+    <div class="tip"><b>Deu "comando não encontrado"?</b> O JDK não está no <code>PATH</code> do sistema. Reinstale marcando a opção de adicionar ao <code>PATH</code>, ou configure a variável de ambiente manualmente (pesquise "adicionar JDK ao PATH" + seu sistema operacional).</div>
+  </section>
+
+  <section id="instalar-intellij">
+    <h2>Instalar o IntelliJ IDEA Community</h2>
+    <p>O <b>IntelliJ IDEA</b> é a IDE (ambiente de desenvolvimento) mais usada pra Java no mercado. Vamos usar a versão <b>Community</b> — gratuita, open source, e suficiente pra tudo que faremos na disciplina.</p>
+    <h3>Passo a passo</h3>
+    <ol style="color:var(--text-2);padding-left:22px;margin-top:8px">
+      <li>Baixe o instalador em <code>jetbrains.com/idea</code>, escolhendo a edição <b>Community</b>.</li>
+      <li>Instale normalmente (Windows/macOS/Linux têm instaladores próprios; no Linux também dá pra usar o <b>JetBrains Toolbox</b>).</li>
+      <li>Abra o IntelliJ e crie um projeto: <code>New Project</code> → tipo <b>Java</b> → em <b>JDK</b>, selecione o <b>21</b> que você acabou de instalar (se não aparecer na lista, clique em <code>Add JDK...</code> e aponte pra pasta de instalação).</li>
+      <li>Dê um nome ao projeto, ex.: <code>orientacao-objetos-java</code>, e confirme.</li>
+    </ol>
+    <h3>A estrutura do projeto</h3>
+    <ul>
+      <li><code>src/</code> — onde ficam seus arquivos <code>.java</code> (código-fonte)</li>
+      <li><code>out/</code> — onde a IDE guarda os <code>.class</code> compilados automaticamente</li>
+      <li>arquivo <code>.iml</code> — configuração interna do projeto pro IntelliJ</li>
+    </ul>
+    <div class="tip star"><b>O botão ▶ verde:</b> quando você clica em "Run" no IntelliJ, ele está fazendo por trás exatamente o que a gente vai fazer na mão daqui a pouco: chamando o <code>javac</code> e depois o <code>java</code>.</div>
+  </section>
+
+  <section id="hello-world">
+    <h2>Hello, World!</h2>
+    <p>Todo caminho em uma linguagem nova começa por aqui. Crie um arquivo chamado <code>Ola.java</code> dentro de <code>src/</code>:</p>
+    <pre><span class="kw">public class</span> <span class="ty">Ola</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, mundo Java!"</span>);
+  }
+}</pre>
+    <p>Desmontando essa "casca" que vai se repetir em quase todo arquivo Java:</p>
+    <ul>
+      <li><code>public class Ola</code> — declara uma classe pública chamada <code>Ola</code>. <b>O nome da classe precisa bater com o nome do arquivo</b> (<code>Ola.java</code>) — regra do Java, não é estilo.</li>
+      <li><code>public static void main(String[] args)</code> — o <b>método principal</b>: é por onde a JVM começa a executar o programa.</li>
+      <li><code>System.out.println(...)</code> — imprime uma linha de texto no terminal.</li>
+    </ul>
+    <div class="tip"><b>Por que tanta palavra-chave?</b> Cada uma tem um papel que você vai entender ao longo do semestre: <code>public</code> (aula 04, encapsulamento), <code>static</code> (aula 04) e o próprio conceito de classe (aula 03). Por enquanto, decore a "casca" — ela funciona.</div>
+  </section>
+
+  <section id="compilar-rodar">
+    <h2>Compilar e rodar pelo terminal</h2>
+    <p>Rodar pela IDE é ótimo no dia a dia, mas hoje a gente faz <b>na mão</b> pra entender o que realmente acontece — é exatamente isso que o desafio da semana vai pedir.</p>
+    <h3>1. Compilar com <code>javac</code></h3>
+    <p>No terminal, navegue até a pasta onde está o <code>Ola.java</code> e rode:</p>
+    <div class="terminal"><span class="p">$</span> javac Ola.java</div>
+    <p>Se não der nenhum erro, o <code>javac</code> gerou um arquivo novo, <code>Ola.class</code> — o <b>bytecode</b>. Confira com <code>ls</code> (Linux/macOS) ou <code>dir</code> (Windows):</p>
+    <div class="terminal"><span class="p">$</span> ls
+<span class="out">Ola.class   Ola.java</span></div>
+    <h3>2. Executar com <code>java</code></h3>
+    <p>Agora peça pra JVM rodar esse bytecode — <b>sem a extensão <code>.class</code></b>:</p>
+    <div class="terminal"><span class="p">$</span> java Ola
+<span class="out">Olá, mundo Java!</span></div>
+    <div class="tip star"><b>O fluxo completo:</b> <code>Ola.java</code> (código-fonte, texto) → <code>javac</code> compila → <code>Ola.class</code> (bytecode) → <code>java</code> manda a JVM executar → saída no terminal. Isso é literalmente o mesmo fluxo do slide do bytecode, só que rodando na sua máquina.</div>
+    <p style="margin-top:22px">Pronto pra praticar? Encara o desafio 👇</p>
+    <a class="cta" href="desafio.html">🎯 Ir para o desafio</a>
+  </section>
+
+  <section id="proximos-passos">
+    <h2>Próximos passos</h2>
+    <p>Na <b>aula 02</b> a gente segue direto pro coração da linguagem: tipos primitivos, variáveis, operadores, casting, condicionais, repetição, arrays e entrada de dados com <code>Scanner</code>. Chegue com o ambiente já funcionando!</p>
+  </section>
+</main>
+</div>
+
+</body>
+</html>

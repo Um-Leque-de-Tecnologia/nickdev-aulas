@@ -47,6 +47,17 @@ export default function Home() {
           <p>Levar tecnologia pra comunidade — da ideia à entrega, na prática.</p>
           <div className="meta">em breve</div>
         </div>
+
+        <Link className="card" href="/cursos/orientacao-objetos-java">
+          <span className="num">04</span>
+          <h3>Orientação a Objetos — Java</h3>
+          <p>
+            Do ecossistema Java aos pilares de OO, coleções, exceções e
+            lambdas, até um projeto prático em equipe com persistência e
+            arquitetura em camadas.
+          </p>
+          <div className="meta">graduação · em andamento</div>
+        </Link>
       </div>
 
       <Footer />
