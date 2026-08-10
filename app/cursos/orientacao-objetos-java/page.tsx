@@ -47,10 +47,11 @@ export default function OrientacaoObjetosJava() {
             <h3>Primeiros passos: paradigma OO e ecossistema Java</h3>
             <p>
               Plano de ensino e critérios de avaliação. Paradigma estruturado
-              × orientado a objetos. Ecossistema Java (JDK, JVM, JRE,
-              bytecode). Setup do ambiente com JDK 21 + IntelliJ IDEA
-              Community. Primeiro programa: Hello World, compilação e
-              execução pelo terminal.
+              × orientado a objetos, com os exemplos em{" "}
+              <strong>Python</strong> antes de entrar em Java. Ecossistema Java
+              (JDK, JVM, JRE, bytecode). Setup do ambiente com JDK 21 +
+              IntelliJ IDEA Community. Primeiro programa: Hello World,
+              compilação e execução pelo terminal.
             </p>
             <div className="mats">
               <a className="mat primary" href={`${AULA_01}/slides.html`}>
