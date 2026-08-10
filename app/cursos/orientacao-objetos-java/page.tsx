@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
+const PROJETO = "/cursos/orientacao-objetos-java/projeto";
 
 export default function OrientacaoObjetosJava() {
   return (
@@ -31,6 +32,27 @@ export default function OrientacaoObjetosJava() {
         camadas com testes. Sem pré-requisito de Java.
       </p>
       <div className="brand-rule" />
+
+      <div className="section-label">Projeto do curso</div>
+
+      <div className="lessons">
+        <div className="lesson">
+          <div className="idx">🎬</div>
+          <div className="body">
+            <h3>LequePlay — um catálogo de mídias</h3>
+            <p>
+              O projeto em equipe que cresce junto com as aulas: começa como
+              uma classe só e termina como um sistema em camadas, com exceções,
+              coleções, streams, persistência e testes. Apresentado na aula 05.
+            </p>
+            <div className="mats">
+              <a className="mat primary" href={`${PROJETO}/brief.html`}>
+                📋 Brief do projeto
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="section-label">Aulas</div>
 

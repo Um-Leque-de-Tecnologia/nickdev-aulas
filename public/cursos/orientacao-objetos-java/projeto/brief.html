@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto do curso — LequePlay · Orientação a Objetos com Java · NickDev</title>
+<meta name="description" content="Brief do projeto do curso de Orientação a Objetos com Java: LequePlay, um catálogo de mídias em console que cresce junto com as aulas, do encapsulamento à arquitetura em camadas.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:920px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:34px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:52px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* diagrama de classes */
+.diagrama{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:22px 24px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d8d3e6;white-space:pre;margin-top:6px}
+.diagrama .cls{color:#7B4FD0;font-weight:700}
+.diagrama .abs{color:#F24487;font-weight:700}
+.diagrama .int{color:#5fd08a}
+.diagrama .cm{color:#6f6a83}
+.diagrama .mt{color:#E88BB8}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+/* entregas */
+.entrega{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:14px}
+.entrega-hd{display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.entrega .quando{font-family:var(--mono);font-size:12px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:100px;padding:4px 12px;white-space:nowrap}
+.entrega h3{font-size:18px;font-weight:600;flex:1;min-width:180px}
+.entrega .peso{font-family:var(--mono);font-size:12px;color:var(--pink-light)}
+.entrega p{color:var(--text-2);font-size:14.5px}
+.entrega ul{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.entrega li{margin:4px 0}
+.entrega li b{color:var(--text)}
+
+/* listas */
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 17px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:13px 16px;margin-top:14px;font-size:14.5px;color:var(--text-2)}
+.tip b{color:var(--purple-light)}
+.tip.star{border-left-color:var(--magenta)}
+.tip.star b{color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.entrega{padding:20px 18px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Projeto do curso · em equipe</div>
+  <h1><span class="grad">LequePlay</span> 🎬</h1>
+  <p class="lead">
+    Um catálogo de mídias em console — filmes, séries e podcasts — que você
+    constrói junto com as aulas. Ele começa como uma classe só, na aula 03, e
+    termina como um sistema em camadas, com exceções, coleções, streams,
+    persistência em arquivo e testes.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>Por que esse projeto</h3>
+      <p>Porque nele os pilares de OO <b>aparecem por necessidade, não por
+      obrigação</b>. Você não vai precisar inventar uma herança pra cumprir
+      requisito: a diferença entre calcular a duração de um filme e a de uma
+      série <i>pede</i> polimorfismo. Uma série que contém temporadas que contêm
+      episódios <i>é</i> composição. Nota fora de 0 a 10 <i>é</i> exceção.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">🧩</span>
+    <div>
+      <h3>O projeto é o mesmo, o acervo é seu</h3>
+      <p>Todas as equipes constroem o <b>LequePlay</b> com a mesma arquitetura —
+      isso mantém a avaliação justa e permite ajudar uma equipe com o que a
+      outra descobriu. Mas cada equipe escolhe o <b>acervo temático</b>: cinema
+      nacional, animação, terror, podcasts de tecnologia, documentários... A
+      cara do sistema é de vocês.</p>
+    </div>
+  </div>
+
+  <div class="label">O modelo de classes</div>
+  <p style="color:var(--text-2);font-size:15px">
+    Este é o esqueleto mínimo. Ele não é uma camisa de força — se a sua equipe
+    quiser acrescentar classe, atributo ou comportamento, ótimo. O que não pode
+    é <b>tirar</b>: cada peça aqui existe pra exercitar um pilar específico.
+  </p>
+
+<div class="diagrama"><span class="cm">                        «abstract»</span>
+                          <span class="abs">Midia</span>            <span class="cm">implements Avaliavel, Comparable&lt;Midia&gt;</span>
+              ┌───────────────────────────────┐
+              │ - titulo: String              │
+              │ - ano: int                    │
+              │ - genero: Genero  <span class="cm">«enum»</span>      │
+              │ - notas: List&lt;Double&gt;         │
+              ├───────────────────────────────┤
+              │ <span class="mt">+ duracaoTotal(): int</span>  <span class="cm">«abstract»</span>│
+              │ <span class="mt">+ fichaTecnica(): String</span> <span class="cm">«abs»</span> │
+              │ + avaliar(nota: double)       │
+              │ + notaMedia(): double         │
+              └───────────────┬───────────────┘
+                              △
+        ┌─────────────────────┼─────────────────────┐
+   <span class="cls">Filme</span>                 <span class="cls">Serie</span>                 <span class="cls">Podcast</span>
+ - duracaoMin: int    - temporadas          - episodios
+ - diretor: String      List&lt;<span class="cls">Temporada</span>&gt;       List&lt;<span class="cls">Episodio</span>&gt;
+                                            - apresentador
+
+ <span class="cm">duracaoTotal()</span>       <span class="cm">duracaoTotal()</span>        <span class="cm">duracaoTotal()</span>
+ <span class="cm">devolve o campo</span>      <span class="cm">soma as temporadas</span>    <span class="cm">soma os episodios</span>
+
+
+ <span class="cm">── composição ──────────────────────────────────────────</span>
+ <span class="cls">Serie</span> ◆── <span class="cls">Temporada</span> ◆── <span class="cls">Episodio</span>
+ <span class="cm">apagou a série, apagou temporadas e episódios junto</span>
+
+ <span class="cm">── agregação ───────────────────────────────────────────</span>
+ <span class="cls">Perfil</span> ◇── <span class="cls">Midia</span>
+ <span class="cm">apagou o perfil, as mídias continuam no catálogo</span>
+
+ <span class="cm">── quem orquestra ──────────────────────────────────────</span>
+ <span class="cls">Catalogo</span>   guarda e busca as mídias
+ <span class="cls">Perfil</span>     nome, assistidas, minha lista
+ <span class="int">Avaliavel</span>  interface: avaliar() e notaMedia()
+</div>
+
+  <div class="tip star"><b>A pergunta que separa quem entendeu:</b> por que
+  <code>Serie</code> guarda <code>List&lt;Temporada&gt;</code> em vez de
+  <code>List&lt;Episodio&gt;</code> direto? Porque temporada tem identidade
+  própria (número, ano, quantidade de episódios) e é ela que a série organiza.
+  Se você achatar, perde a composição em dois níveis — e ela é o coração do
+  modelo.</div>
+
+  <div class="label">As quatro entregas</div>
+
+  <div class="entrega">
+    <div class="entrega-hd"><span class="quando">Aula 05</span><h3>Marco 0 — equipes e recorte</h3><span class="peso">não vale nota</span></div>
+    <p>Apresentação do projeto em sala, formação das equipes (3 a 4 pessoas) e
+    escolha do acervo temático.</p>
+    <ul>
+      <li>Equipe formada, com <b>um repositório público</b> no GitHub</li>
+      <li>Acervo escolhido e registrado no <code>README.md</code></li>
+      <li>Pelo menos a classe <code>Filme</code> com atributos privados,
+      construtor e getters — o que já foi visto até a aula 04</li>
+    </ul>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd"><span class="quando">Aula 10</span><h3>Entrega 1 — a proposta e o núcleo</h3><span class="peso">30%</span></div>
+    <p>A parte de OO "clássica" já em pé. É aqui que a estrutura do sistema
+    precisa estar decidida — daqui pra frente a gente só acrescenta.</p>
+    <ul>
+      <li><b>Diagrama de classes</b> do que vocês vão construir (pode ser à mão, fotografado)</li>
+      <li><code>Midia</code> abstrata com <code>Filme</code>, <code>Serie</code> e <code>Podcast</code></li>
+      <li><code>duracaoTotal()</code> implementado <b>diferente</b> em cada subclasse</li>
+      <li>Composição <code>Serie → Temporada → Episodio</code> funcionando</li>
+      <li>Interface <code>Avaliavel</code> implementada</li>
+      <li>Exceções próprias para nota inválida e mídia não encontrada</li>
+      <li>Um menu de console que cadastra, lista e avalia</li>
+    </ul>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd"><span class="quando">Aula 15</span><h3>Checkpoint 2 — mentoria por equipe</h3><span class="peso">não vale nota</span></div>
+    <p>Conversa de 15 minutos por equipe, com o código aberto na tela. Não é
+    prova: é pra destravar o que estiver travado antes da reta final.</p>
+    <ul>
+      <li>Traga <b>uma dúvida específica</b> e o trecho de código onde ela mora</li>
+      <li>Coleções e streams já em uso (ranking, agrupamento por gênero)</li>
+      <li>Persistência em arquivo funcionando, mesmo que só parcialmente</li>
+    </ul>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd"><span class="quando">Aulas 16–17</span><h3>Entrega final — código, documentação e apresentação</h3><span class="peso">70%</span></div>
+    <p>Sistema completo, apresentado pela equipe. Cada pessoa apresenta uma
+    parte — e precisa saber explicar o código que mostrar.</p>
+    <ul>
+      <li>Código em <b>camadas</b>: modelo, repositório, serviço e aplicação</li>
+      <li>Persistência: o catálogo sobrevive a fechar e reabrir o programa</li>
+      <li>Pelo menos <b>5 testes unitários</b> com JUnit, nas regras de negócio</li>
+      <li><code>README.md</code> com o que é, como rodar e o modelo de classes</li>
+      <li>Apresentação de <b>12 minutos</b>, com demonstração ao vivo</li>
+    </ul>
+  </div>
+
+  <div class="label">Requisitos técnicos obrigatórios</div>
+  <p style="color:var(--text-2);font-size:15px">
+    Cada item aqui existe pra você provar que domina um pilar. A lista é a
+    mesma pra todas as equipes.
+  </p>
+  <ul class="check" style="margin-top:14px">
+    <li><b>Encapsulamento</b> — atributos <code>private</code>, acesso por getters/setters, validação no setter</li>
+    <li><b>Construtores</b> — pelo menos um com sobrecarga</li>
+    <li><b>Herança</b> — <code>Midia</code> abstrata, com no mínimo 3 filhas</li>
+    <li><b>Polimorfismo</b> — <code>duracaoTotal()</code> e <code>fichaTecnica()</code> com implementação real e distinta em cada filha</li>
+    <li><b>Sobrescrita de <code>toString()</code> e <code>equals()</code></b> nas classes de modelo</li>
+    <li><b>Interface própria</b> — <code>Avaliavel</code>, implementada por <code>Midia</code></li>
+    <li><b>Interface da linguagem</b> — <code>Comparable</code> na <code>Midia</code> e ao menos um <code>Comparator</code> separado</li>
+    <li><b>Composição e agregação</b> — as duas presentes, e vocês sabendo apontar qual é qual</li>
+    <li><b>Exceções próprias</b> — no mínimo duas, herdando de <code>Exception</code>, com <code>try/catch</code> tratando de verdade</li>
+    <li><b>Collections</b> — <code>List</code>, <code>Map</code> e <code>Set</code>, cada uma escolhida por um motivo que vocês saibam explicar</li>
+    <li><b>Enum</b> — <code>Genero</code>, no mínimo</li>
+    <li><b>Streams</b> — pelo menos 3 consultas (ranking, filtro, agrupamento)</li>
+    <li><b>Persistência</b> — salvar e carregar de arquivo</li>
+    <li><b>Camadas</b> — pacotes separados, sem <code>Scanner</code> dentro do modelo</li>
+    <li><b>Testes</b> — 5 ou mais, com JUnit 5</li>
+  </ul>
+
+  <div class="label">Ideias de consulta com Streams</div>
+  <p style="color:var(--text-2);font-size:15px">
+    Pra não travar na hora de pensar "o que eu consulto?", aqui vão exemplos que
+    o domínio pede naturalmente:
+  </p>
+  <div class="grid2">
+    <div class="mini"><b>Top 5 por nota</b>As mídias mais bem avaliadas do catálogo, em ordem.</div>
+    <div class="mini"><b>Agrupar por gênero</b><code>Map&lt;Genero, List&lt;Midia&gt;&gt;</code> — a "prateleira" do catálogo.</div>
+    <div class="mini"><b>Tempo total assistido</b>Somar a duração das mídias do perfil. Uma linha com <code>mapToInt</code>.</div>
+    <div class="mini"><b>Maratona possível</b>O que cabe em N horas livres neste fim de semana?</div>
+    <div class="mini"><b>Média por gênero</b>Qual gênero o perfil avalia melhor?</div>
+    <div class="mini"><b>Série mais longa</b><code>max</code> comparando por <code>duracaoTotal()</code>.</div>
+  </div>
+
+  <div class="label">Extras, pra quem quiser ir além ✨</div>
+  <ul class="check extra">
+    <li><b>Recomendação simples</b> — sugerir mídias do gênero que o perfil mais assiste</li>
+    <li><b>Histórico com data</b> — usar <code>LocalDate</code> e responder "o que eu assisti este mês?"</li>
+    <li><b>Continuar assistindo</b> — guardar em que episódio a pessoa parou</li>
+    <li><b>Vários perfis</b> — como na TV, com listas independentes</li>
+    <li><b>Importar de CSV</b> — carregar um acervo inicial de um arquivo pronto</li>
+    <li><b>Padrão Strategy</b> — trocar o critério de ordenação em tempo de execução</li>
+  </ul>
+
+  <div class="label">O que NÃO pode 🚫</div>
+  <ul class="check no">
+    <li>Atributo <code>public</code> nas classes de modelo</li>
+    <li><code>Scanner</code> ou <code>System.out</code> dentro das classes de modelo — quem fala com a pessoa é a camada de aplicação</li>
+    <li>Herança que existe só pra cumprir requisito: se as filhas não se comportam diferente, não é herança, é campo a mais</li>
+    <li><code>catch (Exception e) { }</code> vazio, engolindo o erro</li>
+    <li>Uma classe gigante fazendo tudo — se passar de ~200 linhas, provavelmente ela tem mais de uma responsabilidade</li>
+    <li>Código copiado sem entender: na apresentação, cada pessoa explica o que mostrar</li>
+  </ul>
+
+  <div class="label">Como a nota é composta</div>
+  <table>
+    <thead><tr><th>Critério</th><th>Peso</th><th>O que a gente olha</th></tr></thead>
+    <tbody>
+      <tr><td><b>Modelagem e pilares de OO</b></td><td>30%</td><td>As classes representam bem o domínio? A herança tem motivo? Composição e agregação estão no lugar certo?</td></tr>
+      <tr><td><b>Funcionalidade e persistência</b></td><td>25%</td><td>O sistema faz o que promete e os dados sobrevivem ao fechar o programa?</td></tr>
+      <tr><td><b>Camadas e legibilidade</b></td><td>20%</td><td>Dá pra achar as coisas? Os nomes dizem o que são? O modelo está livre de interface de usuário?</td></tr>
+      <tr><td><b>Apresentação individual</b></td><td>15%</td><td>Cada pessoa sabe explicar a parte que mostrou</td></tr>
+      <tr><td><b>Entregas no prazo</b></td><td>10%</td><td>Marco 0, Entrega 1 e checkpoint cumpridos</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip"><b>Sobre trabalho em equipe:</b> dividam por <b>camada ou
+  funcionalidade</b>, nunca por "quem escreve mais linha". Combinem commits
+  pequenos e frequentes — é mais fácil resolver dois conflitos pequenos que um
+  gigante na véspera. E todo mundo precisa ter commit no repositório.</div>
+
+  <div class="label">Como começar hoje</div>
+  <div class="grid3">
+    <div class="mini"><b>1. Formem a equipe</b>3 a 4 pessoas. Criem o repositório público e adicionem todo mundo.</div>
+    <div class="mini"><b>2. Escolham o acervo</b>O tema que vocês teriam vontade de catalogar de verdade.</div>
+    <div class="mini"><b>3. Desenhem no papel</b>Antes de codar: quais classes existem e quem contém quem.</div>
+  </div>
+
+  <div class="tip star"><b>Comece pequeno de propósito.</b> Na aula 05 vocês só
+  têm <code>Filme</code> — e está certo. A abstração <code>Midia</code> só faz
+  sentido depois que existirem duas ou três classes parecidas o bastante pra
+  você <i>sentir</i> a repetição. Criar a superclasse antes disso é adivinhação,
+  e adivinhação em modelagem quase sempre erra.</div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="/cursos/orientacao-objetos-java">☕ Voltar ao curso</a>
+    <a class="btn" href="/cursos/orientacao-objetos-java/aula-01-primeiros-passos/guia-ecossistema-java.html">📘 Guia da aula 01</a>
+  </div>
+
+  <div class="foot">Projeto do curso · Orientação a Objetos com Java · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>
