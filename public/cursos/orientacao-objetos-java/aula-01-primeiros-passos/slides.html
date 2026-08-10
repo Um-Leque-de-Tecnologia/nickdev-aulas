@@ -113,8 +113,12 @@
   .layer .lbl.jvm-c{color:var(--key)}
 
   /* código */
+  /* white-space:pre é o que preserva as quebras de linha e a indentação.
+     Sem isso a div colapsa tudo numa linha só — e em Python, onde a
+     indentação define o bloco, o exemplo deixa de fazer sentido. */
   .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
-    font-size:clamp(12.5px,1.4vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:760px}
+    font-size:clamp(12.5px,1.4vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:760px;
+    white-space:pre;tab-size:4}
   .code .cm{color:#6f6a83}
   .code .kw{color:var(--key)}
   .code .st{color:var(--str)}
@@ -304,6 +308,7 @@ emprestado = <span class="kw">False</span>
         self.emprestado = <span class="kw">True</span>
         <span class="fn">print</span>(self.nome + <span class="st">" foi emprestado."</span>)
 
+<span class="cm"># usando o objeto</span>
 duna = <span class="ty">Livro</span>(<span class="st">"Duna"</span>)
 duna.<span class="fn">emprestar</span>()</div>
     <p class="note">Agora ninguém precisa lembrar de nada de fora: o próprio livro atualiza o seu estado. <strong>OO não é coisa de Java</strong> — Python também faz.</p>
