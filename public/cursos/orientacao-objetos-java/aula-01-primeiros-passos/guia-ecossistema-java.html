@@ -214,12 +214,14 @@ duna.<span class="fn">emprestar</span>();</pre>
 
   <section id="instalar-jdk">
     <h2>Instalar o JDK 21</h2>
-    <p>Vamos usar o <b>JDK 21</b> (versão LTS — suporte de longo prazo) durante todo o curso. Baixe a distribuição <b>Eclipse Temurin</b> (OpenJDK, gratuita) ou a <b>Oracle JDK</b> — ambas funcionam igual pra esse curso.</p>
+    <p>Vamos usar o <b>JDK 21</b> (versão LTS — suporte de longo prazo) durante todo o curso. Baixe pela página oficial da Oracle, a mesma pros três sistemas:</p>
+    <p style="margin:8px 0 4px">🔗 <a href="https://www.oracle.com/java/technologies/downloads/#jdk21-windows" target="_blank" rel="noopener noreferrer" style="color:var(--pink-light);text-decoration:underline">oracle.com/java/technologies/downloads</a> — role até <b>JDK 21</b> e escolha a aba do seu sistema.</p>
     <div class="osgrid">
-      <div class="os"><h4>🪟 Windows</h4><p>Baixe o instalador <code>.msi</code>, execute e siga o assistente. Marque a opção de adicionar ao <code>PATH</code>, se ela aparecer.</p></div>
-      <div class="os"><h4>🍎 macOS</h4><p>Baixe o instalador <code>.pkg</code> e execute. Ou, com Homebrew: <code>brew install --cask temurin21</code>.</p></div>
-      <div class="os"><h4>🐧 Linux</h4><p>Pelo gerenciador de pacotes, ex.: <code>sudo apt install temurin-21-jdk</code>, ou extraindo o <code>.tar.gz</code> e ajustando o <code>PATH</code>.</p></div>
+      <div class="os"><h4>🪟 Windows</h4><p>Aba <b>Windows</b> → <b>x64 Installer</b> (<code>.exe</code>) ou <code>.msi</code>. Execute e avance — o instalador já configura o <code>PATH</code>.</p></div>
+      <div class="os"><h4>🍎 macOS</h4><p>Aba <b>macOS</b> → <b>ARM64 DMG</b> (chip M1 em diante) ou <b>x64 DMG</b> (Intel). Abra e siga o instalador.</p></div>
+      <div class="os"><h4>🐧 Linux</h4><p>Aba <b>Linux</b> → <code>.deb</code> ou <code>.rpm</code>. Ou pelo gerenciador: <code>sudo apt install openjdk-21-jdk</code>.</p></div>
     </div>
+    <div class="tip"><b>Oracle JDK × OpenJDK.</b> Os dois nomes aparecem por aí. É a mesma linguagem e a mesma versão — muda o distribuidor e a licença. Pra estudar, qualquer um serve.</div>
     <h3>Conferindo a instalação</h3>
     <p>Abra o terminal (Prompt de Comando, PowerShell ou Terminal) e rode:</p>
     <div class="terminal"><span class="p">$</span> java -version
