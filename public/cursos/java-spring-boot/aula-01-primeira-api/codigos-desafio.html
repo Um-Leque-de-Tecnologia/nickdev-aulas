@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio 01 · Java Avançado · NickDev</title>
+<meta name="description" content="Código comentado do desafio da aula 01: record, service, controller com injeção por construtor e três rotas GET em Spring Boot.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  p code, li code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .glow{position:absolute;border-radius:50%}
+  .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1280px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:26px 18px;display:flex;flex-direction:column;gap:3px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:12px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:8px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 10px;border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--text-2);transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:42px clamp(20px,3.4vw,52px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(28px,4.6vw,44px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.6vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .aviso{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:18px 20px;margin-top:30px}
+  .aviso .ico{font-size:22px;line-height:1}
+  .aviso h3{font-size:16px;margin-bottom:3px}
+  .aviso p{color:var(--text-2);font-size:14.5px}
+
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;display:flex;align-items:center;gap:12px;scroll-margin-top:20px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  section{margin-top:34px;scroll-margin-top:20px}
+  section > h2{font-family:var(--mono);font-size:18px;font-weight:500;display:flex;align-items:center;gap:11px}
+  section > h2::before{content:"";width:8px;height:20px;background:var(--grad);border-radius:3px;flex:none}
+  section > p{color:var(--text-2);margin:9px 0 0;font-size:15px}
+  section > p b{color:var(--text)}
+
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:14px}
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:0 12px 12px 12px;padding:16px 18px;margin-top:-1px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;white-space:pre;max-width:1000px}
+  .cm{color:#6f6a83}.kw{color:#F24487}.ty{color:#7B4FD0}.st{color:#A98CE0}.fn{color:#E88BB8}.an{color:#5fd08a}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:14px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto;max-width:1000px}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin-top:14px;font-size:14.5px;color:var(--text-2);max-width:1000px}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4);max-width:900px}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/java-spring-boot">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Estrutura</div>
+    <a href="#pacotes">Os pacotes</a>
+    <a href="#pom">pom.xml</a>
+    <div class="grp">O código</div>
+    <a href="#application">Application.java</a>
+    <a href="#record">Livro.java</a>
+    <a href="#service">LivroService.java</a>
+    <a href="#controller">LivroController.java</a>
+    <div class="grp">Rodando</div>
+    <a href="#rodar">Subir e testar</a>
+    <a href="#erros">Se der errado</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · código do desafio</div>
+  <h1>A API <span class="g">linha por linha</span></h1>
+  <p class="lead">
+    O desafio resolvido com o tema "livros", comentado. Use como referência
+    quando travar — mas tente antes. Aqui o que importa não é a sintaxe: é
+    entender <b>quem cria os objetos</b>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🎨</span>
+    <div>
+      <h3>O tema aqui é livros, o seu pode ser outro</h3>
+      <p>Troque <code>Livro</code> por receitas, plantas, discos, jogos — o que
+      te interessar. A estrutura não muda: um <code>record</code>, um
+      <code>@Service</code> com a lista, um <code>@RestController</code>
+      injetando por construtor.</p>
+    </div>
+  </div>
+
+  <div class="divisor" id="pacotes">Estrutura</div>
+
+  <section>
+    <h2>Os pacotes</h2>
+    <p>Tudo <b>dentro</b> do pacote da classe main — é o que o
+    <code>@ComponentScan</code> varre.</p>
+<div class="file">📁 estrutura</div>
+<pre>src/main/java/com/seunome/biblioteca/
+├── <b>BibliotecaApplication.java</b>   <span class="cm">← a classe main</span>
+├── model/
+│   └── Livro.java                <span class="cm">← o record</span>
+├── service/
+│   └── LivroService.java         <span class="cm">← regra e dados</span>
+└── controller/
+    └── LivroController.java      <span class="cm">← fala HTTP</span></pre>
+    <div class="tip warn"><b>Se um pacote ficar fora daí</b> — por exemplo <code>com.seunome.controller</code>, irmão em vez de filho — o Spring não encontra a classe e a rota dá 404 <b>sem nenhum erro no terminal</b>. É o erro mais difícil de achar da primeira semana.</div>
+  </section>
+
+  <section id="pom">
+    <h2>pom.xml — só o que importa</h2>
+    <p>O Initializr gera o arquivo inteiro. Estas são as partes que você deve
+    saber ler:</p>
+<div class="file">📄 pom.xml</div>
+<pre>&lt;<span class="ty">parent</span>&gt;
+  &lt;<span class="ty">groupId</span>&gt;org.springframework.boot&lt;/<span class="ty">groupId</span>&gt;
+  &lt;<span class="ty">artifactId</span>&gt;spring-boot-starter-parent&lt;/<span class="ty">artifactId</span>&gt;
+  &lt;<span class="ty">version</span>&gt;4.1.0&lt;/<span class="ty">version</span>&gt;      <span class="cm">&lt;!-- a versão do Spring --&gt;</span>
+&lt;/<span class="ty">parent</span>&gt;
+
+&lt;<span class="ty">properties</span>&gt;
+  &lt;<span class="ty">java.version</span>&gt;21&lt;/<span class="ty">java.version</span>&gt;   <span class="cm">&lt;!-- a versão do Java --&gt;</span>
+&lt;/<span class="ty">properties</span>&gt;
+
+&lt;<span class="ty">dependencies</span>&gt;
+  <span class="cm">&lt;!-- traz Spring MVC + Tomcat embutido + Jackson (JSON) --&gt;</span>
+  &lt;<span class="ty">dependency</span>&gt;
+    &lt;<span class="ty">groupId</span>&gt;org.springframework.boot&lt;/<span class="ty">groupId</span>&gt;
+    &lt;<span class="ty">artifactId</span>&gt;spring-boot-starter-web&lt;/<span class="ty">artifactId</span>&gt;
+  &lt;/<span class="ty">dependency</span>&gt;
+
+  <span class="cm">&lt;!-- reinicia sozinho quando você salva --&gt;</span>
+  &lt;<span class="ty">dependency</span>&gt;
+    &lt;<span class="ty">groupId</span>&gt;org.springframework.boot&lt;/<span class="ty">groupId</span>&gt;
+    &lt;<span class="ty">artifactId</span>&gt;spring-boot-devtools&lt;/<span class="ty">artifactId</span>&gt;
+    &lt;<span class="ty">optional</span>&gt;true&lt;/<span class="ty">optional</span>&gt;
+  &lt;/<span class="ty">dependency</span>&gt;
+&lt;/<span class="ty">dependencies</span>&gt;</pre>
+    <div class="tip"><b>Repare no que NÃO está lá:</b> nenhuma versão nas dependências. O <code>parent</code> já define versões compatíveis entre si — é isso que um "starter" resolve.</div>
+  </section>
+
+  <div class="divisor" id="application">O código</div>
+
+  <section>
+    <h2>BibliotecaApplication.java</h2>
+    <p>Gerado pelo Initializr. Você não mexe nele hoje.</p>
+<div class="file">📄 BibliotecaApplication.java</div>
+<pre><span class="kw">package</span> com.seunome.biblioteca;
+
+<span class="kw">import</span> org.springframework.boot.SpringApplication;
+<span class="kw">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="an">@SpringBootApplication</span>
+<span class="kw">public class</span> <span class="ty">BibliotecaApplication</span> {
+
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">SpringApplication</span>.<span class="fn">run</span>(<span class="ty">BibliotecaApplication</span>.<span class="kw">class</span>, args);
+  }
+}</pre>
+  </section>
+
+  <section id="record">
+    <h2>model/Livro.java</h2>
+    <p>Um <code>record</code>: classe imutável com construtor, getters,
+    <code>equals</code>, <code>hashCode</code> e <code>toString</code> prontos.
+    É Java puro — nada de Spring aqui.</p>
+<div class="file">📄 model/Livro.java</div>
+<pre><span class="kw">package</span> com.seunome.biblioteca.model;
+
+<span class="cm">// os nomes dos campos viram as chaves do JSON</span>
+<span class="kw">public record</span> <span class="ty">Livro</span>(
+    <span class="ty">String</span> titulo,
+    <span class="ty">String</span> autor,
+    <span class="ty">int</span> ano,
+    <span class="ty">String</span> genero,
+    <span class="ty">double</span> nota) {
+}</pre>
+    <div class="tip"><b>Por que record e não classe:</b> ele só transporta dados, não tem comportamento. Imutável significa que ninguém altera um livro por acidente depois de criado.</div>
+  </section>
+
+  <section id="service">
+    <h2>service/LivroService.java</h2>
+    <p>⭐ Onde os dados e a regra moram. Repare que ele <b>não sabe que existe
+    HTTP</b> — nenhum import de web, nenhum <code>System.out</code>.</p>
+<div class="file">📄 service/LivroService.java</div>
+<pre><span class="kw">package</span> com.seunome.biblioteca.service;
+
+<span class="kw">import</span> com.seunome.biblioteca.model.Livro;
+<span class="kw">import</span> org.springframework.stereotype.Service;
+<span class="kw">import</span> java.util.Comparator;
+<span class="kw">import</span> java.util.List;
+
+<span class="cm">// @Service diz ao Spring: crie uma instância disto e guarde</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="ty">LivroService</span> {
+
+  <span class="cm">// List.of devolve uma lista IMUTÁVEL — ninguém altera o acervo</span>
+  <span class="kw">private final</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; acervo = <span class="ty">List</span>.<span class="fn">of</span>(
+      <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Frank Herbert"</span>, 1965, <span class="st">"Ficção"</span>, 9.2),
+      <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Neuromancer"</span>, <span class="st">"William Gibson"</span>, 1984, <span class="st">"Ficção"</span>, 8.7),
+      <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Vidas Secas"</span>, <span class="st">"Graciliano Ramos"</span>, 1938, <span class="st">"Drama"</span>, 9.0),
+      <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Torto Arado"</span>, <span class="st">"Itamar Vieira Junior"</span>, 2019, <span class="st">"Drama"</span>, 9.5),
+      <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"O Cortiço"</span>, <span class="st">"Aluísio Azevedo"</span>, 1890, <span class="st">"Realismo"</span>, 8.4)
+  );
+
+  <span class="cm">// rota 1: o acervo inteiro</span>
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">listar</span>() {
+    <span class="kw">return</span> acervo;
+  }
+
+  <span class="cm">// rota 2: o de maior nota. orElseThrow porque a lista pode estar vazia</span>
+  <span class="kw">public</span> <span class="ty">Livro</span> <span class="fn">destaque</span>() {
+    <span class="kw">return</span> acervo.<span class="fn">stream</span>()
+        .<span class="fn">max</span>(<span class="ty">Comparator</span>.<span class="fn">comparingDouble</span>(<span class="ty">Livro</span>::<span class="fn">nota</span>))
+        .<span class="fn">orElseThrow</span>();
+  }
+
+  <span class="cm">// rota 3: o filtro — a Stream API da aula de OO, aqui no service</span>
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">porGenero</span>(<span class="ty">String</span> genero) {
+    <span class="kw">return</span> acervo.<span class="fn">stream</span>()
+        .<span class="fn">filter</span>(livro -&gt; livro.<span class="fn">genero</span>().<span class="fn">equalsIgnoreCase</span>(genero))
+        .<span class="fn">toList</span>();
+  }
+}</pre>
+    <div class="tip warn"><b>O filtro mora aqui, não no controller.</b> É a regra que separa as camadas: se amanhã a mesma busca precisar ser exposta por linha de comando, o service continua servindo sem mudar uma linha.</div>
+  </section>
+
+  <section id="controller">
+    <h2>controller/LivroController.java</h2>
+    <p>⭐ O coração do desafio. Repare no que <b>não existe</b>: nenhum
+    <code>new LivroService()</code>.</p>
+<div class="file">📄 controller/LivroController.java</div>
+<pre><span class="kw">package</span> com.seunome.biblioteca.controller;
+
+<span class="kw">import</span> com.seunome.biblioteca.model.Livro;
+<span class="kw">import</span> com.seunome.biblioteca.service.LivroService;
+<span class="kw">import</span> org.springframework.web.bind.annotation.*;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/livros"</span>)   <span class="cm">// prefixo de todas as rotas da classe</span>
+<span class="kw">public class</span> <span class="ty">LivroController</span> {
+
+  <span class="kw">private final</span> <span class="ty">LivroService</span> service;
+
+  <span class="cm">// INJEÇÃO POR CONSTRUTOR</span>
+  <span class="cm">// O Spring vê que este construtor pede um LivroService,</span>
+  <span class="cm">// procura o bean e entrega pronto. Como só existe UM</span>
+  <span class="cm">// construtor, o @Autowired é opcional — pode omitir.</span>
+  <span class="kw">public</span> <span class="ty">LivroController</span>(<span class="ty">LivroService</span> service) {
+    <span class="kw">this</span>.service = service;
+  }
+
+  <span class="cm">// GET /livros</span>
+  <span class="an">@GetMapping</span>
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">listar</span>() {
+    <span class="kw">return</span> service.<span class="fn">listar</span>();
+  }
+
+  <span class="cm">// GET /livros/destaque</span>
+  <span class="an">@GetMapping</span>(<span class="st">"/destaque"</span>)
+  <span class="kw">public</span> <span class="ty">Livro</span> <span class="fn">destaque</span>() {
+    <span class="kw">return</span> service.<span class="fn">destaque</span>();
+  }
+
+  <span class="cm">// GET /livros/genero/Ficção</span>
+  <span class="cm">// @PathVariable pega o pedaço da URL e entrega como parâmetro</span>
+  <span class="an">@GetMapping</span>(<span class="st">"/genero/{genero}"</span>)
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">porGenero</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> genero) {
+    <span class="kw">return</span> service.<span class="fn">porGenero</span>(genero);
+  }
+}</pre>
+    <div class="tip"><b>O controller é burro de propósito.</b> Cada método dele faz uma coisa só: receber a requisição e repassar pro service. Se um dia você vir lógica de negócio aqui dentro, é sinal de que ela está no lugar errado.</div>
+  </section>
+
+  <div class="divisor" id="rodar">Rodando</div>
+
+  <section>
+    <h2>Subir e testar</h2>
+<div class="terminal"><span class="p">$</span> ./mvnw spring-boot:run
+<span class="out">Tomcat initialized with port 8080 (http)
+Started BibliotecaApplication in 1.372 seconds</span>
+
+<span class="p">$</span> curl localhost:8080/livros/destaque
+<span class="out">{"titulo":"Torto Arado","autor":"Itamar Vieira Junior",
+ "ano":2019,"genero":"Drama","nota":9.5}</span>
+
+<span class="p">$</span> curl <span class="st">"localhost:8080/livros/genero/Drama"</span>
+<span class="out">[{"titulo":"Vidas Secas","autor":"Graciliano Ramos",
+  "ano":1938,"genero":"Drama","nota":9.0},
+ {"titulo":"Torto Arado","autor":"Itamar Vieira Junior",
+  "ano":2019,"genero":"Drama","nota":9.5}]</span></div>
+    <div class="tip"><b>Acento na URL:</b> pra buscar "Ficção" pelo curl, coloque a URL entre aspas. O navegador codifica sozinho; o terminal não.</div>
+  </section>
+
+  <section id="erros">
+    <h2>Se der errado</h2>
+    <p>Os quatro que mais aparecem, com a causa real:</p>
+<div class="terminal"><span class="cm"># 404 na rota que você acabou de criar</span>
+<span class="out">→ a classe está fora do pacote da main, ou faltou @RestController</span>
+
+<span class="cm"># Port 8080 was already in use</span>
+<span class="out">→ tem outra execução rodando. Pare no ⏹ da IDE, ou:
+   Linux/macOS:  lsof -ti:8080 | xargs kill
+   Windows:      netstat -ano | findstr :8080</span>
+
+<span class="cm"># No qualifying bean of type 'LivroService'</span>
+<span class="out">→ faltou @Service na classe, ou ela está fora do pacote varrido</span>
+
+<span class="cm"># imports do Spring em vermelho na IDE</span>
+<span class="out">→ você abriu o arquivo em vez da pasta do projeto;
+   ou o Maven ainda não baixou. Recarregue o projeto Maven.</span></div>
+    <div class="tip warn"><b>Leia a primeira linha do erro.</b> O Spring costuma dizer exatamente o que faltou, e frequentemente sugere a correção num bloco <code>Action</code> logo abaixo. A pilha de 60 linhas quase nunca é onde está a resposta.</div>
+  </section>
+
+  <div style="margin-top:56px">
+    <a class="cta primary" href="desafio.html">🎯 Voltar ao desafio</a>
+    <a class="cta" href="guia-spring-boot.html">📘 Guia</a>
+    <a class="cta" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Código da Aula 01 · Java Avançado com Spring Boot · NickDev 💜</div>
+</main>
+</div>
+</body>
+</html>

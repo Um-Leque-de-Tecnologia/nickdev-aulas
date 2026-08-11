@@ -56,7 +56,17 @@ export default function Home() {
             lambdas, até um projeto prático em equipe com persistência e
             arquitetura em camadas.
           </p>
-          <div className="meta">graduação · em andamento</div>
+          <div className="meta">18 aulas · em andamento</div>
+        </Link>
+
+        <Link className="card" href="/cursos/java-spring-boot">
+          <span className="num">05</span>
+          <h3>Java Avançado — Spring Boot</h3>
+          <p>
+            Do Java puro à API REST em produção: injeção de dependência, JPA,
+            segurança com JWT, testes, Docker e deploy.
+          </p>
+          <div className="meta">18 aulas · em andamento</div>
         </Link>
       </div>
 

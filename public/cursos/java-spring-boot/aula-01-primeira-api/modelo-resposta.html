@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de resposta — Desafio 01 · Java Avançado · NickDev</title>
+<meta name="description" content="Modelo de resposta do desafio da aula 01: API Spring Boot com service, controller e três rotas, com a saída real do terminal.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:1000px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.panes{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start}
+@media(max-width:860px){.panes{grid-template-columns:1fr}}
+.pane{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface)}
+.panehd{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.panehd .dot{width:9px;height:9px;border-radius:50%}
+.panehd .dot.r{background:#ff5f56}.panehd .dot.y{background:#ffbd2e}.panehd .dot.g{background:#27c93f}
+.panehd b{color:var(--text);font-weight:500}
+
+pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;margin:0;white-space:pre}
+.kw{color:#F24487}.ty{color:#7B4FD0}.st{color:#A98CE0}.fn{color:#E88BB8}.cm{color:#6f6a83}.an{color:#5fd08a}
+
+.term{background:#0b0913;padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.85;white-space:pre;overflow-x:auto}
+.term .p{color:var(--text-3)}
+.term .cmdline{color:var(--text)}
+.term .out{color:#9ee39e}
+.term .cm{color:#6f6a83}
+
+.recap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+@media(max-width:760px){.recap{grid-template-columns:1fr}}
+.recap .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.recap .card h3{font-size:15px;margin-bottom:6px;color:var(--pink-light)}
+.recap .card p{font-size:13.5px;color:var(--text-2)}
+
+.check{list-style:none;display:grid;gap:10px;margin-top:8px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check b{color:var(--text)}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/java-spring-boot">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Modelo de resposta · Aula 01</div>
+  <h1>API <span class="grad">no ar</span> ✅</h1>
+  <p class="lead">
+    O desafio resolvido com o tema "livros": <code>record</code>,
+    <code>@Service</code> com cinco itens, <code>@RestController</code> com
+    injeção por construtor e três rotas GET — com a saída real do terminal.
+  </p>
+  <div class="rule"></div>
+
+  <div class="label">As três classes</div>
+  <div class="panes">
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">LivroService.java</b></div>
+      <pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="ty">LivroService</span> {
+
+  <span class="kw">private final</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; acervo = <span class="ty">List</span>.<span class="fn">of</span>(
+    <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Frank Herbert"</span>, 1965, <span class="st">"Ficção"</span>, 9.2),
+    <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Neuromancer"</span>, <span class="st">"W. Gibson"</span>, 1984, <span class="st">"Ficção"</span>, 8.7),
+    <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Vidas Secas"</span>, <span class="st">"G. Ramos"</span>, 1938, <span class="st">"Drama"</span>, 9.0),
+    <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Torto Arado"</span>, <span class="st">"I. V. Junior"</span>, 2019, <span class="st">"Drama"</span>, 9.5),
+    <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"O Cortiço"</span>, <span class="st">"A. Azevedo"</span>, 1890, <span class="st">"Realismo"</span>, 8.4)
+  );
+
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">listar</span>() { <span class="kw">return</span> acervo; }
+
+  <span class="kw">public</span> <span class="ty">Livro</span> <span class="fn">destaque</span>() {
+    <span class="kw">return</span> acervo.<span class="fn">stream</span>()
+      .<span class="fn">max</span>(<span class="ty">Comparator</span>.<span class="fn">comparingDouble</span>(<span class="ty">Livro</span>::<span class="fn">nota</span>))
+      .<span class="fn">orElseThrow</span>();
+  }
+
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">porGenero</span>(<span class="ty">String</span> g) {
+    <span class="kw">return</span> acervo.<span class="fn">stream</span>()
+      .<span class="fn">filter</span>(l -&gt; l.<span class="fn">genero</span>().<span class="fn">equalsIgnoreCase</span>(g))
+      .<span class="fn">toList</span>();
+  }
+}</pre>
+    </div>
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">LivroController.java</b></div>
+      <pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/livros"</span>)
+<span class="kw">public class</span> <span class="ty">LivroController</span> {
+
+  <span class="kw">private final</span> <span class="ty">LivroService</span> service;
+
+  <span class="cm">// sem new, sem @Autowired</span>
+  <span class="kw">public</span> <span class="ty">LivroController</span>(<span class="ty">LivroService</span> service) {
+    <span class="kw">this</span>.service = service;
+  }
+
+  <span class="an">@GetMapping</span>
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">listar</span>() {
+    <span class="kw">return</span> service.<span class="fn">listar</span>();
+  }
+
+  <span class="an">@GetMapping</span>(<span class="st">"/destaque"</span>)
+  <span class="kw">public</span> <span class="ty">Livro</span> <span class="fn">destaque</span>() {
+    <span class="kw">return</span> service.<span class="fn">destaque</span>();
+  }
+
+  <span class="an">@GetMapping</span>(<span class="st">"/genero/{genero}"</span>)
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">porGenero</span>(
+      <span class="an">@PathVariable</span> <span class="ty">String</span> genero) {
+    <span class="kw">return</span> service.<span class="fn">porGenero</span>(genero);
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="label">A saída real</div>
+  <div class="pane">
+    <div class="panehd"><span class="dot g"></span><b>terminal</b></div>
+    <div class="term"><span class="p">$</span> <span class="cmdline">./mvnw spring-boot:run</span>
+<span class="out">Tomcat initialized with port 8080 (http)
+Started BibliotecaApplication in 1.372 seconds</span>
+
+<span class="p">$</span> <span class="cmdline">curl localhost:8080/livros/destaque</span>
+<span class="out">{"titulo":"Torto Arado","autor":"Itamar Vieira Junior",
+ "ano":2019,"genero":"Drama","nota":9.5}</span>
+
+<span class="p">$</span> <span class="cmdline">curl "localhost:8080/livros/genero/Drama"</span>
+<span class="out">[{"titulo":"Vidas Secas","autor":"Graciliano Ramos",
+  "ano":1938,"genero":"Drama","nota":9.0},
+ {"titulo":"Torto Arado","autor":"Itamar Vieira Junior",
+  "ano":2019,"genero":"Drama","nota":9.5}]</span>
+
+<span class="p">$</span> <span class="cmdline">curl -i localhost:8080/livros | head -3</span>
+<span class="out">HTTP/1.1 200
+Content-Type: application/json</span>
+<span class="cm"># repare: application/json, e ninguém escreveu conversão</span></div>
+  </div>
+
+  <div class="label">Por que essa solução funciona</div>
+  <div class="recap">
+    <div class="card"><h3>Injeção por construtor</h3><p>Nenhum <code>new LivroService()</code>. O Spring viu o construtor pedindo o tipo, achou o bean e entregou — e o campo pôde ser <code>final</code>.</p></div>
+    <div class="card"><h3>Regra no service</h3><p>Os três <code>stream()</code> vivem no service. O controller só recebe a requisição e repassa: ele não sabe filtrar, só sabe falar HTTP.</p></div>
+    <div class="card"><h3>JSON de graça</h3><p>O <code>record</code> volta como objeto e o Jackson serializa sozinho, com <code>Content-Type: application/json</code> correto.</p></div>
+  </div>
+
+  <div class="label">Checklist batido</div>
+  <ul class="check">
+    <li>Spring Boot 4.1 com Java 21, subindo em pouco mais de 1 segundo</li>
+    <li><code>record Livro</code> com <b>5 campos</b> (mais que o mínimo de 4)</li>
+    <li><code>@Service</code> com <b>5 livros</b> no acervo</li>
+    <li><code>@RestController</code> com <b>injeção por construtor</b>, sem <code>@Autowired</code></li>
+    <li><b>3 rotas GET</b>, a terceira com <code>@PathVariable</code> e filtro</li>
+    <li>A filtragem acontece no <b>service</b>, via Stream API</li>
+    <li>Tudo dentro do pacote da classe <code>main</code></li>
+  </ul>
+
+  <div class="label">Continue por aqui</div>
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Rever o desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código comentado, linha por linha</a>
+    <a class="btn" href="guia-spring-boot.html">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Modelo de resposta · Aula 01 · Java Avançado com Spring Boot · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>
