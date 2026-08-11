@@ -227,22 +227,40 @@ acervo.<span class="fn">stream</span>()
     <a href="#conferir" style="color:var(--pink-light);text-decoration:underline">conferência</a>.
     Se está começando por aqui, instale o <b>JDK 21</b> (LTS).</p>
 
+    <p>Baixe pela página oficial de downloads da Oracle — é a mesma página pros
+    três sistemas, mudando só a aba:</p>
+    <p style="margin-top:6px">
+      🔗 <a href="https://www.oracle.com/java/technologies/downloads/#jdk21-windows"
+            target="_blank" rel="noopener noreferrer"
+            style="color:var(--pink-light);text-decoration:underline">oracle.com/java/technologies/downloads</a>
+      — role até a seção <b>JDK 21</b> e escolha a aba do seu sistema.
+    </p>
+
     <h4>Windows</h4>
     <ol>
-      <li>Baixe o instalador <code>.msi</code> do <b>Eclipse Temurin 21</b> em <code>adoptium.net</code></li>
-      <li>Durante a instalação, marque <b>"Set JAVA_HOME variable"</b> e <b>"Add to PATH"</b> — sem isso o terminal não acha o <code>java</code></li>
-      <li>Feche e reabra o terminal</li>
+      <li>Na aba <b>Windows</b>, baixe o <b>x64 Installer</b> (<code>.exe</code>) ou o <code>.msi</code></li>
+      <li>Execute e avance. O instalador da Oracle já configura o <code>PATH</code> e o <code>JAVA_HOME</code></li>
+      <li><b>Feche e reabra o terminal</b> — o que já estava aberto não enxerga as variáveis novas</li>
     </ol>
 
     <h4>macOS</h4>
-<div class="terminal"><span class="p">$</span> brew install --cask temurin@21</div>
-    <p>Sem Homebrew, baixe o <code>.pkg</code> em <code>adoptium.net</code>.</p>
+    <ol>
+      <li>Na aba <b>macOS</b>, escolha <b>ARM64 DMG</b> (Apple Silicon: M1 em diante) ou <b>x64 DMG</b> (Intel)</li>
+      <li>Abra o <code>.dmg</code> e siga o instalador</li>
+    </ol>
+    <p>Se preferir a linha de comando e já tiver Homebrew:</p>
+<div class="terminal"><span class="p">$</span> brew install --cask oracle-jdk@21</div>
 
-    <h4>Linux (Ubuntu/Debian)</h4>
+    <h4>Linux</h4>
+    <p>Na aba <b>Linux</b>, baixe o <code>.deb</code> (Ubuntu/Debian) ou o
+    <code>.rpm</code> (Fedora/RHEL) da arquitetura certa. Ou, pelo gerenciador
+    de pacotes, com o OpenJDK:</p>
 <div class="terminal"><span class="p">$</span> sudo apt update
 <span class="p">$</span> sudo apt install openjdk-21-jdk</div>
 
-    <div class="tip warn"><b>JDK, não JRE.</b> O JRE só <i>roda</i> programas Java; o JDK traz o compilador e as ferramentas. Pra programar você precisa do <b>JDK</b>. Se o site oferecer os dois, é o JDK.</div>
+    <div class="tip warn"><b>JDK, não JRE.</b> O JRE só <i>roda</i> programas Java; o JDK traz o compilador (<code>javac</code>) e as ferramentas. Pra programar você precisa do <b>JDK</b>. Na página da Oracle, o que aparece na seção "JDK 21" já é o certo.</div>
+
+    <div class="tip"><b>Oracle JDK × OpenJDK.</b> Você vai ver os dois nomes por aí. São a mesma linguagem e a mesma versão — mudam o distribuidor e os termos de licença. Pra estudar e desenvolver, os dois servem igual, e o curso funciona com qualquer um.</div>
   </section>
 
   <!-- ==================================================================== -->
@@ -252,12 +270,17 @@ acervo.<span class="fn">stream</span>()
     acabaram de ser criadas) e rode:</p>
 
 <div class="terminal"><span class="p">$</span> java -version
-<span class="out">openjdk version "21.0.5" 2024-10-15 LTS
-OpenJDK Runtime Environment Temurin-21.0.5+11
-OpenJDK 64-Bit Server VM Temurin-21.0.5+11</span>
+<span class="out">java version "21.0.5" 2024-10-15 LTS
+Java(TM) SE Runtime Environment (build 21.0.5+9-LTS-239)
+Java HotSpot(TM) 64-Bit Server VM (build 21.0.5+9-LTS-239, mixed mode)</span>
 
 <span class="p">$</span> javac -version
 <span class="out">javac 21.0.5</span></div>
+
+    <p style="font-size:14px;color:var(--text-3)">Se você instalou o OpenJDK em
+    vez do Oracle JDK, a primeira linha vem como
+    <code>openjdk version "21..."</code>. Tanto faz — o que importa é o número
+    ser <b>21 ou maior</b>.</p>
 
     <p>As duas precisam responder, e as duas precisam ser <b>21 ou mais nova</b>.</p>
 
