@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · Spring Boot: IoC, DI e a primeira API · Aula 01 · NickDev</title>
+<meta name="description" content="Guia da aula 01 de Java avançado: inversão de controle, injeção de dependência, Spring Initializr, @RestController, beans e camadas.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:264px 1fr;max-width:1300px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/java-spring-boot">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Revisão de Java</div>
+    <a href="#revisao">O que o Spring usa de você</a>
+    <div class="grp">Preparar a máquina</div>
+    <a href="#instalar-java">Instalar o Java (JDK 21)</a>
+    <a href="#conferir">Conferir se instalou</a>
+    <a href="#intellij">Instalar o IntelliJ</a>
+    <a href="#instalar-spring">"Instalar" o Spring</a>
+    <div class="grp">O conceito</div>
+    <a href="#por-que">Por que Spring existe</a>
+    <a href="#ioc">Inversão de controle</a>
+    <a href="#di">Injeção de dependência</a>
+    <div class="grp">O ecossistema</div>
+    <a href="#spring-boot">Spring, Boot e starters</a>
+    <a href="#versoes">Versões e requisitos</a>
+    <div class="grp">Mão na massa</div>
+    <a href="#criar">Criar o projeto</a>
+    <a href="#intellij-usar">Usar no IntelliJ</a>
+    <a href="#estrutura">A estrutura</a>
+    <a href="#rodar">Rodar a aplicação</a>
+    <div class="grp">A API</div>
+    <a href="#controller">Primeiro controller</a>
+    <a href="#json">Devolvendo JSON</a>
+    <a href="#beans">Beans e estereótipos</a>
+    <a href="#camadas">Camadas na prática</a>
+    <div class="grp">Fechando</div>
+    <a href="#testar">Testar a API</a>
+    <a href="#erros">Erros comuns 🔧</a>
+    <a href="#cola">Cola rápida</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · guia de apoio</div>
+  <h1>Do Java puro <span class="g">ao Spring</span></h1>
+  <p class="lead">
+    O que é inversão de controle, por que injeção de dependência muda o jeito
+    de escrever classes, e o passo a passo pra colocar sua primeira API REST no
+    ar com Spring Boot.
+  </p>
+  <div class="rule"></div>
+
+  <div class="tip warn" style="margin-top:32px">
+    <b>🎯 O que esta aula assume.</b> Que você já modela em orientação a
+    objetos: classes, encapsulamento, interfaces e a ideia de separar em
+    camadas. O Spring <b>não substitui</b> nada disso — ele organiza o que você
+    já sabe e tira do caminho o código repetitivo.
+  </div>
+
+  <!-- ==================================================================== -->
+  <section id="revisao">
+    <h2>Revisão: o que o Spring usa de você</h2>
+    <p>Da metade final do curso de OO, cinco coisas aparecem <b>hoje mesmo</b>
+    dentro do Spring. Se alguma estiver enferrujada, é aqui que você desenferruja.</p>
+
+    <h3>1. Exceções</h3>
+    <p>Exceção é pra o que <b>foge do esperado</b> — não pra controlar fluxo
+    normal. "Lista vazia" não é exceção; "id que não existe" é.</p>
+<pre><span class="kw">public class</span> <span class="ty">MidiaNaoEncontradaException</span> <span class="kw">extends</span> <span class="ty">RuntimeException</span> {
+  <span class="kw">public</span> <span class="ty">MidiaNaoEncontradaException</span>(<span class="ty">String</span> titulo) {
+    <span class="kw">super</span>(<span class="st">"Mídia não encontrada: "</span> + titulo);
+  }
+}</pre>
+    <p><code>RuntimeException</code> (unchecked) não obriga <code>try/catch</code>;
+    <code>Exception</code> (checked) obriga. Em API, o padrão é lançar unchecked
+    e deixar um tratador global converter em resposta HTTP — assunto da aula 03.</p>
+
+    <h3>2. Coleções e generics</h3>
+    <table>
+      <tr><th>Coleção</th><th>Use quando</th><th>No Spring aparece em</th></tr>
+      <tr><td><code>List&lt;T&gt;</code></td><td>ordem importa, aceita repetido</td><td>retorno de rota que lista</td></tr>
+      <tr><td><code>Set&lt;T&gt;</code></td><td>não pode repetir</td><td>perfis de acesso de um usuário</td></tr>
+      <tr><td><code>Map&lt;K,V&gt;</code></td><td>busca por chave</td><td>parâmetros, cabeçalhos, agrupamentos</td></tr>
+    </table>
+    <div class="tip"><b>Cuidado com <code>List.of()</code>:</b> ela devolve lista <b>imutável</b>. Chamar <code>add()</code> lança <code>UnsupportedOperationException</code>. Pra uma lista que muda, use <code>new ArrayList&lt;&gt;()</code>.</div>
+
+    <h3>3. Lambdas e Stream API</h3>
+    <p>É o que você vai usar no desafio de hoje, na rota com filtro:</p>
+<pre><span class="cm">// filtrar</span>
+acervo.<span class="fn">stream</span>()
+      .<span class="fn">filter</span>(m -&gt; m.<span class="fn">genero</span>().<span class="fn">equalsIgnoreCase</span>(genero))
+      .<span class="fn">toList</span>();
+
+<span class="cm">// o maior</span>
+acervo.<span class="fn">stream</span>()
+      .<span class="fn">max</span>(<span class="ty">Comparator</span>.<span class="fn">comparingDouble</span>(<span class="ty">Midia</span>::<span class="fn">nota</span>))
+      .<span class="fn">orElseThrow</span>();
+
+<span class="cm">// agrupar</span>
+acervo.<span class="fn">stream</span>()
+      .<span class="fn">collect</span>(<span class="ty">Collectors</span>.<span class="fn">groupingBy</span>(<span class="ty">Midia</span>::<span class="fn">genero</span>));</pre>
+
+    <h3>4. Optional</h3>
+    <p>O tipo que diz "pode não ter nada aqui". Evita
+    <code>NullPointerException</code> porque força você a tratar o caso vazio:</p>
+<pre><span class="ty">Optional</span>&lt;<span class="ty">Midia</span>&gt; achada = acervo.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(m -&gt; m.<span class="fn">titulo</span>().<span class="fn">equals</span>(titulo))
+    .<span class="fn">findFirst</span>();
+
+<span class="ty">Midia</span> m = achada.<span class="fn">orElseThrow</span>(() -&gt; <span class="kw">new</span> <span class="ty">MidiaNaoEncontradaException</span>(titulo));</pre>
+    <div class="tip"><b>Guarde este:</b> na aula 04, o <code>findById()</code> do Spring Data devolve exatamente um <code>Optional</code>. Quem entendeu aqui não estranha lá.</div>
+
+    <h3>5. Records</h3>
+<pre><span class="kw">public record</span> <span class="ty">Midia</span>(<span class="ty">String</span> titulo, <span class="ty">int</span> ano, <span class="ty">String</span> genero) {}</pre>
+    <p>Uma classe imutável com construtor, getters, <code>equals</code>,
+    <code>hashCode</code> e <code>toString</code> prontos. É o que vamos devolver
+    nas rotas — e o Jackson converte pra JSON lendo esses getters.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="instalar-java">
+    <h2>Instalar o Java (JDK 21)</h2>
+    <p>Se você veio do curso de OO, já tem — pule pra
+    <a href="#conferir" style="color:var(--pink-light);text-decoration:underline">conferência</a>.
+    Se está começando por aqui, instale o <b>JDK 21</b> (LTS).</p>
+
+    <h4>Windows</h4>
+    <ol>
+      <li>Baixe o instalador <code>.msi</code> do <b>Eclipse Temurin 21</b> em <code>adoptium.net</code></li>
+      <li>Durante a instalação, marque <b>"Set JAVA_HOME variable"</b> e <b>"Add to PATH"</b> — sem isso o terminal não acha o <code>java</code></li>
+      <li>Feche e reabra o terminal</li>
+    </ol>
+
+    <h4>macOS</h4>
+<div class="terminal"><span class="p">$</span> brew install --cask temurin@21</div>
+    <p>Sem Homebrew, baixe o <code>.pkg</code> em <code>adoptium.net</code>.</p>
+
+    <h4>Linux (Ubuntu/Debian)</h4>
+<div class="terminal"><span class="p">$</span> sudo apt update
+<span class="p">$</span> sudo apt install openjdk-21-jdk</div>
+
+    <div class="tip warn"><b>JDK, não JRE.</b> O JRE só <i>roda</i> programas Java; o JDK traz o compilador e as ferramentas. Pra programar você precisa do <b>JDK</b>. Se o site oferecer os dois, é o JDK.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="conferir">
+    <h2>Conferir se instalou</h2>
+    <p>Abra um terminal <b>novo</b> (o antigo não enxerga as variáveis que
+    acabaram de ser criadas) e rode:</p>
+
+<div class="terminal"><span class="p">$</span> java -version
+<span class="out">openjdk version "21.0.5" 2024-10-15 LTS
+OpenJDK Runtime Environment Temurin-21.0.5+11
+OpenJDK 64-Bit Server VM Temurin-21.0.5+11</span>
+
+<span class="p">$</span> javac -version
+<span class="out">javac 21.0.5</span></div>
+
+    <p>As duas precisam responder, e as duas precisam ser <b>21 ou mais nova</b>.</p>
+
+    <table>
+      <tr><th>O que aconteceu</th><th>O que fazer</th></tr>
+      <tr><td><code>java: command not found</code> (ou "não é reconhecido")</td><td>o Java não está no PATH. No Windows, reinstale marcando "Add to PATH". No Linux/macOS, feche e reabra o terminal.</td></tr>
+      <tr><td><code>java -version</code> responde, mas <code>javac</code> não</td><td>você instalou o JRE, não o JDK. Instale o JDK.</td></tr>
+      <tr><td>Aparece uma versão menor que 21</td><td>tem um Java antigo na frente no PATH. No Windows, ajuste a variável <code>JAVA_HOME</code>; no Linux, use <code>sudo update-alternatives --config java</code>.</td></tr>
+    </table>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="intellij">
+    <h2>Instalar o IntelliJ IDEA</h2>
+    <p>Baixe o <b>IntelliJ IDEA Community Edition</b> em
+    <code>jetbrains.com/idea/download</code> — gratuita, open source e
+    suficiente pro curso inteiro.</p>
+
+    <div class="tip"><b>Community × Ultimate.</b> A Ultimate é paga e traz atalhos pra Spring (assistente de criação, autocomplete em <code>application.properties</code>, painel de endpoints). Tudo que a gente faz no curso funciona na <b>Community</b> — os atalhos poupam cliques, não são obrigatórios. Se você é estudante, a JetBrains costuma dar licença educacional gratuita da Ultimate.</div>
+
+    <h3>Na primeira vez que abrir</h3>
+    <ol>
+      <li>Aceite os termos e escolha o tema</li>
+      <li>Pule a instalação de plugins extras — o que precisamos já vem</li>
+      <li>Em <b>Settings → Build → Build Tools → Maven</b>, confira que o campo <code>Maven home path</code> está preenchido (o "Bundled" serve)</li>
+    </ol>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="instalar-spring">
+    <h2>"Instalar" o Spring</h2>
+
+    <div class="tip warn"><b>Você não instala o Spring.</b> Essa é a pergunta mais comum da primeira aula, e a resposta surpreende: o Spring não é um programa que se instala na máquina, como o Java ou o IntelliJ. Ele é uma <b>biblioteca</b> — um conjunto de arquivos <code>.jar</code> que o Maven baixa pra dentro do seu projeto, na primeira vez que você o abre.</div>
+
+    <p>Quer dizer que:</p>
+    <ul>
+      <li>Não existe "instalador do Spring" pra baixar</li>
+      <li>Cada projeto tem a <b>sua</b> versão do Spring, declarada no <code>pom.xml</code> — dois projetos na mesma máquina podem usar versões diferentes</li>
+      <li>Quem baixa é o <b>Maven</b>, e ele guarda tudo numa pasta <code>.m2</code> na sua pasta de usuário, pra reaproveitar entre projetos</li>
+      <li>Por isso a <b>primeira</b> execução demora (ele está baixando) e as seguintes são rápidas</li>
+    </ul>
+
+    <p>O trecho do <code>pom.xml</code> que traz o Spring:</p>
+<pre>&lt;<span class="ty">parent</span>&gt;
+  &lt;<span class="ty">groupId</span>&gt;org.springframework.boot&lt;/<span class="ty">groupId</span>&gt;
+  &lt;<span class="ty">artifactId</span>&gt;spring-boot-starter-parent&lt;/<span class="ty">artifactId</span>&gt;
+  &lt;<span class="ty">version</span>&gt;4.1.0&lt;/<span class="ty">version</span>&gt;   <span class="cm">&lt;!-- a versão do Spring é ESTA linha --&gt;</span>
+&lt;/<span class="ty">parent</span>&gt;
+
+&lt;<span class="ty">dependencies</span>&gt;
+  &lt;<span class="ty">dependency</span>&gt;
+    &lt;<span class="ty">groupId</span>&gt;org.springframework.boot&lt;/<span class="ty">groupId</span>&gt;
+    &lt;<span class="ty">artifactId</span>&gt;spring-boot-starter-web&lt;/<span class="ty">artifactId</span>&gt;
+  &lt;/<span class="ty">dependency</span>&gt;
+&lt;/<span class="ty">dependencies</span>&gt;</pre>
+
+    <div class="tip"><b>Precisa instalar o Maven?</b> Não. O projeto vem com o <code>mvnw</code> (Maven Wrapper), um script que baixa a versão certa do Maven sozinho. É por isso que a gente roda <code>./mvnw</code> e não <code>mvn</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="por-que">
+    <h2>Por que o Spring existe</h2>
+    <p>Escreva uma aplicação Java média sem framework e três problemas aparecem
+    sempre:</p>
+    <ol>
+      <li><b>Quem cria os objetos?</b> Alguém precisa dar <code>new</code> em tudo, na ordem certa, e passar uns pros outros.</li>
+      <li><b>Configuração espalhada.</b> Servidor, porta, banco, JSON — cada um configurado num canto.</li>
+      <li><b>Código repetido.</b> Abrir conexão, ler requisição, converter pra objeto, fechar tudo. De novo. E de novo.</li>
+    </ol>
+    <p>O Spring resolve os três. Mas o primeiro é o mais importante — e é o
+    único que muda o <b>jeito de escrever suas classes</b>.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="ioc">
+    <h2>Inversão de controle</h2>
+    <p>Olhe esta classe. Ela tem um problema que não é óbvio à primeira vista:</p>
+
+<pre><span class="kw">class</span> <span class="ty">MidiaServico</span> {
+  <span class="kw">private</span> <span class="ty">MidiaRepositorio</span> repo = <span class="kw">new</span> <span class="ty">MidiaRepositorioArquivo</span>();
+
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Midia</span>&gt; <span class="fn">listar</span>() {
+    <span class="kw">return</span> repo.<span class="fn">buscarTodas</span>();
+  }
+}</pre>
+
+    <p>Ela faz <b>duas</b> coisas: usa um repositório <i>e</i> decide qual
+    repositório é. A segunda não deveria ser responsabilidade dela.</p>
+
+    <h3>O que dói na prática</h3>
+    <ul>
+      <li>Trocar por um repositório de banco exige <b>editar o serviço</b> — que não tem nada a ver com essa decisão</li>
+      <li>Num teste, você não consegue pôr um repositório falso: ele nasce dentro do método</li>
+      <li>Se dez classes criarem o repositório assim, você tem dez cópias da mesma decisão</li>
+    </ul>
+
+    <p><b>Inversão de controle</b> é tirar essa decisão da sua classe e passar
+    pra outra pessoa — no nosso caso, o contêiner do Spring. A classe deixa de
+    <i>buscar</i> o que precisa e passa a <i>declarar</i> o que precisa.</p>
+
+    <div class="tip"><b>De onde vem o nome:</b> normalmente o <i>seu</i> código controla o fluxo e chama as bibliotecas. Com um framework, o controle inverte: o framework chama o seu código na hora certa. Daí "inversão".</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="di">
+    <h2>Injeção de dependência</h2>
+    <p>Injeção de dependência é <b>como</b> a inversão de controle acontece: em
+    vez de a classe criar o que precisa, ela recebe pronto — normalmente pelo
+    construtor.</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>❌ a classe decide</h4>
+<pre><span class="kw">class</span> <span class="ty">MidiaServico</span> {
+  <span class="kw">private</span> <span class="ty">MidiaRepositorio</span> repo =
+    <span class="kw">new</span> <span class="ty">MidiaRepositorioArquivo</span>();
+}</pre>
+        Acoplada à implementação. Trocar = editar.
+      </div>
+      <div class="box ok">
+        <h4>✅ a classe pede</h4>
+<pre><span class="an">@Service</span>
+<span class="kw">class</span> <span class="ty">MidiaServico</span> {
+  <span class="kw">private final</span> <span class="ty">MidiaRepositorio</span> repo;
+
+  <span class="ty">MidiaServico</span>(<span class="ty">MidiaRepositorio</span> repo) {
+    <span class="kw">this</span>.repo = repo;
+  }
+}</pre>
+        Depende do tipo, não da implementação.
+      </div>
+    </div>
+
+    <h3>O que você ganha</h3>
+    <table>
+      <tr><th>Ganho</th><th>Por quê</th></tr>
+      <tr><td><b>Trocar sem editar</b></td><td>outra implementação do mesmo tipo entra sem tocar no serviço</td></tr>
+      <tr><td><b>Testar de verdade</b></td><td>no teste é um <code>new</code> comum, passando um dublê pelo construtor</td></tr>
+      <tr><td><b>Uma decisão só</b></td><td>qual implementação usar fica num lugar, não espalhada</td></tr>
+      <tr><td><b>Objeto sempre completo</b></td><td>com <code>final</code>, é impossível existir um serviço sem repositório</td></tr>
+    </table>
+
+    <div class="tip"><b>Analogia:</b> num restaurante você não vai à cozinha buscar o prato — você pede pelo cardápio e alguém traz. Sua classe declara o que quer (o tipo, no construtor) e o Spring resolve como conseguir.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="spring-boot">
+    <h2>Spring, Boot e starters</h2>
+    <p>Três nomes que aparecem juntos e confundem:</p>
+    <table>
+      <tr><th>Nome</th><th>O que é</th></tr>
+      <tr><td><b>Spring Framework</b></td><td>O contêiner de injeção de dependência, mais módulos para web, dados, segurança e outros. Existe desde 2003.</td></tr>
+      <tr><td><b>Spring Boot</b></td><td>Uma camada por cima que <b>configura o Spring sozinha</b>, embute um servidor web e gera um jar executável.</td></tr>
+      <tr><td><b>Starter</b></td><td>Um pacote de dependências combinadas e testadas juntas. <code>spring-boot-starter-web</code> traz Spring MVC, Tomcat e Jackson de uma vez.</td></tr>
+    </table>
+    <p>Antes do Boot, subir uma aplicação Spring pedia dezenas de linhas de XML
+    e um servidor instalado à parte. Ele existe exatamente para você não fazer
+    isso.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="versoes">
+    <h2>Versões e requisitos</h2>
+    <table>
+      <tr><th>Item</th><th>Versão do curso</th></tr>
+      <tr><td>Spring Boot</td><td><b>4.1.x</b> (sobre Spring Framework 7)</td></tr>
+      <tr><td>Java</td><td><b>21</b> — o Boot 4 aceita 17 ou mais novo</td></tr>
+      <tr><td>Build</td><td><b>Maven</b> (vem embutido via <code>mvnw</code>)</td></tr>
+    </table>
+
+    <div class="tip warn"><b>Tutorial antigo vai te quebrar.</b> Muito conteúdo na internet é do Spring Boot 2, que usa <code>javax.*</code>. A partir do Boot 3 tudo virou <code>jakarta.*</code> — se um import não existe, quase sempre é isso. Outro sinal de material velho: <code>@Autowired</code> em campo, que hoje é desencorajado.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="criar">
+    <h2>Criar o projeto</h2>
+    <p>Vá em <code>start.spring.io</code> (o <b>Spring Initializr</b>) e monte o
+    projeto:</p>
+    <table>
+      <tr><th>Campo</th><th>Valor</th></tr>
+      <tr><td>Project</td><td>Maven</td></tr>
+      <tr><td>Language</td><td>Java</td></tr>
+      <tr><td>Spring Boot</td><td>4.1.x (a versão estável mais recente, sem SNAPSHOT)</td></tr>
+      <tr><td>Group</td><td><code>com.nickdev</code></td></tr>
+      <tr><td>Artifact</td><td><code>catalogo-api</code></td></tr>
+      <tr><td>Packaging</td><td>Jar</td></tr>
+      <tr><td>Java</td><td>21</td></tr>
+    </table>
+
+    <h3>Dependências de hoje</h3>
+    <ul>
+      <li><b>Spring Web</b> — Spring MVC, o Tomcat embutido e o Jackson (JSON)</li>
+      <li><b>Spring Boot DevTools</b> — reinicia a aplicação sozinho quando você salva</li>
+    </ul>
+
+    <div class="tip"><b>Só isso.</b> Banco, segurança e validação entram nas próximas aulas. Cada dependência que você adiciona sem precisar é mais superfície pra dar errado — e uma aplicação que sobe em 1 segundo vira uma que sobe em 8.</div>
+
+    <p>Clique em <b>Generate</b>, descompacte e abra a pasta na sua IDE.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="intellij-usar">
+    <h2>Usar no IntelliJ</h2>
+
+    <h3>Abrir o projeto</h3>
+    <ol>
+      <li><b>File → Open</b> e escolha a <b>pasta</b> do projeto (não um arquivo solto)</li>
+      <li>O IntelliJ reconhece o <code>pom.xml</code> e pergunta se pode confiar no projeto — confirme</li>
+      <li>Espere a barra de progresso no rodapé: ele está <b>baixando as dependências</b>. Na primeira vez pode levar alguns minutos.</li>
+    </ol>
+
+    <div class="tip warn"><b>Não abra o arquivo <code>.java</code> direto.</b> Se você abrir só um arquivo em vez da pasta, o IntelliJ não enxerga o Maven — e aí todos os <code>import</code> do Spring ficam vermelhos. Feche e abra a pasta inteira.</div>
+
+    <h3>Conferir o JDK do projeto</h3>
+    <p>Em <b>File → Project Structure → Project</b>, o campo <b>SDK</b> precisa
+    apontar pro JDK 21. Se estiver vazio ou numa versão antiga, clique em
+    <b>Add SDK → Download JDK</b> e escolha a 21 — o IntelliJ baixa sozinho.</p>
+
+    <h3>Rodar</h3>
+    <p>Três caminhos, todos equivalentes:</p>
+    <ul>
+      <li>Abra <code>CatalogoApplication.java</code> e clique no <b>▶ verde</b> ao lado do método <code>main</code></li>
+      <li>Use o atalho <b>Shift + F10</b> (roda a última configuração)</li>
+      <li>Pelo terminal integrado (<b>Alt + F12</b>): <code>./mvnw spring-boot:run</code></li>
+    </ul>
+    <p>A saída aparece na aba <b>Run</b>, embaixo. Procure a linha
+    <code>Started CatalogoApplication in ... seconds</code>.</p>
+
+    <h3>Parar</h3>
+    <p>O quadrado vermelho ⏹ na aba Run. <b>Sempre pare antes de rodar de
+    novo</b> — senão a porta 8080 continua ocupada e a segunda execução falha.</p>
+
+    <h3>Atalhos que economizam o dia</h3>
+    <table>
+      <tr><th>Atalho</th><th>O que faz</th></tr>
+      <tr><td><code>Ctrl/Cmd + N</code></td><td>criar classe nova</td></tr>
+      <tr><td><code>Alt + Insert</code></td><td>gerar construtor, getters, <code>toString</code></td></tr>
+      <tr><td><code>Ctrl/Cmd + Alt + L</code></td><td>formatar o arquivo</td></tr>
+      <tr><td><code>Alt + Enter</code></td><td>sugestão de correção no ponto do erro — <b>use muito</b>: resolve import faltando</td></tr>
+      <tr><td><code>Shift</code> ×2</td><td>buscar qualquer coisa no projeto</td></tr>
+      <tr><td><code>Ctrl/Cmd + F9</code></td><td>compilar (útil com DevTools pra forçar o reload)</td></tr>
+    </table>
+
+    <div class="tip"><b>Atalho de ouro:</b> quando um nome ficar vermelho por falta de <code>import</code>, deixe o cursor nele e aperte <b>Alt + Enter</b>. O IntelliJ oferece o import certo. Você quase nunca precisa escrever um <code>import</code> na mão.</div>
+
+    <h3>Criar o projeto direto pela IDE</h3>
+    <p>Na <b>Ultimate</b>, <b>File → New → Project → Spring Boot</b> abre o
+    Initializr embutido, com os mesmos campos do site. Na <b>Community</b> esse
+    assistente não existe — use o <code>start.spring.io</code> e depois abra a
+    pasta. O resultado é idêntico.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="estrutura">
+    <h2>A estrutura do projeto</h2>
+<pre>catalogo-api/
+├── src/main/java/com/nickdev/catalogo/
+│   └── <b>CatalogoApplication.java</b>   <span class="cm">← a classe com o main</span>
+├── src/main/resources/
+│   ├── <b>application.properties</b>     <span class="cm">← configuração</span>
+│   └── static/                    <span class="cm">← arquivos públicos</span>
+├── src/test/java/                 <span class="cm">← testes</span>
+├── <b>pom.xml</b>                        <span class="cm">← dependências e build</span>
+└── mvnw, mvnw.cmd                 <span class="cm">← roda sem instalar Maven</span></pre>
+
+    <h3>A classe principal</h3>
+    <div class="file">📄 CatalogoApplication.java</div>
+<pre><span class="an">@SpringBootApplication</span>
+<span class="kw">public class</span> <span class="ty">CatalogoApplication</span> {
+
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">SpringApplication</span>.<span class="fn">run</span>(<span class="ty">CatalogoApplication</span>.<span class="kw">class</span>, args);
+  }
+}</pre>
+
+    <p>É o mesmo <code>public static void main</code> de sempre. O que muda é o
+    que ele faz: sobe o contêiner do Spring e um servidor web.</p>
+
+    <h3>O que <code>@SpringBootApplication</code> liga</h3>
+    <table>
+      <tr><th>Anotação embutida</th><th>O que faz</th></tr>
+      <tr><td><code>@Configuration</code></td><td>marca a classe como fonte de configuração</td></tr>
+      <tr><td><code>@EnableAutoConfiguration</code></td><td>configura sozinho conforme o que encontra no classpath: achou Spring Web, sobe servidor</td></tr>
+      <tr><td><code>@ComponentScan</code></td><td>varre o pacote atrás das suas classes anotadas</td></tr>
+    </table>
+
+    <div class="tip warn"><b>Erro nº 1 de quem começa.</b> O <code>@ComponentScan</code> varre <b>a partir do pacote da classe main</b>, para baixo. Se você criar um controller em <code>com.outracoisa</code>, o Spring nunca vai encontrá-lo — e a rota dá 404 sem nenhum erro no terminal. Mantenha tudo dentro de <code>com.nickdev.catalogo</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="rodar">
+    <h2>Rodar a aplicação</h2>
+    <p>Pelo terminal, na raiz do projeto:</p>
+<div class="terminal"><span class="p">$</span> ./mvnw spring-boot:run        <span class="cm"># Linux/macOS</span>
+<span class="p">$</span> mvnw.cmd spring-boot:run      <span class="cm"># Windows</span></div>
+
+    <p>Ou pelo botão ▶ da IDE, na classe <code>CatalogoApplication</code>. A
+    linha que importa é a última:</p>
+<div class="terminal"><span class="out">Tomcat initialized with port 8080 (http)
+Started CatalogoApplication in 1.412 seconds</span></div>
+
+    <p>O <b>Tomcat</b> é o servidor web, e ele está <b>dentro</b> do seu
+    projeto. Não precisa instalar nada além do Java — é isso que o Boot resolve.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="controller">
+    <h2>Primeiro controller</h2>
+    <p>Crie o pacote <code>controller</code> dentro do pacote principal, e
+    dentro dele:</p>
+
+    <div class="file">📄 controller/SaudacaoController.java</div>
+<pre><span class="kw">package</span> com.nickdev.catalogo.controller;
+
+<span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;
+<span class="kw">import</span> org.springframework.web.bind.annotation.RestController;
+
+<span class="an">@RestController</span>
+<span class="kw">public class</span> <span class="ty">SaudacaoController</span> {
+
+  <span class="an">@GetMapping</span>(<span class="st">"/ola"</span>)
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">ola</span>() {
+    <span class="kw">return</span> <span class="st">"Olá, mundo Spring!"</span>;
+  }
+}</pre>
+
+    <p>Salve e abra <code>localhost:8080/ola</code>. Pronto — API no ar.</p>
+
+    <h3>O que cada peça faz</h3>
+    <table>
+      <tr><th>Peça</th><th>Papel</th></tr>
+      <tr><td><code>@RestController</code></td><td>faz da classe um bean que responde HTTP, e faz o <b>retorno virar o corpo da resposta</b></td></tr>
+      <tr><td><code>@GetMapping("/ola")</code></td><td>liga o método ao verbo GET no caminho <code>/ola</code></td></tr>
+      <tr><td>o retorno</td><td>vira o corpo da resposta, com status 200</td></tr>
+    </table>
+
+    <div class="tip warn"><b><code>@Controller</code> × <code>@RestController</code>:</b> com <code>@Controller</code> puro, o Spring entende que o retorno é o <i>nome de uma página</i> a renderizar — e você vê um erro estranho ou uma tela em branco. O <code>@RestController</code> é <code>@Controller</code> + <code>@ResponseBody</code>, e é o que você quer numa API.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="json">
+    <h2>Devolvendo JSON</h2>
+    <p>Devolva um objeto em vez de uma <code>String</code> e o JSON sai de
+    graça:</p>
+
+<pre><span class="kw">public record</span> <span class="ty">Midia</span>(<span class="ty">String</span> titulo, <span class="ty">int</span> ano, <span class="ty">String</span> genero) {}
+
+<span class="an">@GetMapping</span>(<span class="st">"/midias/destaque"</span>)
+<span class="kw">public</span> <span class="ty">Midia</span> <span class="fn">destaque</span>() {
+  <span class="kw">return new</span> <span class="ty">Midia</span>(<span class="st">"Duna"</span>, <span class="st">2021</span>, <span class="st">"Ficção"</span>);
+}</pre>
+
+    <p>O que chega no navegador:</p>
+<pre>{
+  <span class="st">"titulo"</span>: <span class="st">"Duna"</span>,
+  <span class="st">"ano"</span>: 2021,
+  <span class="st">"genero"</span>: <span class="st">"Ficção"</span>
+}</pre>
+
+    <p>Ninguém escreveu conversão. O starter web trouxe a biblioteca
+    <b>Jackson</b>, que serializa o objeto lendo os getters — e um
+    <code>record</code> já os tem.</p>
+
+    <div class="tip"><b><code>record</code> é Java puro.</b> Não é coisa do Spring: é uma classe imutável com construtor, getters, <code>equals</code>, <code>hashCode</code> e <code>toString</code> gerados. Perfeito para transportar dados.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="beans">
+    <h2>Beans e estereótipos</h2>
+    <p>Um <b>bean</b> é um objeto que o Spring criou e guarda pra você. Ao
+    subir, ele varre o pacote, acha as classes anotadas e cria uma instância de
+    cada — que fica disponível pra ser injetada.</p>
+
+    <table>
+      <tr><th>Anotação</th><th>Papel na arquitetura</th></tr>
+      <tr><td><code>@RestController</code></td><td>recebe requisição HTTP e devolve resposta</td></tr>
+      <tr><td><code>@Service</code></td><td>regra de negócio</td></tr>
+      <tr><td><code>@Repository</code></td><td>acesso a dados</td></tr>
+      <tr><td><code>@Component</code></td><td>qualquer outro bean</td></tr>
+    </table>
+
+    <div class="tip"><b>As quatro fazem tecnicamente a mesma coisa:</b> viram bean. A diferença é a <b>intenção</b> — quem lê o código sabe na hora qual é o papel da classe. Use a mais específica que couber.</div>
+
+    <h3>Por padrão, um bean é único</h3>
+    <p>O Spring cria <b>uma instância só</b> de cada bean e entrega a mesma
+    para todo mundo que pedir (escopo <i>singleton</i>). Duas consequências:</p>
+    <ul>
+      <li>É eficiente — não se cria um serviço novo a cada requisição</li>
+      <li>Beans <b>não devem guardar estado de uma requisição</b>, porque são compartilhados. Estado vai em parâmetro e retorno, não em atributo.</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="camadas">
+    <h2>Camadas na prática</h2>
+    <p>A mesma separação da aula de arquitetura em camadas, agora com o Spring
+    ligando as peças:</p>
+
+    <div class="file">📄 service/MidiaService.java</div>
+<pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="ty">MidiaService</span> {
+
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Midia</span>&gt; <span class="fn">listar</span>() {
+    <span class="kw">return</span> <span class="ty">List</span>.<span class="fn">of</span>(
+      <span class="kw">new</span> <span class="ty">Midia</span>(<span class="st">"Duna"</span>, 2021, <span class="st">"Ficção"</span>),
+      <span class="kw">new</span> <span class="ty">Midia</span>(<span class="st">"Cidade de Deus"</span>, 2002, <span class="st">"Drama"</span>)
+    );
+  }
+}</pre>
+
+    <div class="file">📄 controller/MidiaController.java</div>
+<pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/midias"</span>)
+<span class="kw">public class</span> <span class="ty">MidiaController</span> {
+
+  <span class="kw">private final</span> <span class="ty">MidiaService</span> service;
+
+  <span class="cm">// injeção por construtor — sem @Autowired, porque só há um construtor</span>
+  <span class="kw">public</span> <span class="ty">MidiaController</span>(<span class="ty">MidiaService</span> service) {
+    <span class="kw">this</span>.service = service;
+  }
+
+  <span class="an">@GetMapping</span>
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Midia</span>&gt; <span class="fn">listar</span>() {
+    <span class="kw">return</span> service.<span class="fn">listar</span>();
+  }
+}</pre>
+
+    <p>Repare que <b>não existe <code>new MidiaService()</code></b> em lugar
+    nenhum. O Spring viu o construtor pedindo um <code>MidiaService</code>,
+    encontrou o bean e entregou.</p>
+
+    <h3>Construtor, não campo</h3>
+    <div class="duo">
+      <div class="box no">
+        <h4>❌ @Autowired no campo</h4>
+<pre><span class="an">@Autowired</span>
+<span class="kw">private</span> <span class="ty">MidiaService</span> service;</pre>
+        Não pode ser <code>final</code>, o objeto pode existir incompleto, e o teste precisa de reflexão pra injetar um dublê.
+      </div>
+      <div class="box ok">
+        <h4>✅ no construtor</h4>
+<pre><span class="kw">private final</span> <span class="ty">MidiaService</span> service;
+
+<span class="kw">public</span> <span class="ty">MidiaController</span>(<span class="ty">MidiaService</span> s) {
+  <span class="kw">this</span>.service = s;
+}</pre>
+        <code>final</code>, objeto sempre completo, e o teste é um <code>new</code> comum.
+      </div>
+    </div>
+
+    <div class="tip"><b>Teste de sanidade das camadas:</b> se você apagasse o controller e expusesse a mesma funcionalidade por linha de comando, o service continuaria funcionando? Se sim, a separação está certa. Se o service souber o que é HTTP, está errada.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="testar">
+    <h2>Testar a API</h2>
+    <p>O navegador só faz GET. Pra ver status e cabeçalhos — e mais pra frente
+    fazer POST — use o <code>curl</code>:</p>
+
+<div class="terminal"><span class="p">$</span> curl localhost:8080/midias
+<span class="out">[{"titulo":"Duna","ano":2021,"genero":"Ficção"},
+ {"titulo":"Cidade de Deus","ano":2002,"genero":"Drama"}]</span>
+
+<span class="p">$</span> curl -i localhost:8080/ola
+<span class="out">HTTP/1.1 200
+Content-Type: text/plain;charset=UTF-8
+
+Olá, mundo Spring!</span></div>
+
+    <p>O <code>-i</code> mostra a linha de status e os cabeçalhos. Alternativas
+    com interface gráfica: <b>Bruno</b>, <b>Insomnia</b> ou <b>Postman</b>.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="erros">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>Whitelabel Error Page · 404</h4>
+    <p>A rota não existe. Confira, nesta ordem: o caminho está escrito igual?
+    A classe tem <code>@RestController</code>? Ela está <b>dentro do pacote da
+    classe main</b>?</p>
+
+    <h4>Port 8080 was already in use</h4>
+    <p>Já tem algo rodando nessa porta — provavelmente uma execução anterior que
+    não morreu. Pare a outra, ou mude em
+    <code>application.properties</code>: <code>server.port=8081</code>.</p>
+
+    <h4>No qualifying bean of type '...MidiaService'</h4>
+    <p>O Spring não encontrou o bean. Faltou a anotação (<code>@Service</code>)
+    ou a classe está fora do pacote varrido pelo <code>@ComponentScan</code>.</p>
+
+    <h4>A rota devolve o texto como se fosse nome de página</h4>
+    <p>Você usou <code>@Controller</code> em vez de
+    <code>@RestController</code>.</p>
+
+    <h4>package org.springframework... does not exist</h4>
+    <p>As dependências não foram baixadas. Rode <code>./mvnw clean install</code>
+    ou peça pra IDE recarregar o projeto Maven.</p>
+
+    <h4>Salvei e nada mudou</h4>
+    <p>O DevTools reinicia sozinho, mas só depois que o arquivo é
+    <b>compilado</b>. Em algumas IDEs isso exige um build manual. Na dúvida,
+    pare e rode de novo.</p>
+
+    <div class="tip"><b>Leia a primeira linha do erro, não a pilha inteira.</b> O Spring costuma dizer exatamente o que faltou — e frequentemente sugere a correção logo abaixo, num bloco chamado <code>Action</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="cola">
+    <h2>Cola rápida</h2>
+
+<pre><span class="cm">// ---------- subir a aplicação ----------</span>
+./mvnw spring-boot:run          <span class="cm">Linux/macOS</span>
+mvnw.cmd spring-boot:run        <span class="cm">Windows</span>
+
+<span class="cm">// ---------- controller ----------</span>
+<span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/midias"</span>)      <span class="cm">prefixo de todas as rotas da classe</span>
+<span class="kw">public class</span> <span class="ty">MidiaController</span> {
+
+  <span class="kw">private final</span> <span class="ty">MidiaService</span> service;
+
+  <span class="kw">public</span> <span class="ty">MidiaController</span>(<span class="ty">MidiaService</span> service) {
+    <span class="kw">this</span>.service = service;   <span class="cm">injeção por construtor</span>
+  }
+
+  <span class="an">@GetMapping</span>                  <span class="cm">GET /midias</span>
+  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Midia</span>&gt; <span class="fn">listar</span>() { ... }
+}
+
+<span class="cm">// ---------- estereótipos ----------</span>
+<span class="an">@RestController</span>   responde HTTP
+<span class="an">@Service</span>          regra de negócio
+<span class="an">@Repository</span>       acesso a dados
+<span class="an">@Component</span>        qualquer outro bean
+
+<span class="cm">// ---------- record como transporte de dados ----------</span>
+<span class="kw">public record</span> <span class="ty">Midia</span>(<span class="ty">String</span> titulo, <span class="ty">int</span> ano, <span class="ty">String</span> genero) {}
+
+<span class="cm">// ---------- testar ----------</span>
+curl localhost:8080/midias
+curl -i localhost:8080/ola     <span class="cm">com status e cabeçalhos</span>
+
+<span class="cm">// ---------- mudar a porta ----------</span>
+<span class="cm">// application.properties</span>
+server.port=8081</pre>
+
+    <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
+    <a class="cta" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+
+    <div class="foot">Guia da Aula 01 · Java Avançado com Spring Boot · NickDev 💜</div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>
