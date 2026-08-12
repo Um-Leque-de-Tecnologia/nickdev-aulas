@@ -214,6 +214,37 @@
     <p>Guarde esta seção. Todo termo novo do dia está aqui, em uma linha. Se
     você travar em alguma palavra no meio do guia, volte aqui.</p>
 
+    <h3>Antes de tudo: as palavras do dia a dia</h3>
+    <p>Estas não são de Spring — são de programação em geral. Vão aparecer o
+    tempo todo, então valem uma linha cada.</p>
+
+    <dl class="gloss">
+      <dt>terminal</dt><dd>a janela onde você <b>digita ordens</b> pro computador em vez de clicar; escreve, aperta Enter, ele responde</dd>
+      <dt>compilar</dt><dd>traduzir o que você escreveu para algo que a máquina executa, tudo de uma vez, antes de rodar</dd>
+      <dt>IDE</dt><dd>o editor turbinado onde você programa; o nosso é o IntelliJ</dd>
+      <dt>repositório</dt><dd>a pasta do seu projeto guardada na internet, com todo o histórico de mudanças; fica no GitHub</dd>
+      <dt>deploy</dt><dd>colocar o projeto no ar, num computador que fica ligado, pra qualquer pessoa acessar</dd>
+    </dl>
+
+    <h3>As palavras da web</h3>
+    <p>Você vai construir uma API. Antes de mais nada, o que é isso.</p>
+
+    <dl class="gloss">
+      <dt>servidor</dt><dd>um computador que fica <b>ligado o tempo todo</b> esperando alguém pedir alguma coisa; não é mágica, é um computador sempre acordado</dd>
+      <dt>cliente</dt><dd>quem <b>pede</b>: um navegador, um aplicativo de celular, outro programa</dd>
+      <dt>requisição</dt><dd>o pedido que o cliente faz — "me manda a lista de receitas"</dd>
+      <dt>resposta</dt><dd>o que o servidor devolve — a lista, ou um aviso de erro</dd>
+      <dt>API</dt><dd>um programa feito pra ser usado <b>por outro programa</b>, não por gente; ele não devolve uma tela bonita, devolve <b>dados</b></dd>
+      <dt>rota</dt><dd>um endereço da sua API, tipo <code>/receitas</code>; cada rota faz uma coisa</dd>
+      <dt>porta</dt><dd>um número que separa programas no mesmo computador, como o número do apartamento; o Spring usa a <code>8080</code></dd>
+      <dt>localhost</dt><dd>"aqui mesmo" — o seu próprio computador; <code>localhost:8080</code> só você enxerga</dd>
+      <dt>GET</dt><dd>o tipo de pedido que quer <b>só buscar</b> informação, sem mudar nada</dd>
+      <dt>CRUD</dt><dd>as quatro coisas que quase todo sistema faz: <b>C</b>riar, <b>L</b>er (<i>read</i>), <b>A</b>tualizar e <b>A</b>pagar (<i>delete</i>)</dd>
+      <dt>record</dt><dd>um jeito curto do Java de criar uma classe que só guarda dados, sem nenhum comportamento</dd>
+    </dl>
+
+    <h3>As palavras do Spring</h3>
+
     <dl class="gloss">
       <dt>dependência</dt><dd>uma classe de que a sua classe precisa pra funcionar</dd>
       <dt>acoplamento</dt><dd>o quanto duas peças de código estão grudadas uma na outra</dd>
@@ -1198,9 +1229,38 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
 
   <section id="http">
     <h2>Como a web funciona (o mínimo)</h2>
-    <p>Sem isso, o resto vira decoreba. São três ideias.</p>
+    <p>Sem isso, o resto vira decoreba. São quatro ideias.</p>
 
-    <h3>1. Requisição e resposta</h3>
+    <h3>1. O que é uma API, afinal</h3>
+    <p>Você vai ouvir essa palavra o semestre inteiro, então vale parar nela.</p>
+
+    <p>Abra o Instagram no celular. As fotos <b>não estão dentro do aplicativo</b>
+    — ele acabou de baixar do seu celular e não tem foto nenhuma guardada. O que
+    ele faz é <b>pedir</b> as fotos para um computador da Meta.</p>
+
+    <p>E repare no que esse computador devolve: <b>não é uma tela pronta</b>. Ele
+    devolve só os <b>dados crus</b> — quem postou, qual imagem, quantas curtidas,
+    que horas foi. Quem pega esses dados e monta a telinha bonita é o aplicativo,
+    no seu celular.</p>
+
+    <p>Esse programa do outro lado, que <b>devolve dados em vez de tela</b>, é uma
+    <b>API</b>.</p>
+
+    <table>
+      <thead><tr><th></th><th>Um site comum</th><th>Uma API</th></tr></thead>
+      <tbody>
+        <tr><td><b>Quem usa</b></td><td>uma pessoa</td><td>outro programa</td></tr>
+        <tr><td><b>O que devolve</b></td><td>uma página pronta pra olhar</td><td>dados crus, pra serem usados</td></tr>
+        <tr><td><b>Exemplo</b></td><td>o site do banco que você abre</td><td>o que o app do banco consulta por trás</td></tr>
+      </tbody>
+    </table>
+
+    <div class="aviso"><b>É isso que você vai construir neste semestre.</b> Não um
+    site com telas — o <b>outro lado</b>: o programa que guarda os dados e os
+    entrega para quem pedir. Depois, em outra disciplina, você aprende a fazer a
+    tela que consome uma API dessas.</div>
+
+    <h3>2. Requisição e resposta</h3>
     <p>Toda a web é uma conversa de duas falas: alguém <b>pergunta</b>
     (requisição) e alguém <b>responde</b> (resposta). O protocolo — o idioma
     dessa conversa — chama-se <b>HTTP</b>.</p>
@@ -1210,7 +1270,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
       <li><b>Servidor:</b> quem responde. A sua aplicação Spring.</li>
     </ul>
 
-    <h3>2. A URL, pedaço por pedaço</h3>
+    <h3>3. A URL, pedaço por pedaço</h3>
     <p>Dissecando <code>http://localhost:8080/livros</code>:</p>
     <table>
       <tr><th>Pedaço</th><th>Nome</th><th>Significado</th></tr>
@@ -1220,7 +1280,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
       <tr><td><code>/livros</code></td><td>caminho (<i>path</i>)</td><td>o que você quer daquele programa. É isso que você mapeia no código.</td></tr>
     </table>
 
-    <h3>3. Verbos e status</h3>
+    <h3>4. Verbos e status</h3>
     <div class="duo">
       <div class="box">
         <h4>Verbos — a intenção</h4>
