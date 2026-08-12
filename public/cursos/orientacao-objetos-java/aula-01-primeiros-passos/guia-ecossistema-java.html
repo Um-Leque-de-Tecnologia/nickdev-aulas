@@ -98,6 +98,8 @@
   <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#dicionario">📖 O dicionário desta aula</a>
     <div class="grp">Paradigmas</div>
     <a href="#paradigmas">Estruturado × objetos</a>
     <div class="grp">Ecossistema Java</div>
@@ -117,14 +119,117 @@
 <main>
   <div class="eyebrow">Aula 01 · guia de apoio</div>
   <h1>Ecossistema Java &amp; <span class="g">primeiros passos</span></h1>
-  <p class="lead">Como o paradigma orientado a objetos se diferencia do estruturado, o que são JDK/JRE/JVM/bytecode, e o passo a passo pra instalar tudo e rodar seu primeiro programa Java.</p>
+  <p class="lead">Duas maneiras de organizar código e por que uma delas venceu; o que significam aquelas siglas todas (JDK, JRE, JVM, bytecode) sem enrolação; e o passo a passo, clique por clique, pra instalar tudo e ver o seu primeiro programa Java rodando.</p>
+
+  <div class="tip star" style="margin-top:26px"><b>📖 Perdida(o) numa palavra?</b> Comece pelo <a href="#dicionario" style="color:var(--pink-light,#E88BB8);text-decoration:underline">dicionário desta aula</a> — todo termo técnico traduzido pra português normal. Ele foi feito exatamente pra ser consultado no meio da leitura.</div>
   <div class="rule"></div>
+
+  <section id="dicionario">
+    <h2>O dicionário desta aula</h2>
+    <p>Programação tem muita palavra estranha, e Java tem mais que a média. Aqui estão as desta aula, <b>em português normal</b>. Volte aqui sempre que esbarrar numa que você esqueceu — consultar dicionário não é trapaça, é o que todo mundo que programa faz o dia inteiro.</p>
+
+    <h3>Escrever e rodar</h3>
+    <table>
+      <thead><tr><th>Palavra</th><th>O que é, em palavras simples</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Terminal</b></td>
+          <td>Uma janela onde você <b>digita ordens</b> pro computador em vez de clicar. Escreve uma linha, aperta Enter, ele responde. Também chamam de "prompt", "console" ou "linha de comando" — é tudo a mesma janela.</td>
+        </tr>
+        <tr>
+          <td><b>Código-fonte</b></td>
+          <td>O texto que <b>você escreve</b>. É o arquivo <code>.java</code>. Uma pessoa lê e entende; o computador ainda não.</td>
+        </tr>
+        <tr>
+          <td><b>Compilar</b></td>
+          <td><b>Traduzir</b> o que você escreveu para algo que a máquina consegue executar — tudo de uma vez, antes de rodar. Quem faz isso em Java é o <code>javac</code>.</td>
+        </tr>
+        <tr>
+          <td><b>IDE</b></td>
+          <td>Um <b>editor de texto turbinado</b> pra programar. Ele colore o código, avisa dos erros enquanto você digita e roda o programa com um clique. O nosso é o IntelliJ.</td>
+        </tr>
+        <tr>
+          <td><code>main</code></td>
+          <td>A <b>porta de entrada</b> do programa. Quando você manda rodar, o Java procura esse método e começa por ele. Sem <code>main</code>, o programa não sabe por onde começar.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>As siglas do Java</h3>
+    <table>
+      <thead><tr><th>Palavra</th><th>O que é, em palavras simples</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Bytecode</b></td>
+          <td>Uma <b>língua intermediária</b>. Não é mais o que você escreveu, e ainda não é o idioma do seu computador. Fica no arquivo <code>.class</code>.</td>
+        </tr>
+        <tr>
+          <td><b>JVM</b></td>
+          <td>O <b>tradutor</b> que lê o bytecode e conversa com o seu computador. Existe uma versão dela pra Windows, outra pra Mac, outra pra Linux.</td>
+        </tr>
+        <tr>
+          <td><b>JRE</b></td>
+          <td>A JVM <b>mais um monte de coisa pronta</b> que todo programa Java usa. É o pacote de quem só quer <i>rodar</i> programas.</td>
+        </tr>
+        <tr>
+          <td><b>JDK</b></td>
+          <td>O JRE <b>mais as ferramentas de construir</b> — inclusive o tradutor <code>javac</code>. É o pacote de quem vai <i>escrever</i> programas. <b>É este que você instala.</b></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>As palavras de orientação a objetos</h3>
+    <table>
+      <thead><tr><th>Palavra</th><th>O que é, em palavras simples</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Classe</b></td>
+          <td>A <b>forma de bolo</b>. Ela descreve como uma coisa é, mas não é a coisa. "Todo livro tem um título e pode ser emprestado" — isso é a classe Livro.</td>
+        </tr>
+        <tr>
+          <td><b>Objeto</b></td>
+          <td>O <b>bolo</b> feito com aquela forma. Um livro de verdade, com título "Duna", que está emprestado. De uma forma você tira quantos bolos quiser.</td>
+        </tr>
+        <tr>
+          <td><b>Atributo</b></td>
+          <td>Uma <b>informação</b> que o objeto guarda. O título do livro, se ele está emprestado. É um dado.</td>
+        </tr>
+        <tr>
+          <td><b>Método</b></td>
+          <td>Uma <b>ação</b> que o objeto sabe fazer. Emprestar, devolver, mostrar o título. É um verbo.</td>
+        </tr>
+        <tr>
+          <td><b>Construtor</b></td>
+          <td>A <b>receita de como nascer</b>. É o que roda no momento em que você cria um objeto, pra deixar ele já com as informações certas.</td>
+        </tr>
+        <tr>
+          <td><b>Tipo</b></td>
+          <td>Que <b>espécie de informação</b> uma coisa guarda: texto (<code>String</code>), número inteiro (<code>int</code>), sim ou não (<code>boolean</code>). Em Java você é obrigada(o) a dizer isso; em Python, não.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip"><b>Não decore nada disto.</b> Ninguém aprende vocabulário técnico decorando lista — a gente aprende usando. Você vai ouvir cada uma dessas palavras centenas de vezes ao longo das 18 aulas, e daqui a um mês vai usar sem nem perceber.</div>
+  </section>
 
   <section id="paradigmas">
     <h2>Paradigma estruturado × orientado a objetos</h2>
-    <p>Um <b>paradigma de programação</b> é um jeito de organizar o pensamento (e o código) pra resolver problemas. Os dois que mais aparecem no início da carreira são o <b>estruturado</b> e o <b>orientado a objetos (OO)</b>.</p>
 
-    <p>Os exemplos desta seção estão em <b>Python</b> de propósito: a ideia de paradigma é a mesma em qualquer linguagem, e é mais fácil enxergá-la numa sintaxe enxuta. Java entra logo depois, com o mesmo exemplo.</p>
+    <h3>Comece pela agenda de telefone</h3>
+    <p>Imagine que você vai anotar os contatos dos seus amigos. Existem duas maneiras.</p>
+
+    <p><b>Maneira 1:</b> uma folha só com os nomes, outra folha só com os telefones, e uma terceira só com os aniversários. Funciona — desde que você lembre que o terceiro nome corresponde ao terceiro telefone. Se alguém apagar uma linha do meio, tudo desanda.</p>
+
+    <p><b>Maneira 2:</b> um cartãozinho por pessoa, com nome, telefone e aniversário <b>juntos</b>. Perdeu um cartão? Perdeu só aquela pessoa. O resto continua certo.</p>
+
+    <p>Essas duas maneiras de arrumar as coisas existem também na hora de programar. Elas têm nome: cada jeito de organizar código é um <b>paradigma</b>.</p>
+
+    <ul>
+      <li>A folha de nomes separada da folha de telefones é o <b>paradigma estruturado</b></li>
+      <li>O cartãozinho com tudo junto é o <b>paradigma orientado a objetos</b> — o OO, assunto deste curso</li>
+    </ul>
+
+    <div class="tip"><b>Por que os exemplos a seguir estão em Python.</b> A ideia de paradigma é a mesma em qualquer linguagem, e o Python se escreve com menos cerimônia — então dá pra enxergar a ideia sem tropeçar na escrita. Assim que ela estiver clara, a gente refaz o mesmo exemplo em Java e compara lado a lado.</div>
 
     <h3>Estruturado: dados de um lado, funções de outro</h3>
     <p>No paradigma estruturado você tem <b>variáveis soltas</b> e <b>funções</b> que recebem essas variáveis como parâmetro pra operar sobre elas. Dados e comportamento vivem separados.</p>
@@ -192,24 +297,69 @@ duna.<span class="fn">emprestar</span>();</pre>
 
   <section id="jdk-jre-jvm">
     <h2>JDK, JRE e JVM</h2>
-    <p>Três siglas que aparecem juntas e confundem no começo. A relação entre elas é de <b>conjunto contido</b>: o JDK contém o JRE, que contém a JVM.</p>
+    <p>Três siglas que aparecem sempre juntas e confundem todo mundo no começo. A boa notícia: elas são <b>uma dentro da outra</b>, como bonecas russas.</p>
+
+    <p>Pense numa oficina de carros:</p>
+    <ul>
+      <li>A <b>JVM</b> é o <b>motor</b>. É a peça que de fato faz o carro andar.</li>
+      <li>O <b>JRE</b> é o <b>carro montado</b> — motor, rodas, banco, volante. Dá pra dirigir, mas não dá pra construir outro carro.</li>
+      <li>O <b>JDK</b> é a <b>oficina inteira</b>: o carro, mais todas as ferramentas pra fabricar carros novos.</li>
+    </ul>
+
+    <p>Você vai <b>escrever</b> programas, não só rodar os dos outros. Então você precisa da oficina: <b>instale o JDK</b>. Ele já vem com o carro e o motor dentro.</p>
+    <h3>A mesma coisa, em tabela</h3>
     <table>
-      <thead><tr><th>Sigla</th><th>Nome</th><th>Pra que serve</th></tr></thead>
+      <thead><tr><th>Sigla</th><th>Do que vem o nome</th><th>Na oficina é</th><th>Serve pra</th></tr></thead>
       <tbody>
-        <tr><td><b>JDK</b></td><td>Java Development Kit</td><td>Kit completo pra <b>desenvolver</b>: compilador (<code>javac</code>), ferramentas de linha de comando e o JRE embutido. É o que você instala pra programar.</td></tr>
-        <tr><td><b>JRE</b></td><td>Java Runtime Environment</td><td>O necessário pra <b>rodar</b> programas Java já prontos: bibliotecas padrão (<code>java.lang</code>, <code>java.util</code>...) + a JVM.</td></tr>
-        <tr><td><b>JVM</b></td><td>Java Virtual Machine</td><td>A máquina virtual que de fato <b>executa</b> o bytecode, dentro de qualquer sistema operacional. É o "motor".</td></tr>
+        <tr>
+          <td><b>JVM</b></td><td>Java <b>V</b>irtual <b>M</b>achine</td><td>o motor</td>
+          <td>Ler o bytecode e fazer o computador executar. É a peça mais no fundo de todas.</td>
+        </tr>
+        <tr>
+          <td><b>JRE</b></td><td>Java <b>R</b>untime <b>E</b>nvironment</td><td>o carro montado</td>
+          <td>Rodar programas Java que <b>já estão prontos</b>. Traz o motor mais um monte de coisa pronta que todo programa usa.</td>
+        </tr>
+        <tr>
+          <td><b>JDK</b></td><td>Java <b>D</b>evelopment <b>K</b>it</td><td>a oficina inteira</td>
+          <td><b>Escrever</b> programas novos. Traz o carro inteiro mais as ferramentas — inclusive o tradutor <code>javac</code>.</td>
+        </tr>
       </tbody>
     </table>
-    <div class="tip"><b>Regra prática:</b> quem só quer <i>rodar</i> um programa Java precisa apenas do JRE. Quem vai <i>programar</i> (nosso caso, o curso todo) precisa do <b>JDK</b> — e ele já traz o JRE e a JVM dentro.</div>
+
+    <div class="tip star"><b>Se você guardar uma frase só desta seção, guarde esta:</b> instale o <b>JDK</b>. Os outros dois vêm dentro dele, e você nunca vai precisar instalar nenhum dos dois separado.</div>
   </section>
 
   <section id="bytecode">
     <h2>Bytecode e portabilidade</h2>
-    <p>Quando você compila um arquivo <code>.java</code>, o <code>javac</code> não gera código de máquina direto pro seu processador — ele gera <b>bytecode</b>, salvo num arquivo <code>.class</code>. O bytecode é um "idioma intermediário": não é o código-fonte que você escreveu, nem é o binário nativo do seu processador.</p>
-    <pre><span class="fn">Aula.java</span>  <span class="cm">→ (javac) →</span>  <span class="fn">Aula.class</span>  <span class="cm">→ (JVM) →</span>  <span class="cm">executando</span></pre>
-    <p>Quem entende bytecode é a <b>JVM</b> — e existe uma implementação de JVM pra Windows, outra pra Linux, outra pra macOS. Por isso o mesmo arquivo <code>.class</code> roda em qualquer sistema operacional que tenha uma JVM instalada. É a ideia por trás do lema <i>"write once, run anywhere"</i> ("escreva uma vez, rode em qualquer lugar").</p>
-    <div class="tip"><b>Compare com Python:</b> lá não existe esse passo — você roda <code>python programa.py</code> e o interpretador lê o seu código-fonte e executa, toda vez. Em Java há uma etapa a mais no meio: o <code>javac</code> traduz pra bytecode <b>uma vez</b>, e a JVM executa esse bytecode depois. É trabalho extra que compra duas coisas: o compilador pega erros antes de o programa rodar, e o mesmo <code>.class</code> roda em qualquer sistema operacional sem recompilar.</div>
+
+    <h3>Comece por um livro traduzido</h3>
+    <p>Você escreveu um livro em português e quer que ele seja lido no mundo inteiro. Traduzir pra cada idioma daria um trabalho enorme.</p>
+
+    <p>Então você faz diferente: traduz <b>uma vez só</b> para um idioma que todo tradutor do mundo conhece. Depois, em cada país, um tradutor local lê essa versão e conta a história na língua de lá.</p>
+
+    <p>É exatamente isso que o Java faz:</p>
+    <ul>
+      <li>Você escreve em Java — o arquivo <code>.java</code>. É o <b>seu livro em português</b>.</li>
+      <li>O <code>javac</code> traduz <b>uma vez</b> para o <b>bytecode</b> — o arquivo <code>.class</code>. É o <b>idioma que todo tradutor conhece</b>.</li>
+      <li>A <b>JVM</b> é o <b>tradutor local</b>. Tem uma pra Windows, uma pra Mac, uma pra Linux. Cada uma lê o mesmo <code>.class</code> e fala com o computador dela.</li>
+    </ul>
+
+    <p>Por isso o mesmo arquivo <code>.class</code> funciona em qualquer computador que tenha uma JVM instalada, sem você precisar mexer em nada. É o que o pessoal do Java chama de <i>"write once, run anywhere"</i> — "escreva uma vez, rode em qualquer lugar".</p>
+    <h3>O caminho, num desenho</h3>
+    <pre><span class="fn">Aula.java</span>  <span class="cm">→ (javac) →</span>  <span class="fn">Aula.class</span>  <span class="cm">→ (JVM) →</span>  <span class="cm">executando</span>
+<span class="cm">  o que você        o idioma           o computador</span>
+<span class="cm">  escreveu          intermediário      fazendo a coisa</span></pre>
+
+    <h3>"E o Python não faz isso?"</h3>
+    <p>Não — e é uma boa pergunta. No Python você digita <code>python programa.py</code> e pronto: ele lê o que você escreveu e vai executando na hora, toda vez que roda.</p>
+
+    <p>O Java tem essa parada a mais no meio. Parece trabalho desnecessário, mas ela paga duas coisas:</p>
+    <ul>
+      <li><b>Erros aparecem antes.</b> Na hora de traduzir, o <code>javac</code> confere um monte de coisa. Se você escreveu bobagem, ele avisa <b>antes</b> do programa rodar — e não na frente do usuário.</li>
+      <li><b>Roda em qualquer lugar.</b> O mesmo <code>.class</code> funciona no Windows, no Mac e no Linux sem traduzir de novo.</li>
+    </ul>
+
+    <div class="tip star"><b>Não existe linguagem melhor, existe troca.</b> Python te dá velocidade pra escrever; Java te dá segurança pra crescer. Neste curso a gente usa Java justamente porque ele obriga a organizar as coisas — e organizar é o que você veio aprender.</div>
   </section>
 
   <section id="instalar-jdk">
@@ -258,20 +408,36 @@ duna.<span class="fn">emprestar</span>();</pre>
     <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, mundo Java!"</span>);
   }
 }</pre>
-    <p>Desmontando essa "casca" que vai se repetir em quase todo arquivo Java:</p>
-    <ul>
-      <li><code>public class Ola</code> — declara uma classe pública chamada <code>Ola</code>. <b>O nome da classe precisa bater com o nome do arquivo</b> (<code>Ola.java</code>) — regra do Java, não é estilo.</li>
-      <li><code>public static void main(String[] args)</code> — o <b>método principal</b>: é por onde a JVM começa a executar o programa.</li>
-      <li><code>System.out.println(...)</code> — imprime uma linha de texto no terminal.</li>
-    </ul>
-    <div class="tip"><b>Por que tanta palavra-chave?</b> Cada uma tem um papel que você vai entender ao longo do curso: <code>public</code> (aula 04, encapsulamento), <code>static</code> (aula 04) e o próprio conceito de classe (aula 03). Por enquanto, decore a "casca" — ela funciona.</div>
+    <h3>São muitas palavras. Vamos por partes</h3>
+    <p>Bate um susto na primeira vez: seis palavras estranhas pra escrever uma frase na tela. Cada linha faz uma coisa só:</p>
+    <table>
+      <thead><tr><th>A linha</th><th>O que ela faz</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>public class Ola</code></td>
+          <td>Dá nome à <b>forma de bolo</b>. Em Java, todo código mora dentro de uma classe — não existe código solto. <b>Cuidado:</b> o nome aqui tem que ser <b>igual</b> ao nome do arquivo (<code>Ola.java</code>). Se não for, o Java reclama.</td>
+        </tr>
+        <tr>
+          <td><code>public static void main(...)</code></td>
+          <td>A <b>porta de entrada</b>. Quando você manda rodar, o Java procura essa linha e começa por ela. Sem <code>main</code>, ele não sabe por onde começar.</td>
+        </tr>
+        <tr>
+          <td><code>System.out.println(...)</code></td>
+          <td><b>Escreve uma linha na tela.</b> É o equivalente ao <code>print</code> do Python. O nome comprido é o preço de ser Java.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip"><b>Pode decorar essa casca sem culpa.</b> Sério. Cada palavrinha dela tem um motivo, e cada motivo tem sua aula: <code>public</code> e <code>static</code> na <b>aula 04</b>, a ideia de classe na <b>aula 03</b>. Tentar entender tudo hoje só ia atrapalhar. Por enquanto: copie, rode, veja funcionar. O entendimento vem depois — e vem bem melhor depois de você já ter usado.</div>
   </section>
 
   <section id="compilar-rodar">
     <h2>Compilar e rodar pelo terminal</h2>
     <p>Rodar pela IDE é ótimo no dia a dia, mas hoje a gente faz <b>na mão</b> pra entender o que realmente acontece — é exatamente isso que o desafio da semana vai pedir.</p>
     <h3>1. Compilar com <code>javac</code></h3>
-    <p>No terminal, navegue até a pasta onde está o <code>Ola.java</code> e rode:</p>
+    <p>Primeiro você precisa <b>levar o terminal até a pasta</b> onde o arquivo está. Quem faz isso é o comando <code>cd</code> (de <i>change directory</i>, "mudar de pasta"):</p>
+<div class="terminal"><span class="p">$</span> cd caminho/da/pasta/onde/esta/o/arquivo</div>
+    <p>Chegou lá? Agora mande traduzir:</p>
     <div class="terminal"><span class="p">$</span> javac Ola.java</div>
     <p>Se não der nenhum erro, o <code>javac</code> gerou um arquivo novo, <code>Ola.class</code> — o <b>bytecode</b>. Confira com <code>ls</code> (Linux/macOS) ou <code>dir</code> (Windows):</p>
     <div class="terminal"><span class="p">$</span> ls
