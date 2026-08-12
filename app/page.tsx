@@ -42,9 +42,9 @@ export default function Home() {
           <div className="meta">18 aulas · em andamento</div>
         </Link>
 
-        <Link className="card" href="/cursos/java-spring-boot">
+        <Link className="card" href="/cursos/introducao-spring-boot">
           <span className="num">03</span>
-          <h3>Java Avançado — Spring Boot</h3>
+          <h3>Introdução ao Spring Boot</h3>
           <p>
             Do Java puro à API REST em produção: injeção de dependência, JPA,
             segurança com JWT, testes, Docker e deploy.
