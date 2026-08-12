@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Introdução ao Spring Boot · NickDev",
   description:
-    "Curso de Java avançado com Spring Boot: injeção de dependência, API REST, Spring Data JPA, validação, segurança com JWT, testes, observabilidade, Docker e deploy.",
+    "Curso de introdução ao Spring Boot: injeção de dependência, API REST, Spring Data JPA, validação, segurança com JWT, testes, observabilidade, Docker e deploy.",
 };
 
 const AULA_01 = "/cursos/introducao-spring-boot/aula-01-primeira-api";
