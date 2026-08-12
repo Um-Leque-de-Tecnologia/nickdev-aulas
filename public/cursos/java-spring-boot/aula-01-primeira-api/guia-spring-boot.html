@@ -457,18 +457,52 @@ Java HotSpot(TM) 64-Bit Server VM (build 21.0.5+9-LTS-239, mixed mode)</span>
   <!-- ==================================================================== -->
   <section id="criar">
     <h2>Criar o projeto</h2>
-    <p>Vá em <code>start.spring.io</code> (o <b>Spring Initializr</b>) e monte o
-    projeto:</p>
+    <p>Existem dois caminhos, e o resultado é <b>exatamente o mesmo</b>. Use o
+    que estiver disponível pra você:</p>
     <table>
-      <tr><th>Campo</th><th>Valor</th></tr>
-      <tr><td>Project</td><td>Maven</td></tr>
-      <tr><td>Language</td><td>Java</td></tr>
-      <tr><td>Spring Boot</td><td>4.1.x (a versão estável mais recente, sem SNAPSHOT)</td></tr>
-      <tr><td>Group</td><td><code>com.nickdev</code></td></tr>
-      <tr><td>Artifact</td><td><code>catalogo-api</code></td></tr>
-      <tr><td>Packaging</td><td>Jar</td></tr>
-      <tr><td>Java</td><td>21</td></tr>
+      <tr><th>Caminho</th><th>Quando usar</th></tr>
+      <tr><td><b>A — pelo IntelliJ</b></td><td>se o seu IntelliJ tem o gerador <b>Spring Initializr</b> em <i>New Project</i> (edição Ultimate)</td></tr>
+      <tr><td><b>B — pelo site</b></td><td>sempre funciona, em qualquer edição e qualquer IDE</td></tr>
     </table>
+
+    <h3>Caminho A — direto no IntelliJ</h3>
+    <p><b>File → New → Project…</b> e escolha <b>Spring Initializr</b> na lista
+    da esquerda. Preencha assim:</p>
+
+    <table>
+      <tr><th>Campo</th><th>O que pôr</th><th>Por quê</th></tr>
+      <tr><td><b>Name</b></td><td><code>catalogo-api</code></td><td>o nome do projeto. Evite deixar <code>demo</code> — você vai ter vários.</td></tr>
+      <tr><td><b>Location</b></td><td>onde você guarda seus projetos</td><td>o IntelliJ cria uma pasta com o nome ali dentro</td></tr>
+      <tr><td><b>Language</b></td><td><b>Java</b></td><td>—</td></tr>
+      <tr><td><b>Type</b></td><td>⚠️ <b>Maven</b></td><td>o padrão da tela costuma vir <b>Gradle</b>. <b>Troque</b> — o curso todo usa Maven.</td></tr>
+      <tr><td><b>Group</b></td><td><code>com.seunome</code></td><td>identificador de quem publica. <code>com.example</code> funciona, mas é o "sem nome".</td></tr>
+      <tr><td><b>Artifact</b></td><td>igual ao Name</td><td>preenche sozinho</td></tr>
+      <tr><td><b>Package name</b></td><td>deixe como veio</td><td>é <code>Group</code> + <code>Artifact</code>, e vira o pacote da classe main</td></tr>
+      <tr><td><b>JDK</b></td><td><b>21</b> (veja a nota abaixo)</td><td>o JDK que vai compilar</td></tr>
+      <tr><td><b>Java</b></td><td>o <b>mesmo número</b> do JDK</td><td>é o nível de linguagem. Maior que o JDK = erro na hora de compilar.</td></tr>
+      <tr><td><b>Packaging</b></td><td><b>Jar</b></td><td>o Boot embute o servidor; War é pra servidor externo</td></tr>
+    </table>
+
+    <div class="tip warn"><b>Os dois erros mais comuns nessa tela.</b> O primeiro é deixar <b>Type</b> em Gradle — a tela abre assim por padrão, e aí você acaba com um <code>build.gradle</code> em vez do <code>pom.xml</code> que todo o material usa. O segundo é o campo <b>Java</b> ficar diferente do <b>JDK</b>: se o JDK é 21 e o Java está em 17, tudo bem; ao contrário, não compila.</div>
+
+    <div class="tip"><b>Não tem o JDK 21 na lista?</b> Abra o próprio seletor <b>JDK</b> e escolha <b>Download JDK…</b>. O IntelliJ baixa e configura sozinho, <b>sem pedir senha de administrador</b> — ele instala na sua pasta de usuário. É o caminho mais fácil quando a instalação pelo sistema dá trabalho. Escolha a versão <b>21</b>, distribuição Oracle OpenJDK ou Amazon Corretto.</div>
+
+    <p>Clique em <b>Next</b>. Na tela seguinte vêm a versão do Spring Boot e as
+    dependências:</p>
+    <ul>
+      <li><b>Spring Boot:</b> a <b>4.1.x</b> mais recente que não tenha <code>SNAPSHOT</code> nem <code>M</code> no nome (essas são versões de teste)</li>
+      <li>Marque <b>Spring Web</b> e <b>Spring Boot DevTools</b></li>
+    </ul>
+    <p>Clique em <b>Create</b>. O IntelliJ já abre o projeto importado como
+    Maven — não precisa fazer mais nada.</p>
+
+    <h3>Caminho B — pelo site</h3>
+    <p>Vá em <code>start.spring.io</code>. São os mesmos campos, com dois nomes
+    diferentes: <b>Project</b> no lugar de <i>Type</i> (escolha <b>Maven</b>) e
+    <b>Spring Boot</b> na própria primeira tela.</p>
+    <p>Clique em <b>Generate</b>, descompacte o zip e, no IntelliJ, use
+    <b>File → Open</b> apontando pra <b>pasta</b> do projeto — nunca pra um
+    arquivo solto.</p>
 
     <h3>Dependências de hoje</h3>
     <ul>
@@ -478,7 +512,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 21.0.5+9-LTS-239, mixed mode)</span>
 
     <div class="tip"><b>Só isso.</b> Banco, segurança e validação entram nas próximas aulas. Cada dependência que você adiciona sem precisar é mais superfície pra dar errado — e uma aplicação que sobe em 1 segundo vira uma que sobe em 8.</div>
 
-    <p>Clique em <b>Generate</b>, descompacte e abra a pasta na sua IDE.</p>
+    <div class="tip warn"><b>Se aparecer "Maven project configuration required for module ... isn't available":</b> o IntelliJ abriu a pasta mas não vinculou o <code>pom.xml</code>. Clique com o botão direito no <code>pom.xml</code> → <b>Add as Maven Project</b>. Se a opção não existir, abra a aba <b>Maven</b> (lateral direita) e clique em 🔄 <b>Reload All Maven Projects</b>. E confira o espaço em disco: o import precisa baixar dependências e criar a pasta <code>target/</code> — com o disco cheio ele falha no meio e deixa exatamente esse estado.</div>
   </section>
 
   <!-- ==================================================================== -->
@@ -526,11 +560,18 @@ Java HotSpot(TM) 64-Bit Server VM (build 21.0.5+9-LTS-239, mixed mode)</span>
 
     <div class="tip"><b>Atalho de ouro:</b> quando um nome ficar vermelho por falta de <code>import</code>, deixe o cursor nele e aperte <b>Alt + Enter</b>. O IntelliJ oferece o import certo. Você quase nunca precisa escrever um <code>import</code> na mão.</div>
 
-    <h3>Criar o projeto direto pela IDE</h3>
-    <p>Na <b>Ultimate</b>, <b>File → New → Project → Spring Boot</b> abre o
-    Initializr embutido, com os mesmos campos do site. Na <b>Community</b> esse
-    assistente não existe — use o <code>start.spring.io</code> e depois abra a
-    pasta. O resultado é idêntico.</p>
+    <h3>Gerenciar os JDKs instalados</h3>
+    <p>Todo JDK que o IntelliJ baixa por você vai parar em
+    <code>C:\Users\seu-usuario\.jdks</code> (ou <code>~/.jdks</code> no
+    macOS e Linux). Vale abrir essa pasta de tempos em tempos: é comum acumular
+    quatro ou cinco versões de projetos antigos, e <b>cada uma ocupa uns
+    300 MB</b>.</p>
+    <p>Pra ver e limpar pela própria IDE: <b>File → Project Structure →
+    Platform Settings → SDKs</b>. Remova ali os que nenhum projeto seu usa, e
+    apague a pasta correspondente em <code>.jdks</code> pra liberar o disco de
+    fato.</p>
+
+    <div class="tip warn"><b>Disco cheio quebra o Maven de um jeito confuso.</b> Sem espaço, o import não consegue baixar as dependências nem criar a pasta <code>target/</code> — e a mensagem que aparece fala de "configuração do Maven", não de disco. Se um projeto se recusar a importar, <b>confira o espaço livre antes</b> de sair mexendo em configuração. Um projeto Spring Boot precisa de uns 500 MB entre dependências e build.</div>
   </section>
 
   <!-- ==================================================================== -->
