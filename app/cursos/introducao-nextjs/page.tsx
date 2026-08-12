@@ -34,7 +34,7 @@ const AULAS: Aula[] = [
         <span className="mono">Link</span> e <span className="mono">useRouter</span>.
       </>
     ),
-    marco: "Briefing formal + entrega da rubrica",
+    marco: "Briefing do Leque de Vagas + entrega da rubrica",
   },
   {
     n: "03",
@@ -46,7 +46,7 @@ const AULAS: Aula[] = [
         padrões de composição; props serializáveis; Suspense e streaming.
       </>
     ),
-    marco: "Aprovação do tema e do escopo mínimo",
+    marco: "Escopo mínimo do projeto definido",
   },
   {
     n: "04",
@@ -233,10 +233,39 @@ export default function FrontendAvancadoNextjs() {
         Do primeiro componente a uma aplicação em produção. Começa do zero — não
         é preciso saber React — e vai até Server Components, data fetching,
         Server Actions, autenticação, acessibilidade, performance, testes e
-        CI/CD. Tudo aplicado num projeto em equipe que evolui por checkpoints ao
-        longo do semestre.
+        CI/CD. Tudo aplicado no <strong>Leque de Vagas</strong>, um projeto em equipe
+        que evolui por checkpoints ao longo do semestre.
       </p>
       <div className="brand-rule" />
+
+      <div className="section-label">Projeto do curso</div>
+
+      <div className="lessons">
+        <div className="lesson">
+          <div className="idx">💼</div>
+          <div className="body">
+            <h3>Leque de Vagas — vagas de tech pra quem está migrando</h3>
+            <p>
+              O projeto em equipe que cresce junto com as aulas: começa como uma
+              página estática no ar e termina como uma aplicação completa, com
+              listagem, busca, autenticação, banco de dados e deploy contínuo.{" "}
+              <strong>O tema é o mesmo para a turma inteira</strong> — assim o
+              semestre é gasto aprendendo Next.js, não decidindo o que construir.
+              Briefing completo na aula 02.
+            </p>
+            <div className="mats">
+              <a
+                className="mat"
+                href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                💻 Projeto de referência
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="section-label">Aulas</div>
 
