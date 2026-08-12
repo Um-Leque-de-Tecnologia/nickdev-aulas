@@ -336,11 +336,22 @@
       <tr><th>Pergunta</th><th>Resposta</th><th>Por quê</th></tr>
       <tr><td>TypeScript</td><td><b>Yes</b></td><td>o curso inteiro usa; erro pego no editor não vira bug em produção</td></tr>
       <tr><td>ESLint</td><td><b>Yes</b></td><td>aponta código suspeito antes do code review</td></tr>
-      <tr><td>Tailwind CSS</td><td><b>Yes</b></td><td>a aula 8 usa shadcn/ui, que depende dele</td></tr>
+      <tr><td>Tailwind CSS</td><td><b>No</b></td><td>ainda não — até a <b>aula 8</b> o estilo é CSS comum, que você já sabe</td></tr>
       <tr><td>App Router</td><td><b>Yes</b></td><td>é o assunto do curso</td></tr>
       <tr><td>Turbopack</td><td><b>Yes</b></td><td>padrão no Next 16, bem mais rápido</td></tr>
       <tr><td>Import alias <code>@/*</code></td><td><b>Yes</b></td><td>evita <code>../../..</code></td></tr>
     </table>
+
+    <div class="tip"><b>Por que Tailwind fica pra depois.</b> Tailwind é uma
+    forma diferente de escrever CSS, e aprender ela agora seria uma novidade em
+    cima da outra. Você já sabe CSS — então até a <b>aula 8</b> o estilo vai no
+    <code>app/globals.css</code>, do jeito de sempre. Lá a gente entra no
+    Tailwind, e você vai entender o que ele resolve porque terá sentido a
+    diferença na própria mão.</div>
+
+    <div class="tip warn"><b>Responda igual à turma.</b> Quem marcar
+    <code>Yes</code> em Tailwind vai ficar com um projeto diferente do de todo
+    mundo — e os exemplos da aula não vão bater.</div>
 
 <div class="terminal"><span class="p">$</span> cd meu-projeto
 <span class="p">$</span> pnpm dev

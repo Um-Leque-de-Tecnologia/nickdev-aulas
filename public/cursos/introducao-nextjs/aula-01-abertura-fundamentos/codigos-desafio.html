@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Código do desafio 01 · Introdução ao Next.js · NickDev</title>
-<meta name="description" content="Código comentado do desafio da aula 01: layout, rotas, navegação com Link e a prova de que o componente roda no servidor.">
+<meta name="description" content="Código comentado do desafio da aula 01: o componente Cabecalho, o layout, as rotas por pasta e a navegação com Link.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -83,16 +83,16 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <h1>O projeto <span class="grad">linha por linha</span></h1>
   <p class="lead">
     O desafio resolvido, comentado. Use como referência quando travar — mas
-    tente antes. O que importa aqui não é a sintaxe: é entender <b>onde cada
-    arquivo roda</b>.
+    tente antes. O que importa aqui não é a sintaxe: é entender <b>por que o
+    cabeçalho existe em um lugar só</b>.
   </p>
   <div class="rule"></div>
 
   <div class="goal roxo">
     <span class="ico">🧭</span>
     <div>
-      <h3>Três arquivos, e só</h3>
-      <p>A aula 1 inteira cabe em três arquivos. Cada um vai ganhar camadas nas
+      <h3>Poucos arquivos, e só</h3>
+      <p>A aula 1 inteira cabe em cinco arquivos. Cada um vai ganhar camadas nas
       próximas 18 aulas — mas a espinha é esta.</p>
     </div>
   </div>
@@ -100,17 +100,19 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <div class="label">A estrutura</div>
 <pre>meu-primeiro-next/
 ├── app/
-│   ├── <b>layout.tsx</b>        <span class="cm">← moldura + metadata + nav</span>
-│   ├── <b>page.tsx</b>          <span class="cm">← rota /</span>
-│   ├── <b>sobre/page.tsx</b>    <span class="cm">← rota /sobre</span>
-│   └── globals.css
+│   ├── <b>layout.tsx</b>          <span class="cm">← a moldura de todas as páginas</span>
+│   ├── <b>page.tsx</b>            <span class="cm">← rota /</span>
+│   ├── <b>sobre/page.tsx</b>      <span class="cm">← rota /sobre</span>
+│   └── <b>globals.css</b>         <span class="cm">← o CSS do projeto</span>
+├── <b>components/</b>
+│   └── <b>Cabecalho.tsx</b>       <span class="cm">← a peça reutilizável ⭐</span>
 ├── public/
 ├── next.config.ts
 └── package.json</pre>
 
   <div class="label">app/layout.tsx</div>
 <pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
-<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+<span class="kw">import</span> <span class="ty">Cabecalho</span> <span class="kw">from</span> <span class="st">"@/components/Cabecalho"</span>;
 <span class="kw">import</span> <span class="st">"./globals.css"</span>;
 
 <span class="cm">// vira &lt;title&gt; e &lt;meta name="description"&gt; sozinho</span>
@@ -127,14 +129,11 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <span class="kw">return</span> (
     <span class="cm">// lang="pt-BR" importa: o leitor de tela usa pra escolher a voz</span>
     &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
-      &lt;<span class="ty">body</span> className=<span class="st">"min-h-screen bg-zinc-950 text-zinc-100"</span>&gt;
-        <span class="cm">/* o nav vive no layout: não remonta ao navegar */</span>
-        &lt;<span class="ty">nav</span> className=<span class="st">"flex gap-4 border-b border-white/10 p-4"</span>&gt;
-          &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
-          &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
-        &lt;/<span class="ty">nav</span>&gt;
+      &lt;<span class="ty">body</span>&gt;
+        <span class="cm">/* a peça, escrita uma vez e usada aqui */</span>
+        &lt;<span class="ty">Cabecalho</span> /&gt;
 
-        &lt;<span class="ty">main</span> className=<span class="st">"mx-auto max-w-2xl p-8"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
+        &lt;<span class="ty">main</span> className=<span class="st">"conteudo"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
       &lt;/<span class="ty">body</span>&gt;
     &lt;/<span class="ty">html</span>&gt;
   );
@@ -154,12 +153,15 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 
   <div class="label">components/Cabecalho.tsx ⭐</div>
   <p style="color:var(--text-2);font-size:15px">O componente do desafio. Um arquivo, uma função, um nome com maiúscula.</p>
-<pre><span class="cm">// Uma função que devolve HTML. Isso é um componente.</span>
+<pre><span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+
+<span class="cm">// Uma função que devolve HTML. Isso é um componente.</span>
 <span class="cm">// O "export default" é o que permite importar em outro arquivo.</span>
 <span class="kw">export default function</span> <span class="ty">Cabecalho</span>() {
   <span class="kw">return</span> (
-    &lt;<span class="ty">header</span> className=<span class="st">"p-4 border-b border-zinc-800"</span>&gt;
-      &lt;<span class="ty">h1</span> className=<span class="st">"font-bold"</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
+    &lt;<span class="ty">header</span> className=<span class="st">"cabecalho"</span>&gt;
+      &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
+      &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
     &lt;/<span class="ty">header</span>&gt;
   );
 }</pre>
@@ -176,14 +178,56 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     </div>
   </div>
 
+  <div class="label">app/globals.css</div>
+  <p style="color:var(--text-2);font-size:15px">CSS comum, do jeito que você já sabe. Nada de novo aqui — só as classes que os componentes usam.</p>
+<pre><span class="cm">/* o que vale pro site inteiro */</span>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #09090b;
+  color: #fafafa;
+  font-family: system-ui, sans-serif;
+}
+
+<span class="cm">/* a classe usada em &lt;header className="cabecalho"&gt; */</span>
+.cabecalho {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #27272a;
+}
+
+.conteudo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.rodape {
+  padding: 16px;
+  border-top: 1px solid #27272a;
+  color: #a1a1aa;
+}</pre>
+
+  <div class="goal">
+    <span class="ico">🎨</span>
+    <div>
+      <h3>Por que CSS puro por enquanto</h3>
+      <p>Você já sabe CSS — então ele não custa nada de aprendizado agora, e dá
+      pra focar no que é novo de verdade: o componente. Na <b>aula 08</b> a gente
+      entra no Tailwind e você vai entender o que ele resolve, tendo sentido a
+      diferença. Até lá, CSS comum no <code>globals.css</code>.</p>
+    </div>
+  </div>
+
   <div class="label">app/page.tsx</div>
 <pre><span class="cm">// Isto também é um componente — a diferença é que ele está</span>
 <span class="cm">// num arquivo chamado page.tsx, e por isso vira uma página.</span>
 <span class="kw">export default function</span> <span class="ty">Home</span>() {
   <span class="kw">return</span> (
     &lt;<span class="ty">section</span>&gt;
-      &lt;<span class="ty">h1</span> className=<span class="st">"text-4xl font-bold"</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
-      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span>&gt;
         O cabeçalho acima não está escrito neste arquivo — ele vem
         do layout, e aparece em todas as páginas.
       &lt;/<span class="ty">p</span>&gt;
@@ -203,8 +247,8 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 <span class="kw">export default function</span> <span class="ty">Sobre</span>() {
   <span class="kw">return</span> (
     &lt;<span class="ty">section</span>&gt;
-      &lt;<span class="ty">h1</span> className=<span class="st">"text-3xl font-bold"</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
-      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span>&gt;
         Quem eu sou e o que espero deste semestre.
       &lt;/<span class="ty">p</span>&gt;
     &lt;/<span class="ty">section</span>&gt;
@@ -215,7 +259,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <p style="color:var(--text-2);font-size:15px">Se você fez o extra: <code>components/Rodape.tsx</code>. Mesma receita do cabeçalho — e é exatamente esse "mesma receita" que é o ponto.</p>
 <pre><span class="kw">export default function</span> <span class="ty">Rodape</span>() {
   <span class="kw">return</span> (
-    &lt;<span class="ty">footer</span> className=<span class="st">"p-4 border-t border-zinc-800 text-zinc-500"</span>&gt;
+    &lt;<span class="ty">footer</span> className=<span class="st">"rodape"</span>&gt;
       © 2026 — feito na aula 01
     &lt;/<span class="ty">footer</span>&gt;
   );
