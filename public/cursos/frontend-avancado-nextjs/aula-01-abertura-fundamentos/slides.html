@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abertura e fundamentos · Aula 01 · Frontend Avançado com Next.js · NickDev</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#100D1B;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.09);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.hi{border-color:rgba(169,140,224,.5)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:880px;
+    white-space:pre;tab-size:2}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:#7B9FE0}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:880px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:86px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:960px;font-size:clamp(12.5px,1.45vw,17px)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:720px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:820px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:72ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 CAPA -->
+  <section class="slide active center">
+    <div class="eyebrow"><span class="b">aula 01</span> · 12/08 · frontend avançado com next.js</div>
+    <div class="tagtitle"><span class="br">&lt;</span><span class="nm">abertura</span><span class="br">/&gt;</span></div>
+    <h1 style="margin:24px 0 14px">Onde o seu código <span class="grad">roda</span></h1>
+    <p class="lead" style="max-width:54ch">A pergunta que organiza este semestre inteiro. Hoje: o ecossistema, SPA × SSR × SSG, o ambiente montado e o seu primeiro deploy no ar.</p>
+  </section>
+
+  <!-- 2 O CURSO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o que a gente vai construir juntos</div>
+    <h2>Frontend avançado, de verdade</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">Não é "aprender React"</h3><p>Isso a gente assume que você já tem. Aqui o assunto é <strong>arquitetura</strong>: onde roda, quando renderiza, o que cacheia.</p></div>
+      <div class="card"><h3 class="attr">Não é tutorial</h3><p>Cada aula resolve um problema real que aparece em produção — e você vai sentir o problema antes de ver a solução.</p></div>
+      <div class="card"><h3 class="key">É um projeto</h3><p>Um sistema em equipe que cresce por <strong>checkpoints</strong> e termina em produção, com CI e domínio próprio.</p></div>
+    </div>
+    <p class="note">Ao final, você não vai ter "feito um curso de Next". Vai ter <strong>colocado uma aplicação no ar</strong> e conseguido explicar cada decisão dela.</p>
+  </section>
+
+  <!-- 3 AGENDA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">agenda</span> · aula 01</div>
+    <h2>O mapa de hoje</h2>
+    <div class="agenda">
+      <div class="row"><span class="t">20 min</span><span class="d">Plano de ensino, critérios de avaliação e teaser do projeto</span><span class="tag">abertura</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d">Ecossistema React moderno: o que mudou e por quê</span><span class="tag">conceito</span></div>
+      <div class="row"><span class="t">30 min</span><span class="d">SPA × SSR × SSG × ISR — o conceito central do curso</span><span class="tag">conceito</span></div>
+      <div class="row brk"><span class="t">☕</span><span class="d">Intervalo</span><span class="tag">10 min</span></div>
+      <div class="row"><span class="t">30 min</span><span class="d">Setup: Node, pnpm e <span class="mono">create-next-app</span></span><span class="tag">hands-on</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d">A estrutura do App Router, arquivo por arquivo</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d">Primeiro deploy na Vercel</span><span class="tag">hands-on</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d">Formação das equipes e desafio da semana</span><span class="tag">🎉</span></div>
+    </div>
+  </section>
+
+  <!-- 4 PRE-REQUISITOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">antes de começar</span> · o que a gente assume</div>
+    <h2>De onde você já deve vir</h2>
+    <div class="grid2">
+      <div class="card ok">
+        <h3 class="grn">✅ Assumido</h3>
+        <p>JavaScript moderno (<span class="code-inline">async/await</span>, destructuring, módulos), React com componentes e hooks, HTML semântico e CSS, e Git no dia a dia.</p>
+      </div>
+      <div class="card hi">
+        <h3 class="str">📚 A gente revisa</h3>
+        <p>O que mudou no React nos últimos anos, o modelo mental de renderização e tudo que for específico do Next.</p>
+      </div>
+    </div>
+    <p class="note">Se algum item da coluna da esquerda estiver enferrujado, fale comigo <strong>esta semana</strong>. É muito mais fácil recuperar agora que na aula 5.</p>
+  </section>
+
+  <!-- 5 O PROJETO (TEASER) -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">marco do projeto</span> · o teaser</div>
+    <h2>O que vocês vão construir</h2>
+    <p>Uma aplicação real, em equipe de <strong>3 a 4 pessoas</strong>, com tema escolhido por vocês. O requisito não é o tema — são as <strong>capacidades</strong>:</p>
+    <div class="grid4" style="margin-top:18px">
+      <div class="card"><h3 class="tagc">CRUD</h3><p>criar, listar, editar e apagar, com validação de verdade.</p></div>
+      <div class="card"><h3 class="attr">Autenticação</h3><p>login, sessão e rotas protegidas por papel.</p></div>
+      <div class="card"><h3 class="str">Banco</h3><p>dados que sobrevivem, com migrations versionadas.</p></div>
+      <div class="card"><h3 class="key">Produção</h3><p>no ar, com CI, testes e monitoramento.</p></div>
+    </div>
+    <p class="note">Ele cresce por <strong>checkpoints</strong>: protótipo navegável na aula 8, CRUD + auth na 12, deploy com CI na 15. Nada de fazer tudo na última semana.</p>
+  </section>
+
+  <!-- 6 REACT: O QUE MUDOU -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">ecossistema</span> · o que mudou no React</div>
+    <h2>Três eras, um problema só</h2>
+    <table>
+      <tr><th>Era</th><th>Como se pensava</th><th>O que doía</th></tr>
+      <tr><td><b>Classes</b><br><span class="muted">até 2018</span></td><td>ciclo de vida: <code>componentDidMount</code></td><td>lógica espalhada em três métodos diferentes</td></tr>
+      <tr><td><b>Hooks</b><br><span class="muted">2019–2022</span></td><td>estado e efeito em funções</td><td><b>tudo</b> rodava no navegador: bundle grande, dados sempre em <code>useEffect</code></td></tr>
+      <tr><td><b>Server Components</b><br><span class="muted">2023 →</span></td><td>parte do componente roda no servidor</td><td>é o assunto deste curso 🙂</td></tr>
+    </table>
+    <p class="note">O fio que liga as três: <strong>tirar trabalho do navegador de quem acessa</strong>. Cada era empurrou mais um pedaço pra outro lugar.</p>
+  </section>
+
+  <!-- 7 O PROBLEMA DA SPA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">a dor</span> · por que a SPA pura não bastou</div>
+    <h2>O que acontece numa SPA</h2>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div class="code"><span class="cm">// o que o servidor manda numa SPA pura</span>
+&lt;<span class="ty">body</span>&gt;
+  &lt;<span class="ty">div</span> id=<span class="st">"root"</span>&gt;&lt;/<span class="ty">div</span>&gt;
+  &lt;<span class="ty">script</span> src=<span class="st">"/bundle.js"</span>&gt;&lt;/<span class="ty">script</span>&gt;
+&lt;/<span class="ty">body</span>&gt;
+
+<span class="cm">// ...e só depois de baixar e executar o JS</span>
+<span class="cm">// é que qualquer conteúdo aparece</span></div>
+      </div>
+      <div class="stack">
+        <div class="card no"><h3 class="key">Tela branca</h3><p>quem está no 4G espera o bundle inteiro antes de ver qualquer coisa.</p></div>
+        <div class="card no"><h3 class="key">SEO sofre</h3><p>o buscador recebe uma div vazia. Ele até executa JS, mas com atraso e sem garantia.</p></div>
+        <div class="card no"><h3 class="key">Cascata de dados</h3><p>renderiza → <span class="code-inline">useEffect</span> → busca → renderiza de novo. Sempre um passo atrás.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 AS ESTRATEGIAS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o conceito central</span> · guarde esta tabela</div>
+    <h2>Quatro estratégias de renderização</h2>
+    <table>
+      <tr><th>Sigla</th><th>Quando o HTML é gerado</th><th>Boa para</th></tr>
+      <tr><td><b class="key">CSR</b><br><span class="muted">client-side</span></td><td>no navegador, depois do JS carregar</td><td>painel atrás de login, editor, dashboard</td></tr>
+      <tr><td><b class="attr">SSR</b><br><span class="muted">server-side</span></td><td>a cada requisição, no servidor</td><td>conteúdo por usuário: carrinho, feed, extrato</td></tr>
+      <tr><td><b class="str">SSG</b><br><span class="muted">static</span></td><td>uma vez, no build</td><td>landing, blog, documentação</td></tr>
+      <tr><td><b class="tagc">ISR</b><br><span class="muted">incremental</span></td><td>no build, e revalida de tempos em tempos</td><td>catálogo, notícias — muda, mas não a cada acesso</td></tr>
+    </table>
+    <p class="note">A pergunta certa não é "qual é a melhor". É <strong>"com que frequência este conteúdo muda, e ele é igual pra todo mundo?"</strong> A resposta escolhe a estratégia.</p>
+  </section>
+
+  <!-- 9 A GRANULARIDADE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o pulo do gato</span> · e é aqui que o Next muda tudo</div>
+    <h2>Isso não é escolha do <span class="grad">projeto</span></h2>
+    <div class="grid2">
+      <div class="card no">
+        <h3 class="key">❌ Como era</h3>
+        <p>Você escolhia uma estratégia <strong>pro site inteiro</strong>. "Este projeto é SSR." Fim.</p>
+      </div>
+      <div class="card ok">
+        <h3 class="grn">✅ Como é no App Router</h3>
+        <p>A escolha é <strong>por rota</strong> — e, com Partial Prerendering, até <strong>por pedaço da mesma página</strong>.</p>
+      </div>
+    </div>
+    <p style="margin-top:20px">Uma página de produto pode ter: o cabeçalho e a descrição <strong>estáticos</strong>, o preço <strong>revalidado a cada minuto</strong>, e o "seus itens no carrinho" <strong>por requisição</strong>. Tudo na mesma tela.</p>
+    <p class="note">Por isso o curso não tem uma aula de "SSR" e outra de "SSG". Tem aulas sobre <strong>onde o código roda</strong> e <strong>quando ele revalida</strong> — que é o que realmente decide.</p>
+  </section>
+
+  <!-- 10 QUIZ -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">joga no chat</span> · qual estratégia pra cada uma?</div>
+    <h2>Aquecimento</h2>
+    <div class="grid2">
+      <div class="card"><h3 class="str">1. Página "sobre nós"</h3><p>muda uma vez por ano, igual pra todo mundo</p></div>
+      <div class="card"><h3 class="str">2. Extrato bancário</h3><p>diferente por pessoa, sempre atual</p></div>
+      <div class="card"><h3 class="str">3. Home de e-commerce</h3><p>igual pra todos, muda quando entra promoção</p></div>
+      <div class="card"><h3 class="str">4. Editor de texto</h3><p>tudo acontece depois que a pessoa entra</p></div>
+    </div>
+    <p class="note">Respostas: 1 SSG · 2 SSR · 3 ISR · 4 CSR. Se você acertou as quatro, já entendeu o eixo do semestre.</p>
+  </section>
+
+  <!-- 11 PARADA 1 -->
+  <section class="slide parada">
+    <div class="badge">☕ INTERVALO · 10 min</div>
+    <h1>Volta que a gente <span class="grad">coloca a mão</span></h1>
+    <p class="lead" style="margin-top:20px;max-width:44ch">Na volta: Node, pnpm, o projeto criado e rodando.</p>
+  </section>
+
+  <!-- 12 SETUP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">setup</span> · o combinado técnico</div>
+    <h2>O ambiente do semestre</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">Node 20.9+</h3><p>o Next 16 exige. Confira com <span class="code-inline">node -v</span>.</p></div>
+      <div class="card"><h3 class="attr">pnpm</h3><p>gerenciador de pacotes. Mais rápido e economiza disco.</p></div>
+      <div class="card"><h3 class="key">Next.js 16.3</h3><p>versão vigente, com Turbopack por padrão.</p></div>
+    </div>
+<div class="terminal" style="margin-top:20px"><span class="p">$</span> node -v
+<span class="out">v22.19.0</span>
+
+<span class="cm"># instala o pnpm (vem junto com o Node moderno)</span>
+<span class="p">$</span> corepack enable pnpm
+<span class="p">$</span> pnpm -v
+<span class="out">10.x</span></div>
+    <p class="note">Por que pnpm e não npm: ele guarda cada pacote <strong>uma vez só</strong> no disco e liga por atalho. Com vários projetos Next na máquina, a diferença é de gigabytes.</p>
+  </section>
+
+  <!-- 13 CREATE NEXT APP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">mão na massa</span> · criando o projeto</div>
+    <h2>Um comando, projeto pronto</h2>
+<div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-projeto
+
+<span class="cm">✔ TypeScript?                   Yes
+✔ ESLint?                       Yes
+✔ Tailwind CSS?                 Yes
+✔ App Router?                   Yes
+✔ Turbopack?                    Yes
+✔ import alias (@/*)?           Yes</span>
+
+<span class="p">$</span> cd meu-projeto
+<span class="p">$</span> pnpm dev
+<span class="out">▲ Next.js 16.3.0 (Turbopack)
+- Local: http://localhost:3000
+✓ Ready in 812ms</span></div>
+    <p class="note">Tailwind entra <strong>Yes</strong> neste curso — a aula 8 é sobre design system, e vamos usar shadcn/ui, que depende dele.</p>
+  </section>
+
+  <!-- 14 ESTRUTURA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o que veio na caixa</span></div>
+    <h2>A estrutura do App Router</h2>
+    <div class="grid2" style="align-items:start">
+      <div class="tree">meu-projeto/
+├── <b>app/</b>                 <span class="cm">← rotas e UI</span>
+│   ├── <b>layout.tsx</b>       <span class="cm">moldura de tudo</span>
+│   ├── <b>page.tsx</b>         <span class="cm">a rota "/"</span>
+│   └── globals.css
+├── <b>public/</b>              <span class="cm">arquivos estáticos</span>
+├── next.config.ts
+├── tsconfig.json
+└── package.json</div>
+      <div class="stack">
+        <div class="card"><h3 class="tagc">Pasta = rota</h3><p><span class="code-inline">app/sobre/page.tsx</span> vira <span class="code-inline">/sobre</span>. Sem arquivo de configuração de rotas.</p></div>
+        <div class="card"><h3 class="attr">Nomes reservados</h3><p><span class="code-inline">page</span>, <span class="code-inline">layout</span>, <span class="code-inline">loading</span>, <span class="code-inline">error</span>, <span class="code-inline">not-found</span> — cada um com um papel. Aula 2.</p></div>
+        <div class="card ok"><h3 class="grn">Tudo é servidor por padrão</h3><p>Componente só vira cliente quando você pede. Aula 3.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 O LAYOUT -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">live code</span> · lendo o que veio pronto</div>
+    <h2>layout.tsx: a moldura</h2>
+    <span class="filetab">📄 app/layout.tsx</span>
+<div class="code"><span class="kw">export default function</span> <span class="ty">RootLayout</span>({
+  children,
+}: {
+  children: <span class="ty">React.ReactNode</span>;
+}) {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
+      &lt;<span class="ty">body</span>&gt;{children}&lt;/<span class="ty">body</span>&gt;   <span class="cm">← a página entra aqui</span>
+    &lt;/<span class="ty">html</span>&gt;
+  );
+}</div>
+    <p class="note">Ele <strong>não remonta</strong> ao navegar entre rotas — só o <span class="code-inline">children</span> troca. É por isso que o cabeçalho não pisca e o estado dele sobrevive à navegação.</p>
+  </section>
+
+  <!-- 16 A PAGINA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">live code</span> · o primeiro Server Component</div>
+    <h2>Você já escreveu um, sem saber</h2>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <span class="filetab">📄 app/page.tsx</span>
+<div class="code"><span class="kw">export default function</span> <span class="ty">Home</span>() {
+  <span class="cm">// isto roda NO SERVIDOR</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"onde eu apareço?"</span>);
+
+  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Olá, mundo&lt;/<span class="ty">h1</span>&gt;;
+}</div>
+      </div>
+      <div class="stack">
+        <div class="card hi"><h3 class="str">Faça o teste agora</h3><p>Salve e olhe o <strong>terminal</strong> — não o console do navegador. O log está lá.</p></div>
+        <div class="card"><h3 class="attr">Por que importa</h3><p>Este componente <strong>não virou JavaScript</strong> enviado pra quem acessa. Zero bytes de bundle.</p></div>
+      </div>
+    </div>
+    <p class="note">Esse <span class="code-inline">console.log</span> no terminal é o momento em que a ficha cai. Guarde a surpresa — a aula 3 explica o mecanismo inteiro.</p>
+  </section>
+
+  <!-- 17 PARADA 2 -->
+  <section class="slide parada">
+    <div class="badge">⏱️ MÃO NA MASSA · 20 min</div>
+    <h1>Projeto rodando <span class="grad">em todo mundo</span></h1>
+    <p class="lead" style="margin-top:20px;max-width:48ch">Crie o projeto, rode <span class="code-inline">pnpm dev</span>, mude o texto da home e ache o <span class="code-inline">console.log</span> no terminal.</p>
+  </section>
+
+  <!-- 18 DEPLOY -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">deploy</span> · antes de escrever a segunda linha</div>
+    <h2>No ar hoje, não no fim</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>git push pro GitHub</h3><p>repositório público — ele vira parte do seu portfólio.</p></div></div>
+      <div class="st"><div class="body"><h3>vercel.com → Add New → Project</h3><p>importe o repositório. A Vercel detecta o Next sozinha.</p></div></div>
+      <div class="st"><div class="body"><h3>Deploy</h3><p>não mexa em configuração nenhuma.</p></div></div>
+      <div class="st"><div class="body"><h3>Todo push republica</h3><p>e cada Pull Request ganha um <strong>preview</strong> com URL própria.</p></div></div>
+    </div>
+    <p class="note">Deployar na aula 1 não é enfeite: é o que transforma "erro na minha máquina" em "erro que a equipe inteira vê e resolve junto".</p>
+  </section>
+
+  <!-- 19 EQUIPES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">marco do projeto</span> · agora</div>
+    <h2>Formação das equipes</h2>
+    <div class="grid2">
+      <div class="stack">
+        <div class="card"><h3 class="tagc">3 a 4 pessoas</h3><p>menos que 3 sobrecarrega; mais que 4 alguém some.</p></div>
+        <div class="card"><h3 class="attr">Um repositório da equipe</h3><p>público, com todo mundo como colaborador desde hoje.</p></div>
+      </div>
+      <div class="stack">
+        <div class="card"><h3 class="str">Uma ideia de tema</h3><p>não precisa estar fechado — o briefing formal é na aula 2.</p></div>
+        <div class="card ok"><h3 class="grn">Todo mundo commita</h3><p>vale nota individual. Ninguém "só apresenta".</p></div>
+      </div>
+    </div>
+    <p class="note">Dica de tema: algo que <strong>vocês usariam</strong>. Projeto de disciplina que a equipe não quer usar morre no checkpoint 2.</p>
+  </section>
+
+  <!-- 20 DESAFIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">desafio</span> · até a próxima quarta</div>
+    <h2>Ambiente, projeto e <span class="grad">deploy</span></h2>
+    <ul class="clean">
+      <li>Node 20.9+ e pnpm funcionando, com print do <span class="code-inline">-v</span> dos dois</li>
+      <li>Projeto criado com <span class="code-inline">create-next-app</span> e rodando</li>
+      <li>Uma página <span class="code-inline">/sobre</span> escrita por você, com navegação</li>
+      <li>Um <span class="code-inline">console.log</span> provando que você achou o servidor</li>
+      <li><strong>Publicado na Vercel</strong>, com o link no README</li>
+    </ul>
+    <p class="note">Enunciado completo, ficha técnica e código de referência na página da aula.</p>
+  </section>
+
+  <!-- 21 FIM -->
+  <section class="slide center">
+    <div class="big-emoji">▲</div>
+    <h1>Onde o seu código <span class="grad">roda</span></h1>
+    <p class="lead" style="margin-top:18px;max-width:52ch">Se você sair hoje sabendo que existe uma escolha — e que ela é por rota, não por projeto — a aula cumpriu o objetivo.</p>
+    <p class="mono" style="margin-top:18px;color:var(--muted);font-size:13px">NickDev · um leque de tecnologia</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
+<div class="nav">
+  <span id="counter">01 / 21</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

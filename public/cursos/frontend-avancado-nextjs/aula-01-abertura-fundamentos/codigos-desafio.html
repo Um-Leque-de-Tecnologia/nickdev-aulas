@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio 01 · Frontend Avançado com Next.js · NickDev</title>
+<meta name="description" content="Código comentado do desafio da aula 01: layout, rotas, navegação com Link e a prova de que o componente roda no servidor.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:960px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:20px 22px;margin-top:16px}
+.goal .ico{font-size:24px;line-height:1}
+.goal h3{font-size:16.5px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:14.5px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 14px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Aula 01 · código do desafio</div>
+  <h1>O projeto <span class="grad">linha por linha</span></h1>
+  <p class="lead">
+    O desafio resolvido, comentado. Use como referência quando travar — mas
+    tente antes. O que importa aqui não é a sintaxe: é entender <b>onde cada
+    arquivo roda</b>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal roxo">
+    <span class="ico">🧭</span>
+    <div>
+      <h3>Três arquivos, e só</h3>
+      <p>A aula 1 inteira cabe em três arquivos. Cada um vai ganhar camadas nas
+      próximas 18 aulas — mas a espinha é esta.</p>
+    </div>
+  </div>
+
+  <div class="label">A estrutura</div>
+<pre>meu-primeiro-next/
+├── app/
+│   ├── <b>layout.tsx</b>        <span class="cm">← moldura + metadata + nav</span>
+│   ├── <b>page.tsx</b>          <span class="cm">← rota /</span>
+│   ├── <b>sobre/page.tsx</b>    <span class="cm">← rota /sobre</span>
+│   └── globals.css
+├── public/
+├── next.config.ts
+└── package.json</pre>
+
+  <div class="label">app/layout.tsx</div>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+<span class="kw">import</span> <span class="st">"./globals.css"</span>;
+
+<span class="cm">// vira &lt;title&gt; e &lt;meta name="description"&gt; sozinho</span>
+<span class="kw">export const</span> metadata: <span class="ty">Metadata</span> = {
+  title: <span class="st">"Meu primeiro Next"</span>,
+  description: <span class="st">"Projeto da aula 01 de Frontend Avançado"</span>,
+};
+
+<span class="kw">export default function</span> <span class="ty">RootLayout</span>({
+  children,
+}: {
+  children: <span class="ty">React.ReactNode</span>;
+}) {
+  <span class="kw">return</span> (
+    <span class="cm">// lang="pt-BR" importa: o leitor de tela usa pra escolher a voz</span>
+    &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
+      &lt;<span class="ty">body</span> className=<span class="st">"min-h-screen bg-zinc-950 text-zinc-100"</span>&gt;
+        <span class="cm">/* o nav vive no layout: não remonta ao navegar */</span>
+        &lt;<span class="ty">nav</span> className=<span class="st">"flex gap-4 border-b border-white/10 p-4"</span>&gt;
+          &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
+          &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
+        &lt;/<span class="ty">nav</span>&gt;
+
+        &lt;<span class="ty">main</span> className=<span class="st">"mx-auto max-w-2xl p-8"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
+      &lt;/<span class="ty">body</span>&gt;
+    &lt;/<span class="ty">html</span>&gt;
+  );
+}</pre>
+
+  <div class="goal">
+    <span class="ico">💡</span>
+    <div>
+      <h3>Por que o nav fica no layout</h3>
+      <p>Porque o layout <b>não é remontado</b> quando você troca de rota — só o
+      <code>children</code> muda. Se o nav estivesse dentro de cada
+      <code>page</code>, seria destruído e recriado a cada navegação: pisca,
+      perde estado e desperdiça trabalho.</p>
+    </div>
+  </div>
+
+  <div class="label">app/page.tsx</div>
+<pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
+  <span class="cm">// ⭐ ESTE LOG APARECE NO TERMINAL, não no console do navegador.</span>
+  <span class="cm">// Porque este componente roda NO SERVIDOR: ele é executado lá,</span>
+  <span class="cm">// vira HTML, e só o HTML viaja até quem acessa.</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[home] renderizando no servidor"</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h1</span> className=<span class="st">"text-4xl font-bold"</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+        Se você está lendo isto, o servidor gerou este HTML antes de
+        mandar pro seu navegador.
+      &lt;/<span class="ty">p</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre>
+
+  <div class="goal">
+    <span class="ico">🔬</span>
+    <div>
+      <h3>Como provar sozinha(o)</h3>
+      <p>Botão direito → <b>Ver código-fonte da página</b>. O texto do
+      <code>h1</code> está lá, no HTML cru. Numa SPA tradicional você veria só
+      uma <code>&lt;div id="root"&gt;&lt;/div&gt;</code> vazia — o conteúdo só
+      apareceria depois do JavaScript rodar.</p>
+    </div>
+  </div>
+
+  <div class="label">app/sobre/page.tsx</div>
+  <p style="color:var(--text-2);font-size:15px">A pasta criou a rota. Só isso — nenhum arquivo de configuração.</p>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+
+<span class="cm">// metadata da página sobrescreve a do layout</span>
+<span class="kw">export const</span> metadata: <span class="ty">Metadata</span> = {
+  title: <span class="st">"Sobre mim · Meu primeiro Next"</span>,
+};
+
+<span class="kw">export default function</span> <span class="ty">Sobre</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h1</span> className=<span class="st">"text-3xl font-bold"</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+        Quem eu sou e o que espero deste semestre.
+      &lt;/<span class="ty">p</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre>
+
+  <div class="label">Extra · a rota dinâmica</div>
+  <p style="color:var(--text-2);font-size:15px">Se você fez o extra: <code>app/oi/[nome]/page.tsx</code>. Uma pasta entre colchetes, infinitas páginas.</p>
+<pre><span class="cm">// ⚠️ Next 16: params é uma Promise. Sempre await.</span>
+<span class="kw">export default async function</span> <span class="ty">Oi</span>({
+  params,
+}: {
+  params: <span class="ty">Promise</span>&lt;{ nome: <span class="ty">string</span> }&gt;;
+}) {
+  <span class="kw">const</span> { nome } = <span class="kw">await</span> params;
+
+  <span class="kw">return</span> &lt;<span class="ty">h1</span> className=<span class="st">"text-3xl"</span>&gt;Oi, {<span class="fn">decodeURIComponent</span>(nome)}!&lt;/<span class="ty">h1</span>&gt;;
+}</pre>
+
+  <div class="goal">
+    <span class="ico">⚠️</span>
+    <div>
+      <h3>O detalhe que quebra tutorial antigo</h3>
+      <p>No Next 16, <code>params</code> e <code>searchParams</code> são
+      <b>Promise</b>. Muito material da internet ainda faz
+      <code>params.nome</code> direto — hoje isso é erro. A regra prática: se o
+      tutorial não tem <code>await params</code>, ele é de antes do Next 15.</p>
+    </div>
+  </div>
+
+  <div class="label">O que o build revela</div>
+  <p style="color:var(--text-2);font-size:15px">Rode <code>pnpm build</code> e leia a tabela. É a teoria da aula impressa no terminal:</p>
+<div class="terminal"><span class="p">$</span> pnpm build
+
+<span class="out">Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /sobre
+└ ƒ /oi/[nome]
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand</span></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>Repare no que aconteceu</h3>
+      <p><code>/</code> e <code>/sobre</code> ficaram <b>estáticas</b> — o HTML
+      foi gerado uma vez, no build. Já <code>/oi/[nome]</code> é
+      <b>dinâmica</b>, porque o Next não sabe de antemão quais nomes existem.
+      E você <b>não escolheu</b> nada disso: o Next deduziu a estratégia de cada
+      rota a partir do que o código faz. É o slide virando terminal — na aula 4
+      você aprende a controlar isso de propósito.</p>
+    </div>
+  </div>
+
+  <div class="label">Se der errado</div>
+<div class="terminal"><span class="cm"># 404 na rota que você criou</span>
+<span class="out">→ o arquivo precisa se chamar page.tsx, dentro da pasta.
+   app/sobre.tsx não vira rota.</span>
+
+<span class="cm"># Port 3000 is already in use</span>
+<span class="out">→ pnpm dev -p 3001, ou pare a execução anterior</span>
+
+<span class="cm"># o log não aparece em lugar nenhum</span>
+<span class="out">→ olhe o TERMINAL onde o pnpm dev roda, não o navegador.
+   Em rota estática ele roda uma vez só: reinicie o dev.</span>
+
+<span class="cm"># build passa local e falha na Vercel</span>
+<span class="out">→ quase sempre maiúscula em import.
+   Windows ignora, Linux não.</span></div>
+
+  <div class="cta-row" style="margin-top:40px">
+    <a class="btn primary" href="desafio.html">🎯 Voltar ao desafio</a>
+    <a class="btn" href="guia-fundamentos.html">📘 Guia</a>
+    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Código da Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+</div>
+
+</body>
+</html>
