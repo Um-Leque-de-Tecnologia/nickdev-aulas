@@ -31,25 +31,8 @@ export default function Home() {
           <div className="meta">pós-graduação · em andamento</div>
         </Link>
 
-        <div className="card soon">
-          <span className="num">02</span>
-          <h3>React Native</h3>
-          <p>
-            Apps mobile do zero com React Native — componentes, navegação e
-            publicação.
-          </p>
-          <div className="meta">em breve</div>
-        </div>
-
-        <div className="card soon">
-          <span className="num">03</span>
-          <h3>Projeto de Extensão</h3>
-          <p>Levar tecnologia pra comunidade — da ideia à entrega, na prática.</p>
-          <div className="meta">em breve</div>
-        </div>
-
         <Link className="card" href="/cursos/orientacao-objetos-java">
-          <span className="num">04</span>
+          <span className="num">02</span>
           <h3>Orientação a Objetos — Java</h3>
           <p>
             Do ecossistema Java aos pilares de OO, coleções, exceções e
@@ -60,7 +43,7 @@ export default function Home() {
         </Link>
 
         <Link className="card" href="/cursos/java-spring-boot">
-          <span className="num">05</span>
+          <span className="num">03</span>
           <h3>Java Avançado — Spring Boot</h3>
           <p>
             Do Java puro à API REST em produção: injeção de dependência, JPA,
@@ -70,7 +53,7 @@ export default function Home() {
         </Link>
 
         <Link className="card" href="/cursos/frontend-avancado-nextjs">
-          <span className="num">06</span>
+          <span className="num">04</span>
           <h3>Frontend Avançado — Next.js</h3>
           <p>
             App Router, Server Components, Server Actions, autenticação,
