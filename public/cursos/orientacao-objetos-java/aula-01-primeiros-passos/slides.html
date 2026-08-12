@@ -18,6 +18,7 @@
     --str:#A98CE0;       /* strings / sucesso */
     --key:#F24487;       /* palavras-chave / destaque */
     --attr:#E88BB8;      /* atributos / parada */
+    --green:#5fd08a;     /* acerto / caminho bom */
     --line:rgba(255,255,255,.09);
     --mono:'JetBrains Mono',monospace;
     --disp:'Space Grotesk',sans-serif;
@@ -67,6 +68,10 @@
   .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
   .card h3{margin-bottom:6px}
   .card p{font-size:clamp(14px,1.5vw,17px)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.ok h3{color:var(--green)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.no h3{color:var(--key)}
   .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
   .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
 
@@ -277,11 +282,30 @@
     <p class="lead" style="margin-top:20px">Guarde essa resposta — a gente volta nela nos próximos slides.</p>
   </section>
 
+  <!-- 7b A AGENDA: ANCORA CONCRETA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">antes da palavra difícil</span> · uma agenda de telefone</div>
+    <h2>Duas maneiras de anotar contatos</h2>
+    <div class="grid2" style="margin-top:8px">
+      <div class="card no">
+        <h3>Maneira 1: listas separadas</h3>
+        <p>Uma folha só com os nomes. Outra só com os telefones. Outra só com os aniversários.</p>
+        <p style="margin-top:10px">Funciona — <strong>desde que</strong> você lembre que o terceiro nome é dono do terceiro telefone. Apagou uma linha do meio? Tudo desanda.</p>
+      </div>
+      <div class="card ok">
+        <h3>Maneira 2: um cartão por pessoa</h3>
+        <p>Cada pessoa tem seu cartãozinho, com nome, telefone e aniversário <strong>juntos</strong>.</p>
+        <p style="margin-top:10px">Perdeu um cartão? Perdeu só aquela pessoa. O resto continua certinho.</p>
+      </div>
+    </div>
+    <p class="note">Essas duas maneiras de arrumar as coisas existem na programação também. Cada jeito de organizar código tem um nome: <strong>paradigma</strong>. As listas separadas são o <strong>estruturado</strong>. O cartão com tudo junto é a <strong>orientação a objetos</strong> — o assunto das próximas 18 aulas.</p>
+  </section>
+
   <!-- 8 PARADIGMA ESTRUTURADO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">paradigma estruturado</span> · em Python, pra começar de onde você já esteve</div>
+    <div class="eyebrow"><span class="b">paradigma estruturado</span> · as listas separadas, em Python</div>
     <h2>Código como uma sequência de passos</h2>
-    <p>No paradigma <strong>estruturado</strong>, o programa é uma sequência de instruções e funções que operam sobre <strong>dados separados</strong>. Dados de um lado, funções do outro. Em Python fica assim:</p>
+    <p>É a <strong>maneira 1</strong>: o nome do livro numa variável, se ele está emprestado em outra, e uma função solta que mexe nisso. Dados de um lado, ações do outro:</p>
     <div class="code" style="margin-top:18px"><span class="cm"># estilo estruturado: dados soltos + funções que mexem neles</span>
 nome = <span class="st">"Duna"</span>
 emprestado = <span class="kw">False</span>
@@ -297,7 +321,7 @@ emprestado = <span class="kw">False</span>
   <section class="slide">
     <div class="eyebrow"><span class="b">paradigma orientado a objetos</span> · ainda em Python</div>
     <h2>Código como um conjunto de <span class="grad">objetos</span></h2>
-    <p>Em <strong>OO</strong>, dados (atributos) e comportamentos (métodos) que pertencem à mesma ideia ficam <strong>juntos</strong>, dentro de uma classe. Um <span class="code-inline">Livro</span> sabe emprestar a si mesmo:</p>
+    <p>É a <strong>maneira 2</strong>, o cartãozinho: tudo que é do livro fica dentro do livro. As informações (chamadas <strong>atributos</strong>) e as ações (chamadas <strong>métodos</strong>) moram no mesmo lugar. Aqui o <span class="code-inline">Livro</span> sabe emprestar a si mesmo:</p>
     <div class="code" style="margin-top:18px"><span class="cm"># estilo orientado a objetos: dados + comportamento juntos</span>
 <span class="kw">class</span> <span class="ty">Livro</span>:
     <span class="kw">def</span> <span class="fn">__init__</span>(self, nome):
@@ -367,27 +391,28 @@ duna.<span class="fn">emprestar</span>()</div>
     <div class="eyebrow"><span class="b">ecossistema java</span> · três siglas que confundem todo mundo</div>
     <h2>JDK, JRE e JVM</h2>
     <div class="nested">
-      <div class="layer jdk"><span class="lbl jdk-c">JDK — Java Development Kit</span><span class="desc">o "kit completo" pra <strong>desenvolver</strong>: compilador (javac), ferramentas e o JRE dentro dele.</span></div>
-      <div class="layer jre"><span class="lbl jre-c">JRE — Java Runtime Environment</span><span class="desc">o necessário pra <strong>rodar</strong> programas Java: bibliotecas padrão + a JVM.</span></div>
-      <div class="layer jvm"><span class="lbl jvm-c">JVM — Java Virtual Machine</span><span class="desc">a "máquina virtual" que de fato <strong>executa</strong> o bytecode, dentro de qualquer sistema operacional.</span></div>
+      <div class="layer jdk"><span class="lbl jdk-c">JDK — a oficina inteira</span><span class="desc">o carro <strong>mais as ferramentas pra construir carros</strong>. É o que você instala pra <strong>escrever</strong> programas.</span></div>
+      <div class="layer jre"><span class="lbl jre-c">JRE — o carro montado</span><span class="desc">motor, rodas, volante. Dá pra <strong>dirigir</strong> — ou seja, rodar programas prontos. Não dá pra construir outro.</span></div>
+      <div class="layer jvm"><span class="lbl jvm-c">JVM — o motor</span><span class="desc">a peça que de fato <strong>faz andar</strong>. Existe uma pra Windows, uma pra Mac, uma pra Linux.</span></div>
     </div>
-    <p class="note">Pra programar você precisa do <strong>JDK</strong> — ele já inclui o JRE e a JVM lá dentro.</p>
+    <p class="note">São bonecas russas: uma dentro da outra. Você vai <strong>escrever</strong> programas, então precisa da oficina — <strong>instale o JDK</strong>. O carro e o motor já vêm dentro.</p>
   </section>
 
   <!-- 13 BYTECODE -->
   <section class="slide">
     <div class="eyebrow"><span class="b">bytecode</span> · o "meio-termo" do Java</div>
     <h2>Do código-fonte ao bytecode</h2>
+    <p class="lead" style="max-width:62ch;margin-bottom:20px">Você escreveu um livro em português e quer que o mundo inteiro leia. Em vez de traduzir pra cada idioma, você traduz <strong>uma vez</strong> pra uma língua que todo tradutor conhece — e cada país tem o seu tradutor local.</p>
     <div class="flow">
-      <div class="node"><div class="ico">📄</div><b>Código-fonte</b><span class="muted">Aula.java — texto que você escreve</span></div>
+      <div class="node"><div class="ico">📄</div><b>Aula.java</b><span class="muted">o seu livro, em português</span></div>
       <div class="arw">→</div>
-      <div class="node"><div class="ico">🛠️</div><b>javac (compilador)</b><span class="muted">parte do JDK</span></div>
+      <div class="node"><div class="ico">🛠️</div><b>javac</b><span class="muted">o tradutor, uma vez só</span></div>
       <div class="arw">→</div>
-      <div class="node"><div class="ico">📦</div><b>Bytecode</b><span class="muted">Aula.class — instruções da JVM</span></div>
+      <div class="node"><div class="ico">📦</div><b>Aula.class</b><span class="muted">a língua que todos conhecem</span></div>
       <div class="arw">→</div>
-      <div class="node"><div class="ico">▶️</div><b>java (JVM)</b><span class="muted">executa em qualquer SO</span></div>
+      <div class="node"><div class="ico">▶️</div><b>JVM</b><span class="muted">o tradutor local de cada sistema</span></div>
     </div>
-    <p class="note">O bytecode não é o código de máquina do seu processador — é um "idioma intermediário" que qualquer JVM (Windows, Linux, macOS) entende. É isso que dá portabilidade ao Java.</p>
+    <p class="note">Essa "língua do meio" chama <strong>bytecode</strong>. É por causa dela que o mesmo arquivo <span class="code-inline">.class</span> roda no Windows, no Mac e no Linux sem você mexer em nada.</p>
   </section>
 
   <!-- 14 SETUP: JDK -->
