@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de resposta — Desafio 01 · Frontend Avançado com Next.js · NickDev</title>
+<meta name="description" content="Modelo de resposta do desafio da aula 01: projeto Next.js no ar, com README explicando onde o console.log apareceu e a tabela de rotas do build.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:960px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 16px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.pane{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);margin-top:12px}
+.panehd{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.panehd .dot{width:9px;height:9px;border-radius:50%}
+.panehd .dot.r{background:#ff5f56}.panehd .dot.y{background:#ffbd2e}.panehd .dot.g{background:#27c93f}
+.panehd b{color:var(--text);font-weight:500}
+
+pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;margin:0;white-space:pre}
+.kw{color:#F24487}.ty{color:#7B9FE0}.st{color:#A98CE0}.fn{color:#E88BB8}.cm{color:#6f6a83}
+.md{background:#0b0913;padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto;color:#d8d3e6}
+.md .h{color:#E88BB8;font-weight:700}
+.md .out{color:#9ee39e}
+.md .cm{color:#6f6a83}
+
+.recap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+@media(max-width:760px){.recap{grid-template-columns:1fr}}
+.recap .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.recap .card h3{font-size:15px;margin-bottom:6px;color:var(--pink-light)}
+.recap .card p{font-size:13.5px;color:var(--text-2)}
+
+.check{list-style:none;display:grid;gap:10px;margin-top:8px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check b{color:var(--text)}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:20px 22px;margin-top:16px}
+.goal .ico{font-size:24px;line-height:1}
+.goal h3{font-size:16.5px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:14.5px}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Modelo de resposta · Aula 01</div>
+  <h1>Projeto <span class="grad">no ar</span> ▲</h1>
+  <p class="lead">
+    Uma entrega completa do desafio. Repare que o que mais pesa na nota não é o
+    código — é o <b>README explicando o que você observou</b>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="label">O README — 40% da nota está aqui</div>
+
+  <div class="pane">
+    <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">README.md</b></div>
+    <div class="md"><span class="h"># Meu primeiro Next</span>
+
+Projeto da aula 01 de Frontend Avançado com Next.js.
+
+<span class="h">🔗 No ar:</span> https://meu-primeiro-next-nicoly.vercel.app
+
+<span class="h">## Ambiente</span>
+
+<span class="cm">$ node -v</span>
+<span class="out">v22.19.0</span>
+<span class="cm">$ pnpm -v</span>
+<span class="out">10.4.1</span>
+
+Next.js 16.3.0
+
+<span class="h">## Onde o console.log apareceu — e por quê</span>
+
+Apareceu no <span class="h">terminal</span> onde eu rodei `pnpm dev`,
+e NÃO no console do navegador (F12).
+
+Isso acontece porque no App Router todo componente é
+Server Component por padrão. O `app/page.tsx` foi
+executado no servidor: lá o `console.log` rodou, o
+componente virou HTML, e só o HTML foi enviado pro meu
+navegador. O JavaScript desse componente nunca chegou
+no cliente — por isso o navegador não tem como mostrar
+o log.
+
+Confirmei abrindo "ver código-fonte da página": o texto
+do &lt;h1&gt; já está no HTML, antes de qualquer JS rodar.
+
+<span class="h">## Rotas</span>
+
+| Rota     | Arquivo               |
+|----------|-----------------------|
+| /        | app/page.tsx          |
+| /sobre   | app/sobre/page.tsx    |
+
+<span class="h">## Saída do build</span>
+
+<span class="out">Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ○ /sobre
+
+○  (Static)  prerendered as static content</span>
+
+As duas rotas ficaram estáticas porque não dependem de
+nada que mude por requisição. Eu não configurei isso —
+o Next deduziu sozinho.
+
+<span class="h">## O que foi mais difícil</span>
+
+Entender que o log ia pro terminal. Passei uns 10 minutos
+procurando no console do navegador antes de ler o guia.</div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>Por que esse README pontua</h3>
+      <p>Ele não descreve o que foi feito — <b>descreve o que foi observado</b>,
+      com as palavras de quem escreveu. A frase "o JavaScript desse componente
+      nunca chegou no cliente" mostra que o conceito foi entendido, não copiado.
+      E a última seção, sobre a dificuldade, é honesta: isso vale mais do que
+      fingir que foi tudo tranquilo.</p>
+    </div>
+  </div>
+
+  <div class="label">O código</div>
+
+  <div class="pane">
+    <div class="panehd"><span class="dot g"></span><b>app/layout.tsx</b></div>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+<span class="kw">import</span> <span class="st">"./globals.css"</span>;
+
+<span class="kw">export const</span> metadata: <span class="ty">Metadata</span> = {
+  title: <span class="st">"Meu primeiro Next"</span>,
+  description: <span class="st">"Projeto da aula 01 de Frontend Avançado"</span>,
+};
+
+<span class="kw">export default function</span> <span class="ty">RootLayout</span>({
+  children,
+}: {
+  children: <span class="ty">React.ReactNode</span>;
+}) {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
+      &lt;<span class="ty">body</span> className=<span class="st">"min-h-screen bg-zinc-950 text-zinc-100"</span>&gt;
+        &lt;<span class="ty">nav</span> className=<span class="st">"flex gap-4 border-b border-white/10 p-4"</span>&gt;
+          &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
+          &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
+        &lt;/<span class="ty">nav</span>&gt;
+        &lt;<span class="ty">main</span> className=<span class="st">"mx-auto max-w-2xl p-8"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
+      &lt;/<span class="ty">body</span>&gt;
+    &lt;/<span class="ty">html</span>&gt;
+  );
+}</pre>
+  </div>
+
+  <div class="pane">
+    <div class="panehd"><span class="dot g"></span><b>app/page.tsx</b></div>
+<pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[home] renderizando no servidor"</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h1</span> className=<span class="st">"text-4xl font-bold"</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+        Se você está lendo isto, o servidor gerou este HTML antes de
+        mandar pro seu navegador.
+      &lt;/<span class="ty">p</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre>
+  </div>
+
+  <div class="pane">
+    <div class="panehd"><span class="dot g"></span><b>app/sobre/page.tsx</b></div>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+
+<span class="kw">export const</span> metadata: <span class="ty">Metadata</span> = {
+  title: <span class="st">"Sobre mim · Meu primeiro Next"</span>,
+};
+
+<span class="kw">export default function</span> <span class="ty">Sobre</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h1</span> className=<span class="st">"text-3xl font-bold"</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+        Estudo na área há dois anos e quero trabalhar com frontend.
+        Espero sair deste semestre conseguindo colocar uma aplicação
+        completa no ar sozinha.
+      &lt;/<span class="ty">p</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre>
+  </div>
+
+  <div class="label">Por que essa entrega funciona</div>
+  <div class="recap">
+    <div class="card"><h3>Está no ar</h3><p>O link abre, as duas rotas funcionam e a navegação não recarrega a página. É o requisito de maior peso.</p></div>
+    <div class="card"><h3>Explica, não descreve</h3><p>O README conta <b>onde</b> o log apareceu, <b>por que</b> e <b>como isso foi confirmado</b> — com o teste do código-fonte.</p></div>
+    <div class="card"><h3>Higiene</h3><p><code>node_modules</code> e <code>.next</code> fora do repo, <code>pnpm-lock.yaml</code> dentro, build limpo.</p></div>
+  </div>
+
+  <div class="label">Checklist batido</div>
+  <ul class="check">
+    <li>Node 22 e pnpm 10, com os prints no README</li>
+    <li>Next.js <b>16.3.0</b>, criado com <code>create-next-app</code></li>
+    <li>Rota <code>/sobre</code> ligada à home por <code>&lt;Link&gt;</code></li>
+    <li>README explica <b>onde o log apareceu e por quê</b>, com palavras próprias</li>
+    <li>Tabela de rotas do <code>pnpm build</code> colada no README</li>
+    <li><code>pnpm build</code> passando</li>
+    <li>Publicado na Vercel, link no README</li>
+  </ul>
+
+  <div class="label">Continue por aqui</div>
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Rever o desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="btn" href="guia-fundamentos.html">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Modelo de resposta · Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

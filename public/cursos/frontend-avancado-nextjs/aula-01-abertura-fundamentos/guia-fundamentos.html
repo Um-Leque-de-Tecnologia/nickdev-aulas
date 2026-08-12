@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · Fundamentos e setup · Aula 01 · Frontend Avançado com Next.js · NickDev</title>
+<meta name="description" content="Guia da aula 01: ecossistema React moderno, SPA vs SSR vs SSG vs ISR, setup com Node e pnpm, estrutura do App Router e primeiro deploy na Vercel.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:266px 1fr;max-width:1300px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}.kw{color:#F24487}.ty{color:#7B9FE0}.st{color:#A98CE0}.fn{color:#E88BB8}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">O conceito</div>
+    <a href="#react">O que mudou no React</a>
+    <a href="#estrategias">SPA, SSR, SSG e ISR</a>
+    <a href="#granularidade">A escolha é por rota</a>
+    <a href="#decidir">Como decidir na prática</a>
+    <div class="grp">Ambiente</div>
+    <a href="#node">Node 20.9+</a>
+    <a href="#pnpm">pnpm</a>
+    <a href="#criar">Criar o projeto</a>
+    <div class="grp">O projeto</div>
+    <a href="#estrutura">A estrutura</a>
+    <a href="#layout">layout e page</a>
+    <a href="#servidor">O primeiro Server Component</a>
+    <div class="grp">Produção</div>
+    <a href="#deploy">Deploy na Vercel</a>
+    <div class="grp">Fechando</div>
+    <a href="#erros">Erros comuns 🔧</a>
+    <a href="#cola">Cola rápida</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · guia de conteúdo</div>
+  <h1>Fundamentos e <span class="g">setup</span></h1>
+  <p class="lead">
+    O modelo mental que organiza o curso inteiro — onde o seu código roda e
+    quando ele renderiza — e o passo a passo pra deixar o ambiente pronto e o
+    primeiro deploy no ar.
+  </p>
+  <div class="rule"></div>
+
+  <div class="tip warn" style="margin-top:32px">
+    <b>🎯 O que esta aula assume.</b> JavaScript moderno, React com componentes
+    e hooks, HTML e CSS, e Git no dia a dia. O que for específico do Next é
+    ensinado do zero. Se algum pré-requisito estiver enferrujado,
+    <b>fale nesta semana</b> — recuperar agora é muito mais fácil do que na
+    aula 5.
+  </div>
+
+  <!-- ==================================================================== -->
+  <section id="react">
+    <h2>O que mudou no React</h2>
+    <p>Pra entender por que o Next existe do jeito que existe, ajuda ver as três
+    eras do React como <b>tentativas de resolver o mesmo problema</b>: tirar
+    trabalho do navegador de quem acessa.</p>
+
+    <table>
+      <tr><th>Era</th><th>Modelo mental</th><th>O que doía</th></tr>
+      <tr><td><b>Classes</b><br>até 2018</td><td>ciclo de vida (<code>componentDidMount</code>)</td><td>a lógica de uma feature ficava espalhada em três métodos</td></tr>
+      <tr><td><b>Hooks</b><br>2019–2022</td><td>estado e efeito dentro de funções</td><td><b>tudo</b> rodava no navegador: bundle grande e dados sempre em <code>useEffect</code></td></tr>
+      <tr><td><b>Server Components</b><br>2023 em diante</td><td>parte do componente roda no servidor</td><td>é o assunto deste curso</td></tr>
+    </table>
+
+    <p>A era dos hooks resolveu a organização do código, mas deixou uma conta
+    aberta: <b>a aplicação inteira precisava chegar no navegador antes de
+    qualquer coisa aparecer</b>.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="estrategias">
+    <h2>SPA, SSR, SSG e ISR</h2>
+    <p>Quatro estratégias, uma única variável: <b>quando o HTML é gerado</b>.</p>
+
+    <table>
+      <tr><th>Sigla</th><th>HTML gerado</th><th>Boa para</th><th>Custo</th></tr>
+      <tr><td><b>CSR</b><br>client-side</td><td>no navegador, depois do JS carregar</td><td>painel atrás de login, editor, dashboard</td><td>primeira tela lenta, SEO fraco</td></tr>
+      <tr><td><b>SSR</b><br>server-side</td><td>a cada requisição, no servidor</td><td>conteúdo por pessoa: carrinho, feed, extrato</td><td>servidor trabalha em todo acesso</td></tr>
+      <tr><td><b>SSG</b><br>static</td><td>uma vez, no build</td><td>landing, blog, documentação</td><td>pra atualizar, precisa rebuildar</td></tr>
+      <tr><td><b>ISR</b><br>incremental</td><td>no build, e revalida de tempos em tempos</td><td>catálogo, notícias, listagens</td><td>pode servir conteúdo levemente velho</td></tr>
+    </table>
+
+    <h3>O problema da SPA pura</h3>
+    <p>Numa SPA, o servidor manda basicamente isto:</p>
+<pre>&lt;<span class="ty">body</span>&gt;
+  &lt;<span class="ty">div</span> id=<span class="st">"root"</span>&gt;&lt;/<span class="ty">div</span>&gt;
+  &lt;<span class="ty">script</span> src=<span class="st">"/bundle.js"</span>&gt;&lt;/<span class="ty">script</span>&gt;
+&lt;/<span class="ty">body</span>&gt;</pre>
+    <p>Três consequências, e todas aparecem em produção:</p>
+    <ul>
+      <li><b>Tela branca</b> até o bundle baixar e executar — quem está no 4G sente</li>
+      <li><b>SEO sofre:</b> o buscador recebe uma div vazia. Ele executa JavaScript, mas com atraso e sem garantia</li>
+      <li><b>Cascata de dados:</b> renderiza → <code>useEffect</code> → busca → renderiza de novo. Sempre um passo atrás</li>
+    </ul>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="granularidade">
+    <h2>A escolha é por rota, não por projeto</h2>
+    <p>Aqui está a mudança que realmente importa, e a razão de o curso não ter
+    "uma aula de SSR e outra de SSG".</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>❌ Como era antes</h4>
+        Você escolhia uma estratégia <b>para o site inteiro</b>. "Este projeto é SSR." E pronto — inclusive para as páginas que nunca mudam.
+      </div>
+      <div class="box ok">
+        <h4>✅ Como é no App Router</h4>
+        A escolha é <b>por rota</b>. E, com Partial Prerendering, até <b>por pedaço da mesma página</b>.
+      </div>
+    </div>
+
+    <p>Uma página de produto pode ter, ao mesmo tempo:</p>
+    <ul>
+      <li>Cabeçalho e descrição <b>estáticos</b> — não mudam entre acessos</li>
+      <li>Preço e estoque <b>revalidados a cada minuto</b></li>
+      <li>"Seus itens no carrinho" <b>por requisição</b>, porque é de cada pessoa</li>
+    </ul>
+
+    <div class="tip"><b>Por isso o eixo do curso é outro.</b> Em vez de decorar siglas, você vai aprender duas perguntas: <b>onde este código roda</b> (servidor ou cliente — aula 3) e <b>quando ele revalida</b> (aula 4). As siglas são consequência das respostas.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="decidir">
+    <h2>Como decidir na prática</h2>
+    <p>Duas perguntas, nesta ordem:</p>
+    <ol>
+      <li><b>Este conteúdo é igual para todo mundo?</b> Se não for, precisa ser gerado por requisição.</li>
+      <li><b>Com que frequência ele muda?</b> Nunca → estático. De vez em quando → revalidação. A cada acesso → dinâmico.</li>
+    </ol>
+
+    <h3>Exercite</h3>
+    <table>
+      <tr><th>Caso</th><th>Resposta</th><th>Por quê</th></tr>
+      <tr><td>Página "sobre nós"</td><td><b>SSG</b></td><td>igual pra todos, muda uma vez por ano</td></tr>
+      <tr><td>Extrato bancário</td><td><b>SSR</b></td><td>diferente por pessoa e sempre atual</td></tr>
+      <tr><td>Home de e-commerce</td><td><b>ISR</b></td><td>igual pra todos, muda quando entra promoção</td></tr>
+      <tr><td>Editor de texto</td><td><b>CSR</b></td><td>tudo acontece depois que a pessoa entra</td></tr>
+    </table>
+
+    <div class="tip warn"><b>O erro clássico:</b> tornar tudo dinâmico "por segurança". Funciona, e é caro — você paga servidor a cada acesso pra entregar conteúdo que nunca muda. Estático é o padrão; dinâmico é a exceção que você justifica.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="node">
+    <h2>Node 20.9+</h2>
+    <p>O Next.js 16 exige <b>Node 20.9</b> ou mais novo. Confira:</p>
+<div class="terminal"><span class="p">$</span> node -v
+<span class="out">v22.19.0</span></div>
+    <p>Se aparecer menos que isso, ou "comando não encontrado", instale a versão
+    <b>LTS</b> em <code>nodejs.org</code> e reabra o terminal.</p>
+    <div class="tip"><b>Trabalha com vários projetos?</b> Vale usar um gerenciador de versões — <code>nvm</code> (macOS/Linux) ou <code>fnm</code> (multiplataforma, mais rápido). Eles deixam cada projeto na sua versão de Node sem conflito.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="pnpm">
+    <h2>pnpm</h2>
+    <p>Este curso usa <b>pnpm</b> em vez de npm. O Node moderno já traz o
+    Corepack, que instala pra você:</p>
+<div class="terminal"><span class="p">$</span> corepack enable pnpm
+<span class="p">$</span> pnpm -v
+<span class="out">10.x</span></div>
+
+    <h3>Por que pnpm</h3>
+    <table>
+      <tr><th>Aspecto</th><th>npm</th><th>pnpm</th></tr>
+      <tr><td>Disco</td><td>cada projeto tem sua cópia de cada pacote</td><td>uma cópia global, ligada por atalho</td></tr>
+      <tr><td>Instalação</td><td>—</td><td>bem mais rápida a partir da segunda vez</td></tr>
+      <tr><td>Rigor</td><td>permite usar pacote que você não declarou</td><td>bloqueia — o que evita bug que só aparece em produção</td></tr>
+    </table>
+    <div class="tip"><b>Na prática, o que muda pra você:</b> quase nada. <code>npm install</code> vira <code>pnpm install</code>, <code>npm run dev</code> vira <code>pnpm dev</code>. Com cinco projetos Next na máquina, a economia de disco passa de 1 GB — o que, como a gente vai ver, não é detalhe.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="criar">
+    <h2>Criar o projeto</h2>
+<div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-projeto</div>
+
+    <p>Respostas do curso:</p>
+    <table>
+      <tr><th>Pergunta</th><th>Resposta</th><th>Por quê</th></tr>
+      <tr><td>TypeScript</td><td><b>Yes</b></td><td>o curso inteiro usa; erro pego no editor não vira bug em produção</td></tr>
+      <tr><td>ESLint</td><td><b>Yes</b></td><td>aponta código suspeito antes do code review</td></tr>
+      <tr><td>Tailwind CSS</td><td><b>Yes</b></td><td>a aula 8 usa shadcn/ui, que depende dele</td></tr>
+      <tr><td>App Router</td><td><b>Yes</b></td><td>é o assunto do curso</td></tr>
+      <tr><td>Turbopack</td><td><b>Yes</b></td><td>padrão no Next 16, bem mais rápido</td></tr>
+      <tr><td>Import alias <code>@/*</code></td><td><b>Yes</b></td><td>evita <code>../../..</code></td></tr>
+    </table>
+
+<div class="terminal"><span class="p">$</span> cd meu-projeto
+<span class="p">$</span> pnpm dev
+<span class="out">▲ Next.js 16.3.0 (Turbopack)
+- Local: http://localhost:3000
+✓ Ready in 812ms</span></div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="estrutura">
+    <h2>A estrutura</h2>
+<pre>meu-projeto/
+├── <b>app/</b>                 <span class="cm">← 90% do seu tempo é aqui</span>
+│   ├── <b>layout.tsx</b>       <span class="cm">a moldura de todas as páginas</span>
+│   ├── <b>page.tsx</b>         <span class="cm">a rota "/"</span>
+│   └── globals.css
+├── <b>public/</b>              <span class="cm">servido como está: /logo.png</span>
+├── next.config.ts
+├── tsconfig.json
+└── package.json</pre>
+
+    <h3>A regra do App Router</h3>
+    <p><b>Pasta = rota. Arquivo <code>page.tsx</code> = a página.</b> Não existe
+    arquivo de configuração de rotas.</p>
+    <table>
+      <tr><th>Você cria</th><th>URL que nasce</th></tr>
+      <tr><td><code>app/page.tsx</code></td><td><code>/</code></td></tr>
+      <tr><td><code>app/sobre/page.tsx</code></td><td><code>/sobre</code></td></tr>
+      <tr><td><code>app/blog/[slug]/page.tsx</code></td><td><code>/blog/qualquer-coisa</code></td></tr>
+    </table>
+
+    <div class="tip warn"><b>Pegadinha nº 1:</b> criar <code>app/sobre.tsx</code> em vez de <code>app/sobre/page.tsx</code>. Sem o arquivo chamado exatamente <code>page.tsx</code> dentro da pasta, a rota não existe — e você toma 404 sem nenhum erro no terminal.</div>
+
+    <p>Os outros nomes reservados — <code>layout</code>, <code>loading</code>,
+    <code>error</code>, <code>not-found</code>, <code>template</code> — são o
+    assunto da <b>aula 2</b>.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="layout">
+    <h2>layout e page</h2>
+
+    <div class="file">📄 app/layout.tsx</div>
+<pre><span class="kw">export default function</span> <span class="ty">RootLayout</span>({
+  children,
+}: {
+  children: <span class="ty">React.ReactNode</span>;
+}) {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
+      &lt;<span class="ty">body</span>&gt;{children}&lt;/<span class="ty">body</span>&gt;
+    &lt;/<span class="ty">html</span>&gt;
+  );
+}</pre>
+
+    <ul>
+      <li>O layout <b>raiz</b> é obrigatório e é o único lugar com <code>&lt;html&gt;</code> e <code>&lt;body&gt;</code></li>
+      <li>Ao navegar entre rotas ele <b>não é remontado</b> — só o <code>children</code> troca</li>
+      <li>Por isso o cabeçalho não pisca, e o estado dele sobrevive à navegação</li>
+    </ul>
+
+    <div class="file">📄 app/page.tsx</div>
+<pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
+  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Olá, mundo&lt;/<span class="ty">h1</span>&gt;;
+}</pre>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="servidor">
+    <h2>O primeiro Server Component</h2>
+    <p>Você já escreveu um, sem saber. No App Router, <b>todo componente é de
+    servidor por padrão</b>.</p>
+
+    <p>Faça este teste agora — é o momento em que a ficha cai:</p>
+<pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"onde eu apareço?"</span>);
+  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Olá, mundo&lt;/<span class="ty">h1</span>&gt;;
+}</pre>
+
+    <p>Salve e procure a mensagem. Ela está no <b>terminal onde o
+    <code>pnpm dev</code> roda</b> — não no console do navegador.</p>
+
+    <h3>Por que isso importa</h3>
+    <ul>
+      <li>Esse componente <b>não virou JavaScript</b> enviado pra quem acessa — zero bytes de bundle</li>
+      <li>O navegador recebeu HTML pronto, então a primeira tela aparece rápido</li>
+      <li>Como roda no servidor, ele pode falar com banco de dados e usar chave secreta sem expor nada</li>
+    </ul>
+
+    <div class="tip"><b>Guarde a surpresa.</b> O mecanismo inteiro — a fronteira <code>"use client"</code>, o que atravessa e o que não atravessa — é a <b>aula 3</b>. Hoje basta você ter visto acontecer.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="deploy">
+    <h2>Deploy na Vercel</h2>
+    <p>Vamos publicar na <b>aula 1</b>, antes de escrever a segunda linha de
+    código. Não é enfeite: é o que transforma "na minha máquina funciona" num
+    link que a equipe inteira vê.</p>
+
+    <ol>
+      <li>Rode <code>pnpm build</code> local. Passou? Ótimo — é o mesmo comando que a Vercel roda</li>
+      <li><code>git push</code> pro GitHub, em repositório <b>público</b></li>
+      <li>Em <code>vercel.com</code> → <b>Add New… → Project</b> → importe o repositório</li>
+      <li><b>Não mexa em nenhuma configuração.</b> A Vercel reconhece o Next sozinha</li>
+      <li><b>Deploy</b></li>
+    </ol>
+
+    <p>A partir daí, todo <code>git push</code> na branch principal republica. E
+    cada Pull Request ganha um <b>preview deployment</b> com URL própria — o que
+    vai ser essencial pro code review do projeto em equipe.</p>
+
+    <div class="tip"><b>Rode <code>pnpm build</code> antes de dar push.</b> É literalmente o que a Vercel executa. Erro de tipo que o <code>dev</code> tolera, o <code>build</code> reprova — e é bem mais rápido descobrir isso local.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="erros">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>404 numa página que acabei de criar</h4>
+    <p>O arquivo precisa se chamar exatamente <code>page.tsx</code>, dentro de
+    uma pasta. <code>app/sobre.tsx</code> não vira rota.</p>
+
+    <h4>Port 3000 is already in use</h4>
+    <p>Tem outra execução rodando. Pare a anterior, ou use
+    <code>pnpm dev -p 3001</code>.</p>
+
+    <h4>You're importing a component that needs useState…</h4>
+    <p>Faltou <code>"use client"</code> na primeira linha do arquivo. Assunto da
+    aula 3 — por hoje, saiba que a mensagem é literal.</p>
+
+    <h4>Module not found: Can't resolve '@/components/…'</h4>
+    <p>Confira a maiúscula no nome do arquivo. No Windows funciona
+    <code>botao</code> quando o arquivo é <code>Botao</code>; no servidor da
+    Vercel (Linux) <b>não</b>. É um erro que só aparece no deploy.</p>
+
+    <h4>O build passa local e falha na Vercel</h4>
+    <p>Quase sempre uma destas três: diferença de maiúscula em import, variável
+    de ambiente que existe só na sua máquina, ou versão de Node diferente.</p>
+
+    <h4>Disco cheio</h4>
+    <p><code>node_modules</code> de um projeto Next passa de 500 MB. Com vários
+    projetos, o disco enche rápido — e o sintoma costuma ser um erro que não
+    fala nada de disco. É outra razão pra usar pnpm, que compartilha os pacotes.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="cola">
+    <h2>Cola rápida</h2>
+
+<pre><span class="cm">// ---------- ambiente ----------</span>
+node -v                         <span class="cm">precisa ser 20.9+</span>
+corepack enable pnpm            <span class="cm">instala o pnpm</span>
+
+<span class="cm">// ---------- projeto ----------</span>
+pnpm create next-app@latest nome
+cd nome
+pnpm dev                        <span class="cm">desenvolver</span>
+pnpm build                      <span class="cm">conferir antes do push</span>
+pnpm start                      <span class="cm">rodar o build local</span>
+pnpm dev -p 3001                <span class="cm">outra porta</span>
+
+<span class="cm">// ---------- rotas ----------</span>
+app/page.tsx                    <span class="cm">→ /</span>
+app/sobre/page.tsx              <span class="cm">→ /sobre</span>
+app/blog/[slug]/page.tsx        <span class="cm">→ /blog/qualquer-coisa</span>
+
+<span class="cm">// ---------- navegação ----------</span>
+<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+&lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
+
+<span class="cm">// ---------- as 4 estratégias ----------</span>
+CSR   no navegador          painel, editor
+SSR   a cada requisição     conteúdo por pessoa
+SSG   uma vez, no build     landing, blog
+ISR   build + revalidação   catálogo, notícias
+
+<span class="cm">// ---------- as 2 perguntas que decidem ----------</span>
+1. é igual pra todo mundo?
+2. com que frequência muda?</pre>
+
+    <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
+    <a class="cta" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="cta" href="roteiro-aula.html">🛠️ Roteiro da aula</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+
+    <div class="foot">Guia da Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>

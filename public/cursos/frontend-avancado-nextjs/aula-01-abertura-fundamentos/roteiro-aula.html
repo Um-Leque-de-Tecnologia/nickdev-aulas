@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro da aula 01 · Frontend Avançado com Next.js · NickDev</title>
+<meta name="description" content="Roteiro de condução da aula 01: bloco a bloco, com checkpoints, momentos de virada, plano B e o que não pode faltar.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,50px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.aviso{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:20px 22px;margin-top:32px}
+.aviso .ico{font-size:24px;line-height:1}
+.aviso h3{font-size:16.5px;margin-bottom:4px}
+.aviso p{color:var(--text-2);font-size:14.5px}
+.aviso.rosa{border-left-color:var(--magenta)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.bloco{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:14px}
+.bloco-hd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.bloco .dur{font-family:var(--mono);font-size:12px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:100px;padding:4px 12px;white-space:nowrap}
+.bloco h3{font-size:19px;font-weight:600;flex:1;min-width:200px}
+.bloco > p{color:var(--text-2);font-size:15px;margin:6px 0}
+.bloco ul,.bloco ol{margin:10px 0 4px;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.bloco li{margin:5px 0}
+.bloco li b{color:var(--text)}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-family:var(--mono);font-size:11.5px;color:var(--text-2);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:5px 11px;border-radius:100px}
+.chip.fala{color:var(--pink-light);border-color:rgba(232,139,184,.4)}
+.chip.mao{color:var(--green);border-color:rgba(95,208,138,.4)}
+
+.dica{border-left:3px solid var(--magenta);background:rgba(242,68,135,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin-top:14px;font-size:14px;color:var(--text-2)}
+.dica b{color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:9px;padding:0!important;margin-top:14px!important}
+.check li{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text-2);display:flex;gap:11px;align-items:flex-start}
+.check li::before{content:"☐";color:var(--purple-light);font-weight:700}
+
+.pausa{display:flex;align-items:center;gap:14px;border:1px dashed var(--line-strong);border-radius:14px;padding:14px 20px;margin-bottom:14px;color:var(--text-3);font-size:14.5px}
+.pausa .dur{font-family:var(--mono);font-size:12px;color:var(--text-4);border:1px solid var(--line);border-radius:100px;padding:4px 12px}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.bloco{padding:20px 18px}.aviso{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Aula 01 · roteiro de condução</div>
+  <h1>Abertura e <span class="grad">fundamentos</span></h1>
+  <p class="lead">
+    O plano da aula bloco a bloco: o que apresentar, onde parar, o que conferir
+    antes de seguir e o que cortar se atrasar.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo único da aula</h3>
+      <p>Se a turma sair sabendo <b>que existe uma escolha de onde o código roda,
+      e que ela é por rota</b>, a aula cumpriu. Todo o resto — setup, deploy,
+      equipes — é infraestrutura pra sustentar esse entendimento nas próximas 18
+      aulas.</p>
+    </div>
+  </div>
+
+  <div class="aviso rosa">
+    <span class="ico">⚠️</span>
+    <div>
+      <h3>O risco real da aula 1</h3>
+      <p>Não é o conteúdo — é o <b>setup</b>. Metade da turma vai travar em Node
+      antigo, permissão, proxy da instituição ou disco cheio. Por isso o bloco
+      prático vem <b>antes</b> do deploy, e o desafio é curto: o objetivo é que
+      ninguém chegue na aula 2 sem ambiente.</p>
+    </div>
+  </div>
+
+  <div class="label">Antes de começar</div>
+  <ul class="check">
+    <li>Projeto de exemplo já criado e rodando na sua máquina, pra demonstrar sem esperar download</li>
+    <li>Uma conta Vercel de demonstração logada</li>
+    <li>Link do repositório de exemplo pronto pra colar no chat</li>
+    <li>Se a instituição tiver proxy ou bloqueio de rede, teste o <code>pnpm create next-app</code> na sala <b>antes</b></li>
+  </ul>
+
+  <div class="label">A aula, bloco a bloco</div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Abertura: plano, critérios e teaser</h3></div>
+    <p>Apresentação da disciplina, como a nota é composta e o que vai ser
+    construído ao longo do semestre.</p>
+    <ul>
+      <li>Percorra os <b>marcos do projeto</b> na página do curso — eles são o esqueleto do semestre</li>
+      <li>Deixe claro o pré-requisito: React e JS modernos são assumidos</li>
+      <li>Convide quem estiver inseguro a falar com você <b>esta semana</b></li>
+    </ul>
+    <div class="dica"><b>Não gaste mais que 20 minutos aqui.</b> Plano de ensino é importante, mas ninguém sai empolgado de uma aula que começou com 40 minutos de regras. O teaser do projeto é o que prende — vá pra ele rápido.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 1–5</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>Ecossistema React moderno</h3></div>
+    <p>As três eras do React como tentativas de resolver o mesmo problema:
+    tirar trabalho do navegador.</p>
+    <div class="dica"><b>Pergunta que abre o bloco:</b> "quem aqui já escreveu um <code>useEffect</code> só pra buscar dados?" Praticamente todo mundo levanta a mão. Aí você diz: "esse padrão é o que a gente vai aposentar hoje". Ancorar na dor que eles já têm vale mais que qualquer linha do tempo.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 6–7</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">30 min</span><h3>SPA × SSR × SSG × ISR</h3></div>
+    <p>O conceito central do curso. Vale ir devagar — tudo depois disso depende
+    daqui.</p>
+    <ol>
+      <li>Mostre o HTML de uma SPA pura: <code>&lt;div id="root"&gt;</code> e nada mais</li>
+      <li>Apresente a tabela das quatro estratégias</li>
+      <li><b>Vire a chave:</b> a escolha é por rota, não por projeto</li>
+      <li>Rode o quiz do slide 10 no chat</li>
+    </ol>
+    <div class="dica"><b>Demonstração que convence:</b> abra "ver código-fonte" de um site feito em Next e de uma SPA tradicional, lado a lado. Num você lê o conteúdo; no outro, uma div vazia. Trinta segundos que valem mais que dez minutos de slide.</div>
+    <ul class="check">
+      <li>A turma respondeu o quiz e acertou a maioria</li>
+      <li>Alguém consegue explicar, com as próprias palavras, por que a escolha é por rota</li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 8–10</span></div>
+  </div>
+
+  <div class="pausa"><span class="dur">☕ 10 min</span> Intervalo</div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">30 min</span><h3>Setup: Node, pnpm e create-next-app</h3></div>
+    <p>Todo mundo digitando junto. É o bloco de maior risco — reserve monitoria.</p>
+<pre><span class="cm"># confere o Node</span>
+node -v                       <span class="cm">precisa ser 20.9+</span>
+
+<span class="cm"># instala o pnpm</span>
+corepack enable pnpm
+pnpm -v
+
+<span class="cm"># cria o projeto</span>
+pnpm create next-app@latest meu-projeto
+cd meu-projeto
+pnpm dev</pre>
+    <div class="dica"><b>Enquanto instala, aproveite o tempo morto:</b> explique por que pnpm em vez de npm (uma cópia por máquina, não por projeto). A turma está olhando a barra de progresso mesmo — é o melhor momento pra um conceito curto.</div>
+    <ul class="check">
+      <li>Todo mundo com <code>localhost:3000</code> aberto</li>
+      <li>Quem terminou vira monitor de quem travou</li>
+      <li>Anote quem ficou pra trás e combine um horário antes da aula 2</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 12–13</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>A estrutura e o primeiro Server Component</h3></div>
+    <p>Tour pelos arquivos e o momento de virada da aula.</p>
+    <ul>
+      <li><code>app/layout.tsx</code> — a moldura, e por que ela não remonta</li>
+      <li><code>app/page.tsx</code> — a rota <code>/</code></li>
+      <li>Crie <code>app/sobre/page.tsx</code> ao vivo e mostre a URL nascendo</li>
+    </ul>
+    <div class="dica"><b>O momento da aula.</b> Ponha um <code>console.log</code> no <code>page.tsx</code> e pergunte: "onde isso vai aparecer?". Quase todo mundo responde "no console do navegador". Recarregue a página e mostre o log no <b>terminal</b>. O silêncio que segue é a ficha caindo — deixe ele durar. Não explique o mecanismo agora: diga que é a aula 3.</div>
+    <ul class="check">
+      <li>Todo mundo criou a rota <code>/sobre</code></li>
+      <li>Todo mundo viu o log no terminal com os próprios olhos</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 14–17</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Primeiro deploy na Vercel</h3></div>
+    <ol>
+      <li><code>pnpm build</code> local — e leia a <b>tabela de rotas</b> junto com a turma</li>
+      <li><code>git push</code> pro GitHub</li>
+      <li>Vercel → Add New → Project → importar → Deploy</li>
+      <li>Cada pessoa manda o link no grupo 🎉</li>
+    </ol>
+    <div class="dica"><b>Costure com a teoria:</b> a tabela do build mostra <code>○ (Static)</code> nas rotas criadas. Diga em voz alta: "vocês não configuraram isso — o Next deduziu". É o conceito do início da aula aparecendo no terminal, e fecha o arco.</div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slide 18</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Equipes e desafio</h3></div>
+    <ul>
+      <li>Formação das equipes de <b>3 a 4 pessoas</b></li>
+      <li>Repositório da equipe criado ainda na sala, com todo mundo dentro</li>
+      <li>Apresentação do desafio e da data de entrega</li>
+    </ul>
+    <div class="dica"><b>Não deixe a formação pra depois da aula.</b> Quem não formou equipe hoje chega na aula 2 sem grupo, e aí a turma já se acomodou. Se sobrar gente solta, monte você mesma ali na hora.</div>
+    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 19–21</span></div>
+  </div>
+
+  <div class="label">Se atrasar</div>
+  <div class="bloco">
+    <p>Corte nesta ordem:</p>
+    <ol>
+      <li><b>O tour detalhado da estrutura</b> — o guia cobre, e a aula 2 é inteira sobre roteamento</li>
+      <li><b>O quiz do slide 10</b> — vira aquecimento da aula 2</li>
+      <li><b>O deploy</b> — passa pro desafio, mas <b>avise que é obrigatório</b> e ofereça monitoria</li>
+    </ol>
+    <p style="margin-top:14px"><b>Nunca corte:</b> o bloco de SPA × SSR × SSG (é o eixo do curso), o
+    <code>console.log</code> no terminal (é a experiência que ancora tudo) e a
+    formação das equipes.</p>
+  </div>
+
+  <div class="label">Se a turma travar</div>
+  <div class="bloco">
+    <ul>
+      <li><b>Node antigo numa máquina do laboratório</b> — sem permissão pra instalar, use o <a href="https://stackblitz.com" target="_blank" rel="noopener noreferrer" style="color:var(--pink-light);text-decoration:underline">StackBlitz</a> pelo navegador. Não é ideal, mas ninguém fica de fora da aula.</li>
+      <li><b>Rede bloqueando o npm registry</b> — tenha um zip do projeto já criado pra distribuir.</li>
+      <li><b>Disco cheio</b> — <code>node_modules</code> de um projeto Next passa de 500 MB. É comum e o erro não fala de disco. Mande conferir o espaço livre antes de qualquer outra hipótese.</li>
+      <li><b>Ritmos muito diferentes</b> — quem terminou vira monitor. Explicar é o melhor jeito de fixar.</li>
+    </ul>
+  </div>
+
+  <div class="label">Deixe engatilhado pra aula 2</div>
+  <div class="bloco">
+    <p>Três ganchos que valem plantar hoje:</p>
+    <ul>
+      <li>"Repare que ao navegar entre <code>/</code> e <code>/sobre</code> a página não pisca. Por quê?" — abre a aula 2</li>
+      <li>"O <code>console.log</code> foi pro terminal. Como é que eu faço um botão funcionar então?" — abre a aula 3</li>
+      <li>"E se a página precisar de dados que mudam?" — abre a aula 4</li>
+    </ul>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="slides.html">▶ Slides da aula</a>
+    <a class="btn" href="guia-fundamentos.html">📘 Guia de conteúdo</a>
+    <a class="btn" href="desafio.html">🎯 Desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código</a>
+  </div>
+
+  <div class="foot">Roteiro da Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>
