@@ -334,12 +334,24 @@
 
   <!-- 11 SETUP -->
   <section class="slide">
+    <div class="eyebrow">antes de digitar · três palavras novas</div>
+    <h2>O que é aquela tela preta</h2>
+    <div class="grid3">
+      <div class="card"><h3>O terminal</h3><p>Uma janela onde você <strong>digita ordens</strong> pro computador, em vez de clicar. Escreve uma linha, aperta Enter, ele responde. Só isso.</p></div>
+      <div class="card"><h3>Node</h3><p>O programa que faz o <strong>JavaScript rodar fora do navegador</strong>. Até hoje o seu JS só vivia dentro do Chrome. Agora vai rodar direto na máquina.</p></div>
+      <div class="card"><h3>Pacote</h3><p>Um <strong>pedaço de programa que outra pessoa já escreveu</strong> e deixou de graça pra você usar. Ninguém faz tudo do zero.</p></div>
+    </div>
+    <p class="note">Vai parecer estranho nos primeiros dias. Daqui a um mês você abre o terminal sem pensar — como quem abre o WhatsApp.</p>
+  </section>
+
+  <!-- 11b SETUP -->
+  <section class="slide">
     <div class="eyebrow">setup · o combinado técnico</div>
     <h2>O ambiente do semestre</h2>
     <div class="grid3">
-      <div class="card"><h3>Node 20.9+</h3><p>Programa que roda JavaScript fora do navegador. É o que faz o projeto funcionar na sua máquina.</p></div>
-      <div class="card"><h3>pnpm</h3><p>Baixa as peças prontas que o projeto usa. Mesma função do npm, só que mais rápido.</p></div>
-      <div class="card"><h3>VS Code + Git</h3><p>Editor e controle de versão. Conta no GitHub é obrigatória — a entrega é por lá.</p></div>
+      <div class="card"><h3>Node 20.9+</h3><p>Precisa ser essa versão ou mais nova. O Next 16 não funciona com versão velha.</p></div>
+      <div class="card"><h3>pnpm</h3><p>O <strong>entregador dos pacotes</strong>: você diz o que precisa, ele baixa da internet.</p></div>
+      <div class="card"><h3>VS Code + Git</h3><p>O editor onde você escreve, e o programa que <strong>guarda o histórico</strong> das suas mudanças. Conta no GitHub é obrigatória — a entrega é por lá.</p></div>
     </div>
     <span class="filetab" style="margin-top:22px">💻 confira antes de continuar</span>
 <div class="terminal"><span class="p">$</span> node -v
@@ -379,11 +391,11 @@
 │   ├── <b>page.tsx</b>      <span class="cm">a página inicial</span>
 │   └── globals.css     <span class="cm">estilos gerais</span>
 ├── public/             <span class="cm">imagens e arquivos soltos</span>
-├── package.json        <span class="cm">a lista de peças do projeto</span>
-└── node_modules/       <span class="cm">as peças baixadas (não mexa)</span></div>
+├── package.json        <span class="cm">a lista de compras do projeto</span>
+└── node_modules/       <span class="cm">as compras entregues (não mexa)</span></div>
       <div class="stack">
         <div class="card"><h3>app/</h3><p>A pasta que importa. Praticamente tudo que você fizer no semestre acontece dentro dela.</p></div>
-        <div class="card"><h3>node_modules/</h3><p>Não abra, não edite, não suba pro GitHub. É gerada pelo <span class="code-inline">pnpm install</span> a partir do package.json.</p></div>
+        <div class="card"><h3>node_modules/</h3><p>É onde os <strong>pacotes baixados</strong> ficam. Milhares de arquivos que você não escreveu. Não abra, não edite, não suba pro GitHub — se sumir, um <span class="code-inline">pnpm install</span> traz tudo de volta.</p></div>
       </div>
     </div>
   </section>
