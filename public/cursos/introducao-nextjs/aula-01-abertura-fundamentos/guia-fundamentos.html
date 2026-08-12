@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guia · Fundamentos e setup · Aula 01 · Frontend Avançado com Next.js · NickDev</title>
-<meta name="description" content="Guia da aula 01: ecossistema React moderno, SPA vs SSR vs SSG vs ISR, setup com Node e pnpm, estrutura do App Router e primeiro deploy na Vercel.">
+<title>Guia · Fundamentos e setup · Aula 01 · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Guia da aula 01: o problema do HTML repetido, o que é um componente, JSX, setup com Node e pnpm, estrutura do App Router e primeiro deploy na Vercel.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -105,14 +105,14 @@
 
 <div class="wrap">
 <aside>
-  <a class="voltar-curso" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+  <a class="voltar-curso" href="/cursos/introducao-nextjs">← voltar ao curso</a>
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
     <div class="grp">O conceito</div>
-    <a href="#react">O que mudou no React</a>
-    <a href="#estrategias">SPA, SSR, SSG e ISR</a>
-    <a href="#granularidade">A escolha é por rota</a>
-    <a href="#decidir">Como decidir na prática</a>
+    <a href="#problema">O problema: HTML que se repete</a>
+    <a href="#componente">Componente: a peça reutilizável</a>
+    <a href="#jsx">JSX: HTML dentro do JavaScript</a>
+    <a href="#react">React e Next: quem faz o quê</a>
     <div class="grp">Ambiente</div>
     <a href="#node">Node 20.9+</a>
     <a href="#pnpm">pnpm</a>
@@ -120,7 +120,7 @@
     <div class="grp">O projeto</div>
     <a href="#estrutura">A estrutura</a>
     <a href="#layout">layout e page</a>
-    <a href="#servidor">O primeiro Server Component</a>
+    <a href="#rotas">Criando uma rota nova</a>
     <div class="grp">Produção</div>
     <a href="#deploy">Deploy na Vercel</a>
     <div class="grp">Fechando</div>
@@ -133,112 +133,167 @@
   <div class="eyebrow">Aula 01 · guia de conteúdo</div>
   <h1>Fundamentos e <span class="g">setup</span></h1>
   <p class="lead">
-    O modelo mental que organiza o curso inteiro — onde o seu código roda e
-    quando ele renderiza — e o passo a passo pra deixar o ambiente pronto e o
-    primeiro deploy no ar.
+    A ideia que organiza o curso inteiro — o <b>componente</b>, uma peça de
+    interface escrita uma vez e usada em muitos lugares — e o passo a passo pra
+    deixar o ambiente pronto e o primeiro deploy no ar.
   </p>
   <div class="rule"></div>
 
   <div class="tip warn" style="margin-top:32px">
-    <b>🎯 O que esta aula assume.</b> JavaScript moderno, React com componentes
-    e hooks, HTML e CSS, e Git no dia a dia. O que for específico do Next é
-    ensinado do zero. Se algum pré-requisito estiver enferrujado,
-    <b>fale nesta semana</b> — recuperar agora é muito mais fácil do que na
-    aula 5.
+    <b>🎯 O que esta aula assume.</b> Só isto: HTML, CSS e JavaScript básico
+    (variável, função, array). <b>Você não precisa saber React</b> — a gente
+    começa do zero aqui. Tudo que for de React ou de Next é ensinado ao longo do
+    caminho. Se HTML ou JS estiverem enferrujados, <b>fale nesta semana</b>:
+    recuperar agora é muito mais fácil do que na aula 5.
   </div>
 
   <!-- ==================================================================== -->
+  <section id="problema">
+    <h2>O problema: HTML que se repete</h2>
+    <p>Antes de falar de Next.js, vale entender <b>que dor ele resolve</b>. E é
+    uma dor que você provavelmente já sentiu.</p>
+
+    <p>Imagine um site em HTML puro, com duas páginas. O cabeçalho é o mesmo nas
+    duas:</p>
+
+<pre><span class="cm">&lt;!-- index.html --&gt;</span>
+&lt;<span class="ty">header</span>&gt;
+  &lt;<span class="ty">h1</span>&gt;Minha Loja&lt;/<span class="ty">h1</span>&gt;
+  &lt;<span class="ty">nav</span>&gt;
+    &lt;<span class="ty">a</span> href=<span class="st">"index.html"</span>&gt;Início&lt;/<span class="ty">a</span>&gt;
+    &lt;<span class="ty">a</span> href=<span class="st">"sobre.html"</span>&gt;Sobre&lt;/<span class="ty">a</span>&gt;
+  &lt;/<span class="ty">nav</span>&gt;
+&lt;/<span class="ty">header</span>&gt;
+&lt;<span class="ty">main</span>&gt;Bem-vindo!&lt;/<span class="ty">main</span>&gt;
+
+<span class="cm">&lt;!-- sobre.html — o MESMO cabeçalho, copiado --&gt;</span>
+&lt;<span class="ty">header</span>&gt;
+  &lt;<span class="ty">h1</span>&gt;Minha Loja&lt;/<span class="ty">h1</span>&gt;
+  &lt;<span class="ty">nav</span>&gt;
+    &lt;<span class="ty">a</span> href=<span class="st">"index.html"</span>&gt;Início&lt;/<span class="ty">a</span>&gt;
+    &lt;<span class="ty">a</span> href=<span class="st">"sobre.html"</span>&gt;Sobre&lt;/<span class="ty">a</span>&gt;
+  &lt;/<span class="ty">nav</span>&gt;
+&lt;/<span class="ty">header</span>&gt;
+&lt;<span class="ty">main</span>&gt;Quem somos&lt;/<span class="ty">main</span>&gt;</pre>
+
+    <p>Copiar e colar funciona bem — <b>com duas páginas</b>. O problema aparece
+    na décima.</p>
+
+    <h3>A conta que não fecha</h3>
+    <p>Agora o cliente pede pra adicionar "Contato" no menu. Seu site tem 12
+    páginas. Então:</p>
+    <ul>
+      <li>Você abre <b>12 arquivos</b></li>
+      <li>Faz <b>a mesma edição 12 vezes</b></li>
+      <li>Esquece <b>uma</b> — e o site fica inconsistente sem ninguém perceber</li>
+    </ul>
+
+    <p>Repare no absurdo: o cabeçalho é <b>uma coisa só</b>, conceitualmente.
+    Mas está escrito em doze lugares diferentes. É esse descompasso que todo o
+    resto desta aula existe pra resolver.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="componente">
+    <h2>Componente: a peça reutilizável</h2>
+    <p>E se o cabeçalho fosse <b>uma peça</b>? Escrita uma vez, com um nome
+    próprio, e usada em quantas páginas você quiser. Mudou a peça, mudou em
+    todas de uma vez.</p>
+
+    <p>Essa peça tem nome: <b>componente</b>.</p>
+
+    <div class="tip"><b>Guarde esta definição.</b> Um componente é um pedaço de
+    interface com nome próprio, escrito uma vez e reaproveitado onde precisar.
+    É a palavra mais importante do semestre inteiro — tudo que vem depois é
+    variação disso.</div>
+
+    <h3>A analogia do LEGO</h3>
+    <p>Você não esculpe um castelo de LEGO de um bloco só. Você monta peças
+    pequenas — uma parede, uma janela, uma torre — e depois combina. Se a janela
+    precisar mudar, você muda o molde da janela, não cada castelo.</p>
+
+    <p>Uma página em Next.js é isso: um monte de peças combinadas. Cabeçalho,
+    lista de produtos, rodapé. Cada uma escrita separadamente, cada uma com seu
+    nome.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="jsx">
+    <h2>JSX: HTML dentro do JavaScript</h2>
+    <p>Na prática, um componente é <b>uma função JavaScript comum</b> — a mesma
+    que você já sabe escrever. Com duas diferenças: o nome começa com letra
+    maiúscula, e ela <b>devolve HTML</b>.</p>
+
+<pre><span class="kw">function</span> <span class="fn">Cabecalho</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">header</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Minha Loja&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">nav</span>&gt;
+        &lt;<span class="ty">a</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">a</span>&gt;
+        &lt;<span class="ty">a</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">a</span>&gt;
+      &lt;/<span class="ty">nav</span>&gt;
+    &lt;/<span class="ty">header</span>&gt;
+  );
+}</pre>
+
+    <p>Esse HTML escrito dentro do JavaScript tem nome: <b>JSX</b>. Não é uma
+    string, não está entre aspas — é escrito direto, e o Next entende.</p>
+
+    <h3>Como se usa</h3>
+    <p>Depois de criado, o componente vira uma tag:</p>
+
+<pre>&lt;<span class="ty">Cabecalho</span> /&gt;</pre>
+
+    <p>Igualzinho a uma tag HTML — só que quem inventou a tag foi você. É por
+    isso que o nome precisa começar com <b>maiúscula</b>: é assim que o Next
+    diferencia <code>&lt;header&gt;</code> (tag do HTML) de
+    <code>&lt;Cabecalho /&gt;</code> (peça sua).</p>
+
+    <h3>Três detalhes que pegam no começo</h3>
+    <table>
+      <tr><th>No HTML você escreve</th><th>No JSX vira</th><th>Por quê</th></tr>
+      <tr><td><code>class="botao"</code></td><td><code>className="botao"</code></td><td><code>class</code> já é palavra reservada do JavaScript</td></tr>
+      <tr><td><code>&lt;br&gt;</code></td><td><code>&lt;br /&gt;</code></td><td>toda tag precisa fechar, sem exceção</td></tr>
+      <tr><td>vários elementos soltos</td><td>tudo dentro de <b>um</b> elemento</td><td>a função só consegue devolver uma coisa</td></tr>
+    </table>
+
+    <div class="tip warn"><b>O erro mais comum da primeira semana.</b> Escrever
+    <code>class</code> em vez de <code>className</code>. O estilo simplesmente
+    não aplica e nenhum erro aparece. Quando o CSS "não funcionar sem motivo",
+    confira isso primeiro.</div>
+  </section>
+
+  <!-- ==================================================================== -->
   <section id="react">
-    <h2>O que mudou no React</h2>
-    <p>Pra entender por que o Next existe do jeito que existe, ajuda ver as três
-    eras do React como <b>tentativas de resolver o mesmo problema</b>: tirar
-    trabalho do navegador de quem acessa.</p>
+    <h2>React e Next: quem faz o quê</h2>
+    <p>Dois nomes vão aparecer o semestre inteiro. Vale saber de quem é cada um
+    — principalmente na hora de pesquisar no Google.</p>
 
     <table>
-      <tr><th>Era</th><th>Modelo mental</th><th>O que doía</th></tr>
-      <tr><td><b>Classes</b><br>até 2018</td><td>ciclo de vida (<code>componentDidMount</code>)</td><td>a lógica de uma feature ficava espalhada em três métodos</td></tr>
-      <tr><td><b>Hooks</b><br>2019–2022</td><td>estado e efeito dentro de funções</td><td><b>tudo</b> rodava no navegador: bundle grande e dados sempre em <code>useEffect</code></td></tr>
-      <tr><td><b>Server Components</b><br>2023 em diante</td><td>parte do componente roda no servidor</td><td>é o assunto deste curso</td></tr>
+      <tr><th>Nome</th><th>O que é</th><th>O que traz</th></tr>
+      <tr>
+        <td><b>React</b></td>
+        <td>A biblioteca que permite escrever interface em componentes</td>
+        <td>Componente, JSX, e a forma de combinar as peças</td>
+      </tr>
+      <tr>
+        <td><b>Next.js</b></td>
+        <td>A ferramenta construída <b>em volta</b> do React</td>
+        <td>Endereços, organização de pastas, e publicar no ar</td>
+      </tr>
     </table>
 
-    <p>A era dos hooks resolveu a organização do código, mas deixou uma conta
-    aberta: <b>a aplicação inteira precisava chegar no navegador antes de
-    qualquer coisa aparecer</b>.</p>
-  </section>
+    <p>React sozinho não sabe o que é uma página, nem o que é um endereço como
+    <code>/sobre</code>. Ele sabe montar peças de interface — e só. Next.js é o
+    que transforma essas peças num <b>site de verdade</b>.</p>
 
-  <!-- ==================================================================== -->
-  <section id="estrategias">
-    <h2>SPA, SSR, SSG e ISR</h2>
-    <p>Quatro estratégias, uma única variável: <b>quando o HTML é gerado</b>.</p>
+    <div class="tip"><b>A analogia.</b> React é o motor. Next.js é o carro
+    montado em volta do motor: direção, portas, placa. Você dirige o carro sem
+    precisar pensar no motor separadamente — mas quando o erro é do motor,
+    ajuda saber que ele tem outro nome.</div>
 
-    <table>
-      <tr><th>Sigla</th><th>HTML gerado</th><th>Boa para</th><th>Custo</th></tr>
-      <tr><td><b>CSR</b><br>client-side</td><td>no navegador, depois do JS carregar</td><td>painel atrás de login, editor, dashboard</td><td>primeira tela lenta, SEO fraco</td></tr>
-      <tr><td><b>SSR</b><br>server-side</td><td>a cada requisição, no servidor</td><td>conteúdo por pessoa: carrinho, feed, extrato</td><td>servidor trabalha em todo acesso</td></tr>
-      <tr><td><b>SSG</b><br>static</td><td>uma vez, no build</td><td>landing, blog, documentação</td><td>pra atualizar, precisa rebuildar</td></tr>
-      <tr><td><b>ISR</b><br>incremental</td><td>no build, e revalida de tempos em tempos</td><td>catálogo, notícias, listagens</td><td>pode servir conteúdo levemente velho</td></tr>
-    </table>
-
-    <h3>O problema da SPA pura</h3>
-    <p>Numa SPA, o servidor manda basicamente isto:</p>
-<pre>&lt;<span class="ty">body</span>&gt;
-  &lt;<span class="ty">div</span> id=<span class="st">"root"</span>&gt;&lt;/<span class="ty">div</span>&gt;
-  &lt;<span class="ty">script</span> src=<span class="st">"/bundle.js"</span>&gt;&lt;/<span class="ty">script</span>&gt;
-&lt;/<span class="ty">body</span>&gt;</pre>
-    <p>Três consequências, e todas aparecem em produção:</p>
-    <ul>
-      <li><b>Tela branca</b> até o bundle baixar e executar — quem está no 4G sente</li>
-      <li><b>SEO sofre:</b> o buscador recebe uma div vazia. Ele executa JavaScript, mas com atraso e sem garantia</li>
-      <li><b>Cascata de dados:</b> renderiza → <code>useEffect</code> → busca → renderiza de novo. Sempre um passo atrás</li>
-    </ul>
-  </section>
-
-  <!-- ==================================================================== -->
-  <section id="granularidade">
-    <h2>A escolha é por rota, não por projeto</h2>
-    <p>Aqui está a mudança que realmente importa, e a razão de o curso não ter
-    "uma aula de SSR e outra de SSG".</p>
-
-    <div class="duo">
-      <div class="box no">
-        <h4>❌ Como era antes</h4>
-        Você escolhia uma estratégia <b>para o site inteiro</b>. "Este projeto é SSR." E pronto — inclusive para as páginas que nunca mudam.
-      </div>
-      <div class="box ok">
-        <h4>✅ Como é no App Router</h4>
-        A escolha é <b>por rota</b>. E, com Partial Prerendering, até <b>por pedaço da mesma página</b>.
-      </div>
-    </div>
-
-    <p>Uma página de produto pode ter, ao mesmo tempo:</p>
-    <ul>
-      <li>Cabeçalho e descrição <b>estáticos</b> — não mudam entre acessos</li>
-      <li>Preço e estoque <b>revalidados a cada minuto</b></li>
-      <li>"Seus itens no carrinho" <b>por requisição</b>, porque é de cada pessoa</li>
-    </ul>
-
-    <div class="tip"><b>Por isso o eixo do curso é outro.</b> Em vez de decorar siglas, você vai aprender duas perguntas: <b>onde este código roda</b> (servidor ou cliente — aula 3) e <b>quando ele revalida</b> (aula 4). As siglas são consequência das respostas.</div>
-  </section>
-
-  <!-- ==================================================================== -->
-  <section id="decidir">
-    <h2>Como decidir na prática</h2>
-    <p>Duas perguntas, nesta ordem:</p>
-    <ol>
-      <li><b>Este conteúdo é igual para todo mundo?</b> Se não for, precisa ser gerado por requisição.</li>
-      <li><b>Com que frequência ele muda?</b> Nunca → estático. De vez em quando → revalidação. A cada acesso → dinâmico.</li>
-    </ol>
-
-    <h3>Exercite</h3>
-    <table>
-      <tr><th>Caso</th><th>Resposta</th><th>Por quê</th></tr>
-      <tr><td>Página "sobre nós"</td><td><b>SSG</b></td><td>igual pra todos, muda uma vez por ano</td></tr>
-      <tr><td>Extrato bancário</td><td><b>SSR</b></td><td>diferente por pessoa e sempre atual</td></tr>
-      <tr><td>Home de e-commerce</td><td><b>ISR</b></td><td>igual pra todos, muda quando entra promoção</td></tr>
-      <tr><td>Editor de texto</td><td><b>CSR</b></td><td>tudo acontece depois que a pessoa entra</td></tr>
-    </table>
-
-    <div class="tip warn"><b>O erro clássico:</b> tornar tudo dinâmico "por segurança". Funciona, e é caro — você paga servidor a cada acesso pra entregar conteúdo que nunca muda. Estático é o padrão; dinâmico é a exceção que você justifica.</div>
+    <p>Na prática, você vai escrever componentes (React) dentro da estrutura de
+    pastas do Next. Sem precisar separar as duas coisas na cabeça.</p>
   </section>
 
   <!-- ==================================================================== -->
@@ -314,7 +369,8 @@
       <tr><th>Você cria</th><th>URL que nasce</th></tr>
       <tr><td><code>app/page.tsx</code></td><td><code>/</code></td></tr>
       <tr><td><code>app/sobre/page.tsx</code></td><td><code>/sobre</code></td></tr>
-      <tr><td><code>app/blog/[slug]/page.tsx</code></td><td><code>/blog/qualquer-coisa</code></td></tr>
+      <tr><td><code>app/contato/page.tsx</code></td><td><code>/contato</code></td></tr>
+      <tr><td><code>app/blog/posts/page.tsx</code></td><td><code>/blog/posts</code></td></tr>
     </table>
 
     <div class="tip warn"><b>Pegadinha nº 1:</b> criar <code>app/sobre.tsx</code> em vez de <code>app/sobre/page.tsx</code>. Sem o arquivo chamado exatamente <code>page.tsx</code> dentro da pasta, a rota não existe — e você toma 404 sem nenhum erro no terminal.</div>
@@ -327,55 +383,95 @@
   <!-- ==================================================================== -->
   <section id="layout">
     <h2>layout e page</h2>
+    <p>Aqui a promessa do começo do guia é paga. Lembra do cabeçalho copiado em
+    doze arquivos? O <code>layout.tsx</code> é onde ele passa a existir
+    <b>uma vez só</b>.</p>
 
     <div class="file">📄 app/layout.tsx</div>
-<pre><span class="kw">export default function</span> <span class="ty">RootLayout</span>({
-  children,
-}: {
-  children: <span class="ty">React.ReactNode</span>;
-}) {
+<pre><span class="kw">export default function</span> <span class="ty">RootLayout</span>({ children }) {
   <span class="kw">return</span> (
     &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
-      &lt;<span class="ty">body</span>&gt;{children}&lt;/<span class="ty">body</span>&gt;
+      &lt;<span class="ty">body</span>&gt;
+        &lt;<span class="ty">header</span>&gt;Minha Loja&lt;/<span class="ty">header</span>&gt;   <span class="cm">← escrito UMA vez</span>
+
+        {children}                       <span class="cm">← cada página entra aqui</span>
+
+        &lt;<span class="ty">footer</span>&gt;© 2026&lt;/<span class="ty">footer</span>&gt;      <span class="cm">← e o rodapé também</span>
+      &lt;/<span class="ty">body</span>&gt;
     &lt;/<span class="ty">html</span>&gt;
   );
 }</pre>
 
     <ul>
+      <li>O que está no layout aparece em <b>todas</b> as páginas do site</li>
+      <li>Mudou o menu aqui? Mudou no site inteiro, de uma vez</li>
       <li>O layout <b>raiz</b> é obrigatório e é o único lugar com <code>&lt;html&gt;</code> e <code>&lt;body&gt;</code></li>
-      <li>Ao navegar entre rotas ele <b>não é remontado</b> — só o <code>children</code> troca</li>
-      <li>Por isso o cabeçalho não pisca, e o estado dele sobrevive à navegação</li>
+      <li><code>children</code> é o buraco onde a página da vez é encaixada</li>
     </ul>
+
+    <div class="tip"><b>Por que "children".</b> É a palavra que o React usa pra
+    dizer "o conteúdo que vem de dentro". Você não precisa entender o mecanismo
+    hoje — só saber que é ali que a página entra.</div>
 
     <div class="file">📄 app/page.tsx</div>
 <pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
-  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Olá, mundo&lt;/<span class="ty">h1</span>&gt;;
+  <span class="kw">return</span> (
+    &lt;<span class="ty">main</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Bem-vindo à Minha Loja&lt;/<span class="ty">h1</span>&gt;
+    &lt;/<span class="ty">main</span>&gt;
+  );
 }</pre>
+
+    <p>Uma função com nome, que devolve HTML. É <b>um componente</b> — o mesmo
+    conceito das seções anteriores. O <code>export default</code> na frente é o
+    que diz ao Next: "esta é a página desta pasta".</p>
   </section>
 
   <!-- ==================================================================== -->
-  <section id="servidor">
-    <h2>O primeiro Server Component</h2>
-    <p>Você já escreveu um, sem saber. No App Router, <b>todo componente é de
-    servidor por padrão</b>.</p>
+  <section id="rotas">
+    <h2>Criando uma rota nova</h2>
+    <p>Este é o exercício que fecha a aula, e ele é o coração do desafio da
+    semana. Vamos criar a página <code>/sobre</code>.</p>
 
-    <p>Faça este teste agora — é o momento em que a ficha cai:</p>
-<pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"onde eu apareço?"</span>);
-  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Olá, mundo&lt;/<span class="ty">h1</span>&gt;;
+    <h3>Passo 1 — crie a pasta</h3>
+    <p>Dentro de <code>app/</code>, crie uma pasta chamada <code>sobre</code>.
+    O nome da pasta <b>é</b> o endereço.</p>
+
+    <h3>Passo 2 — crie o arquivo</h3>
+    <p>Dentro dela, um arquivo chamado exatamente <code>page.tsx</code>:</p>
+
+    <div class="file">📄 app/sobre/page.tsx</div>
+<pre><span class="kw">export default function</span> <span class="ty">Sobre</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">main</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span>&gt;Meu nome é Fulana e este é meu primeiro projeto Next.js.&lt;/<span class="ty">p</span>&gt;
+    &lt;/<span class="ty">main</span>&gt;
+  );
 }</pre>
 
-    <p>Salve e procure a mensagem. Ela está no <b>terminal onde o
-    <code>pnpm dev</code> roda</b> — não no console do navegador.</p>
+    <h3>Passo 3 — abra no navegador</h3>
+    <p>Vá em <code>http://localhost:3000/sobre</code>. A página está lá. Você
+    não configurou rota nenhuma — só criou uma pasta e um arquivo.</p>
 
-    <h3>Por que isso importa</h3>
-    <ul>
-      <li>Esse componente <b>não virou JavaScript</b> enviado pra quem acessa — zero bytes de bundle</li>
-      <li>O navegador recebeu HTML pronto, então a primeira tela aparece rápido</li>
-      <li>Como roda no servidor, ele pode falar com banco de dados e usar chave secreta sem expor nada</li>
-    </ul>
+    <p>E repare: o <b>cabeçalho do layout aparece nela também</b>, sem você ter
+    escrito nada. É exatamente o problema das doze páginas, resolvido.</p>
 
-    <div class="tip"><b>Guarde a surpresa.</b> O mecanismo inteiro — a fronteira <code>"use client"</code>, o que atravessa e o que não atravessa — é a <b>aula 3</b>. Hoje basta você ter visto acontecer.</div>
+    <h3>Passo 4 — ligue as duas páginas</h3>
+    <p>Pra navegar entre elas, o Next tem uma tag própria. No
+    <code>layout.tsx</code>:</p>
+
+<pre><span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+
+<span class="cm">// ...dentro do header:</span>
+&lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
+&lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;</pre>
+
+    <div class="tip"><b>Por que <code>Link</code> e não <code>&lt;a&gt;</code>.</b>
+    Com <code>&lt;a&gt;</code> o navegador recarrega a página inteira — tela
+    branca e tudo de novo. Com <code>Link</code>, o Next troca só o que mudou e
+    a navegação fica instantânea. Use sempre <code>Link</code> para páginas do
+    seu próprio site; <code>&lt;a&gt;</code> só para links externos.</div>
   </section>
 
   <!-- ==================================================================== -->
@@ -412,9 +508,19 @@
     <p>Tem outra execução rodando. Pare a anterior, ou use
     <code>pnpm dev -p 3001</code>.</p>
 
-    <h4>You're importing a component that needs useState…</h4>
-    <p>Faltou <code>"use client"</code> na primeira linha do arquivo. Assunto da
-    aula 3 — por hoje, saiba que a mensagem é literal.</p>
+    <h4>O CSS não aplica e nenhum erro aparece</h4>
+    <p>Quase sempre é <code>class</code> escrito no lugar de
+    <code>className</code>. No JSX o atributo tem outro nome.</p>
+
+    <h4>Adjacent JSX elements must be wrapped…</h4>
+    <p>Você devolveu dois elementos soltos. Envolva tudo num só —
+    <code>&lt;main&gt;</code>, <code>&lt;div&gt;</code>, ou
+    <code>&lt;&gt;…&lt;/&gt;</code> se não quiser criar uma tag de verdade.</p>
+
+    <h4>Unexpected token / erro estranho no JSX</h4>
+    <p>Confira se toda tag fechou. No JSX <code>&lt;br&gt;</code> e
+    <code>&lt;img&gt;</code> precisam virar <code>&lt;br /&gt;</code> e
+    <code>&lt;img /&gt;</code>.</p>
 
     <h4>Module not found: Can't resolve '@/components/…'</h4>
     <p>Confira a maiúscula no nome do arquivo. No Windows funciona
@@ -450,28 +556,32 @@ pnpm dev -p 3001                <span class="cm">outra porta</span>
 <span class="cm">// ---------- rotas ----------</span>
 app/page.tsx                    <span class="cm">→ /</span>
 app/sobre/page.tsx              <span class="cm">→ /sobre</span>
-app/blog/[slug]/page.tsx        <span class="cm">→ /blog/qualquer-coisa</span>
+app/blog/posts/page.tsx         <span class="cm">→ /blog/posts</span>
 
 <span class="cm">// ---------- navegação ----------</span>
 <span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
 &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
 
-<span class="cm">// ---------- as 4 estratégias ----------</span>
-CSR   no navegador          painel, editor
-SSR   a cada requisição     conteúdo por pessoa
-SSG   uma vez, no build     landing, blog
-ISR   build + revalidação   catálogo, notícias
+<span class="cm">// ---------- um componente ----------</span>
+<span class="kw">export default function</span> <span class="ty">Nome</span>() {
+  <span class="kw">return</span> &lt;<span class="ty">main</span>&gt;conteúdo&lt;/<span class="ty">main</span>&gt;;
+}
 
-<span class="cm">// ---------- as 2 perguntas que decidem ----------</span>
-1. é igual pra todo mundo?
-2. com que frequência muda?</pre>
+<span class="cm">// ---------- HTML → JSX ----------</span>
+class=      <span class="cm">vira</span>  className=
+&lt;br&gt;        <span class="cm">vira</span>  &lt;br /&gt;
+2 elementos <span class="cm">viram</span> 1 elemento envolvendo os dois
+
+<span class="cm">// ---------- as 2 perguntas do dia ----------</span>
+1. isso se repete em várias páginas?  → componente
+2. tem endereço próprio?              → pasta com page.tsx</pre>
 
     <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
     <a class="cta" href="codigos-desafio.html">🧩 Código comentado</a>
     <a class="cta" href="roteiro-aula.html">🛠️ Roteiro da aula</a>
     <a class="cta" href="slides.html">▶ Slides</a>
 
-    <div class="foot">Guia da Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+    <div class="foot">Guia da Aula 01 · Introdução ao Next.js · NickDev 💜</div>
   </section>
 
 </main>
