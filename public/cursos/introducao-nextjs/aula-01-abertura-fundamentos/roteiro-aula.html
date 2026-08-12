@@ -156,13 +156,13 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <li>Projeto de exemplo já criado e rodando na sua máquina, pra demonstrar sem esperar download</li>
     <li>Uma conta Vercel de demonstração logada</li>
     <li>Link do repositório de exemplo pronto pra colar no chat</li>
-    <li>Se a instituição tiver proxy ou bloqueio de rede, teste o <code>pnpm create next-app</code> na sala <b>antes</b></li>
+    <li>Se a instituição tiver proxy ou bloqueio de rede, teste o <code>npx create-next-app</code> na sala <b>antes</b></li>
   </ul>
 
   <div class="label">A aula, bloco a bloco</div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">20 min</span><h3>Abertura: plano e critérios</h3></div>
+    <div class="bloco-hd"><span class="dur">15 min</span><h3>Abertura: plano e critérios</h3></div>
     <p>Apresentação da disciplina, como a nota é composta e o que vai ser
     construído ao longo do semestre.</p>
     <ul>
@@ -175,7 +175,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   </div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">30 min</span><h3>O problema: HTML que se repete</h3></div>
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>O problema: HTML que se repete</h3></div>
     <p>O bloco que ancora a aula inteira. Não pule direto pro Next — a dor tem
     que vir primeiro, senão a solução não faz sentido.</p>
     <ol>
@@ -207,23 +207,20 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 7–9</span></div>
   </div>
 
-  <div class="pausa"><span class="dur">☕ 10 min</span> Intervalo</div>
-
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">30 min</span><h3>Setup: Node, pnpm e create-next-app</h3></div>
+    <div class="bloco-hd"><span class="dur">30 min</span><h3>Setup: Node, npm e create-next-app</h3></div>
     <p>Todo mundo digitando junto. É o bloco de maior risco — reserve monitoria.</p>
 <pre><span class="cm"># confere o Node</span>
 node -v                       <span class="cm">precisa ser 20.9+</span>
 
-<span class="cm"># instala o pnpm</span>
-corepack enable pnpm
-pnpm -v
+<span class="cm"># o npm ja vem com o Node</span>
+npm -v
 
 <span class="cm"># cria o projeto</span>
-pnpm create next-app@latest meu-projeto
+npx create-next-app@latest meu-projeto
 cd meu-projeto
-pnpm dev</pre>
-    <div class="dica"><b>Enquanto instala, aproveite o tempo morto:</b> explique o que é o Node (roda JavaScript fora do navegador) e o que é o pnpm (baixa as peças prontas). A turma está olhando a barra de progresso mesmo — é o melhor momento pra um conceito curto.</div>
+npm run dev</pre>
+    <div class="dica"><b>Enquanto instala, aproveite o tempo morto:</b> explique o que é o Node (roda JavaScript fora do navegador) e o que é o npm (baixa as peças prontas, e já vem junto com o Node). A turma está olhando a barra de progresso mesmo — é o melhor momento pra um conceito curto.</div>
     <div class="dica"><b>Atenção no prompt do Tailwind: responda <code>No</code>.</b> A turma não conhece Tailwind, e ele entra só na <b>aula 8</b>. Até lá o estilo é CSS comum no <code>globals.css</code> — que eles já sabem escrever. Passe na sala conferindo: quem marcar <code>Yes</code> fica com um projeto diferente do dos exemplos, e isso vira suporte pelo resto do semestre.</div>
     <ul class="check">
       <li>Todo mundo com <code>localhost:3000</code> aberto</li>
@@ -251,9 +248,9 @@ pnpm dev</pre>
   </div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">20 min</span><h3>Primeiro deploy na Vercel</h3></div>
+    <div class="bloco-hd"><span class="dur">15 min</span><h3>Primeiro deploy na Vercel</h3></div>
     <ol>
-      <li><code>pnpm build</code> local — e leia a <b>lista de rotas</b> junto com a turma</li>
+      <li><code>npm run build</code> local — e leia a <b>lista de rotas</b> junto com a turma</li>
       <li><code>git push</code> pro GitHub</li>
       <li>Vercel → Add New → Project → importar → Deploy</li>
       <li>Cada pessoa manda o link no grupo 🎉</li>
@@ -263,7 +260,7 @@ pnpm dev</pre>
   </div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">20 min</span><h3>Equipes e desafio</h3></div>
+    <div class="bloco-hd"><span class="dur">10 min</span><h3>Equipes e desafio</h3></div>
     <ul>
       <li>Formação das equipes de <b>3 a 4 pessoas</b></li>
       <li>Repositório da equipe criado ainda na sala, com todo mundo dentro</li>

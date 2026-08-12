@@ -254,7 +254,7 @@ export default function FrontendAvancadoNextjs() {
               Plano de ensino, critérios e formação das equipes. Por que HTML
               puro trava quando o site cresce, e a ideia que organiza o curso
               inteiro: <strong>o componente</strong>. JSX, quem é React e quem é
-              Next, setup do ambiente (Node, pnpm,{" "}
+              Next, setup do ambiente (Node, npm,{" "}
               <span className="mono">create-next-app</span>), rota por pasta e o
               primeiro deploy na Vercel. Estilo em CSS comum — Tailwind entra na
               aula 08.

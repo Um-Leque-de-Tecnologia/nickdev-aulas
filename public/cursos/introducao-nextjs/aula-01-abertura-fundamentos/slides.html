@@ -187,13 +187,13 @@
     <div class="eyebrow">agenda · aula 01</div>
     <h2>O mapa de hoje</h2>
     <div class="agenda">
-      <div class="row"><span class="t">19h00</span><span class="d">Abertura, plano do semestre e formação das equipes</span><span class="tag">conversa</span></div>
-      <div class="row"><span class="t">19h20</span><span class="d">O problema: por que HTML puro trava quando o site cresce</span><span class="tag">conceito</span></div>
-      <div class="row"><span class="t">19h50</span><span class="d">A solução: componente, JSX, e o que React e Next são</span><span class="tag">conceito</span></div>
-      <div class="row brk"><span class="t">20h20</span><span class="d">Intervalo</span><span class="tag">10 min</span></div>
-      <div class="row"><span class="t">20h30</span><span class="d">Instalação do ambiente e criação do projeto</span><span class="tag">mão na massa</span></div>
-      <div class="row"><span class="t">21h00</span><span class="d">Lendo o projeto: layout, página e rota por pasta</span><span class="tag">live code</span></div>
-      <div class="row"><span class="t">21h20</span><span class="d">Projeto no ar e desafio da semana</span><span class="tag">entrega</span></div>
+      <div class="row"><span class="t">19h00</span><span class="d">Abertura, plano do semestre e como a disciplina funciona</span><span class="tag">conversa</span></div>
+      <div class="row"><span class="t">19h15</span><span class="d">O problema: por que HTML puro trava quando o site cresce</span><span class="tag">conceito</span></div>
+      <div class="row"><span class="t">19h40</span><span class="d">A solução: componente, JSX, e o que React e Next são</span><span class="tag">conceito</span></div>
+      <div class="row"><span class="t">20h05</span><span class="d">Instalação do ambiente e criação do projeto</span><span class="tag">mão na massa</span></div>
+      <div class="row"><span class="t">20h35</span><span class="d">Lendo o projeto: layout, página e rota por pasta</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">21h05</span><span class="d">Projeto no ar pela Vercel</span><span class="tag">entrega</span></div>
+      <div class="row"><span class="t">21h20</span><span class="d">Formação das equipes e desafio da semana</span><span class="tag">combinados</span></div>
     </div>
   </section>
 
@@ -328,8 +328,8 @@
 
   <!-- 10 PARADA -->
   <section class="slide parada">
-    <div class="badge">pausa · 10 minutos</div>
-    <h1>Volta que a gente coloca a mão</h1>
+    <div class="badge">parte 2 · mão na massa</div>
+    <h1>Agora a gente coloca a mão</h1>
   </section>
 
   <!-- 11 SETUP -->
@@ -350,15 +350,15 @@
     <h2>O ambiente do semestre</h2>
     <div class="grid3">
       <div class="card"><h3>Node 20.9+</h3><p>Precisa ser essa versão ou mais nova. O Next 16 não funciona com versão velha.</p></div>
-      <div class="card"><h3>pnpm</h3><p>O <strong>entregador dos pacotes</strong>: você diz o que precisa, ele baixa da internet.</p></div>
+      <div class="card"><h3>npm</h3><p>O <strong>entregador dos pacotes</strong>: você diz o que precisa, ele baixa da internet. Já vem com o Node.</p></div>
       <div class="card"><h3>VS Code + Git</h3><p>O editor onde você escreve, e o programa que <strong>guarda o histórico</strong> das suas mudanças. Conta no GitHub é obrigatória — a entrega é por lá.</p></div>
     </div>
     <span class="filetab" style="margin-top:22px">💻 confira antes de continuar</span>
 <div class="terminal"><span class="p">$</span> node -v
 <span class="out">v20.11.0</span>   <span class="cm">← precisa ser 20.9 ou maior</span>
 
-<span class="p">$</span> pnpm -v
-<span class="out">9.1.0</span>     <span class="cm">← se der "command not found": npm i -g pnpm</span></div>
+<span class="p">$</span> npm -v
+<span class="out">10.8.2</span>   <span class="cm">← já vem junto com o Node</span></div>
   </section>
 
   <!-- 12 CRIAR O PROJETO -->
@@ -366,7 +366,7 @@
     <div class="eyebrow">mão na massa · criando o projeto</div>
     <h2>Um comando, projeto pronto</h2>
     <span class="filetab">💻 terminal</span>
-<div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-primeiro-next
+<div class="terminal"><span class="p">$</span> npx create-next-app@latest meu-primeiro-next
 
 <span class="cm">Would you like to use TypeScript?</span>          <span class="out">Yes</span>
 <span class="cm">Would you like to use ESLint?</span>              <span class="out">Yes</span>
@@ -375,7 +375,7 @@
 <span class="cm">Would you like to use App Router?</span>          <span class="out">Yes</span>  <span class="cm">← esse é obrigatório</span>
 
 <span class="p">$</span> cd meu-primeiro-next
-<span class="p">$</span> pnpm dev
+<span class="p">$</span> npm run dev
 <span class="out">▲ Next.js 16.3 · Local: http://localhost:3000</span></div>
     <p class="note">Responda igual à turma inteira. Ambiente diferente é a causa nº 1 de "na minha máquina não funciona" — e a gente não vai gastar aula com isso. <strong>Tailwind fica pra aula 08</strong>: até lá o estilo é CSS comum, que vocês já sabem.</p>
   </section>
@@ -395,7 +395,7 @@
 └── node_modules/       <span class="cm">as compras entregues (não mexa)</span></div>
       <div class="stack">
         <div class="card"><h3>app/</h3><p>A pasta que importa. Praticamente tudo que você fizer no semestre acontece dentro dela.</p></div>
-        <div class="card"><h3>node_modules/</h3><p>É onde os <strong>pacotes baixados</strong> ficam. Milhares de arquivos que você não escreveu. Não abra, não edite, não suba pro GitHub — se sumir, um <span class="code-inline">pnpm install</span> traz tudo de volta.</p></div>
+        <div class="card"><h3>node_modules/</h3><p>É onde os <strong>pacotes baixados</strong> ficam. Milhares de arquivos que você não escreveu. Não abra, não edite, não suba pro GitHub — se sumir, um <span class="code-inline">npm install</span> traz tudo de volta.</p></div>
       </div>
     </div>
   </section>
@@ -478,7 +478,7 @@
     <div class="steps">
       <div class="st"><div class="body"><h3>Suba o código pro GitHub</h3><p>Um repositório novo, público, com o projeto que você acabou de criar.</p></div></div>
       <div class="st"><div class="body"><h3>Conecte na Vercel</h3><p>Login com GitHub, "Import Project", escolhe o repositório. Não precisa configurar nada.</p></div></div>
-      <div class="st"><div class="body"><h3>Ela faz o build sozinha</h3><p><strong>Build</strong> = empacotar o projeto no formato final, pronto pra ser servido. É o que o <span class="code-inline">pnpm dev</span> não faz.</p></div></div>
+      <div class="st"><div class="body"><h3>Ela faz o build sozinha</h3><p><strong>Build</strong> = empacotar o projeto no formato final, pronto pra ser servido. É o que o <span class="code-inline">npm run dev</span> não faz.</p></div></div>
       <div class="st"><div class="body"><h3>Recebe um link</h3><p>Termina em <span class="code-inline">.vercel.app</span>. Abre no celular. Manda pra sua mãe.</p></div></div>
     </div>
     <p class="note">A partir de agora, todo <span class="code-inline">git push</span> atualiza o site sozinho. Você nunca mais vai "publicar" manualmente nesta disciplina.</p>
@@ -502,7 +502,7 @@
     <div class="eyebrow">desafio · até a próxima quarta</div>
     <h2>Ambiente, projeto e deploy</h2>
     <ul class="clean">
-      <li>Node e pnpm instalados e conferidos com <span class="code-inline">-v</span></li>
+      <li>Node e npm conferidos com <span class="code-inline">-v</span></li>
       <li>Projeto criado com as respostas combinadas em aula</li>
       <li>Uma página <span class="code-inline">/sobre</span> criada por você, com seu nome</li>
       <li>Cabeçalho no <span class="code-inline">layout.tsx</span>, aparecendo nas duas páginas</li>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guia · Fundamentos e setup · Aula 01 · Introdução ao Next.js · NickDev</title>
-<meta name="description" content="Guia da aula 01: o problema do HTML repetido, o que é um componente, JSX, setup com Node e pnpm, estrutura do App Router e primeiro deploy na Vercel.">
+<meta name="description" content="Guia da aula 01: o problema do HTML repetido, o que é um componente, JSX, setup com Node e npm, estrutura do App Router e primeiro deploy na Vercel.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -117,7 +117,7 @@
     <a href="#react">React e Next: quem faz o quê</a>
     <div class="grp">Ambiente</div>
     <a href="#node">Node 20.9+</a>
-    <a href="#pnpm">pnpm</a>
+    <a href="#npm">npm</a>
     <a href="#criar">Criar o projeto</a>
     <div class="grp">O projeto</div>
     <a href="#estrutura">A estrutura</a>
@@ -172,8 +172,8 @@
         <td>Um <b>pedaço de programa que outra pessoa já escreveu</b> e disponibilizou de graça pra você usar. Em vez de fazer tudo do zero, você pega pronto. É como usar farinha comprada em vez de moer o trigo.</td>
       </tr>
       <tr>
-        <td><b>pnpm</b></td>
-        <td>O <b>entregador dos pacotes</b>. Você diz o que precisa, ele baixa da internet e guarda na pasta do projeto. Existem outros entregadores (npm, yarn) — o nosso é o pnpm.</td>
+        <td><b>npm</b></td>
+        <td>O <b>entregador dos pacotes</b>. Você diz o que precisa, ele baixa da internet e guarda na pasta do projeto. Já vem junto com o Node — não precisa instalar.</td>
       </tr>
       <tr>
         <td><b>Framework</b></td>
@@ -410,34 +410,41 @@
   </section>
 
   <!-- ==================================================================== -->
-  <section id="pnpm">
-    <h2>pnpm</h2>
-    <p>O <b>pnpm é o entregador dos pacotes</b>: você diz o que o projeto
-    precisa, e ele baixa da internet. Existem outros entregadores fazendo a
-    mesma coisa — o npm é o mais conhecido — mas neste curso a gente usa o pnpm,
-    porque ele é mais rápido e gasta menos espaço no seu disco.</p>
-    <p>Pra instalar, digite estas duas linhas no terminal:</p>
-<div class="terminal"><span class="p">$</span> corepack enable pnpm
-<span class="p">$</span> pnpm -v
-<span class="out">10.x</span></div>
+  <section id="npm">
+    <h2>npm</h2>
+    <p>O <b>npm é o entregador dos pacotes</b>: você diz o que o projeto precisa,
+    e ele baixa da internet. Lembra do dicionário — pacote é um pedaço de
+    programa que outra pessoa já escreveu e deixou pronto pra você usar.</p>
 
-    <h3>Por que não o npm, então?</h3>
-    <p>Imagine que cada projeto seu precisa dos mesmos 300 livros.</p>
-    <ul>
-      <li>O <b>npm</b> compra 300 livros novos <b>pra cada projeto</b>. Cinco projetos, 1500 livros ocupando espaço.</li>
-      <li>O <b>pnpm</b> compra uma vez só e guarda numa biblioteca central. Cada projeto ganha uma <b>plaquinha</b> apontando pra lá.</li>
-    </ul>
-    <p>Resultado: instala mais rápido e ocupa muito menos espaço no seu
-    computador. Com cinco projetos Next na máquina, a diferença passa de 1 GB.</p>
-    <div class="tip"><b>O que muda pra você no dia a dia: quase nada.</b> Onde
-    você veria <code>npm install</code>, escreve <code>pnpm install</code>. Onde
-    veria <code>npm run dev</code>, escreve <code>pnpm dev</code>. Só isso.</div>
+    <div class="tip"><b>Boa notícia: você não precisa instalar nada.</b> O npm
+    vem junto com o Node. Se o <code>node -v</code> funcionou, o npm já está aí
+    também.</div>
+
+    <p>Confira:</p>
+<div class="terminal"><span class="p">$</span> npm -v
+<span class="out">10.8.2</span></div>
+
+    <h3>Os quatro comandos que você vai usar o semestre inteiro</h3>
+    <table>
+      <thead><tr><th>Comando</th><th>O que faz</th></tr></thead>
+      <tbody>
+        <tr><td><code>npm install</code></td><td>Baixa tudo que o projeto precisa. Você roda quando <b>clona</b> um projeto de outra pessoa, ou quando o seu <code>node_modules</code> some.</td></tr>
+        <tr><td><code>npm run dev</code></td><td>Liga o projeto <b>enquanto você trabalha</b>. Fica rodando; toda vez que você salva um arquivo, a página atualiza sozinha.</td></tr>
+        <tr><td><code>npm run build</code></td><td><b>Empacota</b> o projeto no formato final, pronto pra publicar. É o mesmo comando que a Vercel roda.</td></tr>
+        <tr><td><code>npm start</code></td><td>Roda o projeto <b>já empacotado</b>. Você vai usar pouco — serve pra testar o resultado do build na sua máquina.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip warn"><b>Cuidado com o <code>run</code>.</b> É
+    <code>npm run dev</code> e <code>npm run build</code>, mas
+    <code>npm install</code> e <code>npm start</code> sem o <code>run</code>.
+    Não tem lógica bonita — é assim e pronto. Se errar, o npm avisa.</div>
   </section>
 
   <!-- ==================================================================== -->
   <section id="criar">
     <h2>Criar o projeto</h2>
-<div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-projeto</div>
+<div class="terminal"><span class="p">$</span> npx create-next-app@latest meu-projeto</div>
 
     <p>Ele vai fazer <b>seis perguntas</b> em inglês. Elas assustam na primeira
     vez, mas cada uma é simples. Responda assim:</p>
@@ -485,7 +492,7 @@
     mundo — e os exemplos da aula não vão bater.</div>
 
 <div class="terminal"><span class="p">$</span> cd meu-projeto
-<span class="p">$</span> pnpm dev
+<span class="p">$</span> npm run dev
 <span class="out">▲ Next.js 16.3.0 (Turbopack)
 - Local: http://localhost:3000
 ✓ Ready in 812ms</span></div>
@@ -631,7 +638,7 @@
 
     <h3>O caminho, passo a passo</h3>
     <ol>
-      <li>Rode <code>pnpm build</code> no seu computador. Esse comando <b>empacota o projeto</b> no formato final. Se ele reclamar de alguma coisa, conserte antes de continuar — é o mesmo comando que a Vercel vai rodar</li>
+      <li>Rode <code>npm run build</code> no seu computador. Esse comando <b>empacota o projeto</b> no formato final. Se ele reclamar de alguma coisa, conserte antes de continuar — é o mesmo comando que a Vercel vai rodar</li>
       <li>Mande o projeto pro <b>GitHub</b> (é onde o código fica guardado na internet). O repositório precisa ser <b>público</b></li>
       <li>Entre em <code>vercel.com</code> e faça login com a sua conta do GitHub</li>
       <li>Clique em <b>Add New… → Project</b> e escolha o repositório que você acabou de subir</li>
@@ -653,7 +660,7 @@
     ver como ficou antes de mexer no site de verdade. Isso é assunto da aula de
     deploy, mas já vale saber que existe.</p>
 
-    <div class="tip"><b>Rode <code>pnpm build</code> antes de mandar pro GitHub.</b>
+    <div class="tip"><b>Rode <code>npm run build</code> antes de mandar pro GitHub.</b>
     É exatamente o mesmo comando que a Vercel vai rodar. Se ele reclamar aqui, ia
     reclamar lá também — e é bem mais rápido descobrir no seu computador do que
     esperar o site falhar.</div>
@@ -669,7 +676,7 @@
 
     <h4>Port 3000 is already in use</h4>
     <p>Tem outra execução rodando. Pare a anterior, ou use
-    <code>pnpm dev -p 3001</code>.</p>
+    <code>npm run dev -p 3001</code>.</p>
 
     <h4>O CSS não aplica e nenhum erro aparece</h4>
     <p>Quase sempre é <code>class</code> escrito no lugar de
@@ -697,7 +704,7 @@
     <h4>Disco cheio</h4>
     <p><code>node_modules</code> de um projeto Next passa de 500 MB. Com vários
     projetos, o disco enche rápido — e o sintoma costuma ser um erro que não
-    fala nada de disco. É outra razão pra usar pnpm, que compartilha os pacotes.</p>
+    fala nada de disco. Se algo parar de funcionar sem explicação, confira o espaço livre antes de qualquer outra hipótese.</p>
   </section>
 
   <!-- ==================================================================== -->
@@ -706,15 +713,15 @@
 
 <pre><span class="cm">// ---------- ambiente ----------</span>
 node -v                         <span class="cm">precisa ser 20.9+</span>
-corepack enable pnpm            <span class="cm">instala o pnpm</span>
+npm -v                          <span class="cm">ja vem com o Node</span>
 
 <span class="cm">// ---------- projeto ----------</span>
-pnpm create next-app@latest nome
+npx create-next-app@latest nome
 cd nome
-pnpm dev                        <span class="cm">desenvolver</span>
-pnpm build                      <span class="cm">conferir antes do push</span>
-pnpm start                      <span class="cm">rodar o build local</span>
-pnpm dev -p 3001                <span class="cm">outra porta</span>
+npm run dev                        <span class="cm">desenvolver</span>
+npm run build                      <span class="cm">conferir antes do push</span>
+npm start                      <span class="cm">rodar o build local</span>
+npm run dev -p 3001                <span class="cm">outra porta</span>
 
 <span class="cm">// ---------- rotas ----------</span>
 app/page.tsx                    <span class="cm">→ /</span>
