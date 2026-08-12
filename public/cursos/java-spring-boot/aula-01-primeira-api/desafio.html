@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Desafio 01 — Sua primeira API · Java Avançado · NickDev</title>
-<meta name="description" content="Desafio da aula 01: criar um projeto Spring Boot, escrever controller e service com injeção por construtor e publicar uma API REST com três rotas GET.">
+<meta name="description" content="Desafio da aula 01: criar um projeto Spring Boot do zero, configurar o application.properties e publicar três endpoints GET que respondem texto, objeto e lista em JSON.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -47,7 +47,9 @@ h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spac
 .goal .ico{font-size:26px;line-height:1}
 .goal h3{font-size:17px;margin-bottom:4px}
 .goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
 .goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
 
 .label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
 .label::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -57,7 +59,7 @@ h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spac
 .step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
 .step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
 .step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
-.step ul{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
 .step li{margin:4px 0}
 .step li b{color:var(--text)}
 .step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
@@ -82,6 +84,12 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 @media(max-width:640px){.grid2{grid-template-columns:1fr}}
 .mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
 .mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
 
 .entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
 .entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
@@ -112,20 +120,23 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <div class="eyebrow">Desafio · Aula 01</div>
   <h1>Sua primeira <span class="grad">API REST</span> 🌱</h1>
   <p class="lead">
-    Criar um projeto Spring Boot do zero, com <b>controller e service
-    conversando por injeção de dependência</b>, e publicar uma API com três
-    rotas que respondem JSON. O tema do acervo é seu.
+    Criar um projeto Spring Boot do zero, configurá-lo e publicar
+    <b>três endpoints</b> que respondem no navegador — um em texto, um com um
+    objeto e um com uma lista em JSON. O tema é seu.
   </p>
   <div class="rule"></div>
 
   <div class="goal">
     <span class="ico">🎯</span>
     <div>
-      <h3>O objetivo</h3>
-      <p>Provar que você entendeu o conceito central da aula: <b>a sua classe
-      declara o que precisa e o Spring entrega</b>. Se em algum lugar do seu
-      código tiver um <code>new</code> criando um service, o desafio não está
-      cumprido — mesmo que a API funcione.</p>
+      <h3>O que este desafio verifica</h3>
+      <p>Que você consegue, <b>sozinho e sem consultar</b>, sair do zero até uma
+      API respondendo. Não tem pegadinha nem lógica difícil: o que está sendo
+      testado é o caminho — criar, configurar, rodar, mapear uma rota e ver
+      responder.</p>
+      <p>É a base de tudo que vem depois. Da aula 03 em diante, toda aula começa
+      com "abra seu projeto e crie um controller". Se esse passo estiver
+      automático, você acompanha o semestre inteiro tranquilo.</p>
     </div>
   </div>
 
@@ -133,163 +144,225 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <span class="ico">🎨</span>
     <div>
       <h3>O tema é seu</h3>
-      <p>Na aula usamos mídias, mas escolha o que você teria vontade de
-      catalogar: livros, receitas, plantas, discos, jogos, trilhas de estudo.
-      A estrutura é a mesma — e um tema que te interessa deixa o projeto muito
-      mais fácil de terminar.</p>
+      <p>Na aula usei livros. Escolha algo que <b>você</b> teria vontade de
+      catalogar: receitas, plantas, discos, jogos, filmes, exercícios de treino,
+      trilhas de estudo. A estrutura é idêntica — e um tema que te interessa é um
+      projeto que você termina.</p>
+      <p>Guarde essa escolha: ela <b>não precisa</b> ser o tema do projeto da
+      disciplina (esse a equipe define na aula 03), mas pode ser.</p>
     </div>
   </div>
 
   <div class="label">Passo a passo</div>
 
   <div class="step">
-    <div class="step-head"><span class="n">01</span><h3>Crie o projeto no Initializr</h3></div>
-    <p>Em <code>start.spring.io</code>, com estas escolhas:</p>
+    <div class="step-head"><span class="n">01</span><h3>Prepare a máquina</h3></div>
+    <p>Se ainda não fez, faça agora — <b>antes</b> de tentar criar o projeto.</p>
     <ul>
-      <li><b>Maven</b> · <b>Java</b> · Spring Boot <b>4.1.x</b> (versão estável, sem SNAPSHOT)</li>
-      <li>Group <code>com.seunome</code> · Artifact do seu tema · Packaging <b>Jar</b> · Java <b>21</b></li>
-      <li>Dependências: <b>Spring Web</b> e <b>Spring Boot DevTools</b></li>
+      <li><b>JDK 21</b> instalado. Confira no terminal com <code>java -version</code>:
+      tem que aparecer <code>21</code>, não 17 nem 11.</li>
+      <li><b>IntelliJ IDEA Community</b> instalado e abrindo.</li>
     </ul>
-    <p class="tip"><b>Só essas duas.</b> Banco e segurança vêm nas próximas aulas — cada dependência a mais é mais coisa pra dar errado hoje.</p>
+    <div class="tip"><b>Deu erro no <code>java -version</code>?</b> Feche
+    <b>todos</b> os terminais abertos e abra um novo — o terminal só lê a
+    configuração do sistema quando inicia. O guia tem a seção
+    "Conferir a instalação" com a tabela de cada mensagem possível.</div>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">02</span><h3>Rode e confirme que subiu</h3></div>
-<div class="terminal"><span class="p">$</span> ./mvnw spring-boot:run
-<span class="out">Tomcat initialized with port 8080 (http)
-Started SuaApplication in 1.4 seconds</span></div>
-    <p class="tip"><b>Antes de escrever qualquer linha:</b> garanta que o projeto vazio sobe. Se der erro aqui, é ambiente — e é bem mais fácil resolver agora que depois de escrever três classes.</p>
+    <div class="step-head"><span class="n">02</span><h3>Crie o projeto no Spring Initializr</h3></div>
+    <p>Em <code>start.spring.io</code> (ou por <code>File → New → Project →
+    Spring Boot</code> no IntelliJ), com exatamente estas escolhas:</p>
+    <table>
+      <tr><th>Campo</th><th>Valor</th></tr>
+      <tr><td>Project</td><td><code>Maven</code></td></tr>
+      <tr><td>Language</td><td><code>Java</code></td></tr>
+      <tr><td>Spring Boot</td><td>a versão estável mais alta (sem <code>SNAPSHOT</code> nem <code>M1</code>)</td></tr>
+      <tr><td>Group</td><td><code>br.edu.faculdade</code></td></tr>
+      <tr><td>Artifact</td><td>o nome do seu tema, minúsculo e sem acento — ex.: <code>receitas</code></td></tr>
+      <tr><td>Packaging</td><td><code>Jar</code></td></tr>
+      <tr><td>Java</td><td><code>21</code></td></tr>
+      <tr><td>Dependencies</td><td><b>Spring Web</b> e <b>Spring Boot DevTools</b> — só essas duas</td></tr>
+    </table>
+    <div class="tip"><b>Ao descompactar</b>, coloque numa pasta com caminho
+    simples, sem acento e sem espaço. <code>C:\dev\receitas</code> funciona;
+    <code>C:\Users\Ana Júlia\Downloads\Nova pasta (2)</code> costuma dar
+    dor de cabeça.</div>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">03</span><h3>Crie o record do seu domínio</h3></div>
-    <p>Um <code>record</code> com <b>pelo menos 4 campos</b>, sendo ao menos um
-    numérico e um textual. Exemplo com livros:</p>
-<pre><span class="kw">public record</span> <span class="ty">Livro</span>(
-    <span class="ty">String</span> titulo,
-    <span class="ty">String</span> autor,
-    <span class="ty">int</span> ano,
-    <span class="ty">String</span> genero,
-    <span class="ty">double</span> nota) {}</pre>
+    <div class="step-head"><span class="n">03</span><h3>Rode e confirme que subiu</h3></div>
+    <p>Abra a pasta do projeto no IntelliJ (<code>File → Open</code>, selecionando
+    a pasta que contém o <code>pom.xml</code>), espere o Maven baixar tudo e rode
+    a classe <code>...Application</code> no ▶ verde.</p>
+    <div class="terminal"><span class="out">Tomcat started on port 8080 (http)</span>
+<span class="out">Started ReceitasApplication in 1.842 seconds</span></div>
+    <p>Achou a linha <code>Started</code>? Então está no ar. A aplicação
+    <b>não</b> vai terminar — ela fica esperando requisições, e isso está certo.</p>
+    <div class="tip"><b>Ainda sem nenhuma rota</b>, <code>localhost:8080</code>
+    mostra a <i>Whitelabel Error Page</i> com 404. Isso é bom sinal: significa
+    que o servidor respondeu.</div>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">04</span><h3>Crie o service ⭐</h3></div>
-    <p>Anotado com <code>@Service</code>, guardando uma lista fixa de <b>no
-    mínimo 5 itens</b> e expondo os métodos que o controller vai usar.</p>
-<pre><span class="an">@Service</span>
-<span class="kw">public class</span> <span class="ty">LivroService</span> {
+    <div class="step-head"><span class="n">04</span><h3>Configure o <code>application.properties</code></h3></div>
+    <p>Abra <code>src/main/resources/application.properties</code> e coloque
+    <b>duas</b> configurações:</p>
+<pre><span class="cm"># o nome da sua aplicação — troque pelo seu tema</span>
+spring.application.name=<span class="st">receitas</span>
 
-  <span class="kw">private final</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; acervo = <span class="ty">List</span>.<span class="fn">of</span>(
-      <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Frank Herbert"</span>, 1965, <span class="st">"Ficção"</span>, 9.2),
-      <span class="cm">// ... pelo menos mais 4</span>
-  );
-
-  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">listar</span>() { <span class="kw">return</span> acervo; }
-}</pre>
-    <p class="tip"><b>Regra de camada:</b> nada de <code>System.out.println</code> nem <code>Scanner</code> aqui dentro. O service não sabe que existe HTTP nem terminal — ele só recebe e devolve dados.</p>
+<span class="cm"># mude a porta: você escolhe qualquer uma entre 8081 e 8099</span>
+server.port=<span class="st">8081</span></pre>
+    <p>Reinicie a aplicação e confira no log que a porta mudou. A partir daqui,
+    todas as suas URLs usam a <b>sua</b> porta.</p>
+    <div class="tip"><b>Por que isso está no desafio:</b> pra você provar que
+    conseguiu <b>discordar do padrão</b> do Spring Boot. Esse arquivo vai ser
+    usado o semestre inteiro — banco de dados, segurança e deploy passam todos
+    por ele.</div>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">05</span><h3>Crie o controller injetando por construtor ⭐</h3></div>
-    <p>É aqui que o desafio é avaliado de verdade.</p>
+    <div class="step-head"><span class="n">05</span><h3>Crie o <code>record</code> do seu tema</h3></div>
+    <p>No <b>mesmo pacote</b> da classe <code>Application</code>, crie um
+    <code>record</code> com <b>três a cinco campos</b>. Exemplo com receitas:</p>
+<pre><span class="kw">package</span> br.edu.faculdade.receitas;
+
+<span class="kw">public record</span> <span class="ty">Receita</span>(
+    <span class="ty">String</span> nome,
+    <span class="ty">String</span> categoria,
+    <span class="kw">int</span> minutos,
+    <span class="kw">boolean</span> vegetariana) { }</pre>
+    <div class="tip"><b>⚠️ Mesmo pacote, sempre.</b> Se você criar a classe fora
+    do pacote da <code>Application</code>, o Spring não a enxerga e você vai
+    passar meia hora tomando 404 sem entender por quê.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">06</span><h3>Crie o controller com três rotas</h3></div>
+    <p>Ainda no mesmo pacote, crie uma classe terminada em
+    <code>Controller</code> e escreva as três rotas:</p>
+    <table>
+      <tr><th>#</th><th>Rota</th><th>Devolve</th></tr>
+      <tr><td>1</td><td><code>GET /boas-vindas</code></td><td>um <b>texto</b> apresentando sua API</td></tr>
+      <tr><td>2</td><td><code>GET /destaque</code></td><td><b>um objeto</b> do seu record → vira JSON</td></tr>
+      <tr><td>3</td><td><code>GET /receitas</code> (use o plural do seu tema)</td><td>uma <b>lista</b> com pelo menos 4 itens → vira array JSON</td></tr>
+    </table>
 <pre><span class="an">@RestController</span>
-<span class="an">@RequestMapping</span>(<span class="st">"/livros"</span>)
-<span class="kw">public class</span> <span class="ty">LivroController</span> {
+<span class="kw">public class</span> <span class="ty">ReceitaController</span> {
 
-  <span class="kw">private final</span> <span class="ty">LivroService</span> service;
-
-  <span class="cm">// o Spring entrega o service pronto — sem new, sem @Autowired</span>
-  <span class="kw">public</span> <span class="ty">LivroController</span>(<span class="ty">LivroService</span> service) {
-    <span class="kw">this</span>.service = service;
+  <span class="an">@GetMapping</span>(<span class="st">"/boas-vindas"</span>)
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">boasVindas</span>() {
+    <span class="kw">return</span> <span class="st">"API de receitas da Ana — no ar!"</span>;
   }
 
-  <span class="an">@GetMapping</span>
-  <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Livro</span>&gt; <span class="fn">listar</span>() {
-    <span class="kw">return</span> service.<span class="fn">listar</span>();
-  }
+  <span class="cm">// ...e as outras duas, seguindo o mesmo padrão</span>
 }</pre>
+    <div class="tip"><b>Não copie o código pronto do "Código do desafio".</b>
+    Escreva, erre, leia o erro, conserte. O objetivo aqui não é ter o arquivo
+    certo na pasta — é você conseguir escrever de novo na aula que vem.</div>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">06</span><h3>Três rotas GET, uma com filtro</h3></div>
-    <p>A terceira é a que exige pensar — ela recebe um parâmetro e filtra a
-    lista:</p>
-    <div class="grid2">
-      <div class="mini"><b>GET /livros</b>Devolve o acervo inteiro.</div>
-      <div class="mini"><b>GET /livros/destaque</b>Devolve um item só — o de maior nota, por exemplo.</div>
-      <div class="mini"><b>GET /livros/genero/{genero}</b>Filtra por gênero, usando <code>@PathVariable</code>.</div>
-      <div class="mini"><b>Ou: GET /livros?genero=Ficção</b>Mesma ideia com <code>@RequestParam</code>. Escolha uma.</div>
-    </div>
-    <p class="tip"><b>Dica:</b> o filtro é <code>stream().filter(...).toList()</code> — a Stream API que você já viu em OO. Ela vive no <b>service</b>, não no controller.</p>
+    <div class="step-head"><span class="n">07</span><h3>Teste as três rotas</h3></div>
+    <p>No navegador ou pelo terminal, usando a <b>sua</b> porta:</p>
+    <div class="terminal"><span class="p">$</span> curl http://localhost:8081/boas-vindas
+<span class="out">API de receitas da Ana — no ar!</span>
+
+<span class="p">$</span> curl -i http://localhost:8081/receitas
+<span class="out">HTTP/1.1 200</span>
+<span class="out">Content-Type: application/json</span>
+<span class="out"></span>
+<span class="out">[{"nome":"Bolo de fubá","categoria":"Doce","minutos":50,"vegetariana":true}, ...]</span></div>
+    <p>Confira duas coisas na resposta das rotas 2 e 3: veio <code>200</code> e
+    veio <code>Content-Type: application/json</code>.</p>
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">07</span><h3>Teste com curl e publique</h3></div>
-<div class="terminal"><span class="p">$</span> curl localhost:8080/livros
-<span class="p">$</span> curl localhost:8080/livros/destaque
-<span class="p">$</span> curl <span class="st">"localhost:8080/livros/genero/Ficção"</span></div>
-    <p>Depois suba num repositório público com um <code>README.md</code>
-    explicando o que é a API, como rodar e quais são as rotas.</p>
-    <p class="tip"><b>Não suba a pasta <code>target/</code>.</b> O Initializr já gera um <code>.gitignore</code> correto — confira se ele veio junto.</p>
+    <div class="step-head"><span class="n">08</span><h3>Publique no GitHub</h3></div>
+    <p>Crie um repositório <b>público</b> e suba o projeto. No
+    <code>README.md</code>, escreva:</p>
+    <ol>
+      <li>o tema da sua API, em uma frase;</li>
+      <li>como rodar (o comando e a porta que você escolheu);</li>
+      <li>a lista das três rotas, com o que cada uma devolve;</li>
+      <li>um print de cada rota respondendo no navegador.</li>
+    </ol>
+    <div class="tip"><b>O <code>.gitignore</code> já veio pronto</b> no projeto
+    do Initializr — ele impede que a pasta <code>target/</code> vá pro
+    repositório. Se aparecerem centenas de arquivos no commit, é sinal de que
+    algo está errado: confira se o <code>.gitignore</code> está na raiz.</div>
   </div>
 
-  <div class="label">Requisitos mínimos</div>
+  <div class="label">Antes de entregar</div>
+
   <ul class="check">
-    <li>Projeto Spring Boot <b>4.1.x</b> com Java <b>21</b>, rodando</li>
-    <li>Um <code>record</code> com pelo menos <b>4 campos</b></li>
-    <li><code>@Service</code> com no mínimo <b>5 itens</b> no acervo</li>
-    <li><code>@RestController</code> com <b>injeção por construtor</b></li>
-    <li><b>3 rotas GET</b>, uma delas recebendo parâmetro e filtrando</li>
-    <li>A filtragem acontece no <b>service</b>, não no controller</li>
-    <li>Todas as classes dentro do pacote da classe <code>main</code></li>
-    <li>Repositório público com <code>README.md</code> e as rotas documentadas</li>
+    <li><b>Java 21</b> e apenas <b>Spring Web + DevTools</b> como dependências</li>
+    <li>A aplicação sobe e o log mostra <b>Started ... in X seconds</b></li>
+    <li><code>application.properties</code> com <b>nome</b> e <b>porta</b> alterados</li>
+    <li>Um <code>record</code> com 3 a 5 campos, no <b>mesmo pacote</b> da Application</li>
+    <li>Rota 1 devolvendo <b>texto</b></li>
+    <li>Rota 2 devolvendo <b>um objeto</b> em JSON</li>
+    <li>Rota 3 devolvendo uma <b>lista com 4+ itens</b> em JSON</li>
+    <li>Repositório público no GitHub com README e prints</li>
   </ul>
 
-  <div class="label">Extras, pra quem quiser ir além ✨</div>
+  <div class="label">Quer ir além (opcional)</div>
+
   <ul class="check extra">
-    <li>Uma rota que devolve <b>estatísticas</b>: total de itens, nota média, contagem por gênero</li>
-    <li>Ordenação por parâmetro: <code>/livros?ordenar=nota</code></li>
-    <li>Trocar a porta para 8081 em <code>application.properties</code> e explicar no README por quê</li>
-    <li>Uma segunda entidade, com o seu próprio service e controller</li>
-    <li>Devolver <code>404</code> quando o filtro não encontrar nada (spoiler: <code>ResponseEntity</code>, assunto da aula 02)</li>
+    <li>Uma quarta rota <code>/resumo</code> que devolve um objeto com
+    <b>números calculados</b> a partir da sua lista: total de itens, média de um
+    campo numérico, quantidade que atende a alguma condição. Use
+    <code>stream()</code> — é revisão de OO e cai na aula 03.</li>
+    <li>Um arquivo <code>requisicoes.http</code> na raiz do projeto com as
+    requisições prontas, versionado junto com o código.</li>
+    <li>Configurar <code>server.servlet.context-path=/api</code> e ajustar as
+    URLs do README de acordo.</li>
   </ul>
 
-  <div class="label">O que NÃO pode 🚫</div>
+  <div class="label">O que ainda NÃO é pra fazer</div>
+
   <ul class="check no">
-    <li><code>new LivroService()</code> em qualquer lugar — quem cria é o Spring</li>
-    <li><code>@Autowired</code> em campo: a injeção é <b>por construtor</b></li>
-    <li>Regra de negócio ou filtro dentro do controller</li>
-    <li><code>System.out.println</code> ou <code>Scanner</code> no service</li>
-    <li>Classe fora do pacote da <code>main</code> — o Spring não vai achar</li>
-    <li>Tudo numa classe só, sem separar controller e service</li>
+    <li>Banco de dados — a lista fica fixa no código mesmo. Persistência é a aula 05.</li>
+    <li><code>POST</code>, <code>PUT</code> ou <code>DELETE</code> — só <code>GET</code> hoje. Os outros verbos são a aula 03.</li>
+    <li>Camada de service e injeção de dependência no código — o conceito foi hoje, a prática é a aula 02.</li>
+    <li>Validação, tratamento de erro ou login — aulas 04, 10 e 11.</li>
   </ul>
 
-  <div class="label">Como entregar</div>
+  <div class="goal verde" style="margin-top:34px">
+    <span class="ico">🧠</span>
+    <div>
+      <h3>Duas perguntas pra responder no README</h3>
+      <p>Valem tanto quanto o código, e caem em conversa de correção:</p>
+      <p><b>1.</b> Em nenhum lugar do seu projeto existe
+      <code>new ReceitaController()</code>. Então quem criou esse objeto, e
+      quando?</p>
+      <p><b>2.</b> Você não escreveu uma linha convertendo objeto em JSON. Como o
+      Spring soube fazer isso sozinho?</p>
+    </div>
+  </div>
+
+  <div class="label">Entrega</div>
+
   <div class="entrega">
     <ol>
-      <li>Confira que a aplicação sobe do zero: <code>./mvnw clean spring-boot:run</code></li>
-      <li>Teste as três rotas com <code>curl</code> e cole a saída no README</li>
-      <li>Suba num repositório <b>público</b> no GitHub</li>
-      <li>Mande o link no grupo, junto com uma frase sobre o que foi mais difícil</li>
+      <li><b>Prazo:</b> até a aula 02, em 18/08.</li>
+      <li><b>Formato:</b> link do repositório público no GitHub.</li>
+      <li><b>Individual.</b> As equipes só se formam na aula 02 — este desafio é seu.</li>
+      <li><b>Travou?</b> Mande o print do erro <b>com a mensagem completa</b>
+      antes da aula. Erro de setup é rápido de resolver à distância; deixar pra
+      resolver na aula custa metade do seu dia 02.</li>
     </ol>
   </div>
 
-  <div class="label">Materiais de apoio</div>
-  <p class="lead" style="margin-top:0">
-    Travou? O guia tem uma seção de erros comuns com as mensagens exatas que
-    aparecem. Espie o código de referência só depois de tentar. 💜
-  </p>
   <div class="cta-row">
-    <a class="btn primary" href="guia-spring-boot.html">📘 Guia do Spring Boot</a>
-    <a class="btn" href="codigos-desafio.html">🧩 Código comentado</a>
-    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
-    <a class="btn" href="slides.html">▶ Slides</a>
+    <a class="btn primary" href="/cursos/java-spring-boot/aula-01-primeira-api/guia-spring-boot.html">📘 Guia da aula</a>
+    <a class="btn" href="/cursos/java-spring-boot/aula-01-primeira-api/codigos-desafio.html">🧩 Código comentado</a>
+    <a class="btn" href="/cursos/java-spring-boot/aula-01-primeira-api/modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="btn" href="/cursos/java-spring-boot/aula-01-primeira-api/slides.html">▶ Slides</a>
   </div>
 
   <div class="foot">Desafio 01 · Java Avançado com Spring Boot · NickDev 💜</div>
 
 </div>
-
 </body>
 </html>
