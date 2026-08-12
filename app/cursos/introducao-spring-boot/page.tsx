@@ -4,12 +4,12 @@ import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Java Avançado com Spring Boot · NickDev",
+  title: "Introdução ao Spring Boot · NickDev",
   description:
     "Curso de Java avançado com Spring Boot: injeção de dependência, API REST, Spring Data JPA, validação, segurança com JWT, testes, observabilidade, Docker e deploy.",
 };
 
-const AULA_01 = "/cursos/java-spring-boot/aula-01-primeira-api";
+const AULA_01 = "/cursos/introducao-spring-boot/aula-01-primeira-api";
 
 export default function JavaSpringBoot() {
   return (
@@ -22,7 +22,7 @@ export default function JavaSpringBoot() {
 
       <div className="eyebrow">Curso · 18 aulas · 2026.2</div>
       <h1>
-        Java Avançado <span className="grad-text">com Spring Boot</span>
+        Introdução ao <span className="grad-text">Spring Boot</span>
       </h1>
       <p className="lead">
         Do Java puro a uma API REST pronta pra produção: inversão de controle e
