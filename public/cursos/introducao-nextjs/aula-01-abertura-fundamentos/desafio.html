@@ -161,8 +161,9 @@ tr:last-child td{border-bottom:0}
     <div class="step-head"><span class="n">02</span><h3>Crie o projeto</h3></div>
 <div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-primeiro-next</div>
     <p>Respostas: TypeScript <b>Yes</b> · ESLint <b>Yes</b> · Tailwind
-    <b>Yes</b> · App Router <b>Yes</b> · Turbopack <b>Yes</b> · alias
+    <b>No</b> · App Router <b>Yes</b> · Turbopack <b>Yes</b> · alias
     <code>@/*</code> <b>Yes</b>.</p>
+    <p class="tip"><b>Tailwind fica pra aula 08.</b> Até lá o estilo é CSS comum no <code>globals.css</code> — que você já sabe escrever. Quem responder <b>Yes</b> aqui vai ficar com um projeto diferente do da turma.</p>
     <p class="tip"><b>Confira a versão</b> que aparece ao subir: precisa ser <b>Next.js 16.3</b> ou mais recente. Se vier 15 ou menos, seu <code>pnpm</code> pegou cache antigo — rode com <code>@latest</code> explícito.</p>
   </div>
 
@@ -176,8 +177,8 @@ tr:last-child td{border-bottom:0}
 <pre><span class="cm">// components/Cabecalho.tsx</span>
 <span class="kw">export default function</span> <span class="ty">Cabecalho</span>() {
   <span class="kw">return</span> (
-    &lt;<span class="ty">header</span> className=<span class="st">"p-4 border-b border-zinc-800"</span>&gt;
-      &lt;<span class="ty">h1</span> className=<span class="st">"font-bold"</span>&gt;Nome do seu projeto&lt;/<span class="ty">h1</span>&gt;
+    &lt;<span class="ty">header</span> className=<span class="st">"cabecalho"</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Nome do seu projeto&lt;/<span class="ty">h1</span>&gt;
     &lt;/<span class="ty">header</span>&gt;
   );
 }</pre>
@@ -187,6 +188,15 @@ tr:last-child td{border-bottom:0}
 
 <span class="cm">// ...dentro do &lt;body&gt;, antes do {children}:</span>
 &lt;<span class="ty">Cabecalho</span> /&gt;</pre>
+
+    <p>E o estilo, em <code>app/globals.css</code> — CSS comum, do jeito que
+    você já escreve:</p>
+<pre>.cabecalho {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #27272a;
+}</pre>
 
     <p class="tip"><b>Registre no README</b>, com suas palavras, <b>o que é um componente</b> e por que escrever o cabeçalho uma vez só é melhor do que copiar em cada página. Essa frase é o que eu vou ler primeiro na correção — e ela tem que ser sua, não do ChatGPT.</p>
   </div>

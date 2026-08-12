@@ -193,11 +193,35 @@ verdade o atributo é que tinha outro nome no JSX.</div>
 
 <span class="kw">export default function</span> <span class="ty">Cabecalho</span>() {
   <span class="kw">return</span> (
-    &lt;<span class="ty">header</span> className=<span class="st">"flex gap-4 border-b border-white/10 p-4"</span>&gt;
+    &lt;<span class="ty">header</span> className=<span class="st">"cabecalho"</span>&gt;
       &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
       &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
     &lt;/<span class="ty">header</span>&gt;
   );
+}</pre>
+  </div>
+
+  <div class="pane">
+    <div class="panehd"><span class="dot g"></span><b>app/globals.css</b></div>
+<pre>body {
+  margin: 0;
+  min-height: 100vh;
+  background: #09090b;
+  color: #fafafa;
+  font-family: system-ui, sans-serif;
+}
+
+.cabecalho {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #27272a;
+}
+
+.conteudo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px;
 }</pre>
   </div>
 
@@ -219,9 +243,9 @@ verdade o atributo é que tinha outro nome no JSX.</div>
 }) {
   <span class="kw">return</span> (
     &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
-      &lt;<span class="ty">body</span> className=<span class="st">"min-h-screen bg-zinc-950 text-zinc-100"</span>&gt;
+      &lt;<span class="ty">body</span>&gt;
         &lt;<span class="ty">Cabecalho</span> /&gt;   <span class="cm">{/* a peça, usada aqui */}</span>
-        &lt;<span class="ty">main</span> className=<span class="st">"mx-auto max-w-2xl p-8"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
+        &lt;<span class="ty">main</span> className=<span class="st">"conteudo"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
       &lt;/<span class="ty">body</span>&gt;
     &lt;/<span class="ty">html</span>&gt;
   );
@@ -233,8 +257,8 @@ verdade o atributo é que tinha outro nome no JSX.</div>
 <pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
   <span class="kw">return</span> (
     &lt;<span class="ty">section</span>&gt;
-      &lt;<span class="ty">h1</span> className=<span class="st">"text-4xl font-bold"</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
-      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span>&gt;
         Se você está lendo isto, o servidor gerou este HTML antes de
         mandar pro seu navegador.
       &lt;/<span class="ty">p</span>&gt;
@@ -254,8 +278,8 @@ verdade o atributo é que tinha outro nome no JSX.</div>
 <span class="kw">export default function</span> <span class="ty">Sobre</span>() {
   <span class="kw">return</span> (
     &lt;<span class="ty">section</span>&gt;
-      &lt;<span class="ty">h1</span> className=<span class="st">"text-3xl font-bold"</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
-      &lt;<span class="ty">p</span> className=<span class="st">"mt-4 text-zinc-400"</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Sobre mim&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span>&gt;
         Estudo na área há dois anos e quero trabalhar com frontend.
         Espero sair deste semestre conseguindo colocar uma aplicação
         completa no ar sozinha.

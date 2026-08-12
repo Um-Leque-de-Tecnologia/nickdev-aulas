@@ -93,11 +93,13 @@ const AULAS: Aula[] = [
   {
     n: "08",
     data: "30/09",
-    titulo: "UI, design system e acessibilidade",
+    titulo: "Tailwind, design system e acessibilidade",
     desc: (
       <>
-        Tailwind; shadcn/ui; dark mode; responsividade; WCAG na prática. Revisão
-        para a 1ª verificação.
+        <strong>Entrada do Tailwind no curso</strong> — o que ele resolve, por
+        que classes utilitárias, e migrando o CSS que o projeto já tem. Depois:
+        shadcn/ui; dark mode; responsividade; WCAG na prática. Revisão para a 1ª
+        verificação.
       </>
     ),
     marco: "Checkpoint 1 — protótipo navegável",
@@ -254,7 +256,8 @@ export default function FrontendAvancadoNextjs() {
               inteiro: <strong>o componente</strong>. JSX, quem é React e quem é
               Next, setup do ambiente (Node, pnpm,{" "}
               <span className="mono">create-next-app</span>), rota por pasta e o
-              primeiro deploy na Vercel.
+              primeiro deploy na Vercel. Estilo em CSS comum — Tailwind entra na
+              aula 08.
             </p>
             <div className="mats">
               <a className="mat primary" href={`${AULA_01}/slides.html`}>
