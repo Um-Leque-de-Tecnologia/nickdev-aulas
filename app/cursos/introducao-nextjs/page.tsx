@@ -4,12 +4,12 @@ import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Frontend Avançado com Next.js · NickDev",
+  title: "Introdução ao Next.js · NickDev",
   description:
-    "Curso de frontend avançado com Next.js: App Router, Server Components, data fetching, Server Actions, autenticação, performance, testes, arquitetura e deploy com CI/CD.",
+    "Curso de Next.js do zero, sem pré-requisito de React: componentes, App Router, Server Components, data fetching, Server Actions, autenticação, performance, testes e deploy com CI/CD.",
 };
 
-const AULA_01 = "/cursos/frontend-avancado-nextjs/aula-01-abertura-fundamentos";
+const AULA_01 = "/cursos/introducao-nextjs/aula-01-abertura-fundamentos";
 
 type Aula = {
   n: string;
@@ -225,13 +225,14 @@ export default function FrontendAvancadoNextjs() {
 
       <div className="eyebrow">Curso · 19 aulas · 2026.2</div>
       <h1>
-        Frontend Avançado <span className="grad-text">com Next.js</span>
+        Introdução ao <span className="grad-text">Next.js</span>
       </h1>
       <p className="lead">
-        Do App Router a uma aplicação em produção: Server Components, data
-        fetching e cache, Server Actions, autenticação, design system
-        acessível, performance, testes, arquitetura e CI/CD. Tudo aplicado num
-        projeto em equipe que evolve por checkpoints ao longo do semestre.
+        Do primeiro componente a uma aplicação em produção. Começa do zero — não
+        é preciso saber React — e vai até Server Components, data fetching,
+        Server Actions, autenticação, acessibilidade, performance, testes e
+        CI/CD. Tudo aplicado num projeto em equipe que evolui por checkpoints ao
+        longo do semestre.
       </p>
       <div className="brand-rule" />
 
@@ -248,11 +249,12 @@ export default function FrontendAvancadoNextjs() {
               </span>
             </h3>
             <p>
-              Plano de ensino, critérios e teaser do projeto. Ecossistema React
-              moderno e a pergunta que organiza o curso inteiro:{" "}
-              <strong>SPA, SSR ou SSG?</strong> Setup do ambiente (Node, pnpm,{" "}
-              <span className="mono">create-next-app</span>), estrutura do App
-              Router e o primeiro deploy na Vercel.
+              Plano de ensino, critérios e formação das equipes. Por que HTML
+              puro trava quando o site cresce, e a ideia que organiza o curso
+              inteiro: <strong>o componente</strong>. JSX, quem é React e quem é
+              Next, setup do ambiente (Node, pnpm,{" "}
+              <span className="mono">create-next-app</span>), rota por pasta e o
+              primeiro deploy na Vercel.
             </p>
             <div className="mats">
               <a className="mat primary" href={`${AULA_01}/slides.html`}>

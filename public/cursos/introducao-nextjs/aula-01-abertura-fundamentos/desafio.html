@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desafio 01 — Ambiente, projeto e deploy · Frontend Avançado com Next.js · NickDev</title>
+<title>Desafio 01 — Ambiente, projeto e deploy · Introdução ao Next.js · NickDev</title>
 <meta name="description" content="Desafio técnico da aula 01: montar o ambiente com Node e pnpm, criar o projeto Next.js, escrever a primeira rota e publicar na Vercel.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -105,7 +105,7 @@ tr:last-child td{border-bottom:0}
 </head>
 <body>
 
-<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
 <div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
 
 <div class="wrap">
@@ -167,17 +167,28 @@ tr:last-child td{border-bottom:0}
   </div>
 
   <div class="step">
-    <div class="step-head"><span class="n">03</span><h3>Ache o servidor ⭐</h3></div>
+    <div class="step-head"><span class="n">03</span><h3>Crie um componente de verdade ⭐</h3></div>
     <p>Este passo vale mais que os outros: é o conceito da aula virando
-    experiência.</p>
-    <p>Em <code>app/page.tsx</code>, ponha um <code>console.log</code> com uma
-    mensagem sua. Salve, recarregue a página no navegador e <b>procure onde a
-    mensagem apareceu</b>.</p>
-<pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[Nicoly] este log apareceu onde?"</span>);
-  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Olá&lt;/<span class="ty">h1</span>&gt;;
+    experiência. Você vai escrever <b>uma peça</b> e usá-la em duas páginas.</p>
+
+    <p>Crie a pasta <code>components/</code> na raiz do projeto, e dentro dela o
+    arquivo <code>Cabecalho.tsx</code>:</p>
+<pre><span class="cm">// components/Cabecalho.tsx</span>
+<span class="kw">export default function</span> <span class="ty">Cabecalho</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">header</span> className=<span class="st">"p-4 border-b border-zinc-800"</span>&gt;
+      &lt;<span class="ty">h1</span> className=<span class="st">"font-bold"</span>&gt;Nome do seu projeto&lt;/<span class="ty">h1</span>&gt;
+    &lt;/<span class="ty">header</span>&gt;
+  );
 }</pre>
-    <p class="tip"><b>Registre no README</b> onde a mensagem apareceu e escreva, com suas palavras, <b>por que</b> foi ali. Essa frase é o que eu vou ler primeiro na correção.</p>
+
+    <p>Agora use ele no <code>app/layout.tsx</code>:</p>
+<pre><span class="kw">import</span> <span class="ty">Cabecalho</span> <span class="kw">from</span> <span class="st">"@/components/Cabecalho"</span>;
+
+<span class="cm">// ...dentro do &lt;body&gt;, antes do {children}:</span>
+&lt;<span class="ty">Cabecalho</span> /&gt;</pre>
+
+    <p class="tip"><b>Registre no README</b>, com suas palavras, <b>o que é um componente</b> e por que escrever o cabeçalho uma vez só é melhor do que copiar em cada página. Essa frase é o que eu vou ler primeiro na correção — e ela tem que ser sua, não do ChatGPT.</p>
   </div>
 
   <div class="step">
@@ -190,14 +201,14 @@ tr:last-child td{border-bottom:0}
 <pre><span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
 
 &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre mim&lt;/<span class="ty">Link</span>&gt;</pre>
-    <p class="tip"><b>Use <code>&lt;Link&gt;</code>, não <code>&lt;a&gt;</code>.</b> Depois de navegar, volte e repare: com <code>&lt;a&gt;</code> a tela pisca; com <code>&lt;Link&gt;</code> não. Anote a diferença — a aula 2 explica.</p>
+    <p class="tip"><b>Use <code>&lt;Link&gt;</code>, não <code>&lt;a&gt;</code>.</b> Troque um pelo outro e repare: com <code>&lt;a&gt;</code> a tela pisca a cada clique; com <code>&lt;Link&gt;</code> não. Anote a diferença — a aula 2 explica o porquê.</p>
   </div>
 
   <div class="step">
     <div class="step-head"><span class="n">05</span><h3>Rode o build antes de subir</h3></div>
 <div class="terminal"><span class="p">$</span> pnpm build</div>
     <p>É exatamente o comando que a Vercel executa. Se passar aqui, passa lá.</p>
-    <p class="tip"><b>Repare na tabela que o build imprime</b> — ela mostra, rota por rota, se ficou estática (<code>○</code>) ou dinâmica (<code>ƒ</code>). É a teoria da aula aparecendo na saída do terminal. Cole essa tabela no README.</p>
+    <p class="tip"><b>Repare na lista de rotas que o build imprime</b> — todas as páginas que você criou devem aparecer ali. Se faltar alguma, o arquivo não está com o nome <code>page.tsx</code> ou está na pasta errada.</p>
   </div>
 
   <div class="step">
@@ -226,8 +237,8 @@ tr:last-child td{border-bottom:0}
     <li>Node <b>20.9+</b> e pnpm funcionando, com os prints no README</li>
     <li>Projeto em <b>Next.js 16.3+</b>, criado com <code>create-next-app</code></li>
     <li>Rota <code>/sobre</code> escrita por você, ligada à home por <code>&lt;Link&gt;</code></li>
-    <li>No README: <b>onde o <code>console.log</code> apareceu e por quê</b></li>
-    <li>No README: a <b>tabela de rotas</b> que o <code>pnpm build</code> imprime</li>
+    <li>Um componente <code>Cabecalho</code> em arquivo próprio, usado no layout</li>
+    <li>No README: <b>o que é um componente</b>, com suas palavras</li>
     <li><code>pnpm build</code> passando sem erro</li>
     <li><b>Publicado na Vercel</b>, com o link no README</li>
     <li>Equipe formada, com repositório e ideia de tema</li>
@@ -235,9 +246,9 @@ tr:last-child td{border-bottom:0}
 
   <div class="label">Extras, pra quem quiser ir além ✨</div>
   <ul class="check extra">
-    <li>Uma terceira rota <b>dinâmica</b>: <code>app/oi/[nome]/page.tsx</code> que cumprimenta quem está na URL</li>
+    <li>Um segundo componente — <code>Rodape</code> — também no layout</li>
+    <li>Uma terceira rota, <code>/contato</code>, ligada às outras pelo cabeçalho</li>
     <li>Configure <code>metadata</code> no layout e veja o título mudar na aba</li>
-    <li>Compare o HTML: abra "ver código-fonte" e confira que o conteúdo está lá, <b>antes</b> do JavaScript rodar</li>
     <li>Abra um Pull Request no seu próprio repo só pra ver o <b>preview deployment</b> nascer</li>
     <li>Meça no Lighthouse e anote a nota inicial — vamos comparar na aula 12</li>
   </ul>
@@ -256,7 +267,7 @@ tr:last-child td{border-bottom:0}
     <thead><tr><th>Critério</th><th>Peso</th><th>O que eu olho</th></tr></thead>
     <tbody>
       <tr><td><b>Está no ar</b></td><td>40%</td><td>o link abre e as duas rotas funcionam</td></tr>
-      <tr><td><b>Entendeu o conceito</b></td><td>40%</td><td>a explicação do <code>console.log</code> no README — com suas palavras, não copiada</td></tr>
+      <tr><td><b>Entendeu o conceito</b></td><td>40%</td><td>o componente <code>Cabecalho</code> existindo de verdade, e a explicação no README — com suas palavras, não copiada</td></tr>
       <tr><td><b>Higiene</b></td><td>20%</td><td>README completo, sem <code>node_modules</code>, build limpo</td></tr>
     </tbody>
   </table>
@@ -284,7 +295,7 @@ tr:last-child td{border-bottom:0}
     <a class="btn" href="slides.html">▶ Slides</a>
   </div>
 
-  <div class="foot">Desafio 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+  <div class="foot">Desafio 01 · Introdução ao Next.js · NickDev 💜</div>
 
 </div>
 

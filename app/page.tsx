@@ -52,13 +52,13 @@ export default function Home() {
           <div className="meta">18 aulas · em andamento</div>
         </Link>
 
-        <Link className="card" href="/cursos/frontend-avancado-nextjs">
+        <Link className="card" href="/cursos/introducao-nextjs">
           <span className="num">04</span>
-          <h3>Frontend Avançado — Next.js</h3>
+          <h3>Introdução ao Next.js</h3>
           <p>
-            App Router, Server Components, Server Actions, autenticação,
-            performance, testes e CI/CD — num projeto em equipe que evolui por
-            checkpoints.
+            Do primeiro componente ao deploy: App Router, Server Components,
+            Server Actions, autenticação e CI/CD. Começa do zero, sem precisar
+            saber React.
           </p>
           <div className="meta">19 aulas · em andamento</div>
         </Link>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modelo de resposta — Desafio 01 · Frontend Avançado com Next.js · NickDev</title>
-<meta name="description" content="Modelo de resposta do desafio da aula 01: projeto Next.js no ar, com README explicando onde o console.log apareceu e a tabela de rotas do build.">
+<title>Modelo de resposta — Desafio 01 · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Modelo de resposta do desafio da aula 01: projeto Next.js no ar, com README explicando o que é um componente e a lista de rotas do build.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -85,7 +85,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 </head>
 <body>
 
-<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
 <div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
 
 <div class="wrap">
@@ -109,7 +109,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">README.md</b></div>
     <div class="md"><span class="h"># Meu primeiro Next</span>
 
-Projeto da aula 01 de Frontend Avançado com Next.js.
+Projeto da aula 01 de Introdução ao Next.js.
 
 <span class="h">🔗 No ar:</span> https://meu-primeiro-next-nicoly.vercel.app
 
@@ -122,21 +122,26 @@ Projeto da aula 01 de Frontend Avançado com Next.js.
 
 Next.js 16.3.0
 
-<span class="h">## Onde o console.log apareceu — e por quê</span>
+<span class="h">## O que é um componente — com minhas palavras</span>
 
-Apareceu no <span class="h">terminal</span> onde eu rodei `pnpm dev`,
-e NÃO no console do navegador (F12).
+Um componente é um <span class="h">pedaço de tela com nome próprio</span>,
+que eu escrevo uma vez e uso em quantos lugares quiser.
 
-Isso acontece porque no App Router todo componente é
-Server Component por padrão. O `app/page.tsx` foi
-executado no servidor: lá o `console.log` rodou, o
-componente virou HTML, e só o HTML foi enviado pro meu
-navegador. O JavaScript desse componente nunca chegou
-no cliente — por isso o navegador não tem como mostrar
-o log.
+Na prática é uma função JavaScript que devolve HTML. O
+nome dela começa com maiúscula, e depois eu uso ela
+como se fosse uma tag: `&lt;Cabecalho /&gt;`.
 
-Confirmei abrindo "ver código-fonte da página": o texto
-do &lt;h1&gt; já está no HTML, antes de qualquer JS rodar.
+Antes, num site em HTML puro, eu copiava o mesmo
+cabeçalho em cada arquivo. Se eu quisesse mudar um item
+do menu, tinha que abrir todas as páginas e editar uma
+por uma — e bastava esquecer uma pra o site ficar
+inconsistente.
+
+Agora o cabeçalho está escrito em UM arquivo só
+(`components/Cabecalho.tsx`), usado no `layout.tsx`.
+Mudei ali, mudou no site inteiro. Foi isso que me fez
+entender por que isso existe: não é pra escrever menos
+código, é pra ter <span class="h">um só lugar</span> onde cada coisa mora.
 
 <span class="h">## Rotas</span>
 
@@ -145,48 +150,66 @@ do &lt;h1&gt; já está no HTML, antes de qualquer JS rodar.
 | /        | app/page.tsx          |
 | /sobre   | app/sobre/page.tsx    |
 
+<span class="h">## Componentes que eu criei</span>
+
+| Componente | Arquivo                    | Usado em    |
+|------------|----------------------------|-------------|
+| Cabecalho  | components/Cabecalho.tsx   | layout.tsx  |
+
 <span class="h">## Saída do build</span>
 
 <span class="out">Route (app)
-┌ ○ /
-├ ○ /_not-found
-└ ○ /sobre
+┌ /
+├ /_not-found
+└ /sobre</span>
 
-○  (Static)  prerendered as static content</span>
-
-As duas rotas ficaram estáticas porque não dependem de
-nada que mude por requisição. Eu não configurei isso —
-o Next deduziu sozinho.
+As duas rotas que eu criei aparecem na lista. Foi assim
+que eu conferi que o /sobre tinha funcionado.
 
 <span class="h">## O que foi mais difícil</span>
 
-Entender que o log ia pro terminal. Passei uns 10 minutos
-procurando no console do navegador antes de ler o guia.</div>
+Entender que `class` vira `className`. Passei uns 10
+minutos achando que meu CSS estava errado, quando na
+verdade o atributo é que tinha outro nome no JSX.</div>
   </div>
 
   <div class="goal">
     <span class="ico">🎯</span>
     <div>
       <h3>Por que esse README pontua</h3>
-      <p>Ele não descreve o que foi feito — <b>descreve o que foi observado</b>,
-      com as palavras de quem escreveu. A frase "o JavaScript desse componente
-      nunca chegou no cliente" mostra que o conceito foi entendido, não copiado.
-      E a última seção, sobre a dificuldade, é honesta: isso vale mais do que
-      fingir que foi tudo tranquilo.</p>
+      <p>Ele não descreve o que foi feito — <b>descreve o que foi entendido</b>,
+      com as palavras de quem escreveu. A frase "não é pra escrever menos
+      código, é pra ter um só lugar onde cada coisa mora" mostra que o conceito
+      foi digerido, não copiado. E a última seção, sobre a dificuldade, é
+      honesta: isso vale mais do que fingir que foi tudo tranquilo.</p>
     </div>
   </div>
 
   <div class="label">O código</div>
 
   <div class="pane">
+    <div class="panehd"><span class="dot g"></span><b>components/Cabecalho.tsx</b></div>
+<pre><span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+
+<span class="kw">export default function</span> <span class="ty">Cabecalho</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">header</span> className=<span class="st">"flex gap-4 border-b border-white/10 p-4"</span>&gt;
+      &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
+      &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
+    &lt;/<span class="ty">header</span>&gt;
+  );
+}</pre>
+  </div>
+
+  <div class="pane">
     <div class="panehd"><span class="dot g"></span><b>app/layout.tsx</b></div>
 <pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
-<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+<span class="kw">import</span> <span class="ty">Cabecalho</span> <span class="kw">from</span> <span class="st">"@/components/Cabecalho"</span>;
 <span class="kw">import</span> <span class="st">"./globals.css"</span>;
 
 <span class="kw">export const</span> metadata: <span class="ty">Metadata</span> = {
   title: <span class="st">"Meu primeiro Next"</span>,
-  description: <span class="st">"Projeto da aula 01 de Frontend Avançado"</span>,
+  description: <span class="st">"Projeto da aula 01 de Introdução ao Next.js"</span>,
 };
 
 <span class="kw">export default function</span> <span class="ty">RootLayout</span>({
@@ -197,10 +220,7 @@ procurando no console do navegador antes de ler o guia.</div>
   <span class="kw">return</span> (
     &lt;<span class="ty">html</span> lang=<span class="st">"pt-BR"</span>&gt;
       &lt;<span class="ty">body</span> className=<span class="st">"min-h-screen bg-zinc-950 text-zinc-100"</span>&gt;
-        &lt;<span class="ty">nav</span> className=<span class="st">"flex gap-4 border-b border-white/10 p-4"</span>&gt;
-          &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Início&lt;/<span class="ty">Link</span>&gt;
-          &lt;<span class="ty">Link</span> href=<span class="st">"/sobre"</span>&gt;Sobre&lt;/<span class="ty">Link</span>&gt;
-        &lt;/<span class="ty">nav</span>&gt;
+        &lt;<span class="ty">Cabecalho</span> /&gt;   <span class="cm">{/* a peça, usada aqui */}</span>
         &lt;<span class="ty">main</span> className=<span class="st">"mx-auto max-w-2xl p-8"</span>&gt;{children}&lt;/<span class="ty">main</span>&gt;
       &lt;/<span class="ty">body</span>&gt;
     &lt;/<span class="ty">html</span>&gt;
@@ -211,8 +231,6 @@ procurando no console do navegador antes de ler o guia.</div>
   <div class="pane">
     <div class="panehd"><span class="dot g"></span><b>app/page.tsx</b></div>
 <pre><span class="kw">export default function</span> <span class="ty">Home</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[home] renderizando no servidor"</span>);
-
   <span class="kw">return</span> (
     &lt;<span class="ty">section</span>&gt;
       &lt;<span class="ty">h1</span> className=<span class="st">"text-4xl font-bold"</span>&gt;Meu primeiro Next&lt;/<span class="ty">h1</span>&gt;
@@ -273,7 +291,7 @@ procurando no console do navegador antes de ler o guia.</div>
     <a class="btn" href="slides.html">▶ Slides</a>
   </div>
 
-  <div class="foot">Modelo de resposta · Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+  <div class="foot">Modelo de resposta · Aula 01 · Introdução ao Next.js · NickDev 💜</div>
 
 </div>
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roteiro da aula 01 · Frontend Avançado com Next.js · NickDev</title>
+<title>Roteiro da aula 01 · Introdução ao Next.js · NickDev</title>
 <meta name="description" content="Roteiro de condução da aula 01: bloco a bloco, com checkpoints, momentos de virada, plano B e o que não pode faltar.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -90,7 +90,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 </head>
 <body>
 
-<a class="voltar" href="/cursos/frontend-avancado-nextjs">← voltar ao curso</a>
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
 <div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
 
 <div class="wrap">
@@ -112,10 +112,13 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <span class="ico">🎯</span>
     <div>
       <h3>O objetivo único da aula</h3>
-      <p>Se a turma sair sabendo <b>que existe uma escolha de onde o código roda,
-      e que ela é por rota</b>, a aula cumpriu. Todo o resto — setup, deploy,
-      equipes — é infraestrutura pra sustentar esse entendimento nas próximas 18
-      aulas.</p>
+      <p>Se a turma sair sabendo <b>o que é um componente — uma peça escrita uma
+      vez e usada em muitos lugares</b> — e com o projeto no ar, a aula cumpriu.
+      Todo o resto — setup, deploy, equipes — é infraestrutura pra sustentar
+      esse entendimento nas próximas 18 aulas.</p>
+      <p style="margin-top:10px"><b>Esta turma não conhece React.</b> Não conhece
+      SPA, bundle, <code>useEffect</code> nem Promise. Tudo hoje se constrói em
+      cima de HTML, CSS e JavaScript básico — que é o que eles têm.</p>
     </div>
   </div>
 
@@ -141,42 +144,49 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <div class="label">A aula, bloco a bloco</div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">20 min</span><h3>Abertura: plano, critérios e teaser</h3></div>
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Abertura: plano e critérios</h3></div>
     <p>Apresentação da disciplina, como a nota é composta e o que vai ser
     construído ao longo do semestre.</p>
     <ul>
       <li>Percorra os <b>marcos do projeto</b> na página do curso — eles são o esqueleto do semestre</li>
-      <li>Deixe claro o pré-requisito: React e JS modernos são assumidos</li>
-      <li>Convide quem estiver inseguro a falar com você <b>esta semana</b></li>
+      <li>Diga com todas as letras: <b>ninguém precisa saber React</b>. Começa do zero hoje</li>
+      <li>O pré-requisito real é HTML, CSS e JavaScript básico</li>
     </ul>
-    <div class="dica"><b>Não gaste mais que 20 minutos aqui.</b> Plano de ensino é importante, mas ninguém sai empolgado de uma aula que começou com 40 minutos de regras. O teaser do projeto é o que prende — vá pra ele rápido.</div>
-    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 1–5</span></div>
+    <div class="dica"><b>Não gaste mais que 20 minutos aqui.</b> Plano de ensino é importante, mas ninguém sai empolgado de uma aula que começou com 40 minutos de regras.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 1–4</span></div>
   </div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">25 min</span><h3>Ecossistema React moderno</h3></div>
-    <p>As três eras do React como tentativas de resolver o mesmo problema:
-    tirar trabalho do navegador.</p>
-    <div class="dica"><b>Pergunta que abre o bloco:</b> "quem aqui já escreveu um <code>useEffect</code> só pra buscar dados?" Praticamente todo mundo levanta a mão. Aí você diz: "esse padrão é o que a gente vai aposentar hoje". Ancorar na dor que eles já têm vale mais que qualquer linha do tempo.</div>
-    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 6–7</span></div>
-  </div>
-
-  <div class="bloco">
-    <div class="bloco-hd"><span class="dur">30 min</span><h3>SPA × SSR × SSG × ISR</h3></div>
-    <p>O conceito central do curso. Vale ir devagar — tudo depois disso depende
-    daqui.</p>
+    <div class="bloco-hd"><span class="dur">30 min</span><h3>O problema: HTML que se repete</h3></div>
+    <p>O bloco que ancora a aula inteira. Não pule direto pro Next — a dor tem
+    que vir primeiro, senão a solução não faz sentido.</p>
     <ol>
-      <li>Mostre o HTML de uma SPA pura: <code>&lt;div id="root"&gt;</code> e nada mais</li>
-      <li>Apresente a tabela das quatro estratégias</li>
-      <li><b>Vire a chave:</b> a escolha é por rota, não por projeto</li>
-      <li>Rode o quiz do slide 10 no chat</li>
+      <li>Mostre as duas páginas HTML com o cabeçalho <b>copiado</b> (slide 5)</li>
+      <li>Pergunte: "e se eu quiser adicionar Contato no menu?"</li>
+      <li>Faça a conta em voz alta: 12 páginas, 12 arquivos, 12 edições</li>
     </ol>
-    <div class="dica"><b>Demonstração que convence:</b> abra "ver código-fonte" de um site feito em Next e de uma SPA tradicional, lado a lado. Num você lê o conteúdo; no outro, uma div vazia. Trinta segundos que valem mais que dez minutos de slide.</div>
+    <div class="dica"><b>Pergunta que abre o bloco:</b> "quem aqui já copiou e colou o mesmo cabeçalho em várias páginas HTML?" Quase todo mundo levanta a mão — e quem levantou já sentiu a dor. Ancorar numa experiência que eles <b>têm</b> vale mais que qualquer linha do tempo de framework.</div>
     <ul class="check">
-      <li>A turma respondeu o quiz e acertou a maioria</li>
-      <li>Alguém consegue explicar, com as próprias palavras, por que a escolha é por rota</li>
+      <li>Alguém da turma verbalizou o problema antes de você dar a solução</li>
     </ul>
-    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 8–10</span></div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 5–6</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>Componente, JSX, e os dois nomes</h3></div>
+    <p>A palavra mais importante do semestre. Vá devagar — tudo depois disso
+    depende daqui.</p>
+    <ol>
+      <li><b>Componente:</b> uma peça escrita uma vez, usada em muitos lugares</li>
+      <li><b>JSX:</b> uma função que devolve HTML. Escreva no quadro, sem slide</li>
+      <li><b>React × Next:</b> o motor e o carro. Trinta segundos, não mais</li>
+    </ol>
+    <div class="dica"><b>Cuidado com o vocabulário aqui.</b> Esta turma não conhece React. Evite "estado", "hook", "renderização", "props", "bundle" — nenhuma dessas palavras é necessária hoje, e cada uma que escapar cria um buraco. Se alguém perguntar, responda em uma frase e diga em que aula aquilo entra.</div>
+    <ul class="check">
+      <li>Alguém consegue explicar, com as próprias palavras, o que é um componente</li>
+      <li>Ninguém saiu do bloco achando que React e Next são a mesma coisa</li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 7–9</span></div>
   </div>
 
   <div class="pausa"><span class="dur">☕ 10 min</span> Intervalo</div>
@@ -195,41 +205,42 @@ pnpm -v
 pnpm create next-app@latest meu-projeto
 cd meu-projeto
 pnpm dev</pre>
-    <div class="dica"><b>Enquanto instala, aproveite o tempo morto:</b> explique por que pnpm em vez de npm (uma cópia por máquina, não por projeto). A turma está olhando a barra de progresso mesmo — é o melhor momento pra um conceito curto.</div>
+    <div class="dica"><b>Enquanto instala, aproveite o tempo morto:</b> explique o que é o Node (roda JavaScript fora do navegador) e o que é o pnpm (baixa as peças prontas). A turma está olhando a barra de progresso mesmo — é o melhor momento pra um conceito curto.</div>
     <ul class="check">
       <li>Todo mundo com <code>localhost:3000</code> aberto</li>
       <li>Quem terminou vira monitor de quem travou</li>
       <li>Anote quem ficou pra trás e combine um horário antes da aula 2</li>
     </ul>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 12–13</span></div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 11–12</span></div>
   </div>
 
   <div class="bloco">
-    <div class="bloco-hd"><span class="dur">25 min</span><h3>A estrutura e o primeiro Server Component</h3></div>
-    <p>Tour pelos arquivos e o momento de virada da aula.</p>
+    <div class="bloco-hd"><span class="dur">30 min</span><h3>Lendo o projeto: layout, page e rota</h3></div>
+    <p>Tour pelos arquivos e o momento em que a promessa do começo é paga.</p>
     <ul>
-      <li><code>app/layout.tsx</code> — a moldura, e por que ela não remonta</li>
-      <li><code>app/page.tsx</code> — a rota <code>/</code></li>
+      <li>A estrutura de pastas — foque em <code>app/</code>, o resto é ruído hoje</li>
+      <li><code>app/layout.tsx</code> — <b>ponha o cabeçalho aqui, ao vivo</b></li>
+      <li><code>app/page.tsx</code> — a página inicial</li>
       <li>Crie <code>app/sobre/page.tsx</code> ao vivo e mostre a URL nascendo</li>
     </ul>
-    <div class="dica"><b>O momento da aula.</b> Ponha um <code>console.log</code> no <code>page.tsx</code> e pergunte: "onde isso vai aparecer?". Quase todo mundo responde "no console do navegador". Recarregue a página e mostre o log no <b>terminal</b>. O silêncio que segue é a ficha caindo — deixe ele durar. Não explique o mecanismo agora: diga que é a aula 3.</div>
+    <div class="dica"><b>O momento da aula.</b> Depois de escrever o cabeçalho no <code>layout.tsx</code>, crie a rota <code>/sobre</code> vazia e abra no navegador. O cabeçalho está lá — e ninguém escreveu ele naquela página. Faça a ligação em voz alta com as 12 páginas do começo da aula: <b>"lembram do menu copiado? acabou"</b>. Deixe o silêncio durar.</div>
     <ul class="check">
       <li>Todo mundo criou a rota <code>/sobre</code></li>
-      <li>Todo mundo viu o log no terminal com os próprios olhos</li>
+      <li>Todo mundo viu o cabeçalho aparecer na página nova sem ter escrito ele lá</li>
     </ul>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 14–17</span></div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 13–17</span></div>
   </div>
 
   <div class="bloco">
     <div class="bloco-hd"><span class="dur">20 min</span><h3>Primeiro deploy na Vercel</h3></div>
     <ol>
-      <li><code>pnpm build</code> local — e leia a <b>tabela de rotas</b> junto com a turma</li>
+      <li><code>pnpm build</code> local — e leia a <b>lista de rotas</b> junto com a turma</li>
       <li><code>git push</code> pro GitHub</li>
       <li>Vercel → Add New → Project → importar → Deploy</li>
       <li>Cada pessoa manda o link no grupo 🎉</li>
     </ol>
-    <div class="dica"><b>Costure com a teoria:</b> a tabela do build mostra <code>○ (Static)</code> nas rotas criadas. Diga em voz alta: "vocês não configuraram isso — o Next deduziu". É o conceito do início da aula aparecendo no terminal, e fecha o arco.</div>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slide 18</span></div>
+    <div class="dica"><b>Defina "build" na hora que a palavra aparecer:</b> empacotar o projeto no formato final, pronto pra ser servido. É um termo que eles vão ouvir o semestre inteiro — vale os quinze segundos. Na lista de rotas, aponte só que <b>as páginas criadas aparecem ali</b>; não entre em estático × dinâmico, isso é aula 4.</div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 18–19</span></div>
   </div>
 
   <div class="bloco">
@@ -240,20 +251,21 @@ pnpm dev</pre>
       <li>Apresentação do desafio e da data de entrega</li>
     </ul>
     <div class="dica"><b>Não deixe a formação pra depois da aula.</b> Quem não formou equipe hoje chega na aula 2 sem grupo, e aí a turma já se acomodou. Se sobrar gente solta, monte você mesma ali na hora.</div>
-    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 19–21</span></div>
+    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 20–22</span></div>
   </div>
 
   <div class="label">Se atrasar</div>
   <div class="bloco">
     <p>Corte nesta ordem:</p>
     <ol>
-      <li><b>O tour detalhado da estrutura</b> — o guia cobre, e a aula 2 é inteira sobre roteamento</li>
-      <li><b>O quiz do slide 10</b> — vira aquecimento da aula 2</li>
+      <li><b>O bloco React × Next</b> — o guia cobre, e não muda nada do que eles fazem hoje</li>
+      <li><b>O aquecimento do slide 17</b> — vira abertura da aula 2</li>
+      <li><b>O tour detalhado da estrutura</b> — a aula 2 é inteira sobre roteamento</li>
       <li><b>O deploy</b> — passa pro desafio, mas <b>avise que é obrigatório</b> e ofereça monitoria</li>
     </ol>
-    <p style="margin-top:14px"><b>Nunca corte:</b> o bloco de SPA × SSR × SSG (é o eixo do curso), o
-    <code>console.log</code> no terminal (é a experiência que ancora tudo) e a
-    formação das equipes.</p>
+    <p style="margin-top:14px"><b>Nunca corte:</b> o bloco do HTML repetido (é a dor que ancora tudo), o
+    cabeçalho no <code>layout.tsx</code> aparecendo na rota nova (é a experiência
+    que fecha o arco) e a formação das equipes.</p>
   </div>
 
   <div class="label">Se a turma travar</div>
@@ -271,8 +283,8 @@ pnpm dev</pre>
     <p>Três ganchos que valem plantar hoje:</p>
     <ul>
       <li>"Repare que ao navegar entre <code>/</code> e <code>/sobre</code> a página não pisca. Por quê?" — abre a aula 2</li>
-      <li>"O <code>console.log</code> foi pro terminal. Como é que eu faço um botão funcionar então?" — abre a aula 3</li>
-      <li>"E se a página precisar de dados que mudam?" — abre a aula 4</li>
+      <li>"O cabeçalho é uma peça fixa. E se eu quisesse um botão que <b>reage</b> ao clique?" — abre a aula 3</li>
+      <li>"E se o conteúdo da página viesse de fora, e mudasse toda hora?" — abre a aula 4</li>
     </ul>
   </div>
 
@@ -283,7 +295,7 @@ pnpm dev</pre>
     <a class="btn" href="codigos-desafio.html">🧩 Código</a>
   </div>
 
-  <div class="foot">Roteiro da Aula 01 · Frontend Avançado com Next.js · NickDev 💜</div>
+  <div class="foot">Roteiro da Aula 01 · Introdução ao Next.js · NickDev 💜</div>
 
 </div>
 
