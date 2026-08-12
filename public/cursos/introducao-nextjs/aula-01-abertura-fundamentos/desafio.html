@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Desafio 01 — Ambiente, projeto e deploy · Introdução ao Next.js · NickDev</title>
-<meta name="description" content="Desafio técnico da aula 01: montar o ambiente com Node e pnpm, criar o projeto Next.js, escrever a primeira rota e publicar na Vercel.">
+<meta name="description" content="Desafio técnico da aula 01: montar o ambiente com Node e npm, criar o projeto Next.js, escrever a primeira rota e publicar na Vercel.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -161,24 +161,23 @@ tr:last-child td{border-bottom:0}
   <div class="label">Passo a passo</div>
 
   <div class="step">
-    <div class="step-head"><span class="n">01</span><h3>Confira o Node e instale o pnpm</h3></div>
+    <div class="step-head"><span class="n">01</span><h3>Confira o Node e o npm</h3></div>
 <div class="terminal"><span class="p">$</span> node -v
 <span class="out">v22.19.0</span>          <span class="cm"># precisa ser 20.9 ou maior</span>
 
-<span class="p">$</span> corepack enable pnpm
-<span class="p">$</span> pnpm -v
-<span class="out">10.x</span></div>
+<span class="p">$</span> npm -v
+<span class="out">10.8.2</span>          <span class="cm"># ja vem junto com o Node</span></div>
     <p class="tip"><b>Guarde os dois prints.</b> Eles entram no README — e me ajudam a diagnosticar rápido se algo der errado com você.</p>
   </div>
 
   <div class="step">
     <div class="step-head"><span class="n">02</span><h3>Crie o projeto</h3></div>
-<div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-primeiro-next</div>
+<div class="terminal"><span class="p">$</span> npx create-next-app@latest meu-primeiro-next</div>
     <p>Respostas: TypeScript <b>Yes</b> · ESLint <b>Yes</b> · Tailwind
     <b>No</b> · App Router <b>Yes</b> · Turbopack <b>Yes</b> · alias
     <code>@/*</code> <b>Yes</b>.</p>
     <p class="tip"><b>Tailwind fica pra aula 08.</b> Até lá o estilo é CSS comum no <code>globals.css</code> — que você já sabe escrever. Quem responder <b>Yes</b> aqui vai ficar com um projeto diferente do da turma.</p>
-    <p class="tip"><b>Confira a versão</b> que aparece ao subir: precisa ser <b>Next.js 16.3</b> ou mais recente. Se vier 15 ou menos, seu <code>pnpm</code> pegou cache antigo — rode com <code>@latest</code> explícito.</p>
+    <p class="tip"><b>Confira a versão</b> que aparece ao subir: precisa ser <b>Next.js 16.3</b> ou mais recente. Se vier 15 ou menos, o <code>npx</code> pegou uma versão guardada de antes — rode com <code>@latest</code> explícito.</p>
   </div>
 
   <div class="step">
@@ -230,7 +229,7 @@ tr:last-child td{border-bottom:0}
 
   <div class="step">
     <div class="step-head"><span class="n">05</span><h3>Rode o build antes de subir</h3></div>
-<div class="terminal"><span class="p">$</span> pnpm build</div>
+<div class="terminal"><span class="p">$</span> npm run build</div>
     <p>É exatamente o comando que a Vercel executa. Se passar aqui, passa lá.</p>
     <p class="tip"><b>Repare na lista de rotas que o build imprime</b> — todas as páginas que você criou devem aparecer ali. Se faltar alguma, o arquivo não está com o nome <code>page.tsx</code> ou está na pasta errada.</p>
   </div>
@@ -258,12 +257,12 @@ tr:last-child td{border-bottom:0}
 
   <div class="label">Requisitos mínimos</div>
   <ul class="check">
-    <li>Node <b>20.9+</b> e pnpm funcionando, com os prints no README</li>
+    <li>Node <b>20.9+</b> e npm funcionando, com os prints no README</li>
     <li>Projeto em <b>Next.js 16.3+</b>, criado com <code>create-next-app</code></li>
     <li>Rota <code>/sobre</code> escrita por você, ligada à home por <code>&lt;Link&gt;</code></li>
     <li>Um componente <code>Cabecalho</code> em arquivo próprio, usado no layout</li>
     <li>No README: <b>o que é um componente</b>, com suas palavras</li>
-    <li><code>pnpm build</code> passando sem erro</li>
+    <li><code>npm run build</code> passando sem erro</li>
     <li><b>Publicado na Vercel</b>, com o link no README</li>
     <li>Equipe formada, com repositório e ideia de tema</li>
   </ul>
@@ -279,7 +278,7 @@ tr:last-child td{border-bottom:0}
 
   <div class="label">O que NÃO pode 🚫</div>
   <ul class="check no">
-    <li>Usar <code>npm</code> em vez de <code>pnpm</code> (o <code>pnpm-lock.yaml</code> precisa estar no repo)</li>
+    <li>Deixar o <code>package-lock.json</code> de fora do repositório — ele precisa ser enviado junto</li>
     <li>Pages Router — o curso inteiro é <b>App Router</b></li>
     <li><code>&lt;a href&gt;</code> para navegação interna</li>
     <li>Subir <code>node_modules</code> ou <code>.next</code> (o <code>.gitignore</code> gerado já cuida — confira se veio)</li>
@@ -299,7 +298,7 @@ tr:last-child td{border-bottom:0}
   <div class="label">Como entregar</div>
   <div class="entrega">
     <ol>
-      <li>Rode <code>pnpm build</code> e resolva o que aparecer</li>
+      <li>Rode <code>npm run build</code> e resolva o que aparecer</li>
       <li>Suba pro GitHub, em repositório público</li>
       <li>Publique na Vercel</li>
       <li>Mande no grupo: <b>link do site</b> + <b>link do repositório</b></li>
