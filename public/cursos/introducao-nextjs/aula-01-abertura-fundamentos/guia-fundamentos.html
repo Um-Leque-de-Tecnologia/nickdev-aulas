@@ -108,6 +108,8 @@
   <a class="voltar-curso" href="/cursos/introducao-nextjs">← voltar ao curso</a>
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#dicionario">📖 O dicionário desta aula</a>
     <div class="grp">O conceito</div>
     <a href="#problema">O problema: HTML que se repete</a>
     <a href="#componente">Componente: a peça reutilizável</a>
@@ -146,6 +148,102 @@
     caminho. Se HTML ou JS estiverem enferrujados, <b>fale nesta semana</b>:
     recuperar agora é muito mais fácil do que na aula 5.
   </div>
+
+  <!-- ==================================================================== -->
+  <section id="dicionario">
+    <h2>O dicionário desta aula</h2>
+    <p>Toda área tem suas palavras estranhas, e programação tem muitas. Aqui
+    estão as desta aula, <b>em português normal</b>. Volte aqui sempre que
+    esbarrar numa que você esqueceu — isso é esperado, não é vergonha.</p>
+
+    <h3>As ferramentas</h3>
+    <table>
+      <tr><th>Palavra</th><th>O que é, em palavras simples</th></tr>
+      <tr>
+        <td><b>Terminal</b></td>
+        <td>Uma janela preta onde você <b>digita ordens</b> pro computador em vez de clicar. É como conversar com a máquina por bilhetinhos: você escreve uma linha, aperta Enter, ela responde. Também chamam de "prompt", "console" ou "linha de comando" — é tudo a mesma janela.</td>
+      </tr>
+      <tr>
+        <td><b>Node</b></td>
+        <td>Um programa que <b>faz o JavaScript funcionar fora do navegador</b>. Até hoje o seu JavaScript só rodava dentro do Chrome. O Node deixa ele rodar direto no seu computador, como qualquer outro programa.</td>
+      </tr>
+      <tr>
+        <td><b>Pacote</b> (ou biblioteca)</td>
+        <td>Um <b>pedaço de programa que outra pessoa já escreveu</b> e disponibilizou de graça pra você usar. Em vez de fazer tudo do zero, você pega pronto. É como usar farinha comprada em vez de moer o trigo.</td>
+      </tr>
+      <tr>
+        <td><b>pnpm</b></td>
+        <td>O <b>entregador dos pacotes</b>. Você diz o que precisa, ele baixa da internet e guarda na pasta do projeto. Existem outros entregadores (npm, yarn) — o nosso é o pnpm.</td>
+      </tr>
+      <tr>
+        <td><b>Framework</b></td>
+        <td>Um <b>conjunto grande de coisas prontas</b>, com um jeito certo de organizar seu projeto. Ele não te dá só peças: ele te dá a planta da casa. Next.js é um framework.</td>
+      </tr>
+    </table>
+
+    <h3>O projeto</h3>
+    <table>
+      <tr><th>Palavra</th><th>O que é, em palavras simples</th></tr>
+      <tr>
+        <td><b>Raiz do projeto</b></td>
+        <td>A <b>pasta mais de fora</b> do seu projeto — aquela que contém todas as outras. Quando eu disser "crie na raiz", é ali, não dentro de <code>app/</code>.</td>
+      </tr>
+      <tr>
+        <td><b>Componente</b></td>
+        <td>Um <b>pedaço de tela com nome próprio</b>, escrito uma vez e usado em vários lugares. Um cabeçalho, um botão, um card. É a palavra mais importante do semestre.</td>
+      </tr>
+      <tr>
+        <td><b>JSX</b></td>
+        <td><b>HTML escrito dentro do JavaScript.</b> Só isso. Quando você vê <code>&lt;h1&gt;</code> no meio de um arquivo <code>.tsx</code>, aquilo é JSX.</td>
+      </tr>
+      <tr>
+        <td><code>export default</code></td>
+        <td>Uma plaquinha que diz <b>"esta é a peça principal deste arquivo, pode levar"</b>. Sem ela, outros arquivos não conseguem usar o que você escreveu.</td>
+      </tr>
+      <tr>
+        <td><code>import</code></td>
+        <td>O contrário: <b>"quero usar aqui uma peça que está em outro arquivo"</b>. Você escreve o nome dela e de onde ela vem.</td>
+      </tr>
+      <tr>
+        <td><b>Rota</b></td>
+        <td>Um <b>endereço do seu site</b>. O <code>/sobre</code> em <code>meusite.com/sobre</code> é uma rota. Neste curso, criar uma pasta cria uma rota.</td>
+      </tr>
+    </table>
+
+    <h3>Colocar no ar</h3>
+    <table>
+      <tr><th>Palavra</th><th>O que é, em palavras simples</th></tr>
+      <tr>
+        <td><b>Servidor</b></td>
+        <td>Um <b>computador que fica ligado o tempo todo</b>, em algum lugar do mundo, esperando alguém pedir o seu site pra entregar. Não é nada mágico: é um computador, só que sempre acordado.</td>
+      </tr>
+      <tr>
+        <td><code>localhost:3000</code></td>
+        <td>O seu site rodando <b>só na sua máquina</b>, pra você testar. "localhost" quer dizer "aqui mesmo". Ninguém mais no mundo consegue abrir esse endereço.</td>
+      </tr>
+      <tr>
+        <td><b>Build</b></td>
+        <td><b>Empacotar o projeto</b> no formato final, pronto pra ser publicado. Enquanto você desenvolve, o projeto está espalhado e cheio de coisa de rascunho. O build junta tudo e limpa. Fala-se "rodar o build".</td>
+      </tr>
+      <tr>
+        <td><b>Repositório</b></td>
+        <td>A <b>pasta do seu projeto guardada na internet</b>, com todo o histórico de mudanças. Fica no GitHub. Também chamam só de "repo".</td>
+      </tr>
+      <tr>
+        <td><b>Deploy</b></td>
+        <td><b>Colocar o site no ar.</b> Pegar o projeto que está na sua máquina e botar num servidor, pra qualquer pessoa conseguir abrir. Fala-se "fazer o deploy" ou "subir o projeto".</td>
+      </tr>
+      <tr>
+        <td><b>Vercel</b></td>
+        <td>Uma <b>empresa que hospeda sites de graça</b> (até certo tamanho). É quem vai guardar o seu projeto e te dar um link. Foi criada pelas mesmas pessoas do Next.js, por isso combina tão bem.</td>
+      </tr>
+    </table>
+
+    <div class="tip"><b>Não decore nada disto.</b> Ninguém aprende vocabulário
+    técnico decorando lista — a gente aprende usando. Você vai ouvir cada uma
+    dessas palavras dezenas de vezes no semestre, e daqui a um mês vai usar sem
+    perceber. Esta tabela é só pra consultar quando travar.</div>
+  </section>
 
   <!-- ==================================================================== -->
   <section id="problema">
@@ -299,7 +397,11 @@
   <!-- ==================================================================== -->
   <section id="node">
     <h2>Node 20.9+</h2>
-    <p>O Next.js 16 exige <b>Node 20.9</b> ou mais novo. Confira:</p>
+    <p>Lembra do dicionário? <b>Node é o programa que faz o JavaScript rodar
+    fora do navegador.</b> Sem ele, nada do que vem a seguir funciona — então é
+    a primeira coisa a conferir.</p>
+    <p>O Next.js 16 precisa da versão <b>20.9</b> ou mais nova. Pra descobrir
+    qual você tem, abra o terminal e digite:</p>
 <div class="terminal"><span class="p">$</span> node -v
 <span class="out">v22.19.0</span></div>
     <p>Se aparecer menos que isso, ou "comando não encontrado", instale a versão
@@ -310,20 +412,26 @@
   <!-- ==================================================================== -->
   <section id="pnpm">
     <h2>pnpm</h2>
-    <p>Este curso usa <b>pnpm</b> em vez de npm. O Node moderno já traz o
-    Corepack, que instala pra você:</p>
+    <p>O <b>pnpm é o entregador dos pacotes</b>: você diz o que o projeto
+    precisa, e ele baixa da internet. Existem outros entregadores fazendo a
+    mesma coisa — o npm é o mais conhecido — mas neste curso a gente usa o pnpm,
+    porque ele é mais rápido e gasta menos espaço no seu disco.</p>
+    <p>Pra instalar, digite estas duas linhas no terminal:</p>
 <div class="terminal"><span class="p">$</span> corepack enable pnpm
 <span class="p">$</span> pnpm -v
 <span class="out">10.x</span></div>
 
-    <h3>Por que pnpm</h3>
-    <table>
-      <tr><th>Aspecto</th><th>npm</th><th>pnpm</th></tr>
-      <tr><td>Disco</td><td>cada projeto tem sua cópia de cada pacote</td><td>uma cópia global, ligada por atalho</td></tr>
-      <tr><td>Instalação</td><td>—</td><td>bem mais rápida a partir da segunda vez</td></tr>
-      <tr><td>Rigor</td><td>permite usar pacote que você não declarou</td><td>bloqueia — o que evita bug que só aparece em produção</td></tr>
-    </table>
-    <div class="tip"><b>Na prática, o que muda pra você:</b> quase nada. <code>npm install</code> vira <code>pnpm install</code>, <code>npm run dev</code> vira <code>pnpm dev</code>. Com cinco projetos Next na máquina, a economia de disco passa de 1 GB — o que, como a gente vai ver, não é detalhe.</div>
+    <h3>Por que não o npm, então?</h3>
+    <p>Imagine que cada projeto seu precisa dos mesmos 300 livros.</p>
+    <ul>
+      <li>O <b>npm</b> compra 300 livros novos <b>pra cada projeto</b>. Cinco projetos, 1500 livros ocupando espaço.</li>
+      <li>O <b>pnpm</b> compra uma vez só e guarda numa biblioteca central. Cada projeto ganha uma <b>plaquinha</b> apontando pra lá.</li>
+    </ul>
+    <p>Resultado: instala mais rápido e ocupa muito menos espaço no seu
+    computador. Com cinco projetos Next na máquina, a diferença passa de 1 GB.</p>
+    <div class="tip"><b>O que muda pra você no dia a dia: quase nada.</b> Onde
+    você veria <code>npm install</code>, escreve <code>pnpm install</code>. Onde
+    veria <code>npm run dev</code>, escreve <code>pnpm dev</code>. Só isso.</div>
   </section>
 
   <!-- ==================================================================== -->
@@ -331,16 +439,39 @@
     <h2>Criar o projeto</h2>
 <div class="terminal"><span class="p">$</span> pnpm create next-app@latest meu-projeto</div>
 
-    <p>Respostas do curso:</p>
+    <p>Ele vai fazer <b>seis perguntas</b> em inglês. Elas assustam na primeira
+    vez, mas cada uma é simples. Responda assim:</p>
     <table>
-      <tr><th>Pergunta</th><th>Resposta</th><th>Por quê</th></tr>
-      <tr><td>TypeScript</td><td><b>Yes</b></td><td>o curso inteiro usa; erro pego no editor não vira bug em produção</td></tr>
-      <tr><td>ESLint</td><td><b>Yes</b></td><td>aponta código suspeito antes do code review</td></tr>
-      <tr><td>Tailwind CSS</td><td><b>No</b></td><td>ainda não — até a <b>aula 8</b> o estilo é CSS comum, que você já sabe</td></tr>
-      <tr><td>App Router</td><td><b>Yes</b></td><td>é o assunto do curso</td></tr>
-      <tr><td>Turbopack</td><td><b>Yes</b></td><td>padrão no Next 16, bem mais rápido</td></tr>
-      <tr><td>Import alias <code>@/*</code></td><td><b>Yes</b></td><td>evita <code>../../..</code></td></tr>
+      <tr><th>A pergunta</th><th>Responda</th><th>O que ela quer dizer</th></tr>
+      <tr>
+        <td>TypeScript</td><td><b>Yes</b></td>
+        <td>É o JavaScript com uma checagem a mais: ele avisa quando você mistura um número com um texto, por exemplo. Erro que ele pega no editor não vira problema com o site no ar.</td>
+      </tr>
+      <tr>
+        <td>ESLint</td><td><b>Yes</b></td>
+        <td>Um corretor automático, tipo o do Word. Ele sublinha código suspeito enquanto você escreve.</td>
+      </tr>
+      <tr>
+        <td>Tailwind CSS</td><td><b>No</b></td>
+        <td>É outra maneira de escrever CSS. Ainda não — até a <b>aula 8</b> a gente usa o CSS que você já sabe.</td>
+      </tr>
+      <tr>
+        <td>App Router</td><td><b>Yes</b></td>
+        <td>É o jeito novo do Next organizar as páginas, aquele em que a pasta vira o endereço. É o assunto do curso.</td>
+      </tr>
+      <tr>
+        <td>Turbopack</td><td><b>Yes</b></td>
+        <td>O motor que monta o seu site enquanto você trabalha. Esse é o mais rápido, e já vem como padrão.</td>
+      </tr>
+      <tr>
+        <td>Import alias <code>@/*</code></td><td><b>Yes</b></td>
+        <td>Um apelido pra pasta do projeto. Sem ele, pra buscar um arquivo você escreveria <code>../../../components/Cabecalho</code>. Com ele, escreve <code>@/components/Cabecalho</code>. Bem melhor.</td>
+      </tr>
     </table>
+
+    <div class="tip warn"><b>Se você errar alguma, não entre em pânico.</b> Apague
+    a pasta que ele criou e rode o comando de novo. Leva um minuto. É bem mais
+    rápido do que tentar consertar depois.</div>
 
     <div class="tip"><b>Por que Tailwind fica pra depois.</b> Tailwind é uma
     forma diferente de escrever CSS, e aprender ela agora seria uma novidade em
@@ -488,23 +619,44 @@
   <!-- ==================================================================== -->
   <section id="deploy">
     <h2>Deploy na Vercel</h2>
-    <p>Vamos publicar na <b>aula 1</b>, antes de escrever a segunda linha de
-    código. Não é enfeite: é o que transforma "na minha máquina funciona" num
-    link que a equipe inteira vê.</p>
+    <p><b>Deploy é colocar o site no ar</b> — tirar o projeto da sua máquina e
+    botar num computador que fica ligado o tempo todo, pra qualquer pessoa
+    conseguir abrir.</p>
 
+    <p>Até agora o seu site só existe em <code>localhost:3000</code>, e
+    "localhost" quer dizer <b>"aqui mesmo"</b>: só você enxerga. Vamos mudar
+    isso hoje, na aula 1, antes de escrever a segunda linha de código. Não é
+    enfeite — é o que transforma "na minha máquina funciona" num link que você
+    manda pra qualquer pessoa.</p>
+
+    <h3>O caminho, passo a passo</h3>
     <ol>
-      <li>Rode <code>pnpm build</code> local. Passou? Ótimo — é o mesmo comando que a Vercel roda</li>
-      <li><code>git push</code> pro GitHub, em repositório <b>público</b></li>
-      <li>Em <code>vercel.com</code> → <b>Add New… → Project</b> → importe o repositório</li>
-      <li><b>Não mexa em nenhuma configuração.</b> A Vercel reconhece o Next sozinha</li>
-      <li><b>Deploy</b></li>
+      <li>Rode <code>pnpm build</code> no seu computador. Esse comando <b>empacota o projeto</b> no formato final. Se ele reclamar de alguma coisa, conserte antes de continuar — é o mesmo comando que a Vercel vai rodar</li>
+      <li>Mande o projeto pro <b>GitHub</b> (é onde o código fica guardado na internet). O repositório precisa ser <b>público</b></li>
+      <li>Entre em <code>vercel.com</code> e faça login com a sua conta do GitHub</li>
+      <li>Clique em <b>Add New… → Project</b> e escolha o repositório que você acabou de subir</li>
+      <li><b>Não mexa em configuração nenhuma.</b> A Vercel reconhece que é um projeto Next sozinha</li>
+      <li>Clique em <b>Deploy</b> e espere. Em um ou dois minutos ela te devolve um link</li>
     </ol>
 
-    <p>A partir daí, todo <code>git push</code> na branch principal republica. E
-    cada Pull Request ganha um <b>preview deployment</b> com URL própria — o que
-    vai ser essencial pro code review do projeto em equipe.</p>
+    <div class="tip"><b>Abra o link no celular.</b> Sério, faça isso. É o momento
+    em que deixa de ser exercício e vira um site de verdade — e essa sensação é
+    metade do motivo da gente publicar já na primeira aula.</div>
 
-    <div class="tip"><b>Rode <code>pnpm build</code> antes de dar push.</b> É literalmente o que a Vercel executa. Erro de tipo que o <code>dev</code> tolera, o <code>build</code> reprova — e é bem mais rápido descobrir isso local.</div>
+    <h3>E depois?</h3>
+    <p>A partir daqui você não publica mais nada na mão. Toda vez que você
+    mandar código novo pro GitHub, a Vercel percebe sozinha e <b>atualiza o site
+    em um ou dois minutos</b>. Você programa, manda, e pronto.</p>
+
+    <p>Mais pra frente, quando vocês estiverem trabalhando em equipe, ela ainda
+    vai gerar um <b>link separado pra cada mudança em teste</b> — assim dá pra
+    ver como ficou antes de mexer no site de verdade. Isso é assunto da aula de
+    deploy, mas já vale saber que existe.</p>
+
+    <div class="tip"><b>Rode <code>pnpm build</code> antes de mandar pro GitHub.</b>
+    É exatamente o mesmo comando que a Vercel vai rodar. Se ele reclamar aqui, ia
+    reclamar lá também — e é bem mais rápido descobrir no seu computador do que
+    esperar o site falhar.</div>
   </section>
 
   <!-- ==================================================================== -->
