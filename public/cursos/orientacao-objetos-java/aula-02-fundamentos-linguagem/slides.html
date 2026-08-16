@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fundamentos da linguagem · NickDev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E;
+    --canvas-2:#100D1B;
+    --paper:#f6f4ef;
+    --ink:#F3F0FA;
+    --muted:#8B84A0;
+    --tag:#7B4FD0;       /* estrutura / tags */
+    --str:#A98CE0;       /* strings / sucesso */
+    --key:#F24487;       /* palavras-chave / destaque */
+    --attr:#E88BB8;      /* atributos / parada */
+    --green:#5fd08a;     /* acerto / caminho bom */
+    --line:rgba(255,255,255,.09);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --serif:'Newsreader',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--body);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(26px,5.2vw,64px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6.6vw,82px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(26px,4.4vw,52px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.4vw,27px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;color:var(--ink);max-width:60ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.9em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:820px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(14px,1.5vw,17px)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.ok h3{color:var(--green)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.no h3{color:var(--key)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+
+  ul.clean{list-style:none;max-width:64ch}
+  ul.clean li{position:relative;padding-left:26px;margin:12px 0;font-size:clamp(15px,1.7vw,20px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;
+    font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;
+    border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+
+  .agenda{display:flex;flex-direction:column;gap:2px;max-width:940px;width:100%}
+  .row{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;padding:12px 16px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:14px}
+  .row .d{font-size:clamp(14px,1.6vw,18px)}
+  .row .tag{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.55}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;gap:0;width:100%;max-width:960px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+  .flow .node .ico{font-size:34px;margin-bottom:10px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(15px,1.8vw,20px);margin-bottom:6px}
+  .flow .arw{display:flex;align-items:center;padding:0 14px;color:var(--tag);font-size:26px}
+  @media(max-width:820px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg)}}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(12.5px,1.4vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:760px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .termline{font-family:var(--mono);font-size:clamp(12.5px,1.4vw,15px);color:#9ee39e}
+  .termline .p{color:var(--muted)}
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:760px;white-space:pre;overflow-x:auto}
+
+  .steps{counter-reset:s;max-width:760px;width:100%}
+  .steps .st{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:34px;height:34px;min-width:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:15px}
+  .steps .st .body h3{font-size:clamp(16px,1.9vw,21px);margin-bottom:2px}
+  .steps .st .body p{font-size:clamp(13px,1.5vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:13px;color:var(--attr);border-left:2px solid var(--attr);padding-left:14px;margin-top:22px;max-width:60ch;line-height:1.5}
+
+  .big-emoji{font-size:clamp(40px,7vw,72px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  table.slidetable{width:100%;max-width:840px;border-collapse:collapse}
+  table.slidetable th,table.slidetable td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);font-size:clamp(13px,1.5vw,16px)}
+  table.slidetable th{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--muted)}
+  table.slidetable td b{color:#fff}
+
+  .responsividade,.slide{justify-content:safe center}
+  h1,h2,.tagtitle{overflow-wrap:break-word}
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:64px 1fr;gap:10px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center) > *{margin-inline:auto;width:100%;max-width:960px}
+</style>
+<style>
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .deck{z-index:2}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 CAPA -->
+  <section class="slide active center">
+    <div class="eyebrow"><span class="b">curso</span> · aula 02 · orientação a objetos com java</div>
+    <div class="tagtitle"><span class="br">&lt;</span><span class="nm">fundamentos-da-linguagem</span><span class="br">&gt;</span></div>
+    <h1 style="margin:24px 0 14px">Tipos, variáveis<br>e o <span class="grad">coração do Java.</span></h1>
+    <p class="lead" style="max-width:56ch">Hoje a gente sai da casca do Hello World e entra na linguagem de verdade: tipos, operadores, decisão, repetição, arrays e leitura de dados.</p>
+  </section>
+
+  <!-- 2 RECAP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">recap</span> · aula 01 em 30 segundos</div>
+    <h2>Onde a gente parou</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">Paradigmas</h3><p>Estruturado × orientado a objetos. Hoje ainda estamos no <strong>estruturado</strong> — objeto de verdade só na aula 03.</p></div>
+      <div class="card"><h3 class="attr">Ecossistema</h3><p><span class="code-inline">JDK</span>, <span class="code-inline">JRE</span>, <span class="code-inline">JVM</span> e <strong>bytecode</strong> — a oficina, o carro e o motor.</p></div>
+      <div class="card"><h3 class="key">Ambiente</h3><p>JDK 21 + IntelliJ rodando. Primeiro programa <strong>compilado e executado</strong> pelo terminal.</p></div>
+    </div>
+    <p class="note">Se o ambiente ainda não está redondo, fala com a gente antes do fim da aula — hoje o código já cresce bastante.</p>
+  </section>
+
+  <!-- 3 AGENDA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">agenda</span> · aula 02</div>
+    <h2>O mapa de hoje</h2>
+    <div class="agenda">
+      <div class="row"><span class="t">15 min</span><span class="d">Recap + tipos primitivos e variáveis</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d">Operadores (aritméticos, relacionais, lógicos) e casting</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d">Estruturas de decisão: if/else e switch</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">30 min</span><span class="d">Estruturas de repetição: for, while e do-while</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d">Arrays: declarar, acessar e percorrer</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d">Entrada de dados com Scanner</span><span class="tag">hands-on</span></div>
+      <div class="row"><span class="t">15 min</span><span class="d">Lista 1 + dúvidas + encerramento</span><span class="tag">🎉</span></div>
+    </div>
+  </section>
+
+  <!-- 4 VARIÁVEL = CAIXA ROTULADA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">antes da palavra difícil</span> · duas caixas</div>
+    <h2>Duas maneiras de guardar coisas numa caixa</h2>
+    <div class="grid2" style="margin-top:8px">
+      <div class="card no">
+        <h3>Caixa de sapatos</h3>
+        <p>Não tem etiqueta dizendo o que pode entrar. Cabe um sapato, uma foto, um controle remoto quebrado — tudo junto, sem aviso.</p>
+      </div>
+      <div class="card ok">
+        <h3>Caixa de ovos</h3>
+        <p>O formato <strong>já avisa</strong> o que cabe ali. Tenta enfiar outra coisa e não encaixa — o erro aparece na hora, antes de quebrar tudo.</p>
+      </div>
+    </div>
+    <p class="note">Java é como a caixa de ovos: toda <strong>variável</strong> declara um <strong>tipo</strong>, e só aquele tipo cabe ali. O compilador confere isso <strong>antes</strong> do programa rodar — chama <strong>tipagem forte e estática</strong>.</p>
+  </section>
+
+  <!-- 5 TIPOS PRIMITIVOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">tipos primitivos</span> · os quatro que você vai usar o tempo todo</div>
+    <h2>int, double, boolean, char</h2>
+    <div class="grid4">
+      <div class="card"><h3 class="tagc">int</h3><p>Número <strong>inteiro</strong>, sem casas decimais. <span class="code-inline">24</span>, <span class="code-inline">-7</span>, <span class="code-inline">0</span>.</p></div>
+      <div class="card"><h3 class="attr">double</h3><p>Número <strong>com casas decimais</strong>. <span class="code-inline">3.14</span>, <span class="code-inline">-0.5</span>.</p></div>
+      <div class="card"><h3 class="key">boolean</h3><p>Só existem dois valores: <span class="code-inline">true</span> ou <span class="code-inline">false</span>.</p></div>
+      <div class="card"><h3 class="str">char</h3><p>Um <strong>único caractere</strong>, entre aspas simples. <span class="code-inline">'N'</span>, <span class="code-inline">'7'</span>.</p></div>
+    </div>
+    <p class="note">Existem outros (<span class="code-inline">long</span>, <span class="code-inline">float</span>, <span class="code-inline">byte</span>, <span class="code-inline">short</span>) — menos usados no dia a dia. Foco nesses quatro por hoje.</p>
+  </section>
+
+  <!-- 6 STRING NÃO É PRIMITIVO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o intruso da lista</div>
+    <h2>E o <span class="grad">String</span>, que a gente já usou?</h2>
+    <p>Guarda texto: <span class="code-inline">"Nicoly"</span>, <span class="code-inline">"Orientação a Objetos"</span>. Só que, tecnicamente, <strong>String não é primitivo</strong> — é uma <strong>classe</strong>, ou seja, um objeto.</p>
+    <p class="note">A gente entende essa diferença de verdade na aula 03, quando classe e objeto ganham nome e sobrenome. Por hoje, trate String como se fosse mais um tipo — ele se comporta parecido na hora de declarar.</p>
+  </section>
+
+  <!-- 7 DECLARANDO VARIÁVEIS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintaxe</span> · tipo + nome + valor</div>
+    <h2>Declarando variáveis</h2>
+    <div class="code"><span class="ty">int</span> idade = <span class="st">24</span>;
+<span class="ty">double</span> altura = <span class="st">1.68</span>;
+<span class="ty">boolean</span> estudando = <span class="kw">true</span>;
+<span class="ty">char</span> inicial = <span class="st">'N'</span>;
+<span class="ty">String</span> nome = <span class="st">"Nicoly"</span>;</div>
+    <p class="note">Sempre nessa ordem: <span class="code-inline">tipo nome = valor;</span> — e sempre terminando com <span class="code-inline">;</span>.</p>
+  </section>
+
+  <!-- 8 OPERADORES ARITMÉTICOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">operadores aritméticos</span> · + - * / %</div>
+    <h2>Contas com números</h2>
+    <div class="code"><span class="ty">int</span> a = <span class="st">7</span>, b = <span class="st">2</span>;
+
+<span class="ty">int</span> soma = a + b;        <span class="cm">// 9</span>
+<span class="ty">int</span> divInt = a / b;      <span class="cm">// 3  (divisão inteira!)</span>
+<span class="ty">double</span> divReal = a / <span class="st">2.0</span>; <span class="cm">// 3.5</span>
+<span class="ty">int</span> resto = a % b;       <span class="cm">// 1  (resto da divisão)</span></div>
+    <p class="note"><strong>Cuidado com o clássico:</strong> <span class="code-inline">int / int</span> sempre dá <span class="code-inline">int</span>, mesmo que o resultado "devesse" ter casas decimais. Pra divisão exata, pelo menos um dos dois precisa ser <span class="code-inline">double</span>.</p>
+  </section>
+
+  <!-- 9 OPERADORES RELACIONAIS E LÓGICOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">operadores relacionais e lógicos</span> · comparar e combinar</div>
+    <h2>Perguntas que viram <span class="grad">true</span>/<span class="grad">false</span></h2>
+    <table class="slidetable">
+      <tr><th>Relacionais</th><th>Significa</th></tr>
+      <tr><td><span class="code-inline">==</span> / <span class="code-inline">!=</span></td><td>igual a / diferente de</td></tr>
+      <tr><td><span class="code-inline">&gt;</span> / <span class="code-inline">&lt;</span></td><td>maior que / menor que</td></tr>
+      <tr><td><span class="code-inline">&gt;=</span> / <span class="code-inline">&lt;=</span></td><td>maior ou igual / menor ou igual</td></tr>
+    </table>
+    <table class="slidetable" style="margin-top:14px">
+      <tr><th>Lógicos</th><th>Significa</th></tr>
+      <tr><td><span class="code-inline">&amp;&amp;</span></td><td>E — as duas condições precisam ser verdadeiras</td></tr>
+      <tr><td><span class="code-inline">||</span></td><td>OU — basta uma ser verdadeira</td></tr>
+      <tr><td><span class="code-inline">!</span></td><td>NÃO — inverte o valor</td></tr>
+    </table>
+    <p class="note">Exemplo: <span class="code-inline">idade &gt;= 18 &amp;&amp; temCarteira</span> — só é <span class="code-inline">true</span> se as duas partes forem verdadeiras.</p>
+  </section>
+
+  <!-- 10 CASTING -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">casting</span> · trocando de tipo</div>
+    <h2>Implícito × explícito</h2>
+    <div class="code"><span class="cm">// implícito: Java faz sozinho, sem perigo de perda</span>
+<span class="ty">int</span> idade = <span class="st">24</span>;
+<span class="ty">double</span> idadeDouble = idade;   <span class="cm">// 24.0</span>
+
+<span class="cm">// explícito: você pede, com risco de perder informação</span>
+<span class="ty">double</span> preco = <span class="st">9.99</span>;
+<span class="ty">int</span> precoInt = (<span class="ty">int</span>) preco;  <span class="cm">// 9 — trunca, não arredonda!</span></div>
+    <p class="note">De um tipo <strong>"menor" pra um "maior"</strong> (int → double) o Java faz sozinho. Do <strong>"maior" pro "menor"</strong> (double → int) você precisa pedir explicitamente com <span class="code-inline">(tipo)</span> na frente — e avisar que aceita perder as casas decimais.</p>
+  </section>
+
+  <!-- 11 DECISÃO: IF/ELSE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">estruturas de decisão</span> · if / else</div>
+    <h2>Caminhos diferentes pra condições diferentes</h2>
+    <div class="code"><span class="ty">int</span> idade = <span class="st">16</span>;
+
+<span class="kw">if</span> (idade &gt;= <span class="st">18</span>) {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Maior de idade"</span>);
+} <span class="kw">else</span> {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Menor de idade"</span>);
+}</div>
+    <p class="note">Dá pra encadear com <span class="code-inline">else if</span> quantas vezes precisar — cada bloco só roda se a condição de cima for falsa.</p>
+  </section>
+
+  <!-- 12 DECISÃO: SWITCH -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">estruturas de decisão</span> · switch</div>
+    <h2>Quando são muitos <span class="grad">if/else</span> na mesma variável</h2>
+    <div class="code"><span class="ty">int</span> diaDaSemana = <span class="st">3</span>;
+
+<span class="kw">switch</span> (diaDaSemana) {
+  <span class="kw">case</span> <span class="st">1</span>: <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Domingo"</span>); <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="st">2</span>: <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Segunda"</span>); <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="st">3</span>: <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Terça"</span>); <span class="kw">break</span>;
+  <span class="kw">default</span>: <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Outro dia"</span>);
+}</div>
+    <p class="note">O <span class="code-inline">break</span> é o que impede o switch de "cair" pro próximo <span class="code-inline">case</span> de baixo. Esquecer ele é um dos erros mais comuns de quem está começando.</p>
+  </section>
+
+  <!-- 13 REPETIÇÃO: FOR -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">estruturas de repetição</span> · for</div>
+    <h2>Quando você já sabe quantas vezes</h2>
+    <div class="code"><span class="kw">for</span> (<span class="ty">int</span> i = <span class="st">1</span>; i &lt;= <span class="st">5</span>; i++) {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Volta número "</span> + i);
+}</div>
+    <p class="note">Três partes separadas por <span class="code-inline">;</span>: onde <strong>começa</strong> (<span class="code-inline">i = 1</span>), até <strong>quando continua</strong> (<span class="code-inline">i &lt;= 5</span>) e o que <strong>muda</strong> a cada volta (<span class="code-inline">i++</span>, que é <span class="code-inline">i = i + 1</span>).</p>
+  </section>
+
+  <!-- 14 REPETIÇÃO: WHILE / DO-WHILE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">estruturas de repetição</span> · while e do-while</div>
+    <h2>Quando você não sabe quantas vezes</h2>
+    <div class="grid2">
+      <div class="stack">
+        <h3 class="tagc">while</h3>
+        <div class="code" style="max-width:100%"><span class="ty">int</span> contador = <span class="st">0</span>;
+<span class="kw">while</span> (contador &lt; <span class="st">3</span>) {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"oi"</span>);
+  contador++;
+}</div>
+      </div>
+      <div class="stack">
+        <h3 class="key">do-while</h3>
+        <div class="code" style="max-width:100%"><span class="ty">int</span> opcao;
+<span class="kw">do</span> {
+  opcao = leitor.<span class="fn">nextInt</span>();
+} <span class="kw">while</span> (opcao != <span class="st">0</span>);</div>
+      </div>
+    </div>
+    <p class="note">A diferença: o <span class="code-inline">do-while</span> executa o bloco <strong>pelo menos uma vez</strong> antes de checar a condição — ótimo pra menus, que precisam aparecer antes de perguntar se o usuário quer sair.</p>
+  </section>
+
+  <!-- 15 FOR VS WHILE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>qual escolher?</div>
+    <h2>for × while</h2>
+    <div class="grid2">
+      <div class="card ok"><h3>Use for</h3><p>Quando você <strong>sabe de antemão</strong> quantas repetições vai ter — percorrer um array, contar de 1 a N.</p></div>
+      <div class="card"><h3 class="tagc">Use while</h3><p>Quando a repetição depende de uma <strong>condição que só se sabe em tempo de execução</strong> — ler até o usuário digitar 0, por exemplo.</p></div>
+    </div>
+    <p class="note">Não existe regra rígida — os dois conseguem fazer a mesma coisa. É sobre qual deixa a <strong>intenção</strong> do código mais clara pra quem lê.</p>
+  </section>
+
+  <!-- 16 ARRAYS: O QUE É -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">arrays</span> · uma variável, vários valores</div>
+    <h2>Um armário com gavetas numeradas</h2>
+    <p>Um array é um <strong>armário de tamanho fixo</strong>, com gavetas numeradas a partir do <strong>zero</strong>. Todas as gavetas guardam o <strong>mesmo tipo</strong> de coisa.</p>
+    <div class="code" style="margin-top:18px"><span class="ty">int</span>[] notas = <span class="kw">new</span> <span class="ty">int</span>[<span class="st">5</span>]; <span class="cm">// armário com 5 gavetas, todas com 0</span>
+
+notas[<span class="st">0</span>] = <span class="st">8</span>;   <span class="cm">// primeira gaveta</span>
+notas[<span class="st">1</span>] = <span class="st">10</span>;
+notas[<span class="st">4</span>] = <span class="st">6</span>;   <span class="cm">// última gaveta (índice 4, não 5!)</span></div>
+    <p class="note">Um array de tamanho 5 tem índices de <span class="code-inline">0</span> a <span class="code-inline">4</span>. Tentar acessar <span class="code-inline">notas[5]</span> explode em <span class="code-inline">ArrayIndexOutOfBoundsException</span>.</p>
+  </section>
+
+  <!-- 17 ARRAYS: PERCORRER -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">arrays</span> · percorrendo com for</div>
+    <h2>Visitando gaveta por gaveta</h2>
+    <div class="code"><span class="ty">int</span>[] notas = {<span class="st">8</span>, <span class="st">10</span>, <span class="st">7</span>, <span class="st">9</span>, <span class="st">6</span>};
+
+<span class="kw">for</span> (<span class="ty">int</span> i = <span class="st">0</span>; i &lt; notas.length; i++) {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Nota "</span> + i + <span class="st">": "</span> + notas[i]);
+}</div>
+    <p class="note"><span class="code-inline">notas.length</span> dá o <strong>tamanho</strong> do array — sem parênteses, porque é um atributo, não um método. Ele evita o erro de passar do limite.</p>
+  </section>
+
+  <!-- 18 SCANNER -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">entrada de dados</span> · Scanner</div>
+    <h2>Perguntando pro usuário</h2>
+    <div class="code"><span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+
+<span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Qual seu nome? "</span>);
+<span class="ty">String</span> nome = leitor.<span class="fn">nextLine</span>();
+
+<span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Qual sua idade? "</span>);
+<span class="ty">int</span> idade = leitor.<span class="fn">nextInt</span>();</div>
+    <p class="note"><strong>Pegadinha clássica:</strong> depois de um <span class="code-inline">nextInt()</span> ou <span class="code-inline">nextDouble()</span>, um <span class="code-inline">nextLine()</span> logo em seguida costuma "pular" — sobrou uma quebra de linha no buffer. O guia da aula explica como contornar.</p>
+  </section>
+
+  <!-- 19 JUNTANDO TUDO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">juntando tudo</span> · mini programa</div>
+    <h2>Média de uma turma</h2>
+    <div class="code"><span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+<span class="ty">double</span>[] notas = <span class="kw">new</span> <span class="ty">double</span>[<span class="st">3</span>];
+<span class="ty">double</span> soma = <span class="st">0</span>;
+
+<span class="kw">for</span> (<span class="ty">int</span> i = <span class="st">0</span>; i &lt; notas.length; i++) {
+  <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Nota "</span> + (i + <span class="st">1</span>) + <span class="st">": "</span>);
+  notas[i] = leitor.<span class="fn">nextDouble</span>();
+  soma += notas[i];
+}
+
+<span class="ty">double</span> media = soma / notas.length;
+<span class="kw">if</span> (media &gt;= <span class="st">7</span>) {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Aprovado, média "</span> + media);
+} <span class="kw">else</span> {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Reprovado, média "</span> + media);
+}</div>
+    <p class="note">Scanner + array + for + if/else, tudo junto — exatamente a mistura que a Lista 1 vai pedir.</p>
+  </section>
+
+  <!-- 20 DESAFIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">entrega</span> · Lista 1</div>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <h2 style="margin-bottom:8px">6 exercícios <span class="grad">pra fixar tudo</span></h2>
+        <ul class="clean">
+          <li>Tipos primitivos, variáveis e Scanner</li>
+          <li>Operadores aritméticos, relacionais e lógicos</li>
+          <li><span class="code-inline">if/else</span> e <span class="code-inline">switch</span></li>
+          <li><span class="code-inline">for</span>, <span class="code-inline">while</span> e <span class="code-inline">do-while</span></li>
+          <li>Array percorrido com <span class="code-inline">for</span></li>
+        </ul>
+      </div>
+      <div class="card"><h3 class="str">Por quê?</h3><p>Esses seis blocos (tipos, operadores, decisão, repetição, arrays, Scanner) formam o vocabulário que você vai usar em <strong>toda</strong> classe Java daqui pra frente.</p></div>
+    </div>
+    <p class="note">Enunciados completos, exemplos de entrada/saída e modelo de resposta na página da aula.</p>
+  </section>
+
+  <!-- 21 FIM -->
+  <section class="slide center">
+    <div class="big-emoji">🔁</div>
+    <h1>Lógica na veia. <span class="grad">Hoje é repetição de verdade.</span></h1>
+    <p class="lead" style="margin-top:18px">Na próxima aula: abstração, classe × objeto — o início de verdade da orientação a objetos.</p>
+    <p class="mono" style="margin-top:18px;color:var(--muted)">NickDev · Orientação a Objetos com Java · aula 02</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
+<div class="nav">
+  <span id="counter">01 / 21</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

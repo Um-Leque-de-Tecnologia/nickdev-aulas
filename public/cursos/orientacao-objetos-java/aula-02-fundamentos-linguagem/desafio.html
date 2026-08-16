@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista 1 — Fundamentos da linguagem · NickDev</title>
+<meta name="description" content="Lista 1 da aula 02: seis exercícios de tipos primitivos, operadores, casting, if/else, switch, for, while, do-while, arrays e Scanner.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{
+  position:fixed; top:16px; left:18px; z-index:100; display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--mono); font-size:12.5px; color:var(--text-2);
+  background:rgba(16,13,27,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  border:1px solid var(--line-strong); padding:7px 13px; border-radius:100px; transition:.2s;
+}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:860px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:60ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{
+  display:flex;gap:16px;align-items:flex-start;
+  background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);
+  border-radius:14px;padding:22px 24px;margin-top:38px;
+}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 20px}
+
+.step{
+  position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:24px 26px 24px 30px;margin-bottom:16px;
+}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.step .n{
+  font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);
+  border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step h3{font-size:19px;font-weight:600}
+.step .topics{font-family:var(--mono);font-size:12px;color:var(--text-3);margin-top:2px}
+.step p{color:var(--text-2);font-size:15px;margin:10px 0 0}
+.step p + p{margin-top:8px}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:10px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{
+  background:#0b0913;border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;margin-top:14px;overflow-x:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;
+}
+pre .kw{color:#F24487}
+pre .ty{color:#7B4FD0}
+pre .st{color:#A98CE0}
+pre .fn{color:#E88BB8}
+pre .cm{color:#6f6a83}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start;
+}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;
+  padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s;
+}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+
+@media(max-width:560px){
+  .goal{flex-direction:column;gap:10px}
+  .step{padding:22px 20px}
+}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true">
+  <span class="glow magenta"></span>
+  <span class="glow purple"></span>
+</div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Lista 1 · Aula 02</div>
+  <h1>Fundamentos <span class="grad">da linguagem</span> 🔁</h1>
+  <p class="lead">
+    Seis exercícios curtos, cada um focado num pedaço do que vimos hoje.
+    Resolva cada um numa classe Java separada, compile e rode <b>pelo
+    terminal</b> — igual você já fez na Lista 0 (o desafio da aula 01).
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo</h3>
+      <p>Fixar, na mão, o vocabulário que vai aparecer em praticamente toda
+      classe Java que você escrever daqui pra frente:</p>
+      <ol style="margin-top:8px">
+        <li>Tipos primitivos, variáveis e leitura de dados com <code>Scanner</code></li>
+        <li>Operadores aritméticos, relacionais e lógicos</li>
+        <li>Estruturas de decisão: <code>if/else</code> e <code>switch</code></li>
+        <li>Estruturas de repetição: <code>for</code>, <code>while</code> e <code>do-while</code></li>
+        <li>Arrays, percorridos com <code>for</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">📖</span>
+    <div>
+      <h3>Travou numa palavra?</h3>
+      <p>Casting, índice, laço, array — se alguma dessas aparecer aqui e você
+      não lembrar o que é, o guia da aula tem um
+      <a href="guia-fundamentos-java.html#dicionario" style="color:var(--pink-light);text-decoration:underline">dicionário
+      com todas elas em português simples</a>.</p>
+    </div>
+  </div>
+
+  <div class="label">Os 6 exercícios</div>
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><div><h3>Classificador de idade</h3><div class="topics">tipos primitivos · Scanner · if/else</div></div></div>
+    <p>Crie a classe <code>ClassificadorIdade</code>. Leia a idade da pessoa
+    (um <code>int</code>) com <code>Scanner</code> e imprima a faixa etária:</p>
+    <ul style="margin:8px 0 0 20px;color:var(--text-2)">
+      <li><b>0 a 11</b> → "Criança"</li>
+      <li><b>12 a 17</b> → "Adolescente"</li>
+      <li><b>18 a 59</b> → "Adulto"</li>
+      <li><b>60 ou mais</b> → "Idoso"</li>
+    </ul>
+    <div class="terminal"><span class="p">$</span> java ClassificadorIdade
+Digite a idade: <span class="out">15</span>
+<span class="out">Adolescente</span></div>
+    <p class="tip"><b>Dica:</b> ordene as comparações da mais específica pra mais
+    geral, ou use <code>else if</code> em cascata — sem precisar checar
+    intervalo duplo (tipo <code>idade &gt;= 12 &amp;&amp; idade &lt;= 17</code> já
+    resolve, mas dentro de uma cadeia de <code>else if</code> nem precisa do
+    limite de baixo).</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><div><h3>Calculadora simples</h3><div class="topics">operadores aritméticos · Scanner · switch</div></div></div>
+    <p>Crie a classe <code>CalculadoraSimples</code>. Leia dois números
+    (<code>double</code>) e um caractere representando a operação
+    (<code>+</code>, <code>-</code>, <code>*</code> ou <code>/</code>).
+    Use um <code>switch</code> pra escolher a operação e imprima o resultado.</p>
+    <div class="terminal"><span class="p">$</span> java CalculadoraSimples
+Primeiro número: <span class="out">10</span>
+Segundo número: <span class="out">4</span>
+Operação (+, -, *, /): <span class="out">/</span>
+<span class="out">Resultado: 2.5</span></div>
+    <p class="tip"><b>Cuidado:</b> se os dois números forem <code>double</code>
+    desde a declaração, a divisão já sai com casas decimais — não precisa de
+    casting aqui.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><div><h3>Média e situação</h3><div class="topics">operadores relacionais · if/else</div></div></div>
+    <p>Crie a classe <code>MediaSituacao</code>. Leia três notas
+    (<code>double</code>), calcule a média aritmética e imprima a situação:</p>
+    <ul style="margin:8px 0 0 20px;color:var(--text-2)">
+      <li><b>Média ≥ 7</b> → "Aprovado"</li>
+      <li><b>Média ≥ 5 e &lt; 7</b> → "Recuperação"</li>
+      <li><b>Média &lt; 5</b> → "Reprovado"</li>
+    </ul>
+    <div class="terminal"><span class="p">$</span> java MediaSituacao
+Nota 1: <span class="out">8</span>
+Nota 2: <span class="out">6</span>
+Nota 3: <span class="out">7</span>
+<span class="out">Média: 7.0
+Situação: Aprovado</span></div>
+    <p class="tip"><b>Revisão do slide de operadores:</b> se as três notas e a
+    soma forem <code>double</code>, dividir por <code>3</code> (um
+    <code>int</code>) funciona sem problema — o Java promove o <code>3</code>
+    pra <code>double</code> automaticamente porque um dos lados já é
+    <code>double</code>.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><div><h3>Tabuada</h3><div class="topics">for · Scanner</div></div></div>
+    <p>Crie a classe <code>Tabuada</code>. Leia um número inteiro e imprima a
+    tabuada dele, de 1 a 10, usando um <code>for</code>.</p>
+    <div class="terminal"><span class="p">$</span> java Tabuada
+Digite um número: <span class="out">7</span>
+<span class="out">7 x 1 = 7
+7 x 2 = 14
+7 x 3 = 21
+...
+7 x 10 = 70</span></div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><div><h3>Pares em um array</h3><div class="topics">arrays · for</div></div></div>
+    <p>Crie a classe <code>ParesNoArray</code>. Leia um número <code>N</code>
+    (tamanho do array) e depois <code>N</code> números inteiros, guardando
+    tudo num array. Depois, percorra o array com um <code>for</code> e
+    imprima apenas os números <b>pares</b> (use <code>%</code> pra descobrir).</p>
+    <div class="terminal"><span class="p">$</span> java ParesNoArray
+Quantos números? <span class="out">5</span>
+Número 1: <span class="out">3</span>
+Número 2: <span class="out">8</span>
+Número 3: <span class="out">11</span>
+Número 4: <span class="out">4</span>
+Número 5: <span class="out">7</span>
+<span class="out">Pares: 8 4</span></div>
+    <p class="tip"><b>Dica:</b> um número é par quando <code>numero % 2 == 0</code>.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="step">
+    <div class="step-head"><span class="n">06</span><div><h3>Contador com while</h3><div class="topics">while ou do-while · Scanner</div></div></div>
+    <p>Crie a classe <code>ContadorAteZero</code>. Peça números ao usuário,
+    um de cada vez, <b>até</b> ele digitar <code>0</code>. No fim, imprima
+    quantos números (sem contar o <code>0</code>) foram digitados.</p>
+    <div class="terminal"><span class="p">$</span> java ContadorAteZero
+Digite um número (0 para parar): <span class="out">5</span>
+Digite um número (0 para parar): <span class="out">12</span>
+Digite um número (0 para parar): <span class="out">3</span>
+Digite um número (0 para parar): <span class="out">0</span>
+<span class="out">Você digitou 3 números.</span></div>
+    <p class="tip"><b>while ou do-while?</b> Os dois resolvem — pense em qual
+    deixa a leitura mais natural. O guia da aula compara os dois no slide 15.</p>
+  </div>
+
+  <div class="label">Requisitos mínimos</div>
+  <ul class="check">
+    <li>Seis classes, uma por exercício, cada uma com seu próprio <code>main</code></li>
+    <li>Cada exercício usa pelo menos os tópicos indicados no cabeçalho dele</li>
+    <li>Todas as entradas vêm de <code>Scanner</code> — nada de valores fixos no código</li>
+    <li>Compiladas com <code>javac</code> e executadas com <code>java</code> pelo terminal</li>
+    <li>Publicadas no mesmo repositório GitHub da Lista 0 (aula 01), numa pasta <code>lista-1</code></li>
+  </ul>
+
+  <div class="label">Desafios extras (pra quem quer brilhar ✨)</div>
+  <ul class="check extra">
+    <li>No exercício 2 (calculadora), trate divisão por zero antes de dividir e avise o usuário em vez de deixar o programa quebrar</li>
+    <li>No exercício 5 (array), some os pares encontrados e imprima também a soma</li>
+    <li>Reescreva o exercício 4 (tabuada) usando <code>while</code> em vez de <code>for</code></li>
+    <li>Adicione um <code>README.md</code> na pasta <code>lista-1</code> explicando o que cada exercício faz</li>
+  </ul>
+
+  <div class="label">Materiais de apoio</div>
+  <p class="lead" style="margin-top:0">Revise tipos, operadores, decisão,
+  repetição, arrays e Scanner no guia. Travou? Espie o <b>código do
+  desafio</b> — mas tente antes. 💜</p>
+  <div class="cta-row">
+    <a class="btn primary" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver modelo de resposta</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="guia-fundamentos-java.html">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Lista 1 · Aula 02 · Orientação a Objetos com Java · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

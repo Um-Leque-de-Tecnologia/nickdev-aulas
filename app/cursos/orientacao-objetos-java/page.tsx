@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
+const AULA_02 = "/cursos/orientacao-objetos-java/aula-02-fundamentos-linguagem";
 const PROJETO = "/cursos/orientacao-objetos-java/projeto";
 
 export default function OrientacaoObjetosJava() {
@@ -89,16 +90,36 @@ export default function OrientacaoObjetosJava() {
           </div>
         </div>
 
-        <div className="lesson soon">
+        <div className="lesson">
           <div className="idx">02</div>
           <div className="body">
             <h3>Fundamentos da linguagem</h3>
             <p>
               Tipos primitivos, variáveis, operadores e casting. Estruturas
-              de decisão e repetição. Arrays. Entrada de dados com{" "}
-              <span className="mono">Scanner</span>. Entrega: Lista 1.
+              de decisão (<span className="mono">if/else</span>,{" "}
+              <span className="mono">switch</span>) e repetição (
+              <span className="mono">for</span>,{" "}
+              <span className="mono">while</span>). Arrays. Entrada de
+              dados com <span className="mono">Scanner</span>. Entrega:
+              Lista 1.
             </p>
-            <span className="soon-tag">em breve</span>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_02}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_02}/guia-fundamentos-java.html`}>
+                📘 Guia de fundamentos
+              </a>
+              <a className="mat" href={`${AULA_02}/desafio.html`}>
+                🎯 Lista 1
+              </a>
+              <a className="mat" href={`${AULA_02}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_02}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
+            </div>
           </div>
         </div>
 
