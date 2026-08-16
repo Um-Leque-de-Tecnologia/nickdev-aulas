@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio · Aula 02 · NickDev</title>
+<meta name="description" content="Esqueleto e solução comentada dos seis exercícios da Lista 1: tipos primitivos, operadores, decisão, repetição, arrays e Scanner.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1240px;margin:0 auto;gap:0}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+  aside nav a.star{color:var(--pink-light)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0;font-size:14.5px;color:var(--text-2)}
+  .tipbox b{color:var(--purple-light)}
+  .tipbox.star{border-color:var(--magenta)}
+  .tipbox.star b{color:var(--pink-light)}
+
+  .part{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .part:first-of-type{border-top:0;padding-top:0}
+  .part .big{color:var(--pink-light)}
+
+  .sol{margin-top:28px;scroll-margin-top:18px}
+  .sol h3{font-size:19px;font-weight:600}
+  .sol .desc{color:var(--text-3);font-size:14.5px;margin:6px 0 0}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  .filetree{font-family:var(--mono);font-size:13.5px;color:var(--text-2);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0;line-height:1.9}
+  .filetree b{color:var(--text)}
+  .filetree .dim{color:var(--text-3)}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Preparação</div>
+    <a href="#estrutura">Estrutura do projeto</a>
+    <div class="grp">1 · Classificador de idade</div>
+    <a href="#ex1">Solução comentada</a>
+    <div class="grp">2 · Calculadora simples</div>
+    <a href="#ex2" class="star">★ switch com char</a>
+    <div class="grp">3 · Média e situação</div>
+    <a href="#ex3">Solução comentada</a>
+    <div class="grp">4 · Tabuada</div>
+    <a href="#ex4">Solução comentada</a>
+    <div class="grp">5 · Pares em um array</div>
+    <a href="#ex5" class="star">★ Array + for + %</a>
+    <div class="grp">6 · Contador com while</div>
+    <a href="#ex6">Solução comentada</a>
+    <div class="grp">Erros comuns</div>
+    <a href="#erros">Os 4 erros que mais aparecem</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 02 · gabarito</div>
+  <h1>Código da <span class="g">Lista 1</span></h1>
+  <p class="lead">Esqueleto e solução comentada dos seis exercícios, um por um — mais os erros mais comuns de quem está começando com tipos, operadores, decisão, repetição e arrays.</p>
+  <div class="rule"></div>
+
+  <div class="tipbox"><b>Combinado 🤝</b> Tente cada exercício sozinho(a) primeiro, mesmo que trave. Use isto pra conferir, entender os porquês e destravar se algo der erro.</div>
+
+  <div class="part"><span class="big">📁</span> Preparação</div>
+
+  <div class="sol" id="estrutura">
+    <h3>Estrutura do projeto</h3>
+    <p class="desc">Sugestão: continue no mesmo projeto IntelliJ da aula 01, e crie uma pasta <code>lista-1</code> dentro de <code>src/</code> com as seis classes:</p>
+    <div class="filetree">orientacao-objetos-java<span class="dim">/</span>
+├── src<span class="dim">/</span>
+│   ├── SobreMim.java          <span class="dim">← da aula 01</span>
+│   └── lista-1<span class="dim">/</span>
+│       ├── <b>ClassificadorIdade.java</b>
+│       ├── <b>CalculadoraSimples.java</b>
+│       ├── <b>MediaSituacao.java</b>
+│       ├── <b>Tabuada.java</b>
+│       ├── <b>ParesNoArray.java</b>
+│       └── <b>ContadorAteZero.java</b>
+└── ...</div>
+    <p class="desc">Pra compilar e rodar pelo terminal, navegue até a pasta onde o arquivo está e siga o mesmo fluxo <code>javac</code> → <code>java</code> da aula 01.</p>
+  </div>
+
+  <div class="part"><span class="big">✅</span> 1 · Classificador de idade</div>
+
+  <div class="sol" id="ex1">
+    <h3>ClassificadorIdade.java</h3>
+    <p class="desc">Uma cadeia de <code>else if</code>, da faixa mais específica pra mais geral.</p>
+    <pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="ty">ClassificadorIdade</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Digite a idade: "</span>);
+    <span class="ty">int</span> idade = leitor.<span class="fn">nextInt</span>();
+
+    <span class="kw">if</span> (idade &lt;= <span class="st">11</span>) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Criança"</span>);
+    } <span class="kw">else if</span> (idade &lt;= <span class="st">17</span>) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Adolescente"</span>);
+    } <span class="kw">else if</span> (idade &lt;= <span class="st">59</span>) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Adulto"</span>);
+    } <span class="kw">else</span> {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Idoso"</span>);
+    }
+  }
+}</pre>
+    <p class="desc">Repare que cada <code>else if</code> só precisa checar o <b>limite de cima</b> — se chegou até ali, é porque o limite de baixo já foi descartado pelo bloco anterior.</p>
+  </div>
+
+  <div class="part"><span class="big">✅</span> 2 · Calculadora simples</div>
+
+  <div class="sol" id="ex2">
+    <h3>CalculadoraSimples.java ★</h3>
+    <p class="desc">Lê a operação como um único caractere (<code>char</code>) e usa <code>switch</code> pra escolher a conta.</p>
+    <pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="ty">CalculadoraSimples</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Primeiro número: "</span>);
+    <span class="ty">double</span> a = leitor.<span class="fn">nextDouble</span>();
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Segundo número: "</span>);
+    <span class="ty">double</span> b = leitor.<span class="fn">nextDouble</span>();
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Operação (+, -, *, /): "</span>);
+    <span class="ty">char</span> operacao = leitor.<span class="fn">next</span>().<span class="fn">charAt</span>(<span class="st">0</span>);
+
+    <span class="ty">double</span> resultado = <span class="st">0</span>;
+    <span class="kw">switch</span> (operacao) {
+      <span class="kw">case</span> <span class="st">'+'</span>: resultado = a + b; <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="st">'-'</span>: resultado = a - b; <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="st">'*'</span>: resultado = a * b; <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="st">'/'</span>: resultado = a / b; <span class="kw">break</span>;
+      <span class="kw">default</span>: <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Operação inválida"</span>); <span class="kw">return</span>;
+    }
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Resultado: "</span> + resultado);
+  }
+}</pre>
+    <p class="desc"><code>leitor.next()</code> lê uma "palavra" (sem espaços) como <code>String</code>; <code>.charAt(0)</code> pega só o primeiro caractere dela, virando um <code>char</code>. O <code>default</code> com <code>return</code> encerra o programa cedo se a operação digitada não for uma das quatro esperadas.</p>
+  </div>
+
+  <div class="part"><span class="big">✅</span> 3 · Média e situação</div>
+
+  <div class="sol" id="ex3">
+    <h3>MediaSituacao.java</h3>
+    <pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="ty">MediaSituacao</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Nota 1: "</span>);
+    <span class="ty">double</span> nota1 = leitor.<span class="fn">nextDouble</span>();
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Nota 2: "</span>);
+    <span class="ty">double</span> nota2 = leitor.<span class="fn">nextDouble</span>();
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Nota 3: "</span>);
+    <span class="ty">double</span> nota3 = leitor.<span class="fn">nextDouble</span>();
+
+    <span class="ty">double</span> media = (nota1 + nota2 + nota3) / <span class="st">3</span>;
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Média: "</span> + media);
+
+    <span class="kw">if</span> (media &gt;= <span class="st">7</span>) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Situação: Aprovado"</span>);
+    } <span class="kw">else if</span> (media &gt;= <span class="st">5</span>) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Situação: Recuperação"</span>);
+    } <span class="kw">else</span> {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Situação: Reprovado"</span>);
+    }
+  }
+}</pre>
+    <p class="desc">As três notas já são <code>double</code>, então <code>(nota1 + nota2 + nota3) / 3</code> não sofre o problema da divisão inteira — mesmo o <code>3</code> sendo um número "sem vírgula" no código, o Java promove ele pra <code>double</code> na hora da conta.</p>
+  </div>
+
+  <div class="part"><span class="big">✅</span> 4 · Tabuada</div>
+
+  <div class="sol" id="ex4">
+    <h3>Tabuada.java</h3>
+    <pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="ty">Tabuada</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Digite um número: "</span>);
+    <span class="ty">int</span> numero = leitor.<span class="fn">nextInt</span>();
+
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="st">1</span>; i &lt;= <span class="st">10</span>; i++) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(numero + <span class="st">" x "</span> + i + <span class="st">" = "</span> + (numero * i));
+    }
+  }
+}</pre>
+    <p class="desc">Os parênteses em <code>(numero * i)</code> não são opcionais aqui: sem eles, o Java concatenaria <code>" = "</code> com <code>numero</code> primeiro (texto + número vira texto) e só depois tentaria multiplicar texto por <code>i</code> — erro de compilação. Os parênteses garantem que a <b>multiplicação</b> aconteça antes da concatenação.</p>
+  </div>
+
+  <div class="part"><span class="big">✅</span> 5 · Pares em um array</div>
+
+  <div class="sol" id="ex5">
+    <h3>ParesNoArray.java ★</h3>
+    <pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="ty">ParesNoArray</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Quantos números? "</span>);
+    <span class="ty">int</span> quantidade = leitor.<span class="fn">nextInt</span>();
+
+    <span class="ty">int</span>[] numeros = <span class="kw">new</span> <span class="ty">int</span>[quantidade];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="st">0</span>; i &lt; numeros.length; i++) {
+      <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Número "</span> + (i + <span class="st">1</span>) + <span class="st">": "</span>);
+      numeros[i] = leitor.<span class="fn">nextInt</span>();
+    }
+
+    <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Pares: "</span>);
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="st">0</span>; i &lt; numeros.length; i++) {
+      <span class="kw">if</span> (numeros[i] % <span class="st">2</span> == <span class="st">0</span>) {
+        <span class="ty">System</span>.out.<span class="fn">print</span>(numeros[i] + <span class="st">" "</span>);
+      }
+    }
+  }
+}</pre>
+    <p class="desc">Dois laços <code>for</code> separados: o primeiro <b>preenche</b> o array (lendo do usuário), o segundo <b>percorre</b> pra filtrar os pares. É comum precisar de um laço pra cada responsabilidade — tentar fazer tudo num só geralmente complica mais do que ajuda.</p>
+  </div>
+
+  <div class="part"><span class="big">✅</span> 6 · Contador com while</div>
+
+  <div class="sol" id="ex6">
+    <h3>ContadorAteZero.java</h3>
+    <pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="ty">ContadorAteZero</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Scanner</span> leitor = <span class="kw">new</span> <span class="ty">Scanner</span>(<span class="ty">System</span>.in);
+    <span class="ty">int</span> contador = <span class="st">0</span>;
+    <span class="ty">int</span> numero;
+
+    <span class="kw">do</span> {
+      <span class="ty">System</span>.out.<span class="fn">print</span>(<span class="st">"Digite um número (0 para parar): "</span>);
+      numero = leitor.<span class="fn">nextInt</span>();
+      <span class="kw">if</span> (numero != <span class="st">0</span>) {
+        contador++;
+      }
+    } <span class="kw">while</span> (numero != <span class="st">0</span>);
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Você digitou "</span> + contador + <span class="st">" números."</span>);
+  }
+}</pre>
+    <p class="desc"><code>do-while</code> encaixa perfeitamente aqui: você <b>precisa</b> pedir o primeiro número antes de ter qualquer coisa pra comparar. O <code>if</code> dentro do laço evita contar o próprio <code>0</code> que encerrou a repetição.</p>
+  </div>
+
+  <div class="part"><span class="big">⚠️</span> Erros comuns</div>
+
+  <div class="sol" id="erros">
+    <h3>Os 4 erros que mais aparecem</h3>
+    <pre><span class="cm">error: incompatible types: possible lossy conversion from double to int</span></pre>
+    <p class="desc">Você tentou guardar um <code>double</code> numa variável <code>int</code> sem casting explícito. Ou converte com <code>(int)</code>, ou muda o tipo da variável pra <code>double</code>.</p>
+    <pre><span class="cm">Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 5</span></pre>
+    <p class="desc">Tentou acessar uma posição do array que não existe. Lembre: um array de tamanho 5 vai do índice <code>0</code> ao <code>4</code>. Usar <code>array.length</code> na condição do <code>for</code> evita esse erro.</p>
+    <pre><span class="cm">Exception in thread "main" java.util.InputMismatchException</span></pre>
+    <p class="desc">O <code>Scanner</code> esperava um tipo (ex.: <code>nextInt()</code>) e o usuário digitou outra coisa (uma letra, por exemplo). Fora do escopo desta lista tratar isso — só fique de olho na hora de testar.</p>
+    <pre><span class="cm">// programa "trava" (loop infinito)</span></pre>
+    <p class="desc">Em algum <code>while</code>/<code>do-while</code>, a condição nunca vira falsa — geralmente porque esqueceram de atualizar a variável que ela depende (tipo esquecer o <code>contador++</code>). Todo laço precisa de um caminho garantido pra terminar.</p>
+  </div>
+
+  <div class="tipbox" style="margin-top:40px">Quer ver a versão final, com a saída completa no terminal de cada exercício? 👇</div>
+  <a class="cta" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver o modelo de resposta</a>
+</main>
+</div>
+</body>
+</html>
