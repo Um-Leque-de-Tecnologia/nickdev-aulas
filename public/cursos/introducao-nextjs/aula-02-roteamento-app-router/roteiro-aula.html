@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro da aula 02 · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Roteiro de condução da aula 02: bloco a bloco, com checkpoints, momentos de virada, plano B e o que cortar se atrasar.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,50px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.aviso{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:20px 22px;margin-top:32px}
+.aviso .ico{font-size:24px;line-height:1}
+.aviso h3{font-size:16.5px;margin-bottom:4px}
+.aviso p{color:var(--text-2);font-size:14.5px}
+.aviso.rosa{border-left-color:var(--magenta)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.bloco{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:14px}
+.bloco-hd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.bloco .dur{font-family:var(--mono);font-size:12px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:100px;padding:4px 12px;white-space:nowrap}
+.bloco h3{font-size:19px;font-weight:600;flex:1;min-width:200px}
+.bloco > p{color:var(--text-2);font-size:15px;margin:6px 0}
+.bloco ul,.bloco ol{margin:10px 0 4px;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.bloco li{margin:5px 0}
+.bloco li b{color:var(--text)}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-family:var(--mono);font-size:11.5px;color:var(--text-2);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:5px 11px;border-radius:100px}
+.chip.fala{color:var(--pink-light);border-color:rgba(232,139,184,.4)}
+.chip.mao{color:var(--green);border-color:rgba(95,208,138,.4)}
+
+.dica{border-left:3px solid var(--magenta);background:rgba(242,68,135,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin-top:14px;font-size:14px;color:var(--text-2)}
+.dica b{color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:9px;padding:0!important;margin-top:14px!important}
+.check li{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text-2);display:flex;gap:11px;align-items:flex-start}
+.check li::before{content:"☐";color:var(--purple-light);font-weight:700}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.bloco{padding:20px 18px}.aviso{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Aula 02 · roteiro de condução</div>
+  <h1>Roteamento com <span class="grad">App Router</span></h1>
+  <p class="lead">
+    O plano da aula bloco a bloco: o que apresentar, onde parar, o que conferir
+    antes de seguir e o que cortar se atrasar.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo único da aula</h3>
+      <p>Se a turma sair sabendo que <b>uma pasta com colchetes atende infinitas
+      páginas</b> — e que o nome do arquivo já é a instrução — a aula cumpriu.
+      Todo o resto (route groups, catch-all, useRouter) é acessório e pode
+      encolher.</p>
+      <p style="margin-top:10px"><b>A turma ainda não conhece React nem Server
+      Components.</b> A aula 01 deu componente, JSX e pasta = rota. É só isso que
+      você pode assumir hoje.</p>
+    </div>
+  </div>
+
+  <div class="aviso rosa">
+    <span class="ico">⚠️</span>
+    <div>
+      <h3>Os dois conceitos que vazam do futuro, e como tratar cada um</h3>
+      <p>Esta aula tem duas coisas que <b>tecnicamente pertencem a aulas
+      seguintes</b>, mas que o Next 16 obriga a usar hoje. Ignorar não é opção;
+      explicar por inteiro também não. O caminho é <b>nomear, dar a receita e
+      marcar quando a explicação vem</b>.</p>
+      <ul style="margin-top:8px">
+        <li><b><code>await params</code></b> — exige Promise, que é da aula 04.
+        Fala assim: <i>"await quer dizer 'espere chegar'. O params demora um
+        instantinho pra ficar pronto. Por que ele demora é assunto da aula 4."</i>
+        E siga. <b>Não</b> entre em assíncrono, event loop, nada.</li>
+        <li><b><code>"use client"</code></b> — é a aula 03 inteira. Fala assim:
+        <i>"essa linha diz que o arquivo também roda no navegador da pessoa.
+        Semana que vem a gente vê por que isso importa. Hoje: onde eu escrever,
+        escreva."</i></li>
+      </ul>
+      <p style="margin-top:10px">Se alguém perguntar mais fundo: responda em
+      <b>uma frase</b>, diga em que aula entra, e volte. Prometer e cumprir na
+      semana seguinte constrói mais confiança do que explicar mal agora.</p>
+    </div>
+  </div>
+
+  <div class="aviso rosa">
+    <span class="ico">🗣️</span>
+    <div>
+      <h3>O registro de linguagem continua o mesmo</h3>
+      <p>Analogia antes do nome. Nenhuma palavra nova sem tradução na hora. Uma
+      novidade por vez. O guia desta aula tem um <b>dicionário</b> com as palavras
+      de hoje — mande a turma abrir nele quando travar.</p>
+      <p style="margin-top:10px"><b>Evite hoje:</b> hidratação, bundle, streaming,
+      Suspense, renderização, estado. Nenhuma dessas é necessária, e cada uma que
+      escapar cria um buraco. Se escapar — e vai —, pare, defina em uma frase,
+      e siga.</p>
+    </div>
+  </div>
+
+  <div class="label">Antes de começar</div>
+  <ul class="check">
+    <li>Projeto de exemplo com o <code>data/vagas.ts</code> já pronto, pra não digitar dado falso ao vivo</li>
+    <li>Um segundo projeto, já com o mapa completo, pra mostrar o resultado final se o live code travar</li>
+    <li>Corrigir o desafio 01 <b>antes</b> da aula — o bloco de abertura depende disso</li>
+    <li>Lista de quem não entregou o desafio 01, e por quê (setup ainda travado?)</li>
+    <li>O <a href="/cursos/introducao-nextjs/projeto/brief.html" style="color:var(--pink-light);text-decoration:underline">briefing do projeto</a> aberto numa aba, pra projetar no bloco final</li>
+  </ul>
+
+  <div class="label">A aula, bloco a bloco</div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">15 min</span><h3>Abertura: devolutiva do desafio 01</h3></div>
+    <p>Comece pelo que eles fizeram. É o melhor jeito de mostrar que o desafio é
+    lido de verdade.</p>
+    <ul>
+      <li>Mostre <b>dois ou três projetos da turma no telão</b>, abrindo o link ao vivo</li>
+      <li>Leia em voz alta uma boa definição de componente que alguém escreveu no README — <b>com crédito</b></li>
+      <li>Cubra os erros que apareceram em mais de uma entrega (provavelmente <code>class</code> vs <code>className</code>)</li>
+      <li>Levantamento rápido: <b>quem ainda está travado no ambiente?</b> Anote e combine monitoria</li>
+    </ul>
+    <div class="dica"><b>Ver o próprio site no telão é o combustível da aula.</b> Custa cinco minutos e paga o semestre inteiro em engajamento. Mas <b>escolha com cuidado</b>: mostre projetos que funcionam, nunca use uma entrega fraca como exemplo negativo.</div>
+    <div class="meta"><span class="chip fala">conversa</span><span class="chip">slides 1–3</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>O problema: uma página por vaga</h3></div>
+    <p>O bloco que ancora a aula. Mesma estrutura da aula 01: <b>a dor primeiro,
+    a solução depois</b>.</p>
+    <ol>
+      <li>Apresente o cenário: o site de vagas precisa de uma página por vaga</li>
+      <li>Pergunte: <b>"como vocês fariam isso com o que a gente viu semana passada?"</b></li>
+      <li>Alguém vai dizer "uma pasta pra cada". <b>Escreva no quadro</b> e vá até vaga-200</li>
+      <li>Complete a dor: "e quando entrar uma vaga nova amanhã?"</li>
+    </ol>
+    <div class="dica"><b>Faça a ligação explícita com a aula 01.</b> "Lembram do cabeçalho copiado em doze páginas? É o mesmo problema — só que agora é a página inteira, duzentas vezes." Reconhecer o padrão vale mais que a solução: é isso que eles vão levar pro primeiro emprego.</div>
+    <ul class="check">
+      <li>Alguém da turma verbalizou o absurdo antes de você dar a saída</li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 4–5</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">30 min</span><h3>Rota dinâmica e params</h3></div>
+    <p>O coração da aula. Live code, devagar, todo mundo digitando junto.</p>
+    <ol>
+      <li>Crie a pasta <code>app/vagas/[id]/</code> <b>ao vivo</b>, com o nome aparecendo na tela</li>
+      <li>Dentro, um <code>page.tsx</code> que só mostra o id</li>
+      <li>Abra <code>/vagas/1</code>. Depois <code>/vagas/2</code>. Depois <code>/vagas/banana</code></li>
+      <li>Só então ligue à lista de dados e ao <code>find</code></li>
+    </ol>
+<pre><span class="kw">export default async function</span> <span class="ty">Page</span>({ params }) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;
+  <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Vaga {id}&lt;/<span class="ty">h1</span>&gt;;
+}</pre>
+    <div class="dica"><b>O momento da aula.</b> Trocar <code>/vagas/1</code> por <code>/vagas/2</code> na barra de endereço e a tela responder — <b>sem você ter criado nada</b>. Faça isso lentamente, com o dedo na barra. Depois digite qualquer besteira e mostre que ela também responde. Deixe o silêncio durar.</div>
+    <div class="dica"><b>Erre o <code>await</code> de propósito.</b> Tire, salve, mostre o <code>[object Promise]</code> ou o erro no terminal. Depois recoloque. Quando o erro aparecer no desafio deles — e vai —, eles vão reconhecer o sintoma em vez de travar.</div>
+    <ul class="check">
+      <li>Todo mundo com uma rota <code>[id]</code> respondendo a qualquer valor</li>
+      <li>Ninguém saiu achando que precisa criar uma pasta por vaga</li>
+      <li>Todo mundo viu o sintoma do <code>await</code> esquecido</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 6–7</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">35 min</span><h3>Os arquivos com nome reservado</h3></div>
+    <p>Bloco denso. A ordem importa: <b>layout aninhado primeiro</b>, porque ele
+    paga o gancho da aula passada.</p>
+    <ol>
+      <li><b><code>app/vagas/layout.tsx</code></b> — crie ao vivo, navegue entre duas vagas e mostre que ele não remonta. <b>"Lembram da pergunta de por que não pisca? É isto."</b></li>
+      <li><b><code>loading.tsx</code></b> — crie, e use o <code>setTimeout</code> de 2s pra ele aparecer de verdade</li>
+      <li><b><code>not-found.tsx</code></b> + <code>notFound()</code> — acesse <code>/vagas/9999</code></li>
+      <li><b><code>error.tsx</code></b> — <code>throw new Error("teste")</code>, mostre a tela, clique em "tentar de novo"</li>
+      <li>Só no fim, projete a <b>tabela dos seis arquivos</b> como resumo</li>
+    </ol>
+    <div class="dica"><b>Sem o setTimeout, o loading não existe pra eles.</b> A página fica pronta em milissegundos e ninguém vê nada. Segure dois segundos de propósito — é a diferença entre "criei um arquivo" e "vi acontecer".</div>
+    <div class="dica"><b>No error.tsx, o <code>"use client"</code> vai aparecer.</b> Trate como combinado ("escreva e siga"), não como conceito. Se você entrar em servidor × navegador aqui, perde quinze minutos e estraga a aula 03. Diga que semana que vem é sobre exatamente isso.</div>
+    <div class="dica"><b>Ao mostrar o error, aponte pro cabeçalho.</b> Ele continua na tela. "O erro ficou preso dentro da área de vagas — o site não caiu." Esse é o ponto do arquivo, não a tela bonitinha.</div>
+    <ul class="check">
+      <li>Todo mundo viu o layout de vagas <b>sobreviver</b> à troca de vaga</li>
+      <li>Todo mundo viu as três telas especiais aparecerem <b>de verdade</b></li>
+      <li>Ninguém foi mandado embora achando que precisa importar esses arquivos</li>
+    </ul>
+    <div class="meta"><span class="chip mao">live code</span><span class="chip">slides 8–14</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">15 min</span><h3>Route groups, catch-all e as avançadas</h3></div>
+    <p>Bloco de respiro depois do anterior, que é pesado. <b>Ritmo mais rápido</b>,
+    menos digitação.</p>
+    <ul>
+      <li><b>Route group</b> — crie <code>(institucional)</code> ao vivo, com uma página, e mostre a URL <b>sem</b> o prefixo. Isso merece live code: é contraintuitivo</li>
+      <li><b>Catch-all</b> — só o slide. Diga que provavelmente não vão usar no projeto</li>
+      <li><b>Paralelas e interceptadas</b> — trinta segundos, no máximo. Só o nome e o exemplo do modal do Instagram</li>
+    </ul>
+    <div class="dica"><b>O exemplo do Instagram funciona muito bem.</b> Todo mundo já viu aquele modal, e ninguém imagina que é roteamento. Vale os trinta segundos: mostra que o framework resolve coisas que pareciam impossíveis. Mas <b>não abra o código</b>.</div>
+    <div class="dica"><b>Corte aqui primeiro se estiver atrasada.</b> Só o route group é obrigatório — ele cai no desafio. Catch-all e as avançadas podem virar leitura do guia sem prejuízo nenhum.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 15–17</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Navegação: Link, link ativo e useRouter</h3></div>
+    <p>Fecha a parte técnica, e entrega a última peça do desafio.</p>
+    <ol>
+      <li>Retome o <code>&lt;Link&gt;</code> da aula 01 e explique o <b>prefetch</b></li>
+      <li>Crie o <code>MenuLink</code> ao vivo, com <code>usePathname</code></li>
+      <li><code>useRouter</code>: só o slide, com a regra "se dá pra usar Link, use Link"</li>
+    </ol>
+    <div class="dica"><b>Avise sobre o prefetch no dev antes que perguntem.</b> Ele fica desligado em <code>npm run dev</code>. Sem esse aviso, alguém vai jurar que fez errado porque "não ficou instantâneo". Trinta segundos que evitam três mensagens no grupo.</div>
+    <div class="dica"><b>O erro pedagógico que você precisa provocar aqui.</b> Escreva o <code>usePathname</code> <b>sem</b> o <code>"use client"</code> e deixe o erro aparecer. Aí pergunte: <i>"o que vocês fariam?"</i> Alguém vai sugerir pôr a linha no layout. Diga que resolve — <b>e que é justamente o que não pode</b>, porque joga o site inteiro pro navegador. Crie o <code>MenuLink</code> separado. <b>Esse momento é o gancho da aula 03</b>, e a turma vai chegar semana que vem já querendo a resposta.</div>
+    <ul class="check">
+      <li>Todo mundo com o menu marcando a página atual</li>
+      <li>A turma viu <b>por que</b> o <code>"use client"</code> fica no componente pequeno, não no layout</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 18–21</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">15 min</span><h3>Marco do projeto: briefing e rubrica</h3></div>
+    <p>O entregável institucional da aula. Não deixe pro finalzinho corrido.</p>
+    <ul>
+      <li>Apresente o <b>Leque de Vagas</b> pelo problema, não pelas telas: quem é a pessoa, o que incomoda ela</li>
+      <li>Projete o <b>mapa de rotas do projeto</b> (slide 27) e mostre que cada linha é uma coisa da aula de hoje</li>
+      <li>Abra o <b>briefing</b> e percorra os quatro checkpoints e a <b>rubrica</b></li>
+      <li>Confirme as equipes formadas na aula 01, e encaixe quem ficou solto</li>
+      <li>Combinem <b>na sala</b> quem faz o quê no desafio — as rotas são separadas, dá pra dividir</li>
+    </ul>
+    <div class="dica"><b>Entregue a rubrica hoje, não na véspera.</b> A rubrica não é burocracia: é a única forma de a equipe saber o que "bom" significa antes de gastar o esforço. Turma que recebe rubrica no começo entrega melhor — e reclama menos de nota.</div>
+    <div class="dica"><b>A divisão do trabalho na sala é o pulo do gato.</b> Se sair da aula sem divisão combinada, uma pessoa faz tudo na terça à noite. Cinco minutos aqui compram o semestre.</div>
+    <ul class="check">
+      <li>Toda equipe com repositório e com a divisão de tarefas escrita</li>
+      <li>Ninguém sem equipe</li>
+      <li>Todo mundo sabe que este desafio é <b>de equipe</b> e que os commits são olhados</li>
+    </ul>
+    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 25–28</span></div>
+  </div>
+
+  <div class="label">Se atrasar</div>
+  <div class="bloco">
+    <p>Corte nesta ordem:</p>
+    <ol>
+      <li><b>Catch-all e as rotas avançadas</b> — o guia cobre, e nada disso cai no desafio</li>
+      <li><b>O <code>useRouter</code></b> — vira leitura. O desafio só exige <code>usePathname</code></li>
+      <li><b>O aquecimento e a checagem com IA</b> — vira abertura da aula 3</li>
+      <li><b>O <code>template.tsx</code></b> — mencione que existe e siga</li>
+      <li><b>A devolutiva do desafio 01</b> — encurte pra cinco minutos, mas <b>não corte</b>: mostre pelo menos um projeto</li>
+    </ol>
+    <p style="margin-top:14px"><b>Nunca corte:</b> a rota dinâmica com <code>await params</code>
+    (é a aula inteira), o layout aninhado sobrevivendo à navegação (é o gancho
+    pago), as três telas especiais <b>aparecendo de verdade</b>, e o briefing com
+    a rubrica.</p>
+  </div>
+
+  <div class="label">Se a turma travar</div>
+  <div class="bloco">
+    <ul>
+      <li><b>Metade da turma com <code>[object Promise]</code></b> — pare tudo e faça o coletivo: "todo mundo confere se tem <code>async</code> na função e <code>await</code> antes de params". É o erro nº 1 desta aula.</li>
+      <li><b>A vaga nunca é encontrada</b> — o <code>id</code> nos dados está como número. O que vem da URL é texto. Se você distribuir o <code>data/vagas.ts</code> pronto, esse problema some — considere isso se o tempo estiver curto.</li>
+      <li><b>Pasta com parênteses virando URL</b> — a pessoa usou colchetes. Acontece muito porque as duas ideias foram vistas com dez minutos de diferença.</li>
+      <li><b>Erro de <code>usePathname</code> em cascata</b> — se muita gente puser <code>"use client"</code> no layout raiz, pare e explique de novo com o desenho: a linha vai no <b>menor arquivo possível</b>.</li>
+      <li><b>Ainda tem gente sem ambiente</b> — não deixe passar da aula 2. A partir da 3 o prejuízo vira bola de neve. Combine horário individual ainda hoje.</li>
+    </ul>
+  </div>
+
+  <div class="label">Deixe engatilhado pra aula 3</div>
+  <div class="bloco">
+    <p>A aula de hoje planta o gancho sozinha — só não deixe de puxar o fio no
+    final:</p>
+    <ul>
+      <li>"A gente escreveu <code>"use client"</code> duas vezes hoje e eu não expliquei nenhuma. <b>Semana que vem é sobre exatamente isso</b>."</li>
+      <li>"Por que o padrão é o arquivo <b>não</b> rodar no navegador? E o que se ganha com isso?"</li>
+      <li>"E se eu quiser um botão de favoritar a vaga, que <b>reage</b> ao clique — em qual dos dois lados ele mora?"</li>
+    </ul>
+    <div class="dica"><b>Peça pra anotarem.</b> Quem sair da aula com a pergunta "por que use client?" escrita no caderno chega na aula 3 pronto pra receber a resposta — e a aula 3 é a mais conceitual do semestre.</div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="slides.html">▶ Slides da aula</a>
+    <a class="btn" href="guia-roteamento.html">📘 Guia de conteúdo</a>
+    <a class="btn" href="desafio.html">🎯 Desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código</a>
+    <a class="btn" href="/cursos/introducao-nextjs/projeto/brief.html">💼 Briefing</a>
+  </div>
+
+  <div class="foot">Roteiro da Aula 02 · Introdução ao Next.js · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

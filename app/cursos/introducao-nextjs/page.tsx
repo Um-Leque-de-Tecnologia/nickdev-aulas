@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 const AULA_01 = "/cursos/introducao-nextjs/aula-01-abertura-fundamentos";
+const AULA_02 = "/cursos/introducao-nextjs/aula-02-roteamento-app-router";
+const PROJETO = "/cursos/introducao-nextjs/projeto";
 
 type Aula = {
   n: string;
@@ -20,22 +22,6 @@ type Aula = {
 };
 
 const AULAS: Aula[] = [
-  {
-    n: "02",
-    data: "19/08",
-    titulo: "Roteamento com App Router",
-    desc: (
-      <>
-        <span className="mono">layout</span> / <span className="mono">page</span> /{" "}
-        <span className="mono">template</span>; rotas dinâmicas e catch-all;
-        route groups; rotas paralelas e interceptadas;{" "}
-        <span className="mono">loading</span>, <span className="mono">error</span> e{" "}
-        <span className="mono">not-found</span>; navegação com{" "}
-        <span className="mono">Link</span> e <span className="mono">useRouter</span>.
-      </>
-    ),
-    marco: "Briefing do Leque de Vagas + entrega da rubrica",
-  },
   {
     n: "03",
     data: "26/08",
@@ -251,9 +237,11 @@ export default function FrontendAvancadoNextjs() {
               listagem, busca, autenticação, banco de dados e deploy contínuo.{" "}
               <strong>O tema é o mesmo para a turma inteira</strong> — assim o
               semestre é gasto aprendendo Next.js, não decidindo o que construir.
-              Briefing completo na aula 02.
             </p>
             <div className="mats">
+              <a className="mat primary" href={`${PROJETO}/brief.html`}>
+                💼 Briefing e rubrica
+              </a>
               <a
                 className="mat"
                 href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas"
@@ -313,6 +301,58 @@ export default function FrontendAvancadoNextjs() {
                 marco do projeto
               </span>{" "}
               · teaser do escopo e formação das equipes
+            </p>
+          </div>
+        </div>
+
+        <div className="lesson">
+          <div className="idx">02</div>
+          <div className="body">
+            <h3>
+              Roteamento com App Router{" "}
+              <span className="mono" style={{ fontSize: 13, color: "var(--text-3)" }}>
+                · 19/08
+              </span>
+            </h3>
+            <p>
+              Uma pasta que atende infinitas páginas: rotas dinâmicas{" "}
+              <span className="mono">[id]</span> e <span className="mono">params</span>{" "}
+              com <span className="mono">await</span>. Os arquivos cujo nome já é a
+              instrução — <span className="mono">layout</span> aninhado,{" "}
+              <span className="mono">loading</span>, <span className="mono">error</span>{" "}
+              e <span className="mono">not-found</span>. Route groups, catch-all, e
+              navegação com <span className="mono">Link</span>,{" "}
+              <span className="mono">usePathname</span> e{" "}
+              <span className="mono">useRouter</span>.
+            </p>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_02}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_02}/guia-roteamento.html`}>
+                📘 Guia de conteúdo
+              </a>
+              <a className="mat" href={`${AULA_02}/desafio.html`}>
+                🎯 Desafio técnico
+              </a>
+              <a className="mat" href={`${AULA_02}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_02}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
+              <a className="mat" href={`${AULA_02}/roteiro-aula.html`}>
+                🛠️ Roteiro da aula
+              </a>
+              <a className="mat" href={`${PROJETO}/brief.html`}>
+                💼 Briefing do projeto
+              </a>
+            </div>
+            <p style={{ marginTop: 12, marginBottom: 0, fontSize: 14 }}>
+              <span className="mono" style={{ color: "var(--pink-light)" }}>
+                marco do projeto
+              </span>{" "}
+              · briefing do Leque de Vagas, entrega da rubrica e o mapa de rotas
             </p>
           </div>
         </div>

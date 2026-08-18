@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 02 — O esqueleto do Leque de Vagas · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Desafio técnico da aula 02: montar o mapa de rotas do Leque de Vagas com rota dinâmica, loading, error, not-found, route group e link ativo.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+pre .hl{color:#F24487;font-weight:700}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Desafio técnico · Aula 02 · entrega até 26/08</div>
+  <h1>O esqueleto do <span class="grad">Leque de Vagas</span> 🗺️</h1>
+  <p class="lead">
+    Sua missão: montar o <b>mapa de rotas</b> do projeto do semestre. Uma rota
+    dinâmica que atende qualquer vaga, telas de espera e de erro no lugar certo,
+    um 404 que você escreveu, e um menu que sabe onde a pessoa está.
+    <b>É o primeiro entregável da equipe.</b>
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo</h3>
+      <p>Provar que você entendeu a ideia central da aula: <b>o endereço é a
+      pasta, e o nome do arquivo é a instrução</b>. Ao final, o seu projeto tem
+      que ter uma pasta só — <code>[id]</code> — atendendo todas as vagas, e
+      arquivos especiais em todos os lugares onde eles fazem diferença.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">👥</span>
+    <div>
+      <h3>Este é um entregável de equipe</h3>
+      <p>Diferente do desafio 01, este vale <b>por equipe</b>, no repositório da
+      equipe. Combinem quem faz o quê ainda hoje — as rotas são bem separadas,
+      dá pra dividir sem ninguém pisar no pé do outro. <b>Todo mundo precisa ter
+      pelo menos um commit</b>, e eu vou olhar isso.</p>
+    </div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">📖</span>
+    <div>
+      <h3>Travou numa palavra?</h3>
+      <p>Segmento, slug, params, prefetch, hook — se alguma dessas aparecer aqui
+      e você não lembrar o que é, o guia da aula tem um
+      <a href="guia-roteamento.html#dicionario" style="color:var(--pink-light);text-decoration:underline">dicionário
+      com todas elas em português simples</a>. Consultar não é trapaça.</p>
+    </div>
+  </div>
+
+  <div class="label">O ponto de partida</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">00</span><h3>O repositório da equipe</h3></div>
+    <p>O trabalho é no repositório da equipe, criado na aula 01. Se ele ainda
+    está vazio, crie o projeto agora — mesmas respostas da semana passada:</p>
+<div class="terminal"><span class="p">$</span> npx create-next-app@latest leque-de-vagas</div>
+    <p>TypeScript <b>Yes</b> · ESLint <b>Yes</b> · Tailwind <b>No</b> · App
+    Router <b>Yes</b> · Turbopack <b>Yes</b> · alias <code>@/*</code> <b>Yes</b>.</p>
+    <p class="tip"><b>Tailwind continua sendo No.</b> Ele entra na aula 08. Até
+    lá, CSS comum no <code>globals.css</code> — que vocês já sabem escrever.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><h3>Os dados falsos das vagas</h3></div>
+    <p>O projeto ainda não tem banco de dados — isso é a aula 06. Por enquanto as
+    vagas moram num arquivo, e isso basta pra tudo que a gente vai fazer hoje.</p>
+    <p>Crie <code>data/vagas.ts</code> na raiz do projeto:</p>
+<pre><span class="cm">// data/vagas.ts</span>
+<span class="kw">export type</span> <span class="ty">Vaga</span> = {
+  id: <span class="ty">string</span>;
+  titulo: <span class="ty">string</span>;
+  empresa: <span class="ty">string</span>;
+  empresaSlug: <span class="ty">string</span>;
+  area: <span class="ty">string</span>;
+  senioridade: <span class="ty">string</span>;
+  local: <span class="ty">string</span>;
+  aceitaIniciante: <span class="ty">boolean</span>;
+  descricao: <span class="ty">string</span>;
+};
+
+<span class="kw">export const</span> vagas: <span class="ty">Vaga</span>[] = [
+  {
+    id: <span class="st">"1"</span>,
+    titulo: <span class="st">"Pessoa Desenvolvedora Front-end Júnior"</span>,
+    empresa: <span class="st">"Aurora Tech"</span>,
+    empresaSlug: <span class="st">"aurora-tech"</span>,
+    area: <span class="st">"Front-end"</span>,
+    senioridade: <span class="st">"Júnior"</span>,
+    local: <span class="st">"Remoto"</span>,
+    aceitaIniciante: <span class="kw">true</span>,
+    descricao: <span class="st">"Trabalhar com React e Next.js num time de produto."</span>,
+  },
+  <span class="cm">// ...pelo menos mais 5</span>
+];</pre>
+    <p class="tip"><b>Mínimo de 6 vagas</b>, com pelo menos <b>3 áreas
+    diferentes</b> e <b>duas empresas</b> repetindo — isso vai importar quando
+    vocês montarem a página da empresa. Inventem à vontade, mas escrevam vagas
+    que existiriam de verdade.</p>
+    <p class="tip"><b>Repare que o <code>id</code> é texto</b>, entre aspas. Não é
+    frescura: o que vem da URL é sempre texto, e assim a comparação funciona
+    direto. Se você usar número, vai precisar converter.</p>
+  </div>
+
+  <div class="label">O mapa de rotas</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><h3>A estrutura que você vai construir</h3></div>
+    <p>Este é o alvo. Cada linha aqui é uma coisa da aula de hoje:</p>
+<pre>app/
+├── layout.tsx                  <span class="cm">cabeçalho e rodapé do site</span>
+├── page.tsx                    <span class="cm">→ /</span>
+├── <b>not-found.tsx</b>               <span class="cm">→ 404 do site inteiro</span>
+├── globals.css
+├── vagas/
+│   ├── <b>layout.tsx</b>              <span class="cm">moldura da área de vagas</span>
+│   ├── <b>loading.tsx</b>
+│   ├── page.tsx                <span class="cm">→ /vagas   (a listagem)</span>
+│   └── <span class="hl">[id]</span>/
+│       ├── page.tsx            <span class="cm">→ /vagas/1 (o detalhe)</span>
+│       ├── <b>error.tsx</b>
+│       └── <b>not-found.tsx</b>
+├── empresas/
+│   └── <span class="hl">[slug]</span>/page.tsx        <span class="cm">→ /empresas/aurora-tech</span>
+└── <span class="hl">(institucional)</span>/
+    ├── layout.tsx
+    ├── termos/page.tsx         <span class="cm">→ /termos</span>
+    └── privacidade/page.tsx    <span class="cm">→ /privacidade</span>
+
+components/
+├── Cabecalho.tsx
+└── <b>MenuLink.tsx</b>                <span class="cm">o link que sabe se está ativo</span>
+
+data/
+└── vagas.ts</pre>
+    <p class="tip"><b>Não precisa ficar bonito.</b> O CSS desta entrega pode ser o
+    mínimo pra ficar legível. O que eu vou olhar é o mapa de rotas funcionando —
+    design entra a partir da aula 08.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><h3>A listagem em /vagas</h3></div>
+    <p>Percorra a lista e monte um <code>&lt;Link&gt;</code> pra cada vaga. O
+    endereço de cada link usa o <code>id</code> daquela vaga.</p>
+<pre><span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+<span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+
+<span class="kw">export default function</span> <span class="ty">ListaDeVagas</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">ul</span>&gt;
+      {vagas.<span class="fn">map</span>((vaga) =&gt; (
+        &lt;<span class="ty">li</span> key={vaga.id}&gt;
+          &lt;<span class="ty">Link</span> href={<span class="st">`/vagas/${vaga.id}`</span>}&gt;{vaga.titulo}&lt;/<span class="ty">Link</span>&gt;
+        &lt;/<span class="ty">li</span>&gt;
+      ))}
+    &lt;/<span class="ty">ul</span>&gt;
+  );
+}</pre>
+    <p class="tip"><b>Aquele <code>key={vaga.id}</code> não é enfeite.</b> Quando
+    você gera uma lista, cada item precisa de um identificador único — senão o
+    Next avisa no terminal. Por que isso existe é assunto de outra aula; hoje é
+    receita.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><h3>A rota dinâmica ⭐</h3></div>
+    <p>Este passo é o coração do desafio. Uma pasta <code>[id]</code>, um arquivo,
+    e todas as vagas atendidas.</p>
+<pre><span class="cm">// app/vagas/[id]/page.tsx</span>
+<span class="kw">import</span> { notFound } <span class="kw">from</span> <span class="st">"next/navigation"</span>;
+<span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+
+<span class="kw">export default async function</span> <span class="ty">PaginaDaVaga</span>({
+  params,
+}: {
+  params: <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span> }&gt;;
+}) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;
+  <span class="kw">const</span> vaga = vagas.<span class="fn">find</span>((v) =&gt; v.id === id);
+
+  <span class="kw">if</span> (!vaga) {
+    <span class="fn">notFound</span>();
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">article</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;{vaga.titulo}&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">p</span>&gt;{vaga.empresa} · {vaga.local}&lt;/<span class="ty">p</span>&gt;
+      &lt;<span class="ty">p</span>&gt;{vaga.descricao}&lt;/<span class="ty">p</span>&gt;
+    &lt;/<span class="ty">article</span>&gt;
+  );
+}</pre>
+    <p>A página precisa mostrar, no mínimo: <b>título, empresa, área,
+    senioridade, local</b> e a descrição. E um <code>&lt;Link&gt;</code> pra
+    <code>/empresas/[slug]</code> daquela empresa.</p>
+    <p class="tip"><b>O <code>await</code> não é opcional.</b> Sem ele você vê
+    <code>[object Promise]</code> na tela, ou um erro no terminal. E lembre: se
+    tem <code>await</code> dentro, precisa de <code>async</code> na frente da
+    função.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>loading, error e not-found</h3></div>
+    <p>Três arquivos, cada um no seu lugar. Nenhum deles precisa ser importado —
+    o Next encontra sozinho.</p>
+    <ul>
+      <li><code>app/vagas/loading.tsx</code> — o que aparece enquanto a listagem se prepara</li>
+      <li><code>app/vagas/[id]/error.tsx</code> — com <code>"use client"</code> e um botão <code>retry()</code></li>
+      <li><code>app/vagas/[id]/not-found.tsx</code> — a tela de "essa vaga não existe", com link de volta</li>
+      <li><code>app/not-found.tsx</code> — o 404 do site inteiro</li>
+    </ul>
+    <p class="tip"><b>Como testar cada um</b> — e você <b>precisa</b> testar, um a
+    um: o not-found abrindo <code>/vagas/9999</code>; o 404 geral abrindo
+    <code>/pagina-que-nao-existe</code>; o loading e o error com os truques que
+    estão no <a href="codigos-desafio.html" style="color:var(--pink-light);text-decoration:underline">código
+    comentado</a>. Tire print dos quatro — eles vão pro README.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">06</span><h3>A página da empresa</h3></div>
+    <p>Segunda rota dinâmica, agora com um <b>slug</b> em vez de um número:
+    <code>app/empresas/[slug]/page.tsx</code>.</p>
+    <p>Ela mostra o nome da empresa e <b>a lista de vagas daquela empresa</b> —
+    filtrando a lista pelo <code>empresaSlug</code>. Se nenhuma vaga bater, é
+    <code>notFound()</code>.</p>
+    <p class="tip"><b>Por que duas rotas dinâmicas.</b> Pra você ver que
+    <code>[id]</code> e <code>[slug]</code> são a <b>mesma ideia</b> com nomes
+    diferentes — o que está entre colchetes é escolha sua, e vira a chave que
+    você lê no <code>params</code>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">07</span><h3>O route group institucional</h3></div>
+    <p>Crie <code>app/(institucional)/</code> com um <code>layout.tsx</code> só
+    dela e duas páginas: <code>termos</code> e <code>privacidade</code>.</p>
+    <p>O conteúdo pode ser um parágrafo de mentira. O que importa é o endereço
+    ficar <code>/termos</code> — e <b>não</b> <code>/institucional/termos</code>.</p>
+    <p class="tip"><b>Prove que funcionou:</b> na tabela de rotas do README,
+    essas duas linhas mostram o caminho do arquivo com <code>(institucional)</code>
+    e a URL <b>sem</b>. É a prova de que você entendeu o que os parênteses fazem.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">08</span><h3>O menu com link ativo</h3></div>
+    <p>Um componente <code>MenuLink</code> que marca sozinho a página atual, usado
+    no cabeçalho do <code>layout.tsx</code>.</p>
+<pre><span class="st">"use client"</span>;
+
+<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+<span class="kw">import</span> { usePathname } <span class="kw">from</span> <span class="st">"next/navigation"</span>;
+
+<span class="kw">export default function</span> <span class="ty">MenuLink</span>({ href, children }) {
+  <span class="kw">const</span> caminho = <span class="fn">usePathname</span>();
+  <span class="kw">const</span> ativo = caminho === href;
+  <span class="cm">// ...devolve um Link com a classe "ativo" quando for o caso</span>
+}</pre>
+    <p class="tip"><b>O <code>"use client"</code> vai na primeira linha</b>, antes
+    dos imports. Se esquecer, o erro é <code>You're importing a component that
+    needs usePathname…</code> — e agora você já sabe o que ele quer dizer.</p>
+    <p class="tip"><b>Decida e explique no README:</b> o link "Vagas" deve ficar
+    aceso também em <code>/vagas/1</code>? Não existe resposta certa — existe a
+    sua, justificada. Isso vale nota.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">09</span><h3>Build, tabela de rotas e deploy</h3></div>
+<div class="terminal"><span class="p">$</span> npm run build</div>
+    <p>O build imprime a lista de rotas. <b>Cole essa lista no README</b> — é a
+    prova mais rápida de que o mapa inteiro está de pé.</p>
+    <ul>
+      <li>Todas as rotas do passo 02 aparecem na lista</li>
+      <li><code>/termos</code> e <code>/privacidade</code> aparecem <b>sem</b> o <code>(institucional)</code></li>
+      <li><code>/vagas/[id]</code> aparece com os colchetes mesmo</li>
+    </ul>
+    <p class="tip"><b>Faltou alguma rota?</b> Quase sempre é o arquivo que não se
+    chama <code>page.tsx</code>, ou a pasta no lugar errado. O build é o jeito
+    mais rápido de descobrir.</p>
+    <p>Depois: <code>git push</code>, e a Vercel publica sozinha.</p>
+  </div>
+
+  <div class="label">O README da equipe</div>
+  <div class="entrega">
+    <p style="color:var(--text-2);font-size:15px">Além do que já vinha da aula 01, o README precisa ter:</p>
+    <ol>
+      <li>A <b>tabela de rotas</b>: cada arquivo e a URL que ele atende</li>
+      <li>A <b>saída do <code>npm run build</code></b> colada</li>
+      <li>Uma explicação, <b>com as palavras de vocês</b>, de por que a pasta <code>[id]</code> resolve o problema de ter uma página por vaga</li>
+      <li>A decisão sobre o link ativo (passo 08) e o motivo</li>
+      <li>Prints das quatro telas especiais: loading, error, not-found da vaga e 404 do site</li>
+      <li>Quem fez o quê na equipe</li>
+    </ol>
+  </div>
+
+  <div class="label">Requisitos mínimos</div>
+  <ul class="check">
+    <li>Rota dinâmica <code>/vagas/[id]</code> lendo o id com <b><code>await params</code></b></li>
+    <li>Listagem em <code>/vagas</code> com <code>&lt;Link&gt;</code> pra cada vaga</li>
+    <li>Segunda rota dinâmica: <code>/empresas/[slug]</code></li>
+    <li><code>notFound()</code> chamado quando o id ou o slug não existe</li>
+    <li><code>loading.tsx</code>, <code>error.tsx</code> e <code>not-found.tsx</code> nos lugares do mapa</li>
+    <li><code>app/not-found.tsx</code> na raiz, com link de volta pra home</li>
+    <li>Um <code>layout.tsx</code> aninhado em <code>app/vagas/</code></li>
+    <li>Route group <code>(institucional)</code> com duas páginas <b>sem prefixo na URL</b></li>
+    <li>Menu com <b>link ativo</b> via <code>usePathname</code></li>
+    <li><code>npm run build</code> passando, com a lista de rotas no README</li>
+    <li><b>Publicado na Vercel</b>, com o link no README</li>
+    <li>Commits de <b>todo mundo da equipe</b></li>
+  </ul>
+
+  <div class="label">Extras, pra quem quiser ir além ✨</div>
+  <ul class="check extra">
+    <li>Um <code>loading.tsx</code> em formato de <b>esqueleto</b> — caixinhas cinzas no formato do conteúdo, em vez de "Carregando…"</li>
+    <li>Filtro por área usando <code>searchParams</code>: <code>/vagas?area=dados</code></li>
+    <li><code>generateMetadata</code> na página da vaga, pro título da aba virar o nome da vaga</li>
+    <li>Um <code>BotaoVoltar</code> com <code>useRouter().back()</code> na página de detalhe</li>
+    <li>Link ativo que acende na seção inteira (<code>startsWith</code>), tratando a home à parte</li>
+    <li>Um <code>template.tsx</code> em <code>app/vagas/</code> com uma animação de entrada — e um parágrafo no README sobre a diferença que você viu</li>
+  </ul>
+
+  <div class="label">O que NÃO pode 🚫</div>
+  <ul class="check no">
+    <li>Uma pasta por vaga — <code>app/vagas/vaga-1/</code>, <code>vaga-2/</code>… é exatamente o problema que a aula resolve</li>
+    <li><code>params</code> sem <code>await</code></li>
+    <li><code>useRouter</code> importado de <code>next/router</code> (é <code>next/navigation</code>)</li>
+    <li><code>&lt;a href&gt;</code> para navegação interna</li>
+    <li><code>"use client"</code> no <code>layout.tsx</code> raiz pra "resolver" o erro do menu — o componente que precisa é o <code>MenuLink</code>, não o layout inteiro</li>
+    <li>Pages Router — o curso inteiro é <b>App Router</b></li>
+    <li>Subir <code>node_modules</code> ou <code>.next</code></li>
+  </ul>
+
+  <div class="label">Como isso é avaliado</div>
+  <table>
+    <thead><tr><th>Critério</th><th>Peso</th><th>O que eu olho</th></tr></thead>
+    <tbody>
+      <tr><td><b>O mapa de rotas</b></td><td>40%</td><td>as rotas dinâmicas funcionando, o route group sem prefixo, o layout aninhado no lugar</td></tr>
+      <tr><td><b>Os arquivos especiais</b></td><td>30%</td><td>loading, error e not-found existindo <b>e testados</b> — com os prints provando</td></tr>
+      <tr><td><b>Entendeu o conceito</b></td><td>20%</td><td>a explicação do <code>[id]</code> no README, com palavras de vocês, e a decisão do link ativo justificada</td></tr>
+      <tr><td><b>Higiene e equipe</b></td><td>10%</td><td>build limpo, no ar, commits de todo mundo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="label">Como entregar</div>
+  <div class="entrega">
+    <ol>
+      <li>Rode <code>npm run build</code> e resolva o que aparecer</li>
+      <li>Confira as quatro telas especiais uma a uma, e tire os prints</li>
+      <li>Complete o README com a tabela de rotas e as explicações</li>
+      <li><code>git push</code> no repositório <b>da equipe</b></li>
+      <li>Mande no grupo: <b>link do site</b> + <b>link do repositório</b></li>
+      <li>Uma frase sobre o que foi mais difícil — a gente revisa junto na aula 3</li>
+    </ol>
+  </div>
+
+  <div class="label">Materiais de apoio</div>
+  <p class="lead" style="margin-top:0">
+    O guia tem uma seção de erros comuns com as mensagens exatas. O código de
+    referência está inteiro comentado — espie só depois de tentar. 💜
+  </p>
+  <div class="cta-row">
+    <a class="btn primary" href="guia-roteamento.html">📘 Guia de conteúdo</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="btn" href="/cursos/introducao-nextjs/projeto/brief.html">💼 Briefing do projeto</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Desafio 02 · Introdução ao Next.js · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>
