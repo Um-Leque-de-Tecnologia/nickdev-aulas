@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto do curso — Leque de Vagas · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Briefing do projeto do curso de Introdução ao Next.js: Leque de Vagas, um site de vagas de tecnologia para quem está migrando de carreira, com checkpoints e rubrica de avaliação.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:920px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:34px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:52px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.persona{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-top:6px}
+.persona .quote{font-family:'Newsreader',Georgia,serif;font-style:italic;font-size:clamp(17px,2.2vw,22px);color:var(--pink-light);line-height:1.45}
+.persona .who{font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-top:14px}
+
+.diagrama{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:22px 24px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d8d3e6;white-space:pre;margin-top:6px}
+.diagrama .cls{color:#7B4FD0;font-weight:700}
+.diagrama .cm{color:#6f6a83}
+.diagrama .mt{color:#E88BB8}
+.diagrama .hl{color:#F24487;font-weight:700}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+pre .hl{color:#F24487;font-weight:700}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.entrega{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:14px}
+.entrega-hd{display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.entrega .quando{font-family:var(--mono);font-size:12px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:100px;padding:4px 12px;white-space:nowrap}
+.entrega h3{font-size:18px;font-weight:600;flex:1;min-width:180px}
+.entrega .peso{font-family:var(--mono);font-size:12px;color:var(--pink-light)}
+.entrega p{color:var(--text-2);font-size:14.5px}
+.entrega ul{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.entrega li{margin:4px 0}
+.entrega li b{color:var(--text)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 17px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:13px 16px;margin-top:14px;font-size:14.5px;color:var(--text-2)}
+.tip b{color:var(--purple-light)}
+.tip.star{border-left-color:var(--magenta)}
+.tip.star b{color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.entrega{padding:20px 18px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Projeto do curso · em equipe · 2026.2</div>
+  <h1><span class="grad">Leque de Vagas</span> 💼</h1>
+  <p class="lead">
+    Um site onde quem está migrando pra tecnologia encontra vagas de verdade.
+    Começa como um punhado de rotas na aula 02 e termina, em dezembro, como uma
+    aplicação completa: banco de dados, autenticação, testes e publicação
+    automática. <b>É o mesmo projeto pra turma inteira</b> — assim o semestre é
+    gasto aprendendo Next.js, não decidindo o que construir.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>Por que o tema é fechado</h3>
+      <p>Porque escolher tema custa duas semanas e não ensina Next.js. Com todo
+      mundo no mesmo produto, a dúvida de uma equipe serve pra turma inteira, dá
+      pra resolver no telão em cinco minutos, e as equipes conseguem se ajudar de
+      verdade — em vez de cada uma travada num problema que só ela tem.</p>
+      <p style="margin-top:10px"><b>O produto é igual; o código é de vocês.</b> Cada
+      equipe escreve o seu, do seu jeito, com as decisões que souber justificar.</p>
+    </div>
+  </div>
+
+  <div class="label">Pra quem é</div>
+
+  <div class="persona">
+    <p class="quote">"Eu estudo programação há oito meses e me candidato todo dia.
+    Mas metade das vagas de 'júnior' pede três anos de experiência. Eu só queria
+    ver o que sobra quando tiro essas da frente."</p>
+    <p class="who">— a pessoa que usa o Leque de Vagas</p>
+  </div>
+
+  <div class="grid3">
+    <div class="mini"><b>O problema</b>Vaga chamada de júnior com requisito de sênior. Quem está começando gasta a energia toda filtrando na mão.</div>
+    <div class="mini"><b>A promessa</b>Ver rápido as vagas de entrada de verdade, filtradas por área, senioridade e modelo de trabalho.</div>
+    <div class="mini"><b>O sinal de sucesso</b>A pessoa abre, filtra e encontra três vagas que fazem sentido — em menos de um minuto.</div>
+  </div>
+
+  <div class="tip star"><b>Guarde essa pessoa na cabeça o semestre inteiro.</b>
+  Toda decisão de tela, de texto e de filtro deveria responder a uma pergunta só:
+  <b>isso ajuda ela a achar a vaga certa mais rápido?</b> Na apresentação final,
+  é isso que eu vou perguntar sobre cada escolha de vocês.</div>
+
+  <div class="label">Os dados</div>
+  <p style="color:var(--text-2);font-size:15px">Este é o formato de uma vaga.
+  Até a aula 06 ele mora num arquivo <code>data/vagas.ts</code>; depois disso vai
+  pro banco de dados, com estes mesmos campos.</p>
+
+  <div class="diagrama"><span class="cls">Vaga</span>
+  <span class="mt">id</span>                <span class="cm">texto — identificador único, usado na URL</span>
+  <span class="mt">titulo</span>            <span class="cm">"Pessoa Desenvolvedora Front-end Júnior"</span>
+  <span class="mt">empresa</span>           <span class="cm">nome que aparece na tela</span>
+  <span class="mt">empresaSlug</span>       <span class="cm">"aurora-tech" — usado na URL da empresa</span>
+  <span class="mt">area</span>              <span class="cm">Front-end · Back-end · Dados · QA · Design</span>
+  <span class="mt">senioridade</span>       <span class="cm">Estágio · Júnior · Pleno</span>
+  <span class="mt">local</span>             <span class="cm">Remoto · Híbrido · Presencial + cidade</span>
+  <span class="mt">aceitaIniciante</span>   <span class="cm">sim/não — o filtro mais importante do site</span>
+  <span class="mt">descricao</span>         <span class="cm">o texto da vaga</span>
+  <span class="mt">publicadaEm</span>       <span class="cm">data — entra a partir do checkpoint 1</span>
+
+<span class="cls">Empresa</span>            <span class="cm">a partir do checkpoint 2</span>
+  <span class="mt">slug</span> · <span class="mt">nome</span> · <span class="mt">sobre</span> · <span class="mt">site</span>
+
+<span class="cls">Pessoa</span>             <span class="cm">a partir do checkpoint 2</span>
+  <span class="mt">id</span> · <span class="mt">nome</span> · <span class="mt">email</span> · <span class="mt">papel</span> <span class="cm">(candidata ou empresa)</span></div>
+
+  <div class="tip"><b>Podem inventar as vagas, mas com juízo.</b> Escrevam vagas
+  que existiriam de verdade, com títulos e requisitos plausíveis. Um catálogo com
+  "Vaga 1", "Vaga 2" e "lorem ipsum" torna impossível avaliar se as telas
+  funcionam — e, na apresentação final, é o que faz um projeto parecer um
+  exercício em vez de um produto.</div>
+
+  <div class="label">As telas</div>
+  <p style="color:var(--text-2);font-size:15px">O mapa completo do produto. Nem
+  tudo entra de uma vez — a coluna diz em qual checkpoint cada tela nasce.</p>
+
+  <table>
+    <thead><tr><th>Tela</th><th>Rota</th><th>O que faz</th><th>Entra em</th></tr></thead>
+    <tbody>
+      <tr><td><b>Home</b></td><td><code>/</code></td><td>Apresenta o site e leva pra listagem</td><td>aula 02</td></tr>
+      <tr><td><b>Listagem</b></td><td><code>/vagas</code></td><td>Todas as vagas, com busca e filtros</td><td>aula 02</td></tr>
+      <tr><td><b>Detalhe da vaga</b></td><td><code>/vagas/[id]</code></td><td>Os dados completos e o botão de candidatura</td><td>aula 02</td></tr>
+      <tr><td><b>Empresa</b></td><td><code>/empresas/[slug]</code></td><td>Sobre a empresa e as vagas dela</td><td>aula 02</td></tr>
+      <tr><td><b>Institucional</b></td><td><code>/termos</code> <code>/privacidade</code></td><td>Textos legais, num route group</td><td>aula 02</td></tr>
+      <tr><td><b>Publicar vaga</b></td><td><code>/vagas/nova</code></td><td>Formulário de cadastro, com validação</td><td>checkpoint 2</td></tr>
+      <tr><td><b>Editar vaga</b></td><td><code>/vagas/[id]/editar</code></td><td>Alterar e remover uma vaga</td><td>checkpoint 2</td></tr>
+      <tr><td><b>Entrar</b></td><td><code>/entrar</code></td><td>Login</td><td>checkpoint 2</td></tr>
+      <tr><td><b>Painel</b></td><td><code>/painel</code></td><td>Área logada: as vagas que a pessoa publicou</td><td>checkpoint 2</td></tr>
+    </tbody>
+  </table>
+
+  <div class="label">As quatro entregas</div>
+  <p style="color:var(--text-2);font-size:15px">O projeto não é entregue de uma
+  vez em dezembro. Ele cresce em quatro marcos, e cada um é avaliado na hora.</p>
+
+  <div class="entrega">
+    <div class="entrega-hd">
+      <span class="quando">aula 02 · 26/08</span>
+      <h3>Entrega 0 — o mapa de rotas</h3>
+      <span class="peso">10%</span>
+    </div>
+    <p>O esqueleto navegável. Sem dados de verdade, sem estilo caprichado — só o
+    endereçamento inteiro de pé.</p>
+    <ul>
+      <li>Rotas dinâmicas <code>/vagas/[id]</code> e <code>/empresas/[slug]</code></li>
+      <li><code>loading</code>, <code>error</code> e <code>not-found</code> nos lugares certos</li>
+      <li>Route group <code>(institucional)</code> e layout aninhado em <code>/vagas</code></li>
+      <li>Menu com link ativo, e tudo no ar pela Vercel</li>
+    </ul>
+    <div class="tip"><b>Enunciado completo</b> no
+    <a href="/cursos/introducao-nextjs/aula-02-roteamento-app-router/desafio.html" style="color:var(--pink-light);text-decoration:underline">desafio da aula 02</a>.</div>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd">
+      <span class="quando">aula 08 · 30/09</span>
+      <h3>Checkpoint 1 — protótipo navegável</h3>
+      <span class="peso">20%</span>
+    </div>
+    <p>O produto já dá pra usar: dados carregados de fora, listagem com busca e
+    filtro, e uma cara própria.</p>
+    <ul>
+      <li>Vagas vindas de uma fonte externa, com <b>cache e revalidação</b></li>
+      <li><b>Busca e filtros</b> por área, senioridade e "aceita iniciante", via <code>searchParams</code></li>
+      <li>Composição de Server e Client Components consciente e justificada</li>
+      <li>Design com <b>Tailwind</b>, responsivo, e acessibilidade básica</li>
+      <li>Metadata por página — título e descrição corretos em cada rota</li>
+    </ul>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd">
+      <span class="quando">aula 12 · 28/10</span>
+      <h3>Checkpoint 2 — CRUD e autenticação</h3>
+      <span class="peso">30%</span>
+    </div>
+    <p>O produto vira aplicação: dá pra entrar, publicar, editar e apagar. Com
+    <b>code review em sala</b> — cada equipe apresenta uma decisão técnica e
+    responde perguntas.</p>
+    <ul>
+      <li><b>Banco de dados</b> de verdade, com Prisma ou Drizzle</li>
+      <li><b>CRUD completo</b> de vagas via Server Actions, com validação por Zod</li>
+      <li><b>Autenticação</b> e proteção das rotas de publicação e do painel</li>
+      <li>Papéis: quem publica só edita as próprias vagas</li>
+      <li>Tratamento de erro e estados de carregamento em todos os formulários</li>
+    </ul>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd">
+      <span class="quando">aula 15 · 18/11</span>
+      <h3>Checkpoint 3 — produção</h3>
+      <span class="peso">20%</span>
+    </div>
+    <p>O que separa um trabalho de faculdade de um projeto de portfólio.</p>
+    <ul>
+      <li><b>CI no GitHub Actions</b>: build, lint e testes rodando a cada push</li>
+      <li><b>Testes</b> — unitários das regras e ao menos um caminho completo em E2E</li>
+      <li><b>Performance</b>: imagens otimizadas, fontes locais, Core Web Vitals verdes</li>
+      <li><b>SEO</b>: metadata dinâmica, sitemap, Open Graph nas páginas de vaga</li>
+      <li>Variáveis de ambiente tratadas direito — <b>nenhum segredo no repositório</b></li>
+    </ul>
+  </div>
+
+  <div class="entrega">
+    <div class="entrega-hd">
+      <span class="quando">aula 18 · 09/12</span>
+      <h3>Apresentação e defesa</h3>
+      <span class="peso">20%</span>
+    </div>
+    <p>15 minutos por equipe: demonstração ao vivo do site no ar, e defesa das
+    decisões técnicas.</p>
+    <ul>
+      <li>Demonstração <b>no link publicado</b>, não em localhost</li>
+      <li>Três decisões técnicas explicadas: o que foi escolhido, o que foi descartado, por quê</li>
+      <li><b>Perguntas individuais</b> — cada pessoa responde sobre uma parte do código</li>
+      <li>O que quebrou no caminho e como foi resolvido</li>
+    </ul>
+    <div class="tip star"><b>A defesa é individual dentro da equipe.</b> Não dá pra
+    uma pessoa carregar o grupo: cada uma responde sobre uma parte do código, e a
+    nota reflete isso. É por esse motivo que a divisão de tarefas precisa girar ao
+    longo do semestre — quem só mexeu em CSS o tempo todo chega despreparada em
+    dezembro.</div>
+  </div>
+
+  <div class="label">Requisitos técnicos obrigatórios</div>
+  <ul class="check">
+    <li><b>Next.js 16+ com App Router.</b> Pages Router não é aceito</li>
+    <li><b>TypeScript</b> em todo o projeto</li>
+    <li><b>Equipe de 3 a 4 pessoas</b>, com repositório público no GitHub</li>
+    <li><b>Sempre no ar</b> pela Vercel, atualizando a cada push na main</li>
+    <li><b>Commits de todo mundo</b>, distribuídos ao longo do semestre — não todos na véspera</li>
+    <li><b>README vivo</b>: atualizado a cada checkpoint, com as decisões e quem fez o quê</li>
+    <li><b>Branches e pull requests</b> a partir do checkpoint 1</li>
+    <li><b>Tailwind</b> a partir da aula 08 — antes disso, CSS comum</li>
+  </ul>
+
+  <div class="label">Como a nota é composta</div>
+  <table>
+    <thead><tr><th>Entrega</th><th>Quando</th><th>Peso</th></tr></thead>
+    <tbody>
+      <tr><td><b>Entrega 0</b> — mapa de rotas</td><td>aula 02</td><td>10%</td></tr>
+      <tr><td><b>Checkpoint 1</b> — protótipo navegável</td><td>aula 08</td><td>20%</td></tr>
+      <tr><td><b>Checkpoint 2</b> — CRUD e autenticação</td><td>aula 12</td><td>30%</td></tr>
+      <tr><td><b>Checkpoint 3</b> — produção</td><td>aula 15</td><td>20%</td></tr>
+      <tr><td><b>Apresentação e defesa</b></td><td>aula 18</td><td>20%</td></tr>
+    </tbody>
+  </table>
+  <div class="tip"><b>As duas verificações de aprendizagem (aulas 09 e 18) têm nota
+  própria</b>, separada desta. A tabela acima é só a nota do projeto.</div>
+
+  <div class="label">A rubrica — o que eu olho em cada entrega</div>
+  <p style="color:var(--text-2);font-size:15px">Vale pra todos os checkpoints.
+  Guardem isto: é literalmente a folha que eu preencho corrigindo.</p>
+
+  <table>
+    <thead><tr><th>Critério</th><th>Peso</th><th>Excelente</th><th>Insuficiente</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>Funciona no ar</b></td><td>30%</td>
+        <td>O link abre, todos os caminhos da entrega funcionam, nada quebra no meio</td>
+        <td>Só roda em localhost, ou o link está fora, ou o caminho principal quebra</td>
+      </tr>
+      <tr>
+        <td><b>Usa o recurso certo</b></td><td>25%</td>
+        <td>O conteúdo da aula é aplicado como se ensinou, no lugar certo, sem contornos</td>
+        <td>Gambiarra que evita o recurso ensinado, ou código de Next antigo</td>
+      </tr>
+      <tr>
+        <td><b>Explica as decisões</b></td><td>20%</td>
+        <td>O README diz <b>por que</b>, com palavras da equipe, e admite o que ficou em aberto</td>
+        <td>README descreve o que foi feito, ou repete o enunciado, ou é texto de IA sem digestão</td>
+      </tr>
+      <tr>
+        <td><b>Qualidade do código</b></td><td>15%</td>
+        <td>Componentes pequenos e nomeados, sem repetição óbvia, build e lint limpos</td>
+        <td>Arquivos gigantes, código morto, avisos de build ignorados</td>
+      </tr>
+      <tr>
+        <td><b>Trabalho de equipe</b></td><td>10%</td>
+        <td>Commits de todo mundo, tarefas girando, histórico legível</td>
+        <td>Uma pessoa fez tudo, ou tudo commitado na véspera</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip star"><b>O critério que mais surpreende é o terceiro.</b> Um
+  projeto que funciona mas não sabe explicar por que funciona perde um quinto da
+  nota. Isso não é maldade — é a coisa que mais separa quem passa de uma
+  entrevista técnica de quem não passa. <b>Escrevam o README enquanto
+  constroem</b>, não na noite anterior.</div>
+
+  <div class="label">Extras, pra quem quiser ir além ✨</div>
+  <ul class="check extra">
+    <li>Salvar vagas favoritas, com estado no cliente</li>
+    <li>Modo escuro de verdade, respeitando a preferência do sistema</li>
+    <li>Imagem de Open Graph gerada por código pra cada vaga</li>
+    <li>Alerta por e-mail quando entrar vaga na área que a pessoa acompanha</li>
+    <li>Página de estatísticas: vagas por área, por senioridade, ao longo do tempo</li>
+    <li>Internacionalização — o mesmo site em português e inglês</li>
+  </ul>
+
+  <div class="label">O que NÃO pode 🚫</div>
+  <ul class="check no">
+    <li><b>Trocar de tema.</b> O produto é o Leque de Vagas, pra turma inteira</li>
+    <li>Pages Router, ou material de Next 13/14 copiado sem adaptar</li>
+    <li>Repositório privado — ele é parte do portfólio de vocês</li>
+    <li>Chave de API, senha ou string de conexão commitada</li>
+    <li>Copiar o projeto de outra equipe. Trocar ideia é <b>incentivado</b>; copiar código é outra coisa, e dá pra ver no histórico</li>
+    <li>Entregar código de IA que ninguém da equipe sabe explicar. Usar IA é liberado; <b>não entender o que ela deu, não</b></li>
+  </ul>
+
+  <div class="label">Como começar hoje</div>
+  <div class="entrega">
+    <ul style="padding-left:20px">
+      <li>Confirmem a <b>equipe de 3 a 4 pessoas</b> e o repositório, com todo mundo como colaborador</li>
+      <li>Leiam este briefing <b>juntos</b> — não uma pessoa por conta</li>
+      <li>Escrevam as <b>6 primeiras vagas</b> em <code>data/vagas.ts</code>. É a base de tudo que vem depois</li>
+      <li>Dividam as rotas da entrega 0 entre vocês. Elas são bem separadas — dá pra trabalhar em paralelo</li>
+      <li>Combinem <b>quando</b> vocês se falam durante a semana. Equipe que só conversa na véspera entrega véspera</li>
+    </ul>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="/cursos/introducao-nextjs/aula-02-roteamento-app-router/desafio.html">🎯 Entrega 0 — o desafio da aula 02</a>
+    <a class="btn" href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas" target="_blank" rel="noopener noreferrer">💻 Projeto de referência</a>
+    <a class="btn" href="/cursos/introducao-nextjs">📚 Voltar ao curso</a>
+  </div>
+
+  <div class="foot">Briefing do projeto · Leque de Vagas · Introdução ao Next.js · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>
