@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · HTML e CSS · Aula 01 · Frontend Avançado · NickDev</title>
+<meta name="description" content="Guia da aula 01: HTML semântico e acessível, landmarks, formulários, Grid e Flexbox, container queries, custom properties, tema escuro, @layer, :has() e escopo de estilo.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:270px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}.kw{color:#F24487}.ty{color:#7B9FE0}.st{color:#A98CE0}.fn{color:#E88BB8}.sel{color:#5fd08a}
+  pre b{color:var(--text);font-weight:500}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-avancado">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#dicionario">📖 O dicionário desta aula</a>
+    <div class="grp">HTML</div>
+    <a href="#porque">Por que semântica importa</a>
+    <a href="#landmarks">Landmarks</a>
+    <a href="#titulos">Hierarquia de títulos</a>
+    <a href="#listas">Listas, artigos e o resto</a>
+    <a href="#formularios">Formulários acessíveis</a>
+    <a href="#midia">Imagem, data e mídia</a>
+    <a href="#teclado">O teste do teclado</a>
+    <div class="grp">CSS · layout</div>
+    <a href="#flexgrid">Flexbox ou Grid</a>
+    <a href="#grid">Grid na prática</a>
+    <a href="#fluido">Tamanho fluido: clamp e min</a>
+    <a href="#container">Container queries</a>
+    <div class="grp">CSS · sistema</div>
+    <a href="#tokens">Custom properties como tokens</a>
+    <a href="#tema">Tema claro e escuro</a>
+    <a href="#layer">@layer</a>
+    <a href="#has">:has() e aninhamento</a>
+    <a href="#escopo">O problema do escopo</a>
+    <div class="grp">Fechando</div>
+    <a href="#erros">Erros comuns 🔧</a>
+    <a href="#cola">Cola rápida</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 01 · guia de conteúdo · 4 horas</div>
+  <h1>HTML e CSS: <span class="g">a base</span></h1>
+  <p class="lead">
+    Uma revisão com a régua alta. Não é "o que é uma tag" — é <b>por que a
+    escolha da tag muda o comportamento do navegador</b>, e como escrever CSS
+    que continua fazendo sentido no arquivo número duzentos.
+  </p>
+  <div class="rule"></div>
+
+  <div class="tip warn" style="margin-top:32px">
+    <b>🎯 O que esta aula assume.</b> Que você já escreveu HTML e CSS antes e já
+    montou uma página inteira. O que muda aqui é a <b>régua</b>: a partir de
+    hoje, não basta ficar parecido com o desenho — precisa funcionar no teclado,
+    fazer sentido pra quem não enxerga a tela, e não quebrar quando outra pessoa
+    mexer.
+  </div>
+
+  <!-- ==================================================================== -->
+  <section id="dicionario">
+    <h2>O dicionário desta aula</h2>
+    <p>As palavras que vão aparecer o tempo todo daqui pra frente.</p>
+
+    <table>
+      <tr><th>Palavra</th><th>O que é</th></tr>
+      <tr>
+        <td><b>Semântica</b></td>
+        <td>Escolher a tag pelo <b>significado</b> do conteúdo, não pela aparência. <code>&lt;button&gt;</code> porque é um botão — não porque quero um retângulo clicável.</td>
+      </tr>
+      <tr>
+        <td><b>Landmark</b></td>
+        <td>Uma <b>região da página</b> que a tecnologia assistiva reconhece e lista, pra pessoa pular direto pra ela. <code>&lt;main&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;header&gt;</code>.</td>
+      </tr>
+      <tr>
+        <td><b>Leitor de tela</b></td>
+        <td>Programa que <b>lê a página em voz alta</b>. Ele não vê o layout: navega pela estrutura do HTML.</td>
+      </tr>
+      <tr>
+        <td><b>Foco</b></td>
+        <td>O elemento que está <b>selecionado no momento</b> pelo teclado. Anda com <code>Tab</code>, e precisa ser visível.</td>
+      </tr>
+      <tr>
+        <td><b>ARIA</b></td>
+        <td>Atributos que <b>completam</b> a informação para tecnologia assistiva (<code>aria-label</code>, <code>aria-describedby</code>). Complementam o HTML — nunca substituem a tag certa.</td>
+      </tr>
+      <tr>
+        <td><b>Cascata</b></td>
+        <td>As regras que o navegador usa pra <b>decidir qual CSS vence</b> quando duas regras atingem o mesmo elemento.</td>
+      </tr>
+      <tr>
+        <td><b>Especificidade</b></td>
+        <td>O <b>peso</b> de um seletor nessa disputa. <code>#id</code> vence <code>.classe</code>, que vence <code>div</code>.</td>
+      </tr>
+      <tr>
+        <td><b>Token</b></td>
+        <td>Um <b>valor de design com nome</b>, guardado num só lugar e reusado: <code>--cor-marca</code>, <code>--esp-2</code>.</td>
+      </tr>
+      <tr>
+        <td><b>Escopo de estilo</b></td>
+        <td>O <b>alcance</b> de uma regra CSS. Em CSS puro é sempre a página inteira — e é isso que dá problema.</td>
+      </tr>
+      <tr>
+        <td><b>Baseline</b></td>
+        <td>Termo da web pra dizer que <b>um recurso já é seguro de usar</b> em todos os navegadores atuais. Tudo nesta aula é.</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="porque">
+    <h2>Por que semântica importa</h2>
+    <p>Todo mundo já ouviu "use HTML semântico". Quase ninguém ouviu <b>por
+    quê</b>, e sem o porquê a regra não sobrevive ao primeiro prazo apertado.</p>
+
+    <p>São três motivos, e nenhum deles é estético.</p>
+
+    <h3>1. É como quem não enxerga navega</h3>
+    <p>Um leitor de tela não mostra a página: lê. Se a pessoa tivesse que ouvir
+    tudo do começo toda vez, seria inviável. Então ela usa atalhos: <b>listar as
+    regiões</b> da página, <b>listar os títulos</b>, <b>listar os links</b>.</p>
+    <p>Esses atalhos são construídos a partir das suas tags. <b>Sem
+    <code>&lt;main&gt;</code>, não existe "pular para o conteúdo principal".</b>
+    Sem <code>&lt;h2&gt;</code>, não existe índice.</p>
+
+    <h3>2. Você ganha comportamento de graça</h3>
+    <p>Compare o que cada um faz <b>sem nenhuma linha de JavaScript</b>:</p>
+
+    <div class="duo">
+      <div class="box ok">
+        <h4>&lt;button&gt;</h4>
+        <ul style="padding-left:18px">
+          <li>Entra na ordem do <code>Tab</code></li>
+          <li>Dispara com <code>Enter</code> e <code>Espaço</code></li>
+          <li>Anunciado como "botão"</li>
+          <li>Ganha estado desabilitado</li>
+          <li>Envia formulário</li>
+        </ul>
+      </div>
+      <div class="box no">
+        <h4>&lt;div onclick&gt;</h4>
+        <ul style="padding-left:18px">
+          <li>Invisível pro teclado</li>
+          <li>Ignora <code>Enter</code> e <code>Espaço</code></li>
+          <li>Anunciado como… nada</li>
+          <li>Não tem estado</li>
+          <li>Não envia nada</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>Para empatar com o <code>&lt;button&gt;</code>, a <code>&lt;div&gt;</code>
+    precisa de <code>tabindex="0"</code>, <code>role="button"</code>, listener de
+    clique, listener de teclado tratando duas teclas, e gestão de estado. <b>Cinco
+    coisas para reimplementar, mal, o que já vinha pronto.</b></p>
+
+    <h3>3. Descreve o que a coisa é, não como parece</h3>
+    <p><code>&lt;article&gt;</code> continua verdadeiro depois do redesign.
+    <code>class="card-azul"</code> vira mentira no dia em que o card fica
+    verde.</p>
+
+    <div class="tip warn"><b>E o motivo que vale pro resto do curso.</b> Framework
+    <b>facilita</b> errar isso. Quando cada pedaço da tela é um componente
+    isolado, ninguém mais enxerga o documento inteiro — e aí aparecem três
+    <code>&lt;h1&gt;</code> na mesma página, cada um dentro de um componente que
+    parecia certo sozinho. Na aula 03 e na 10 eu volto nisso.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="landmarks">
+    <h2>Landmarks</h2>
+    <p>São as regiões que a tecnologia assistiva lista. Vale decorar esta tabela
+    — é curta.</p>
+
+    <table>
+      <tr><th>Elemento</th><th>O que marca</th><th>Quantos</th></tr>
+      <tr><td><code>&lt;header&gt;</code></td><td>Topo do site (ou de um artigo)</td><td>1 por página, no nível raiz</td></tr>
+      <tr><td><code>&lt;nav&gt;</code></td><td>Bloco de navegação</td><td>Vários — cada um com <code>aria-label</code></td></tr>
+      <tr><td><code>&lt;main&gt;</code></td><td>Conteúdo principal, único da página</td><td><b>Exatamente 1</b></td></tr>
+      <tr><td><code>&lt;aside&gt;</code></td><td>Conteúdo relacionado, secundário</td><td>Quantos precisar</td></tr>
+      <tr><td><code>&lt;footer&gt;</code></td><td>Rodapé do site (ou de um artigo)</td><td>1 por página, no nível raiz</td></tr>
+      <tr><td><code>&lt;section&gt;</code></td><td>Seção temática — <b>só vira landmark com título</b></td><td>Quantas precisar</td></tr>
+      <tr><td><code>&lt;article&gt;</code></td><td>Conteúdo que <b>faz sentido sozinho</b>, fora do contexto</td><td>Quantos precisar</td></tr>
+    </table>
+
+    <div class="file">📄 o esqueleto de uma tela do projeto</div>
+<pre>&lt;<span class="ty">body</span>&gt;
+  &lt;<span class="ty">a</span> href=<span class="st">"#conteudo"</span> class=<span class="st">"pular"</span>&gt;Pular para o conteúdo&lt;/<span class="ty">a</span>&gt;
+
+  &lt;<span class="ty">header</span>&gt;
+    &lt;<span class="ty">h1</span>&gt;Leque de Eventos&lt;/<span class="ty">h1</span>&gt;
+    &lt;<span class="ty">nav</span> aria-label=<span class="st">"Principal"</span>&gt; … &lt;/<span class="ty">nav</span>&gt;
+  &lt;/<span class="ty">header</span>&gt;
+
+  &lt;<span class="ty">main</span> id=<span class="st">"conteudo"</span>&gt;
+    &lt;<span class="ty">section</span> aria-labelledby=<span class="st">"proximos"</span>&gt;
+      &lt;<span class="ty">h2</span> id=<span class="st">"proximos"</span>&gt;Próximos eventos&lt;/<span class="ty">h2</span>&gt;
+
+      &lt;<span class="ty">article</span>&gt; … um card de evento … &lt;/<span class="ty">article</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  &lt;/<span class="ty">main</span>&gt;
+
+  &lt;<span class="ty">footer</span>&gt; … &lt;/<span class="ty">footer</span>&gt;
+&lt;/<span class="ty">body</span>&gt;</pre>
+
+    <h3>O link "pular para o conteúdo"</h3>
+    <p>Sem ele, quem usa teclado passa por <b>todos</b> os links do menu antes de
+    chegar no conteúdo — em toda página, toda vez. Ele fica escondido até receber
+    foco:</p>
+
+<pre><span class="sel">.pular</span> {
+  <span class="fn">position</span>: absolute;
+  <span class="fn">left</span>: <span class="st">-9999px</span>;
+}
+<span class="sel">.pular:focus</span> {
+  <span class="fn">left</span>: <span class="st">1rem</span>;
+  <span class="fn">top</span>: <span class="st">1rem</span>;
+}</pre>
+
+    <div class="tip warn"><b>O erro mais comum com section.</b> Usar
+    <code>&lt;section&gt;</code> onde caberia <code>&lt;div&gt;</code>. Section
+    <b>sem título</b> não vira landmark, não ajuda ninguém e ainda polui a árvore
+    de acessibilidade. Se não tem título, use <code>&lt;div&gt;</code> — ela
+    existe justamente pra isso, e não tem nada de errado com ela.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="titulos">
+    <h2>Hierarquia de títulos</h2>
+    <p>Os títulos formam o <b>índice</b> do documento. Quem usa leitor de tela
+    navega saltando entre eles, e é assim que a pessoa entende a estrutura da
+    página sem ver o layout.</p>
+
+    <p>Duas regras, e só:</p>
+    <ul>
+      <li><b>Um <code>&lt;h1&gt;</code> por página</b>, dizendo do que a página trata</li>
+      <li><b>Nunca pule níveis</b> descendo: de <code>h2</code> vai pra <code>h3</code>, jamais direto pra <code>h4</code></li>
+    </ul>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>Errado</h4>
+<pre><span class="cm">&lt;!-- escolhido pelo tamanho --&gt;</span>
+&lt;<span class="ty">h1</span>&gt;Leque de Eventos&lt;/<span class="ty">h1</span>&gt;
+  &lt;<span class="ty">h4</span>&gt;Próximos&lt;/<span class="ty">h4</span>&gt;
+&lt;<span class="ty">h3</span>&gt;Meetup #42&lt;/<span class="ty">h3</span>&gt;</pre>
+      </div>
+      <div class="box ok">
+        <h4>Certo</h4>
+<pre><span class="cm">&lt;!-- escolhido pelo aninhamento --&gt;</span>
+&lt;<span class="ty">h1</span>&gt;Leque de Eventos&lt;/<span class="ty">h1</span>&gt;
+  &lt;<span class="ty">h2</span>&gt;Próximos eventos&lt;/<span class="ty">h2</span>&gt;
+    &lt;<span class="ty">h3</span>&gt;Meetup #42&lt;/<span class="ty">h3</span>&gt;</pre>
+      </div>
+    </div>
+
+    <div class="tip"><b>Se o tamanho está errado, o problema é do CSS.</b> Nunca
+    escolha <code>&lt;h4&gt;</code> porque "h2 fica grande demais". Escolha o
+    nível certo e ajuste com <code>font-size</code>. Nível é estrutura, tamanho
+    é aparência — e é justamente isso que a gente está separando hoje.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="listas">
+    <h2>Listas, artigos e o resto</h2>
+
+    <h3>Lista é lista</h3>
+    <p>A listagem de eventos é uma <b>lista</b>. Envolver em <code>&lt;ul&gt;</code>
+    faz o leitor de tela anunciar "lista com 8 itens" — informação que a pessoa
+    usa pra decidir se vale percorrer.</p>
+
+<pre>&lt;<span class="ty">ul</span> class=<span class="st">"lista-eventos"</span>&gt;
+  &lt;<span class="ty">li</span>&gt;
+    &lt;<span class="ty">article</span> class=<span class="st">"card-evento"</span>&gt; … &lt;/<span class="ty">article</span>&gt;
+  &lt;/<span class="ty">li</span>&gt;
+&lt;/<span class="ty">ul</span>&gt;</pre>
+
+    <div class="tip"><b>E o CSS não atrapalha.</b> <code>list-style: none</code>
+    tira as bolinhas sem tirar a semântica. Colocar <code>display: grid</code> no
+    <code>&lt;ul&gt;</code> também está perfeitamente ok.</div>
+
+    <h3>article ou div?</h3>
+    <p>O teste é simples: <b>esse pedaço faz sentido sozinho, fora da página?</b>
+    Um card de evento, se você o mandasse isolado pra alguém, ainda se explicaria
+    — então é <code>&lt;article&gt;</code>. Um wrapper que existe só pra
+    posicionar duas coisas é <code>&lt;div&gt;</code>.</p>
+
+    <h3>Botão ou link?</h3>
+    <table>
+      <tr><th>Use</th><th>Quando</th><th>Exemplo no projeto</th></tr>
+      <tr><td><code>&lt;a href&gt;</code></td><td><b>Leva pra outro lugar.</b> Muda a URL.</td><td>Abrir o detalhe do evento</td></tr>
+      <tr><td><code>&lt;button&gt;</code></td><td><b>Faz alguma coisa</b> aqui mesmo.</td><td>Abrir filtro, alternar tema</td></tr>
+    </table>
+    <div class="tip warn"><b>O sinal de que está errado:</b> se você precisa de
+    <code>href="#"</code>, provavelmente era um botão. Se você precisa de
+    <code>onclick</code> que troca de página, provavelmente era um link.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="formularios">
+    <h2>Formulários acessíveis</h2>
+    <p>É onde mais se erra, e onde o erro mais atrapalha — porque formulário é
+    onde a pessoa precisa <b>fazer</b> alguma coisa, não só ler.</p>
+
+    <h3>Toda entrada precisa de label</h3>
+<pre><span class="cm">&lt;!-- ligadas por for/id: clicar no texto foca o campo --&gt;</span>
+&lt;<span class="ty">label</span> for=<span class="st">"cidade"</span>&gt;Cidade&lt;/<span class="ty">label</span>&gt;
+&lt;<span class="ty">input</span> id=<span class="st">"cidade"</span> name=<span class="st">"cidade"</span> type=<span class="st">"text"</span> /&gt;</pre>
+
+    <div class="tip warn"><b>Placeholder não é label.</b> Ele some quando a pessoa
+    começa a digitar (justo quando ela precisaria conferir), tem contraste baixo
+    e não é lido por todo leitor de tela. Se o desenho não tem espaço pro rótulo,
+    esconda a label <b>visualmente</b> — nunca a remova.</div>
+
+<pre><span class="cm">/* esconde da tela, mantém pro leitor de tela */</span>
+<span class="sel">.so-leitor</span> {
+  <span class="fn">position</span>: absolute;
+  <span class="fn">width</span>: <span class="st">1px</span>; <span class="fn">height</span>: <span class="st">1px</span>;
+  <span class="fn">padding</span>: <span class="st">0</span>; <span class="fn">margin</span>: <span class="st">-1px</span>;
+  <span class="fn">overflow</span>: hidden;
+  <span class="fn">clip-path</span>: inset(<span class="st">50%</span>);
+  <span class="fn">white-space</span>: nowrap;
+}</pre>
+
+    <h3>O type certo muda o teclado do celular</h3>
+    <table>
+      <tr><th>type</th><th>O que a pessoa ganha</th></tr>
+      <tr><td><code>email</code></td><td>Teclado com <code>@</code> à mão</td></tr>
+      <tr><td><code>tel</code></td><td>Teclado numérico grande</td></tr>
+      <tr><td><code>search</code></td><td>Botão de limpar, tecla "buscar"</td></tr>
+      <tr><td><code>url</code></td><td>Teclado com <code>.com</code></td></tr>
+      <tr><td><code>datetime-local</code></td><td>Seletor nativo de data e hora</td></tr>
+    </table>
+
+    <div class="tip"><b>E <code>autocomplete</code> economiza a vida.</b>
+    <code>autocomplete="email"</code>, <code>"name"</code>,
+    <code>"street-address"</code> deixam o navegador preencher. Numa tela de
+    cadastro, é a diferença entre trinta segundos e três minutos.</div>
+
+    <h3>Erro precisa ser anunciado</h3>
+    <p>Pintar a borda de vermelho não informa quem não enxerga cor — e quem não
+    enxerga nada.</p>
+
+<pre>&lt;<span class="ty">label</span> for=<span class="st">"email"</span>&gt;E-mail&lt;/<span class="ty">label</span>&gt;
+&lt;<span class="ty">input</span> id=<span class="st">"email"</span> type=<span class="st">"email"</span>
+       aria-describedby=<span class="st">"email-erro"</span>
+       aria-invalid=<span class="st">"true"</span> /&gt;
+&lt;<span class="ty">p</span> id=<span class="st">"email-erro"</span>&gt;Formato inválido. Exemplo: nome@site.com&lt;/<span class="ty">p</span>&gt;</pre>
+
+    <ul>
+      <li><code>aria-describedby</code> — liga a mensagem ao campo</li>
+      <li><code>aria-invalid</code> — diz que este campo está com erro</li>
+      <li>A mensagem <b>diz como corrigir</b>, não só que está errado</li>
+    </ul>
+
+    <h3>Agrupe o que é um grupo</h3>
+<pre>&lt;<span class="ty">fieldset</span>&gt;
+  &lt;<span class="ty">legend</span>&gt;Formato do evento&lt;/<span class="ty">legend</span>&gt;
+  &lt;<span class="ty">label</span>&gt;&lt;<span class="ty">input</span> type=<span class="st">"radio"</span> name=<span class="st">"formato"</span> /&gt; Presencial&lt;/<span class="ty">label</span>&gt;
+  &lt;<span class="ty">label</span>&gt;&lt;<span class="ty">input</span> type=<span class="st">"radio"</span> name=<span class="st">"formato"</span> /&gt; Online&lt;/<span class="ty">label</span>&gt;
+&lt;/<span class="ty">fieldset</span>&gt;</pre>
+    <p>Sem o <code>&lt;fieldset&gt;</code>, o leitor anuncia "Presencial, botão de
+    opção" sem dizer <b>de que pergunta</b> aquilo é resposta.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="midia">
+    <h2>Imagem, data e mídia</h2>
+
+    <h3>alt: descreva a função, não a figura</h3>
+    <table>
+      <tr><th>Situação</th><th>O que escrever</th></tr>
+      <tr><td>Decorativa (onda, textura)</td><td><code>alt=""</code> — vazio de propósito, o leitor pula</td></tr>
+      <tr><td>Informativa</td><td>O que ela <b>comunica</b>: <code>alt="Mapa: Rua X, 200"</code></td></tr>
+      <tr><td>Dentro de um link</td><td>Para onde o link leva: <code>alt="Ver perfil do React Recife"</code></td></tr>
+      <tr><td>Já explicada no texto ao lado</td><td><code>alt=""</code> — repetir só atrapalha</td></tr>
+    </table>
+    <div class="tip warn"><b>Nunca escreva "imagem de".</b> O leitor de tela já
+    anuncia que é imagem. E <b>nunca deixe sem <code>alt</code></b>: sem o
+    atributo, alguns leitores leem o <b>nome do arquivo</b> — e ninguém merece
+    ouvir "IMG underscore 2026 underscore final v3 ponto png".</div>
+
+    <h3>Datas que a máquina entende</h3>
+<pre>&lt;<span class="ty">time</span> datetime=<span class="st">"2026-09-12T19:00"</span>&gt;12 de setembro, 19h&lt;/<span class="ty">time</span>&gt;</pre>
+    <p>A pessoa lê o texto; o buscador e integrações de agenda leem o atributo.
+    No projeto, todo card de evento tem data — comece com
+    <code>&lt;time&gt;</code> desde a entrega 0.</p>
+
+    <h3>Imagem que não empurra o layout</h3>
+<pre>&lt;<span class="ty">img</span> src=<span class="st">"capa.jpg"</span> alt=<span class="st">""</span>
+     width=<span class="st">"800"</span> height=<span class="st">"450"</span>
+     loading=<span class="st">"lazy"</span> decoding=<span class="st">"async"</span> /&gt;</pre>
+    <ul>
+      <li><b><code>width</code> e <code>height</code></b> — o navegador reserva o espaço e a página não "pula" quando a imagem carrega</li>
+      <li><b><code>loading="lazy"</code></b> — só baixa quando estiver perto da tela. <b>Não use</b> na imagem principal do topo</li>
+    </ul>
+    <div class="tip">Aquele "pulo" tem nome — <b>layout shift</b> — e é uma das
+    métricas de performance que o Google mede. Volta com todas as letras na
+    aula 14.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="teclado">
+    <h2>O teste do teclado</h2>
+    <p>O teste de acessibilidade mais barato que existe, e o que mais pega
+    problema. <b>Solte o mouse</b> e navegue com <code>Tab</code>,
+    <code>Shift+Tab</code>, <code>Enter</code> e <code>Espaço</code>.</p>
+
+    <ol>
+      <li><b>Chego em tudo?</b> Todo link, botão e campo precisa ser alcançável</li>
+      <li><b>Vejo onde estou?</b> Se o contorno sumiu, alguém escreveu <code>outline: none</code></li>
+      <li><b>A ordem faz sentido?</b> Ela segue o HTML, não a posição visual</li>
+      <li><b>Consigo sair?</b> Nada pode prender o foco</li>
+    </ol>
+
+    <div class="tip warn"><b>O crime mais comum do CSS.</b>
+    <code>*:focus { outline: none }</code> — escrito porque "fica feio". Isso
+    torna o site inutilizável por teclado. Se não gosta do contorno padrão,
+    <b>troque</b>, não apague:</div>
+
+<pre><span class="cm">/* :focus-visible só aparece pra quem navega por teclado */</span>
+<span class="sel">:focus-visible</span> {
+  <span class="fn">outline</span>: <span class="st">2px solid</span> <span class="kw">var</span>(--cor-marca);
+  <span class="fn">outline-offset</span>: <span class="st">2px</span>;
+  <span class="fn">border-radius</span>: <span class="st">4px</span>;
+}</pre>
+
+    <p><code>:focus-visible</code> é a solução elegante: o contorno aparece pra
+    quem usa <code>Tab</code> e não aparece no clique de mouse — que era a
+    reclamação original.</p>
+
+    <div class="tip"><b>Isso vale nota.</b> A navegação por teclado está na
+    rubrica do projeto, em <b>todas as seis entregas</b>. É comum o projeto
+    nascer acessível e ir perdendo isso quando os componentes chegam.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="flexgrid">
+    <h2>Flexbox ou Grid</h2>
+    <p>A dúvida mais recorrente do CSS, e ela tem resposta.</p>
+
+    <div class="duo">
+      <div class="box ok">
+        <h4>Flexbox — uma direção</h4>
+        <p>Os itens ficam <b>em linha ou em coluna</b>, e o espaço se distribui
+        entre eles. <b>O conteúdo decide o tamanho.</b></p>
+        <p style="margin-top:8px">Barra de navegação, grupo de botões, chips de
+        filtro, o rodapé de um card.</p>
+      </div>
+      <div class="box">
+        <h4 style="color:var(--purple-light)">Grid — duas direções</h4>
+        <p>Existe alinhamento em <b>linhas e colunas ao mesmo tempo</b>.
+        <b>Você decide o tamanho</b>, no container.</p>
+        <p style="margin-top:8px">Galeria de cards, layout da página inteira,
+        formulário em duas colunas.</p>
+      </div>
+    </div>
+
+    <p><b>Regra de bolso:</b> o conteúdo decide → Flex. Você decide → Grid.</p>
+
+    <div class="tip"><b>Não é escolher um time.</b> O normal é a página em Grid e
+    cada card, por dentro, em Flex. Eles foram feitos pra conviver.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="grid">
+    <h2>Grid na prática</h2>
+
+    <h3>A galeria que se vira sozinha</h3>
+<pre><span class="sel">.lista-eventos</span> {
+  <span class="fn">display</span>: grid;
+  <span class="fn">gap</span>: <span class="kw">var</span>(--esp-3);
+  <span class="fn">grid-template-columns</span>: repeat(<span class="kw">auto-fit</span>, minmax(<span class="st">280px</span>, <span class="st">1fr</span>));
+}</pre>
+
+    <p>Uma linha, e nenhuma media query:</p>
+    <ul>
+      <li><b><code>auto-fit</code></b> — crie quantas colunas couberem</li>
+      <li><b><code>minmax(280px, 1fr)</code></b> — cada coluna tem no mínimo 280px; o espaço que sobrar é dividido igualmente</li>
+    </ul>
+    <p>Celular estreito: 1 coluna. Tablet: 2. Monitor: 4. <b>Sem você listar
+    nenhuma largura de aparelho.</b></p>
+
+    <div class="tip"><b><code>auto-fit</code> ou <code>auto-fill</code>?</b> Com
+    poucos itens, <code>auto-fit</code> faz eles <b>esticarem</b> pra ocupar a
+    linha; <code>auto-fill</code> mantém colunas vazias e os itens no tamanho
+    mínimo. Para galeria, quase sempre <code>auto-fit</code>.</div>
+
+    <h3>Layout da página com áreas nomeadas</h3>
+<pre><span class="sel">.pagina</span> {
+  <span class="fn">display</span>: grid;
+  <span class="fn">min-height</span>: <span class="st">100dvh</span>;
+  <span class="fn">grid-template-rows</span>: auto <span class="st">1fr</span> auto;
+  <span class="fn">grid-template-areas</span>:
+    <span class="st">"cabecalho"</span>
+    <span class="st">"conteudo"</span>
+    <span class="st">"rodape"</span>;
+}
+
+<span class="sel">header</span> { <span class="fn">grid-area</span>: cabecalho; }
+<span class="sel">main</span>   { <span class="fn">grid-area</span>: conteudo; }
+<span class="sel">footer</span> { <span class="fn">grid-area</span>: rodape; }</pre>
+
+    <p>O <code>1fr</code> no meio faz o rodapé grudar embaixo mesmo com pouco
+    conteúdo — sem <code>position: absolute</code>, sem cálculo de altura.</p>
+
+    <div class="tip"><b>Repare no <code>100dvh</code>.</b> O <code>vh</code>
+    tradicional conta a barra de endereço do celular e gera aquele corte
+    estranho. <code>dvh</code> acompanha a altura que realmente está visível.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="fluido">
+    <h2>Tamanho fluido: clamp e min</h2>
+
+<pre><span class="sel">h1</span> {
+  <span class="cm">/*      mínimo      ideal (cresce)   máximo */</span>
+  <span class="fn">font-size</span>: clamp(<span class="st">1.75rem</span>, <span class="st">4vw + 1rem</span>, <span class="st">3.5rem</span>);
+}
+
+<span class="sel">.conteudo</span> {
+  <span class="fn">width</span>: min(<span class="st">100% - 2rem</span>, <span class="st">70ch</span>);
+  <span class="fn">margin-inline</span>: auto;
+}</pre>
+
+    <table>
+      <tr><th>Recurso</th><th>Pra que serve</th></tr>
+      <tr><td><code>clamp(min, ideal, max)</code></td><td>Valor que acompanha a tela mas nunca sai da faixa</td></tr>
+      <tr><td><code>min(a, b)</code></td><td>O menor dos dois — largura com margem garantida</td></tr>
+      <tr><td><code>ch</code></td><td>Largura em caracteres. <b>60–75ch</b> é a faixa legível</td></tr>
+      <tr><td><code>margin-inline</code></td><td>Margem horizontal, respeitando o sentido da escrita</td></tr>
+    </table>
+
+    <div class="tip warn"><b>Use <code>rem</code>, não <code>px</code>, em
+    tipografia e media query.</b> Quem aumentou a fonte padrão do navegador — por
+    baixa visão, por exemplo — só é atendido se você usar unidade relativa. Com
+    <code>px</code>, o ajuste da pessoa é simplesmente ignorado.</div>
+
+    <div class="tip"><b>Propriedades lógicas.</b> <code>margin-inline</code>,
+    <code>padding-block</code>, <code>inset</code> substituem
+    <code>left/right/top/bottom</code> e funcionam em qualquer direção de escrita.
+    Custa o mesmo e já deixa o projeto pronto pra internacionalização.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="container">
+    <h2>Container queries</h2>
+    <p>O recurso mais importante desta aula pra quem vai escrever componente — e
+    é por isso que ele aparece antes de Angular e Next.</p>
+
+    <p><b>O problema:</b> media query pergunta o tamanho da <b>janela</b>. Mas um
+    card não se importa com a janela. Ele se importa com <b>o espaço que
+    recebeu</b>. O mesmo card pode estar numa barra lateral de 300px ou no meio
+    da página com 900px — e a janela é a mesma nos dois casos.</p>
+
+<pre><span class="cm">/* 1. o pai declara que é um container mensurável */</span>
+<span class="sel">.lista-eventos</span> {
+  <span class="fn">container-type</span>: inline-size;
+  <span class="fn">container-name</span>: lista;
+}
+
+<span class="cm">/* 2. o filho reage ao tamanho DO PAI, não da tela */</span>
+<span class="kw">@container</span> lista (min-width: <span class="st">400px</span>) {
+  <span class="sel">.card-evento</span> {
+    <span class="fn">grid-template-columns</span>: <span class="st">120px 1fr</span>;
+  }
+}</pre>
+
+    <table>
+      <tr><th></th><th><code>@media</code></th><th><code>@container</code></th></tr>
+      <tr><td>Mede</td><td>A janela do navegador</td><td>O elemento pai</td></tr>
+      <tr><td>Serve pra</td><td>Layout geral da página</td><td><b>Componente reutilizável</b></td></tr>
+      <tr><td>O componente precisa saber onde está?</td><td>Sim</td><td><b>Não</b></td></tr>
+    </table>
+
+    <div class="tip"><b>Por que isso muda tudo com framework.</b> Um componente
+    de card é escrito uma vez e usado em cinco lugares de larguras diferentes.
+    Com media query você acaba criando variações (<code>card--estreito</code>,
+    <code>card--largo</code>) e passando prop pra escolher. Com container query o
+    card <b>se resolve sozinho</b>, onde quer que seja colocado.</div>
+
+    <div class="tip warn"><b>Pegadinha:</b> <code>container-type: inline-size</code>
+    faz o elemento medir a si mesmo — e um elemento não pode depender do tamanho
+    do próprio conteúdo pra isso. Se o container "sumir" ou colapsar, é quase
+    sempre isso. Declare o container no <b>pai</b> do que você quer estilizar,
+    nunca no próprio elemento.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="tokens">
+    <h2>Custom properties como tokens</h2>
+    <p>Um token é um <b>valor de design com nome</b>. Em vez de espalhar
+    <code>#7B4FD0</code> por quarenta lugares, você o declara uma vez.</p>
+
+<pre><span class="sel">:root</span> {
+  <span class="cm">/* cor */</span>
+  <span class="kw">--cor-fundo</span>: <span class="st">#ffffff</span>;
+  <span class="kw">--cor-superficie</span>: <span class="st">#f4f4f5</span>;
+  <span class="kw">--cor-texto</span>: <span class="st">#18181b</span>;
+  <span class="kw">--cor-marca</span>: <span class="st">#7B4FD0</span>;
+
+  <span class="cm">/* escala de espaço — nada de 13px, 17px, 22px soltos */</span>
+  <span class="kw">--esp-1</span>: <span class="st">.5rem</span>;
+  <span class="kw">--esp-2</span>: <span class="st">1rem</span>;
+  <span class="kw">--esp-3</span>: <span class="st">1.5rem</span>;
+  <span class="kw">--esp-4</span>: <span class="st">2.5rem</span>;
+
+  <span class="cm">/* forma */</span>
+  <span class="kw">--raio</span>: <span class="st">12px</span>;
+  <span class="kw">--borda</span>: <span class="st">1px solid</span> <span class="kw">rgb(0 0 0 / .1)</span>;
+}</pre>
+
+    <p>E o uso:</p>
+<pre><span class="sel">.card-evento</span> {
+  <span class="fn">background</span>: <span class="kw">var</span>(--cor-superficie);
+  <span class="fn">padding</span>: <span class="kw">var</span>(--esp-3);
+  <span class="fn">border-radius</span>: <span class="kw">var</span>(--raio);
+}</pre>
+
+    <h3>Elas cascateiam — e isso é o truque</h3>
+    <p>Diferente de variável de Sass, custom property é <b>viva no navegador</b> e
+    herda. Você pode redefinir num pedaço da árvore:</p>
+
+<pre><span class="sel">.card-evento.destaque</span> {
+  <span class="kw">--cor-superficie</span>: <span class="st">#faf5ff</span>;   <span class="cm">/* só aqui dentro */</span>
+}</pre>
+
+    <div class="tip"><b>Valor padrão:</b> <code>var(--x, 1rem)</code> usa
+    <code>1rem</code> se <code>--x</code> não existir. Ótimo pra escrever
+    componente que funciona mesmo sem o tema carregado.</div>
+
+    <div class="tip warn"><b>Nomeie pelo papel, não pela aparência.</b>
+    <code>--cor-marca</code> sobrevive ao redesign; <code>--roxo</code> vira
+    mentira no dia em que a marca fica verde. Vale a mesma lógica de escolher
+    <code>&lt;article&gt;</code> em vez de <code>class="card-azul"</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="tema">
+    <h2>Tema claro e escuro</h2>
+    <p>Com tokens no lugar, o tema custa poucas linhas — e <b>nenhum componente
+    precisa saber que ele existe</b>.</p>
+
+<pre><span class="cm">/* 1. o padrão */</span>
+<span class="sel">:root</span> {
+  <span class="fn">color-scheme</span>: light dark;
+  <span class="kw">--cor-fundo</span>: <span class="st">#ffffff</span>;
+  <span class="kw">--cor-texto</span>: <span class="st">#18181b</span>;
+}
+
+<span class="cm">/* 2. quem prefere escuro no sistema */</span>
+<span class="kw">@media</span> (prefers-color-scheme: dark) {
+  <span class="sel">:root</span> {
+    <span class="kw">--cor-fundo</span>: <span class="st">#0d0b14</span>;
+    <span class="kw">--cor-texto</span>: <span class="st">#f3f0fa</span>;
+  }
+}
+
+<span class="cm">/* 3. e a escolha manual vence os dois */</span>
+<span class="sel">:root[data-tema=<span class="st">"dark"</span>]</span> {
+  <span class="kw">--cor-fundo</span>: <span class="st">#0d0b14</span>;
+  <span class="kw">--cor-texto</span>: <span class="st">#f3f0fa</span>;
+}
+<span class="sel">:root[data-tema=<span class="st">"light"</span>]</span> {
+  <span class="kw">--cor-fundo</span>: <span class="st">#ffffff</span>;
+  <span class="kw">--cor-texto</span>: <span class="st">#18181b</span>;
+}</pre>
+
+    <p>Os componentes seguem usando <code>var(--cor-fundo)</code> e não mudam uma
+    linha. <b>Esse desacoplamento é o ponto</b> — não o tema em si.</p>
+
+    <div class="tip"><b><code>color-scheme: light dark</code> não é enfeite.</b> Ele
+    faz o <b>navegador</b> adaptar o que você não controla: barra de rolagem,
+    campos de formulário nativos, seletor de data. Sem ele, você tem um site
+    escuro com um <code>&lt;input&gt;</code> branco brilhante.</div>
+
+    <div class="tip warn"><b>Contraste continua valendo nos dois temas.</b> Texto
+    normal precisa de 4.5:1 contra o fundo. Uma combinação que passa no claro
+    pode falhar no escuro — teste os dois. O DevTools mostra a razão de contraste
+    quando você inspeciona uma cor.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="layer">
+    <h2>@layer</h2>
+    <p>A cena clássica: você escreve uma regra, ela não aplica, e a saída vira
+    <code>!important</code> — que obriga o próximo <code>!important</code>, e em
+    seis meses ninguém sabe mais quem manda em quê.</p>
+
+    <p>A causa é a <b>especificidade</b>: <code>.pagina .lista .card a</code>
+    ganha de <code>.card a</code>, mesmo que a segunda seja mais recente e mais
+    correta.</p>
+
+    <p><code>@layer</code> resolve isso deixando você <b>declarar a ordem de
+    prioridade</b> antes de escrever qualquer regra:</p>
+
+<pre><span class="cm">/* declare a ordem UMA vez, no topo. só isso já define tudo */</span>
+<span class="kw">@layer</span> reset, base, componentes, utilitarios;
+
+<span class="kw">@layer</span> base {
+  <span class="sel">a</span> { <span class="fn">color</span>: <span class="kw">var</span>(--cor-marca); }
+}
+
+<span class="kw">@layer</span> componentes {
+  <span class="cm">/* seletor mais fraco, mas vence: a camada é posterior */</span>
+  <span class="sel">.card-evento a</span> { <span class="fn">color</span>: <span class="kw">var</span>(--cor-texto); }
+}
+
+<span class="kw">@layer</span> utilitarios {
+  <span class="sel">.texto-suave</span> { <span class="fn">color</span>: <span class="kw">var</span>(--cor-texto-2); }
+}</pre>
+
+    <p><b>Quem está numa camada posterior vence</b>, independente da
+    especificidade. A disputa deixa de ser uma corrida de seletor.</p>
+
+    <div class="tip warn"><b>A regra que confunde:</b> CSS <b>fora</b> de qualquer
+    camada vence <b>todas</b> as camadas. Isso é proposital — deixa você
+    sobrescrever uma biblioteca em camadas com um CSS avulso. Mas significa que
+    misturar os dois estilos dá confusão: <b>coloque tudo em camadas, ou nada</b>.</div>
+
+    <div class="tip"><b>Onde isso brilha:</b> importar CSS de terceiro dentro de
+    uma camada — <code>@import url(lib.css) layer(vendor)</code> — e pronto: o seu
+    CSS ganha da biblioteca inteira sem um <code>!important</code> sequer.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="has">
+    <h2>:has() e aninhamento</h2>
+
+    <h3>:has() — o seletor de pai</h3>
+    <p>Por vinte anos o CSS só descia na árvore. <code>:has()</code> permite
+    estilizar um elemento <b>pelo que existe dentro dele</b>.</p>
+
+<pre><span class="cm">/* card que TEM selo de gratuito */</span>
+<span class="sel">.card-evento:has(.selo-gratuito)</span> {
+  <span class="fn">border-color</span>: <span class="kw">var</span>(--cor-ok);
+}
+
+<span class="cm">/* o campo cujo input está inválido — e que a pessoa já preencheu */</span>
+<span class="sel">.campo:has(input:invalid:not(:placeholder-shown))</span> {
+  <span class="fn">border-color</span>: <span class="kw">var</span>(--cor-erro);
+}
+
+<span class="cm">/* lista sem nenhum card = estado vazio */</span>
+<span class="sel">.lista-eventos:not(:has(.card-evento))</span> {
+  <span class="fn">display</span>: grid;
+  <span class="fn">place-items</span>: center;
+  <span class="fn">min-height</span>: <span class="st">40vh</span>;
+}</pre>
+
+    <p>Cada um desses casos exigia JavaScript pra adicionar uma classe. Agora é
+    CSS, e continua funcionando se o JavaScript falhar.</p>
+
+    <div class="tip"><b>O truque do <code>:not(:placeholder-shown)</code>.</b>
+    Sozinho, <code>:invalid</code> pinta o campo de vermelho <b>antes</b> de a
+    pessoa digitar qualquer coisa, o que é hostil. Combinado assim, o erro só
+    aparece depois que ela mexeu no campo.</div>
+
+    <h3>Aninhamento nativo</h3>
+    <p>Sem Sass, sem passo de build:</p>
+
+<pre><span class="sel">.card-evento</span> {
+  <span class="fn">padding</span>: <span class="kw">var</span>(--esp-3);
+  <span class="fn">border-radius</span>: <span class="kw">var</span>(--raio);
+
+  <span class="sel">& h3</span> { <span class="fn">margin-block-end</span>: <span class="kw">var</span>(--esp-1); }
+
+  <span class="sel">&:hover</span> { <span class="fn">border-color</span>: <span class="kw">var</span>(--cor-marca); }
+
+  <span class="kw">@media</span> (width &gt;= <span class="st">48rem</span>) {
+    <span class="fn">padding</span>: <span class="kw">var</span>(--esp-4);
+  }
+}</pre>
+
+    <div class="tip warn"><b>Vá até 2 níveis, no máximo 3.</b> Aninhar fundo gera
+    seletores enormes e específicos demais — exatamente o problema que
+    <code>@layer</code> veio resolver. Aninhamento é conveniência de escrita, não
+    licença pra criar <code>.a .b .c .d .e</code>.</div>
+
+    <div class="tip">Repare em <code>@media (width &gt;= 48rem)</code>: a sintaxe
+    de comparação, mais legível que <code>min-width</code>. E em
+    <code>margin-block-end</code>, a versão lógica de <code>margin-bottom</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="escopo">
+    <h2>O problema do escopo</h2>
+    <p>Esta seção existe pra plantar uma pergunta que volta na aula 03 e na
+    aula 10.</p>
+
+    <p><b>Em CSS puro, toda regra é global.</b> Você escreve
+    <code>.card { padding: 1rem }</code> pensando na listagem de eventos. Três
+    meses depois, outra pessoa escreve <code>.card</code> pensando no perfil do
+    organizador. Uma das duas telas quebra — e ninguém descobre até alguém
+    reclamar.</p>
+
+    <p>Não é falta de cuidado: é uma característica da linguagem. As saídas
+    historicamente foram:</p>
+
+    <table>
+      <tr><th>Abordagem</th><th>Como funciona</th><th>O custo</th></tr>
+      <tr><td><b>Convenção de nome</b> (BEM)</td><td><code>.card-evento__titulo--destaque</code></td><td>Funciona, mas é manual e verboso</td></tr>
+      <tr><td><b>Estilo no componente</b> (Angular)</td><td>O framework reescreve os seletores pra valerem só ali</td><td>Precisa do framework</td></tr>
+      <tr><td><b>CSS Modules</b> (Next)</td><td>O build gera nomes únicos: <code>.card_a3f9</code></td><td>Precisa do passo de build</td></tr>
+      <tr><td><b><code>@scope</code></b> (CSS nativo)</td><td>Delimita onde as regras valem, sem ferramenta</td><td>Ainda chegando aos navegadores</td></tr>
+    </table>
+
+    <div class="tip"><b>Guarde esta seção.</b> Na aula 03, quando o Angular
+    isolar o CSS do componente automaticamente, e na aula 10, quando o Next
+    fizer o mesmo por outro caminho, a pergunta vai ser: <b>que problema isso
+    resolve?</b> É este. Quem entende o problema entende a solução em cinco
+    minutos; quem não entende decora sintaxe.</div>
+
+    <p>No desafio de hoje vocês vão sentir isso na mão: três telas, um arquivo de
+    CSS, e a necessidade de inventar uma convenção de nome pra não colidir.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="erros">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>O foco sumiu quando navego por Tab</h4>
+    <p>Alguém escreveu <code>outline: none</code>. Troque por um
+    <code>:focus-visible</code> com contorno próprio — nunca simplesmente
+    remova.</p>
+
+    <h4>Meu @container não faz nada</h4>
+    <p>Duas causas: faltou <code>container-type: inline-size</code> no <b>pai</b>,
+    ou você declarou o container no próprio elemento que está tentando estilizar.
+    Ele mede o <b>ancestral</b>.</p>
+
+    <h4>A regra certa não aplica e eu apelei pro !important</h4>
+    <p>É especificidade. Em vez do <code>!important</code>, organize em
+    <code>@layer</code> — ou reduza o seletor que está ganhando, que
+    normalmente é longo demais.</p>
+
+    <h4>O grid não quebra em coluna única no celular</h4>
+    <p>Provavelmente o mínimo do <code>minmax()</code> é maior que a tela.
+    <code>minmax(280px, 1fr)</code> numa tela de 320px com padding não cabe. Use
+    <code>minmax(min(280px, 100%), 1fr)</code>.</p>
+
+    <h4>A página "pula" enquanto carrega</h4>
+    <p>Imagem sem <code>width</code> e <code>height</code>. Declare os dois, mesmo
+    usando CSS pra redimensionar.</p>
+
+    <h4>Meu site escuro tem inputs brancos</h4>
+    <p>Faltou <code>color-scheme: light dark</code> no <code>:root</code>. Os
+    controles nativos não seguem as suas variáveis.</p>
+
+    <h4>Zoom no celular quando toco num campo</h4>
+    <p>O iOS dá zoom em campo com fonte menor que 16px. Use no mínimo
+    <code>1rem</code> nos inputs.</p>
+
+    <h4>100vh corta o conteúdo no celular</h4>
+    <p>A barra de endereço entra na conta. Use <code>100dvh</code>.</p>
+
+    <h4>O leitor de tela lê o nome do arquivo da imagem</h4>
+    <p>A imagem está sem <code>alt</code>. Se for decorativa, o certo é
+    <code>alt=""</code> — vazio, mas presente.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="cola">
+    <h2>Cola rápida</h2>
+
+<pre><span class="cm">/* ---------- estrutura da página ---------- */</span>
+&lt;header&gt; &lt;nav aria-label="…"&gt; &lt;main&gt; &lt;aside&gt; &lt;footer&gt;
+&lt;section&gt;  <span class="cm">só com título</span>
+&lt;article&gt;  <span class="cm">faz sentido sozinho</span>
+&lt;div&gt;      <span class="cm">sem significado — e tudo bem</span>
+
+<span class="cm">/* ---------- títulos ---------- */</span>
+1 &lt;h1&gt; por página · nunca pule níveis · nível é estrutura, tamanho é CSS
+
+<span class="cm">/* ---------- formulário ---------- */</span>
+&lt;label for="x"&gt; + &lt;input id="x"&gt;      <span class="cm">sempre</span>
+type / autocomplete corretos           <span class="cm">teclado certo no celular</span>
+aria-describedby + aria-invalid        <span class="cm">erro anunciado</span>
+&lt;fieldset&gt; + &lt;legend&gt;                  <span class="cm">grupo de opções</span>
+
+<span class="cm">/* ---------- layout ---------- */</span>
+conteúdo decide o tamanho  → flex
+você decide o tamanho      → grid
+
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+grid-template-rows: auto 1fr auto;      <span class="cm">rodapé no fim</span>
+
+<span class="cm">/* ---------- tamanho fluido ---------- */</span>
+font-size: clamp(1.75rem, 4vw + 1rem, 3.5rem);
+width: min(100% - 2rem, 70ch);
+min-height: 100dvh;                     <span class="cm">não 100vh</span>
+
+<span class="cm">/* ---------- componente que se resolve ---------- */</span>
+.pai  { container-type: inline-size; }
+@container (min-width: 400px) { .filho { … } }
+
+<span class="cm">/* ---------- sistema ---------- */</span>
+:root { --cor-marca: …; --esp-2: 1rem; --raio: 12px; }
+color-scheme: light dark;
+@media (prefers-color-scheme: dark) { :root { … } }
+@layer reset, base, componentes, utilitarios;
+
+<span class="cm">/* ---------- seletores novos ---------- */</span>
+.card:has(.selo)                        <span class="cm">estiliza o pai</span>
+.campo:has(input:invalid:not(:placeholder-shown))
+:focus-visible                          <span class="cm">foco só no teclado</span>
+
+<span class="cm">/* ---------- as 3 perguntas do dia ---------- */</span>
+1. essa tag descreve o que a coisa É?     → semântica
+2. isso funciona só com o teclado?        → acessibilidade
+3. esse valor se repete?                  → token</pre>
+
+    <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
+    <a class="cta" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="cta" href="/cursos/frontend-avancado/projeto/brief.html">🎟️ Briefing do projeto</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+
+    <div class="foot">Guia da Aula 01 · Frontend Avançado · NickDev 💜</div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>
