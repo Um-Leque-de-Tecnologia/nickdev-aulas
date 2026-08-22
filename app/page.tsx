@@ -79,7 +79,7 @@ export default function Home() {
           <h3>Next.js + IA</h3>
           <p>
             Simulação de trabalho em 8 aulas: você entra num time, pega tickets
-            do backlog e entrega por Pull Request. Construindo o Leque de Mídias sobre
+            do backlog e entrega por Pull Request. Construindo o LequePlay sobre
             uma API real, do primeiro bug até uma feature de IA em produção.
           </p>
           <div className="meta">8 aulas de 2h30 · em breve</div>

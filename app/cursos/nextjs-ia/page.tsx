@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Next.js + IA · NickDev",
   description:
-    "Curso de Next.js com IA em 8 aulas, no formato de simulação de trabalho: sprints, tickets, pull requests e code review. Construindo o Leque de Mídias sobre uma API real, da correção de bugs à feature de IA em produção.",
+    "Curso de Next.js com IA em 8 aulas, no formato de simulação de trabalho: sprints, tickets, pull requests e code review. Construindo o LequePlay sobre uma API real, da correção de bugs à feature de IA em produção.",
 };
 
 /* -------------------------------------------------------------------------
@@ -476,16 +476,11 @@ export default function NextjsIA() {
         <div className="lesson">
           <div className="idx">🎬</div>
           <div className="body">
-            <h3>Leque de Mídias — o catálogo que vira produto</h3>
+            <h3>LequePlay — o catálogo que vira produto</h3>
             <p>
               Um catálogo de <strong>filmes, séries e podcasts</strong>: você
               navega, filtra, abre a ficha, avalia, marca o que já viu e monta
-              sua lista. Quem fez o curso de{" "}
-              <Link href="/cursos/orientacao-objetos-java">
-                Orientação a Objetos
-              </Link>{" "}
-              reconhece o domínio — é o <strong>LequePlay</strong>, que lá vive
-              no console e aqui vira um produto web sobre uma API real.
+              sua lista. Tudo sobre uma API real, que o time já mantém.
             </p>
             <p style={{ marginBottom: 0 }}>
               A escolha não é decorativa. Um catálogo de mídia é visual e
