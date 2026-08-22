@@ -62,6 +62,17 @@ export default function Home() {
           </p>
           <div className="meta">19 aulas · em andamento</div>
         </Link>
+
+        <Link className="card" href="/cursos/frontend-avancado">
+          <span className="num">05</span>
+          <h3>Frontend Avançado</h3>
+          <p>
+            A mesma aplicação, feita duas vezes: em Angular 22 com signals e
+            zoneless, depois em Next.js com App Router. Precedidas de uma
+            revisão firme de HTML, CSS, JavaScript e TypeScript.
+          </p>
+          <div className="meta">16 aulas de 4h · em breve</div>
+        </Link>
       </div>
 
       <Footer />

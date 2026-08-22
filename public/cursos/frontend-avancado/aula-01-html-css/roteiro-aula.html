@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro da aula 01 · Frontend Avançado · NickDev</title>
+<meta name="description" content="Roteiro de condução da aula 01 (4h): bloco a bloco, com intervalos, checkpoints, momentos de virada, plano B e o que cortar se atrasar.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,50px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.aviso{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:20px 22px;margin-top:32px}
+.aviso .ico{font-size:24px;line-height:1}
+.aviso h3{font-size:16.5px;margin-bottom:4px}
+.aviso p{color:var(--text-2);font-size:14.5px}
+.aviso.rosa{border-left-color:var(--magenta)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.bloco{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:14px}
+.bloco-hd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.bloco .dur{font-family:var(--mono);font-size:12px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);border-radius:100px;padding:4px 12px;white-space:nowrap}
+.bloco h3{font-size:19px;font-weight:600;flex:1;min-width:200px}
+.bloco > p{color:var(--text-2);font-size:15px;margin:6px 0}
+.bloco ul,.bloco ol{margin:10px 0 4px;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.bloco li{margin:5px 0}
+.bloco li b{color:var(--text)}
+
+.pausa{display:flex;align-items:center;gap:14px;border:1px dashed var(--line-strong);border-radius:14px;padding:14px 20px;margin-bottom:14px;color:var(--text-3);font-size:14.5px}
+.pausa .dur{font-family:var(--mono);font-size:12px;color:var(--text-4);border:1px solid var(--line);border-radius:100px;padding:4px 12px}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-family:var(--mono);font-size:11.5px;color:var(--text-2);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:5px 11px;border-radius:100px}
+.chip.fala{color:var(--pink-light);border-color:rgba(232,139,184,.4)}
+.chip.mao{color:var(--green);border-color:rgba(95,208,138,.4)}
+
+.dica{border-left:3px solid var(--magenta);background:rgba(242,68,135,.06);border-radius:0 10px 10px 0;padding:11px 15px;margin-top:14px;font-size:14px;color:var(--text-2)}
+.dica b{color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:9px;padding:0!important;margin-top:14px!important}
+.check li{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--text-2);display:flex;gap:11px;align-items:flex-start}
+.check li::before{content:"☐";color:var(--purple-light);font-weight:700}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .sel{color:#5fd08a}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.bloco{padding:20px 18px}.aviso{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/frontend-avancado">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Aula 01 · roteiro de condução · 4 horas</div>
+  <h1>HTML e <span class="grad">CSS</span></h1>
+  <p class="lead">
+    O plano bloco a bloco: o que apresentar, onde parar, o que conferir antes de
+    seguir e o que cortar se atrasar.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo único da aula</h3>
+      <p>Se a turma sair sabendo <b>por que</b> a escolha da tag muda o
+      comportamento do navegador, e enxergando CSS como <b>sistema em vez de
+      tentativa e erro</b>, a aula cumpriu. Todo o resto — <code>:has()</code>,
+      <code>@layer</code>, catch-all de sintaxe nova — é acessório e pode
+      encolher.</p>
+      <p style="margin-top:10px"><b>O segundo objetivo, silencioso:</b> plantar
+      a pergunta do <b>escopo de estilo</b>. Ela é o gancho das aulas 03 e 10.</p>
+    </div>
+  </div>
+
+  <div class="aviso rosa">
+    <span class="ico">🗣️</span>
+    <div>
+      <h3>O risco de tom desta aula</h3>
+      <p>Esta turma <b>já sabe</b> HTML e CSS. Se você abrir explicando o que é
+      uma tag, perde a sala nos primeiros dez minutos.</p>
+      <p style="margin-top:10px"><b>O enquadramento que funciona:</b> "vocês já
+      sabem fazer isso funcionar; hoje a gente vê por que funciona, e o que
+      quebra quando o projeto cresce". Toda seção deveria entregar pelo menos um
+      <b>"ué, não sabia disso"</b> — o teste do teclado, o container query, o
+      <code>:has()</code>, o <code>@layer</code>.</p>
+      <p style="margin-top:10px">Quando alguém disser "isso eu já sei", devolva:
+      <i>"sabe por quê?"</i>. Quase sempre a resposta é não, e aí a atenção
+      volta.</p>
+    </div>
+  </div>
+
+  <div class="aviso rosa">
+    <span class="ico">⚠️</span>
+    <div>
+      <h3>Aula de 4 horas exige gestão de energia</h3>
+      <p>Quatro horas de exposição não existem. O roteiro tem <b>dois
+      intervalos</b> e alterna conceito e mão na massa a cada bloco de propósito.</p>
+      <p style="margin-top:10px"><b>Regra:</b> nenhum bloco expositivo passa de
+      25 minutos sem a turma fazer alguma coisa. O bloco do teclado (slide 12) é
+      o respiro do meio — não corte, mesmo atrasada, porque ele acorda a sala e é
+      o conteúdo que mais rende no desafio.</p>
+    </div>
+  </div>
+
+  <div class="label">Antes de começar</div>
+  <ul class="check">
+    <li>Projeto de exemplo pronto num editor, com as três telas já montadas, pra demonstrar sem digitar do zero</li>
+    <li>Um leitor de tela instalado e testado (NVDA no Windows, VoiceOver no Mac) — a demonstração de 2 minutos vale a aula inteira</li>
+    <li>Navegador com o painel de acessibilidade do DevTools já aberto</li>
+    <li>O <a href="/cursos/frontend-avancado/projeto/brief.html" style="color:var(--pink-light);text-decoration:underline">briefing do projeto</a> numa aba, pro bloco final</li>
+    <li>Uma página real com problema de acessibilidade pra mostrar ao vivo (qualquer site grande serve)</li>
+  </ul>
+
+  <div class="label">A aula, bloco a bloco</div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Abertura: o curso e as equipes</h3></div>
+    <p>Apresentação da disciplina e o combinado que define tudo.</p>
+    <ul>
+      <li>As 4 unidades, e a régua: <b>a mesma aplicação, construída duas vezes</b></li>
+      <li>Por que duas vezes — é o que torna a comparação honesta</li>
+      <li>Como a nota é composta: percorra as seis entregas do briefing</li>
+      <li>Formação das equipes de <b>3 a 4 pessoas</b>, ainda agora</li>
+    </ul>
+    <div class="dica"><b>Venda a ideia da repetição logo.</b> Vai aparecer a
+    reação "de novo a mesma coisa?". A resposta: na segunda volta o problema já
+    está resolvido, então o que sobra pra pensar é <b>só a diferença entre os
+    frameworks</b> — e isso é o mais próximo de experiência real que um curso
+    consegue dar.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 1–4</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">40 min</span><h3>HTML: semântica como infraestrutura</h3></div>
+    <p>O bloco que ancora a aula. <b>A dor primeiro, a regra depois</b> — como
+    sempre.</p>
+    <ol>
+      <li>Mostre a sopa de <code>div</code> e a versão semântica lado a lado (slide 6). Pergunte o que muda</li>
+      <li>Alguém vai dizer "nada, renderiza igual". <b>Perfeito.</b> É a deixa</li>
+      <li><b>Ligue o leitor de tela</b> e navegue as duas versões</li>
+      <li>Só depois disso, as três razões (slide 7) e os landmarks</li>
+    </ol>
+    <div class="dica"><b>A demonstração com leitor de tela é o momento da aula.</b>
+    Dois minutos, com fone no viva-voz. Navegue por landmarks na versão semântica
+    — "banner, navegação, principal" — e depois na sopa de div, onde não há
+    nada pra listar. <b>Ninguém esquece.</b> Se você não tiver leitor de tela,
+    o painel de acessibilidade do DevTools mostra a árvore, mas rende bem menos.</div>
+    <div class="dica"><b>Cuidado com o tom aqui.</b> Não é "vocês fazem errado" —
+    é "isso ninguém ensina, e é o que separa júnior de pleno". A maior parte da
+    turma nunca ouviu falar de landmark.</div>
+    <ul class="check">
+      <li>A turma ouviu a diferença, não só viu o slide</li>
+      <li>Alguém verbalizou por que <code>&lt;button&gt;</code> ganha de <code>&lt;div onclick&gt;</code></li>
+      <li>Ficou claro que <code>&lt;section&gt;</code> sem título não serve pra nada</li>
+    </ul>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip mao">demo</span><span class="chip">slides 5–9</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>Formulários, mídia e o teste do teclado</h3></div>
+    <ol>
+      <li>Formulário acessível em 4 regras (slide 10) — foque em <b>label e erro anunciado</b></li>
+      <li><code>alt</code> e <code>&lt;time&gt;</code> (slide 11), rápido</li>
+      <li><b>O teste do teclado</b> (slide 12): a turma inteira, 3 minutos, mouse longe</li>
+    </ol>
+    <div class="dica"><b>Mande abrir um projeto antigo deles.</b> Não um exemplo
+    seu — o código <b>deles</b>. A chance de encontrarem foco invisível ou botão
+    inalcançável é altíssima, e a lição gruda porque é o próprio código.</div>
+    <div class="dica"><b>Depois do teste, mostre <code>:focus-visible</code>.</b>
+    A objeção real de quem escreve <code>outline: none</code> é "fica feio no
+    clique". <code>:focus-visible</code> resolve exatamente isso — e a turma
+    percebe que a solução existia e ninguém contou.</div>
+    <ul class="check">
+      <li>Todo mundo navegou uma página só com teclado</li>
+      <li>Pelo menos uma pessoa achou um problema no próprio projeto</li>
+    </ul>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 10–12</span></div>
+  </div>
+
+  <div class="pausa"><span class="dur">15 min</span><span>Intervalo — depois de 1h25</span></div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">45 min</span><h3>CSS: Grid, Flexbox e responsividade</h3></div>
+    <p>Volta do intervalo com live code, não com slide.</p>
+    <ol>
+      <li>Flex ou Grid (slide 14): dê a regra de bolso e siga — <b>não vire aula de sintaxe</b></li>
+      <li><b>Live code:</b> monte a listagem com <code>auto-fit</code> e <code>minmax</code>, redimensionando a janela ao vivo</li>
+      <li>Mostre o bug dos 320px e conserte com <code>min(280px, 100%)</code></li>
+      <li><code>clamp()</code>, <code>min()</code> e <code>ch</code> (slide 16)</li>
+    </ol>
+<pre><span class="sel">.lista-eventos</span> {
+  <span class="fn">display</span>: grid;
+  <span class="fn">gap</span>: <span class="kw">var</span>(--esp-3);
+  <span class="fn">grid-template-columns</span>: repeat(<span class="kw">auto-fit</span>, minmax(min(<span class="st">280px</span>, <span class="st">100%</span>), <span class="st">1fr</span>));
+}</pre>
+    <div class="dica"><b>Redimensione a janela devagar, ao vivo.</b> Ver as
+    colunas passarem de 4 para 3 para 1 sozinhas, sem nenhuma media query, é o
+    argumento inteiro. Depois pergunte: "quantas media queries isso substituiu?"</div>
+    <div class="dica"><b>Mostre o bug de propósito.</b> Ponha
+    <code>minmax(280px, 1fr)</code>, abra em 320px, mostre a barra de rolagem
+    horizontal — e só então corrija. É o erro nº 1 do desafio; quem viu acontecer
+    reconhece na hora.</div>
+    <ul class="check">
+      <li>Todo mundo com uma galeria responsiva funcionando sem media query</li>
+      <li>A turma viu a rolagem horizontal aparecer e sumir</li>
+    </ul>
+    <div class="meta"><span class="chip mao">live code</span><span class="chip">slides 13–16</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>Container queries</h3></div>
+    <p>O conteúdo mais importante da aula pro resto do curso. Merece bloco
+    próprio.</p>
+    <ol>
+      <li>Coloque a <b>mesma</b> lista em dois lugares: um largo, um estreito</li>
+      <li>Mostre que com media query os dois se comportam igual — <b>e isso está errado</b></li>
+      <li>Adicione <code>container-type</code> no pai e o <code>@container</code></li>
+      <li>Mostre os dois lados mudando independentemente</li>
+    </ol>
+    <div class="dica"><b>Erre o <code>container-type</code> de propósito.</b>
+    Coloque no próprio card primeiro e mostre que nada acontece. É <b>o</b> erro
+    desta parte — a equipe do modelo de resposta perdeu 40 minutos nele. Vendo
+    acontecer no telão, eles reconhecem em 30 segundos.</div>
+    <div class="dica"><b>Amarre com o futuro:</b> "quando vocês escreverem um
+    componente de card no Angular, ele vai ser usado em cinco lugares de larguras
+    diferentes. Com media query vocês criariam variações e passariam prop. Com
+    container query, <b>ele se resolve sozinho</b>." Essa frase justifica o bloco
+    inteiro.</div>
+    <ul class="check">
+      <li>Todo mundo viu o mesmo HTML render­izar diferente em dois containers</li>
+      <li>Ficou claro que o <code>container-type</code> vai no pai</li>
+    </ul>
+    <div class="meta"><span class="chip mao">live code</span><span class="chip">slide 17</span></div>
+  </div>
+
+  <div class="pausa"><span class="dur">10 min</span><span>Intervalo — depois de 3h05</span></div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">25 min</span><h3>Tokens, tema, @layer e :has()</h3></div>
+    <p>Bloco de ritmo rápido — são quatro recursos, cada um com uma
+    demonstração curta.</p>
+    <ul>
+      <li><b>Tokens</b> (slide 19): a regra de nomear pelo papel, não pela cor</li>
+      <li><b>Tema</b> (slide 20): monte ao vivo e alterne no sistema operacional</li>
+      <li><b><code>@layer</code></b> (slide 21): mostre o conflito real, o impulso do <code>!important</code>, e a camada resolvendo</li>
+      <li><b><code>:has()</code></b> (slide 22): o card com selo ganhando borda</li>
+    </ul>
+    <div class="dica"><b>No tema, mostre a armadilha do contraste.</b> Troque só
+    o fundo pra escuro, mantendo o roxo da marca, e abra o verificador de
+    contraste do DevTools: reprova. Aí clareie a marca e passe. <b>É o detalhe
+    que separa quem fez tema de quem fez tema direito</b>, e está na rubrica.</div>
+    <div class="dica"><b>No <code>@layer</code>, encene o conflito.</b> Escreva a
+    regra, mostre que não aplica, digite <code>!important</code> — e pare. "Quem
+    já fez isso?" Todo mundo levanta a mão. Aí apague e resolva com camada. A
+    memória do gesto vale mais que a explicação.</div>
+    <div class="dica"><b>Se o tempo apertar, corte <code>:has()</code> daqui</b> e
+    deixe pro guia — mas <b>não corte <code>@layer</code></b>, porque o desafio
+    exige zero <code>!important</code> e sem a camada eles não têm como cumprir.</div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip mao">demo</span><span class="chip">slides 18–23</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">10 min</span><h3>O escopo — plantando o gancho</h3></div>
+    <p>Bloco curto e conceitual, mas é o que amarra o curso inteiro.</p>
+    <ul>
+      <li>Mostre o problema: <code>.card</code> escrito em dois arquivos, uma tela quebra</li>
+      <li>As saídas históricas: convenção de nome, e o que os frameworks fazem</li>
+      <li><b>Não explique como Angular ou Next resolvem.</b> Só diga que resolvem</li>
+    </ul>
+    <div class="dica"><b>Deixe a pergunta no ar, literalmente.</b> "Guardem esta
+    tela. Na aula 03 o Angular vai isolar o CSS do componente sozinho, e eu vou
+    perguntar: <b>que problema isso está resolvendo?</b> Quem lembrar de hoje
+    responde em cinco segundos." Peça pra anotarem.</div>
+    <div class="meta"><span class="chip fala">conceito</span><span class="chip">slide 24</span></div>
+  </div>
+
+  <div class="bloco">
+    <div class="bloco-hd"><span class="dur">20 min</span><h3>Briefing do projeto e desafio</h3></div>
+    <p>O marco da aula. Não deixe pro finalzinho corrido.</p>
+    <ul>
+      <li>Apresente o <b>Leque de Eventos</b> pela pessoa, não pelas telas</li>
+      <li>Percorra as <b>seis entregas</b> e a rubrica no briefing</li>
+      <li>Enfatize que <b>acessibilidade vale 15% em todas as entregas</b>, inclusive nas de framework</li>
+      <li>Apresente o desafio e a regra do <b>zero JavaScript</b></li>
+      <li><b>Divisão de tarefas na sala</b>: uma tela por pessoa</li>
+    </ul>
+    <div class="dica"><b>Justifique o "zero JavaScript" antes que reclamem.</b> É
+    a única aula do curso em que dá pra focar 100% em estrutura e estilo. E o
+    desafio foi desenhado pra que tudo que pareça precisar de script tenha saída
+    em CSS — inclusive o botão de tema.</div>
+    <div class="dica"><b>Cinco minutos de divisão de tarefas na sala compram o
+    semestre.</b> Equipe que sai sem combinar entrega na véspera, feita por uma
+    pessoa só.</div>
+    <ul class="check">
+      <li>Toda equipe formada, com repositório e divisão escrita</li>
+      <li>Ninguém sem equipe</li>
+      <li>Todo mundo entendeu que o protótipo de hoje será portado duas vezes</li>
+    </ul>
+    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 27–30</span></div>
+  </div>
+
+  <div class="label">Se atrasar</div>
+  <div class="bloco">
+    <p>Corte nesta ordem:</p>
+    <ol>
+      <li><b>Aninhamento nativo (slide 23)</b> — o guia cobre, e não cai no desafio</li>
+      <li><b>O aquecimento e o prompt de IA (slides 25–26)</b> — viram abertura da aula 02</li>
+      <li><b><code>:has()</code> (slide 22)</b> — deixe um exemplo no telão e mande pro guia</li>
+      <li><b>Imagem e <code>&lt;time&gt;</code> (slide 11)</b> — está no código de referência</li>
+      <li><b>Flex × Grid (slide 14)</b> — encurte pra regra de bolso, sem exemplos</li>
+    </ol>
+    <p style="margin-top:14px"><b>Nunca corte:</b> a demonstração com leitor de
+    tela, o teste do teclado, o container query com o erro proposital, o
+    <code>@layer</code> (o desafio depende), o bloco do escopo (é o gancho do
+    curso) e a divisão de tarefas.</p>
+  </div>
+
+  <div class="label">Se a turma travar</div>
+  <div class="bloco">
+    <ul>
+      <li><b>"Isso eu já sei" no bloco de HTML</b> — pule pro leitor de tela imediatamente. É o argumento que ninguém rebate.</li>
+      <li><b>Ninguém tem leitor de tela instalado</b> — use o painel de acessibilidade do DevTools e mostre a árvore. Rende menos, mas funciona.</li>
+      <li><b>Container query não faz nada em várias máquinas</b> — quase sempre é <code>container-type</code> no elemento errado. Faça o coletivo: "todo mundo confere se está no <b>pai</b>".</li>
+      <li><b>Turma dispersa depois de 3h</b> — antecipe o segundo intervalo e troque a ordem: dê o briefing do projeto antes do bloco de tokens. Projeto acorda mais que sintaxe.</li>
+      <li><b>Perguntas sobre Angular ou Next</b> — responda em uma frase e diga em que aula entra. Não antecipe: a aula 01 tem valor próprio.</li>
+    </ul>
+  </div>
+
+  <div class="label">Deixe engatilhado pra aula 02</div>
+  <div class="bloco">
+    <p>Três ganchos que valem plantar hoje:</p>
+    <ul>
+      <li>"O botão de tema funciona, mas <b>esquece a escolha quando você recarrega</b>. Onde a gente guardaria isso?" — abre a aula 02</li>
+      <li>"Vocês escreveram os 8 eventos <b>na mão, no HTML</b>. E se fossem 200?" — abre a entrega 1</li>
+      <li>"O formulário de busca está lá, bonito, e <b>não faz nada</b>. Semana que vem ele funciona."</li>
+    </ul>
+    <div class="dica"><b>O primeiro gancho é o melhor</b>, porque eles vão bater
+    nele sozinhos durante a semana ao testar o extra do tema. Chegam na aula 02
+    já com a pergunta formada.</div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="slides.html">▶ Slides da aula</a>
+    <a class="btn" href="guia-html-css.html">📘 Guia de conteúdo</a>
+    <a class="btn" href="desafio.html">🎯 Desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código</a>
+    <a class="btn" href="/cursos/frontend-avancado/projeto/brief.html">🎟️ Briefing</a>
+  </div>
+
+  <div class="foot">Roteiro da Aula 01 · Frontend Avançado · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

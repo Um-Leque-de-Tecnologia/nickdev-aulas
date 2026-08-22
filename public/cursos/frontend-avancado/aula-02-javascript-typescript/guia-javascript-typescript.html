@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · JavaScript e TypeScript · Aula 02 · Frontend Avançado · NickDev</title>
+<meta name="description" content="Guia da aula 02: módulos ES, escopo e closures, métodos de array, imutabilidade, assíncrono com Promise e async/await, e TypeScript 6 com tipos, narrowing, genéricos e strict.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:280px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}.kw{color:#F24487}.ty{color:#7B9FE0}.st{color:#A98CE0}.fn{color:#E88BB8}
+  pre b{color:var(--text);font-weight:500}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/frontend-avancado">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#dicionario">📖 O dicionário desta aula</a>
+    <a href="#versoes">⚠️ Qual TypeScript instalar</a>
+    <div class="grp">JavaScript</div>
+    <a href="#modulos">Módulos ES</a>
+    <a href="#escopo">Escopo e closures</a>
+    <a href="#desestruturacao">Desestruturação e spread</a>
+    <a href="#array">Métodos de array</a>
+    <a href="#imutabilidade">Imutabilidade</a>
+    <a href="#this">Arrow e o this</a>
+    <a href="#operadores">?. e ??</a>
+    <div class="grp">Assíncrono</div>
+    <a href="#promise">Promise</a>
+    <a href="#async">async e await</a>
+    <a href="#fetch">fetch e tratamento de erro</a>
+    <a href="#paralelo">Vários pedidos</a>
+    <a href="#loop">O laço de eventos</a>
+    <div class="grp">TypeScript</div>
+    <a href="#porque-ts">Por que TypeScript</a>
+    <a href="#tipos">Tipos e inferência</a>
+    <a href="#formato">Descrevendo os dados</a>
+    <a href="#narrowing">Narrowing</a>
+    <a href="#genericos">Genéricos</a>
+    <a href="#utility">Utility types</a>
+    <a href="#strict">strict</a>
+    <div class="grp">Fechando</div>
+    <a href="#erros">Erros comuns 🔧</a>
+    <a href="#cola">Cola rápida</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 02 · guia de conteúdo · 4 horas</div>
+  <h1>JavaScript e <span class="g">TypeScript</span></h1>
+  <p class="lead">
+    A linguagem que Angular e Next assumem que você domina. Aqui não tem
+    framework nenhum — e é justamente por isso que tudo daqui continua valendo
+    nas 14 aulas seguintes.
+  </p>
+  <div class="rule"></div>
+
+  <div class="tip warn" style="margin-top:32px">
+    <b>🎯 O que esta aula assume.</b> JavaScript básico: variável, função,
+    array, laço. O que muda é a <b>profundidade</b>: por que imutabilidade
+    importa, o que <code>await</code> realmente faz, e como descrever dados com
+    tipos. É o material que separa quem usa framework de quem entende o que ele
+    está fazendo.
+  </div>
+
+  <!-- ==================================================================== -->
+  <section id="dicionario">
+    <h2>O dicionário desta aula</h2>
+    <table>
+      <tr><th>Palavra</th><th>O que é</th></tr>
+      <tr><td><b>Módulo</b></td><td>Um <b>arquivo</b> que exporta e importa coisas. Tem escopo próprio: nada vaza pro resto da página.</td></tr>
+      <tr><td><b>Escopo</b></td><td>A <b>região onde um nome existe</b>. Fora dele, é como se não existisse.</td></tr>
+      <tr><td><b>Closure</b></td><td>Uma função que <b>lembra do lugar onde nasceu</b> e continua tendo acesso às variáveis de lá.</td></tr>
+      <tr><td><b>Referência</b></td><td>O <b>endereço</b> de um objeto na memória. Duas variáveis podem apontar pro mesmo objeto.</td></tr>
+      <tr><td><b>Mutação</b></td><td><b>Alterar</b> um objeto ou array existente, em vez de criar um novo.</td></tr>
+      <tr><td><b>Imutabilidade</b></td><td>A prática de <b>nunca alterar</b> — sempre criar uma cópia com a mudança.</td></tr>
+      <tr><td><b>Promise</b></td><td>Um objeto que representa <b>um valor que ainda não chegou</b>. Um vale.</td></tr>
+      <tr><td><b>Assíncrono</b></td><td>Código que <b>não bloqueia</b>: dispara a tarefa e continua, tratando o resultado quando chegar.</td></tr>
+      <tr><td><b>Laço de eventos</b></td><td>O mecanismo que decide <b>o que roda em seguida</b>. Existe só um — por isso código pesado trava a tela.</td></tr>
+      <tr><td><b>Tipo</b></td><td>Uma <b>descrição do formato</b> de um valor. Existe só enquanto você escreve; some no build.</td></tr>
+      <tr><td><b>Inferência</b></td><td>Quando o TypeScript <b>deduz o tipo sozinho</b>, sem você escrever.</td></tr>
+      <tr><td><b>Narrowing</b></td><td>Quando o TypeScript <b>afina o tipo</b> dentro de um <code>if</code>, porque ali ele sabe mais.</td></tr>
+      <tr><td><b>Genérico</b></td><td>Um <b>espaço em branco pro tipo</b>, preenchido na hora da chamada. É o <code>&lt;T&gt;</code>.</td></tr>
+    </table>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="versoes">
+    <h2>⚠️ Qual TypeScript instalar</h2>
+    <p>Comece por aqui, porque errar isto custa uma tarde inteira na aula 03.</p>
+
+    <table>
+      <tr><th>Versão</th><th>O que é</th><th>Serve para</th></tr>
+      <tr>
+        <td><b><code>7.0.2</code></b></td>
+        <td>A mais recente. O compilador foi <b>portado para Go</b> e ficou de 8 a 12× mais rápido.</td>
+        <td>Next.js ✓ · <b>Angular ✗</b></td>
+      </tr>
+      <tr>
+        <td><b><code>6.0.3</code></b></td>
+        <td>A faixa que o Angular 22 exige: <code>typescript &gt;=6.0 &lt;6.1</code></td>
+        <td><b>O nosso curso</b> ✓</td>
+      </tr>
+    </table>
+
+    <p><b>Por que o Angular não pode usar o 7 ainda:</b> o TypeScript 7 ainda não
+    expõe a <b>API pública de compilador</b> que ferramentas usam pra analisar
+    código. O Angular precisa dela pra checar os tipos dentro dos templates HTML
+    — então ele fica na faixa 6.0.x até o port terminar. O mesmo vale, por
+    enquanto, para Vue, Svelte e Astro.</p>
+
+    <div class="terminal"><span class="p">$</span> npm install typescript@latest   <span class="cm"># num projeto Angular</span>
+<span class="err">✗ ERESOLVE unable to resolve dependency tree
+  @angular/compiler-cli requires typescript &gt;=6.0 &lt;6.1</span></div>
+
+    <div class="tip"><b>A boa notícia: a linguagem é a mesma.</b> O 7 é um
+    <b>port</b>, não uma reescrita da semântica — as regras de tipo vieram do 6
+    de propósito. Tudo que você aprender aqui vale nas duas versões. O que muda é
+    a velocidade do compilador, não o que é válido.</div>
+
+    <div class="tip warn"><b>Não tente "resolver" com <code>--force</code> ou
+    <code>--legacy-peer-deps</code>.</b> O aviso não é burocracia: com o TS
+    errado, a checagem de template do Angular simplesmente não roda, e você perde
+    exatamente a rede de segurança pela qual instalou TypeScript.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="modulos">
+    <h2>Módulos ES</h2>
+    <p>Um arquivo, um assunto. Cada módulo tem <b>escopo próprio</b>: o que você
+    declara ali não vaza para o resto da página.</p>
+
+    <div class="file">📄 dados/eventos.ts</div>
+<pre><span class="kw">export const</span> eventos = [ … ];
+
+<span class="kw">export function</span> <span class="fn">porSlug</span>(slug: <span class="ty">string</span>) {
+  <span class="kw">return</span> eventos.<span class="fn">find</span>((e) =&gt; e.slug === slug);
+}
+
+<span class="cm">// um "principal" por arquivo, se fizer sentido</span>
+<span class="kw">export default</span> eventos;</pre>
+
+    <div class="file">📄 main.ts</div>
+<pre><span class="cm">// nomeados: entre chaves, com o nome exato</span>
+<span class="kw">import</span> { eventos, porSlug } <span class="kw">from</span> <span class="st">"./dados/eventos.js"</span>;
+
+<span class="cm">// default: sem chaves, e o nome é escolha sua</span>
+<span class="kw">import</span> lista <span class="kw">from</span> <span class="st">"./dados/eventos.js"</span>;
+
+<span class="cm">// só o tipo — some no build</span>
+<span class="kw">import type</span> { <span class="ty">Evento</span> } <span class="kw">from</span> <span class="st">"./dados/tipos.js"</span>;</pre>
+
+    <p>No HTML:</p>
+<pre>&lt;<span class="ty">script</span> type=<span class="st">"module"</span> src=<span class="st">"main.js"</span>&gt;&lt;/<span class="ty">script</span>&gt;</pre>
+
+    <div class="tip warn"><b>Sem <code>type="module"</code>, o <code>import</code>
+    não existe</b> e o navegador dá erro de sintaxe. Módulo também já vem com
+    <code>defer</code> embutido — ele espera o HTML terminar sozinho, então não
+    precisa colocar o script no fim do <code>&lt;body&gt;</code>.</div>
+
+    <div class="tip"><b>Por que a extensão <code>.js</code> no import de um arquivo
+    <code>.ts</code>?</b> Porque o import é resolvido em <b>tempo de execução</b>,
+    quando o arquivo já virou <code>.js</code>. É estranho no começo e vira
+    automático depois.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="escopo">
+    <h2>Escopo e closures</h2>
+
+    <h3>const não é imutável</h3>
+<pre><span class="kw">const</span> eventos = [];
+eventos.<span class="fn">push</span>(<span class="st">"a"</span>);      <span class="cm">// ✓ permitido: o conteúdo mudou</span>
+eventos = [];             <span class="cm">// ✗ erro: a ligação não pode mudar</span></pre>
+    <p><code>const</code> congela <b>a ligação entre o nome e o valor</b>, não o
+    valor. Para um objeto, isso significa que você não pode trocá-lo por outro —
+    mas pode mexer no de dentro à vontade. Guarde isso para a seção de
+    imutabilidade.</p>
+
+    <h3>Closure</h3>
+<pre><span class="kw">function</span> <span class="fn">criarContador</span>() {
+  <span class="kw">let</span> total = <span class="st">0</span>;              <span class="cm">// vive só aqui dentro</span>
+  <span class="kw">return</span> {
+    <span class="fn">incrementar</span>: () =&gt; ++total,
+    <span class="fn">ler</span>: () =&gt; total,
+  };
+}
+
+<span class="kw">const</span> c = <span class="fn">criarContador</span>();
+c.<span class="fn">incrementar</span>();
+c.<span class="fn">ler</span>();                     <span class="cm">// 1</span>
+<span class="cm">// não existe jeito de mexer em "total" por fora</span></pre>
+
+    <div class="tip"><b>Closure não é curiosidade de entrevista.</b> É o
+    mecanismo de estado privado, e é literalmente como <code>signal()</code>
+    funciona por dentro no Angular. Quando você chamar
+    <code>const total = signal(0)</code> na aula 05, vai estar usando isto.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="desestruturacao">
+    <h2>Desestruturação e spread</h2>
+    <p>A sintaxe que mais aparece em código de framework. Vale automatizar.</p>
+
+<pre><span class="cm">// tirar campos, com apelido e valor padrão</span>
+<span class="kw">const</span> { titulo, cidade = <span class="st">"Online"</span>, organizador: quem } = evento;
+
+<span class="cm">// pegar o resto</span>
+<span class="kw">const</span> { id, ...semId } = evento;
+
+<span class="cm">// em array, por posição</span>
+<span class="kw">const</span> [primeiro, segundo] = eventos;
+
+<span class="cm">// direto no parâmetro — o padrão de componente</span>
+<span class="kw">function</span> <span class="fn">Card</span>({ titulo, inicioEm }: <span class="ty">Evento</span>) { … }</pre>
+
+    <h3>Spread: copiar mudando</h3>
+<pre><span class="cm">// objeto novo, com um campo diferente</span>
+<span class="kw">const</span> destacado = { ...evento, destaque: <span class="kw">true</span> };
+
+<span class="cm">// array novo, com um item a mais</span>
+<span class="kw">const</span> comNovo = [...eventos, novoEvento];
+
+<span class="cm">// juntar dois</span>
+<span class="kw">const</span> todos = [...gratuitos, ...pagos];</pre>
+
+    <div class="tip warn"><b>O spread é raso.</b>
+    <code>{ ...evento }</code> copia o primeiro nível; objetos aninhados
+    continuam <b>compartilhados</b> com o original. Se precisar de cópia
+    profunda, use <code>structuredClone(evento)</code> — mas na maior parte dos
+    casos, copiar só o nível que você vai mudar é o certo, e é mais rápido.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="array">
+    <h2>Métodos de array</h2>
+    <table>
+      <tr><th>Método</th><th>Devolve</th><th>Use quando</th></tr>
+      <tr><td><code>map</code></td><td>Array do mesmo tamanho</td><td>Transformar cada item</td></tr>
+      <tr><td><code>filter</code></td><td>Array menor ou igual</td><td>Selecionar por condição</td></tr>
+      <tr><td><code>find</code></td><td>Um item, ou <code>undefined</code></td><td>Achar o primeiro que bate</td></tr>
+      <tr><td><code>some</code> / <code>every</code></td><td><code>boolean</code></td><td>"Algum?" / "Todos?"</td></tr>
+      <tr><td><code>reduce</code></td><td>Um valor só</td><td>Somar, agrupar, achatar</td></tr>
+      <tr><td><code>sort</code></td><td>O <b>mesmo</b> array, alterado ⚠️</td><td>— prefira <code>toSorted</code></td></tr>
+      <tr><td><code>toSorted</code></td><td>Array <b>novo</b>, ordenado</td><td>Ordenar sem mutar</td></tr>
+    </table>
+
+<pre><span class="cm">// encadear é o normal</span>
+<span class="kw">const</span> proximosGratis = eventos
+  .<span class="fn">filter</span>((e) =&gt; e.gratuito)
+  .<span class="fn">filter</span>((e) =&gt; <span class="kw">new</span> <span class="ty">Date</span>(e.inicioEm) &gt; <span class="kw">new</span> <span class="ty">Date</span>())
+  .<span class="fn">toSorted</span>((a, b) =&gt; a.inicioEm.<span class="fn">localeCompare</span>(b.inicioEm));
+
+<span class="cm">// agrupar por categoria com reduce</span>
+<span class="kw">const</span> porCategoria = eventos.<span class="fn">reduce</span>&lt;<span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">Evento</span>[]&gt;&gt;(
+  (acc, e) =&gt; {
+    (acc[e.categoria] ??= []).<span class="fn">push</span>(e);
+    <span class="kw">return</span> acc;
+  },
+  {},
+);</pre>
+
+    <div class="tip"><b>Se <code>reduce</code> ficar difícil de ler, use um laço
+    <code>for...of</code>.</b> Legibilidade ganha de elegância. <code>reduce</code>
+    brilha em soma e agrupamento; fora disso, costuma atrapalhar.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="imutabilidade">
+    <h2>Imutabilidade</h2>
+    <p>O conceito mais importante desta aula para o resto do curso.</p>
+
+    <h3>O problema, concretamente</h3>
+<pre><span class="kw">const</span> lista = [<span class="st">"a"</span>, <span class="st">"b"</span>];
+<span class="kw">const</span> mesma = lista;
+
+lista.<span class="fn">push</span>(<span class="st">"c"</span>);
+
+lista === mesma;      <span class="cm">// true — é o MESMO array</span>
+mesma.length;         <span class="cm">// 3 — mudou sem ninguém pedir</span></pre>
+
+    <p>Framework reativo detecta mudança <b>comparando referências</b>: "o valor
+    de antes é o mesmo objeto de agora?" Se for, ele conclui que nada mudou e
+    <b>não redesenha a tela</b>.</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>Muta — a tela não atualiza</h4>
+<pre>lista.<span class="fn">push</span>(novo);
+lista.<span class="fn">sort</span>();
+lista.<span class="fn">splice</span>(<span class="st">0</span>, <span class="st">1</span>);
+evento.titulo = <span class="st">"x"</span>;</pre>
+      </div>
+      <div class="box ok">
+        <h4>Cria novo — funciona</h4>
+<pre><span class="kw">const</span> l = [...lista, novo];
+<span class="kw">const</span> l = lista.<span class="fn">toSorted</span>();
+<span class="kw">const</span> l = lista.<span class="fn">toSpliced</span>(<span class="st">0</span>, <span class="st">1</span>);
+<span class="kw">const</span> e = { ...evento, titulo };</pre>
+      </div>
+    </div>
+
+    <h3>Os métodos que não mutam</h3>
+    <table>
+      <tr><th>Em vez de</th><th>Use</th></tr>
+      <tr><td><code>sort()</code></td><td><code>toSorted()</code></td></tr>
+      <tr><td><code>reverse()</code></td><td><code>toReversed()</code></td></tr>
+      <tr><td><code>splice()</code></td><td><code>toSpliced()</code></td></tr>
+      <tr><td><code>lista[0] = x</code></td><td><code>lista.with(0, x)</code></td></tr>
+      <tr><td><code>push()</code></td><td><code>[...lista, x]</code></td></tr>
+    </table>
+
+    <div class="tip"><b>Por que isso aparece hoje e não na aula de Angular.</b>
+    Porque quando o <code>computed()</code> não recalcular na aula 05, você vai
+    ter duas hipóteses: "o Angular está com bug" ou "eu mutei". Sabendo disto,
+    você vai direto na segunda — que é sempre a certa.</div>
+
+    <div class="tip warn"><b>Cuidado com o encadeamento.</b>
+    <code>lista.filter(...).sort()</code> é seguro: o <code>filter</code> já
+    criou um array novo, então o <code>sort</code> muta a cópia. Mas
+    <code>lista.sort()</code> direto muta o original. Na dúvida, use sempre
+    <code>toSorted</code>.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="this">
+    <h2>Arrow e o this</h2>
+<pre><span class="kw">const</span> obj = {
+  nome: <span class="st">"Leque"</span>,
+  <span class="fn">normal</span>() { <span class="kw">return</span> <span class="kw">this</span>.nome; },      <span class="cm">// "Leque"  ✓</span>
+  <span class="fn">seta</span>: () =&gt; <span class="kw">this</span>.nome,                <span class="cm">// undefined ✗</span>
+};</pre>
+
+    <p>Função normal recebe um <code>this</code> que depende de <b>como ela foi
+    chamada</b>. Arrow <b>não tem <code>this</code> próprio</b> — ela usa o de
+    fora, decidido onde foi escrita.</p>
+
+    <p>Parece defeito, mas é justamente o que você quer em callback:</p>
+
+<pre><span class="kw">class</span> <span class="ty">ListaEventos</span> {
+  itens: <span class="ty">Evento</span>[] = [];
+
+  <span class="kw">async</span> <span class="fn">carregar</span>() {
+    <span class="kw">const</span> dados = <span class="kw">await</span> <span class="fn">buscar</span>();
+
+    dados.<span class="fn">forEach</span>((e) =&gt; {
+      <span class="kw">this</span>.itens.<span class="fn">push</span>(e);   <span class="cm">// "this" ainda é a ListaEventos ✓</span>
+    });
+  }
+}</pre>
+
+    <div class="tip"><b>Regra prática:</b> arrow em callback, método normal em
+    objeto e classe. Você quase nunca vai precisar pensar nisso de novo.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="operadores">
+    <h2>?. e ??</h2>
+
+<pre><span class="cm">// optional chaining: para e devolve undefined se algo não existir</span>
+<span class="kw">const</span> cidade = evento?.local?.cidade;
+<span class="kw">const</span> primeiro = lista?.[<span class="st">0</span>];
+<span class="fn">callback</span>?.();                    <span class="cm">// só chama se existir</span>
+
+<span class="cm">// nullish: usa o padrão só quando é null ou undefined</span>
+<span class="kw">const</span> vagas = evento.vagas ?? <span class="st">"ilimitadas"</span>;</pre>
+
+    <div class="tip warn"><b>A diferença entre <code>||</code> e <code>??</code> é
+    fonte de bug sutil.</b> <code>||</code> troca <b>qualquer valor falso</b> —
+    incluindo <code>0</code>, <code>""</code> e <code>false</code>:</div>
+
+<pre>evento.vagas = <span class="st">0</span>;
+
+evento.vagas || <span class="st">"ilimitadas"</span>;   <span class="cm">// "ilimitadas"  ✗ errado!</span>
+evento.vagas ?? <span class="st">"ilimitadas"</span>;   <span class="cm">// 0             ✓ certo</span></pre>
+
+    <p>Um evento com <b>zero vagas restantes</b> passa a exibir "ilimitadas". É o
+    tipo de bug que sobrevive meses porque só aparece num caso de borda.</p>
+
+    <div class="tip"><b>E <code>??=</code>:</b>
+    <code>(acc[chave] ??= []).push(x)</code> quer dizer "se não existir, crie uma
+    lista vazia; e me devolva ela". Aparece bastante em agrupamento.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="promise">
+    <h2>Promise</h2>
+    <p>Um objeto que representa um valor que <b>ainda não chegou</b>. Ele está
+    sempre num de três estados: <b>pendente</b>, <b>resolvido</b> ou
+    <b>rejeitado</b>.</p>
+
+<pre><span class="fn">fetch</span>(<span class="st">"/dados/eventos.json"</span>)
+  .<span class="fn">then</span>((resposta) =&gt; resposta.<span class="fn">json</span>())
+  .<span class="fn">then</span>((eventos) =&gt; <span class="fn">render</span>(eventos))
+  .<span class="fn">catch</span>((erro) =&gt; <span class="fn">mostrarErro</span>(erro))
+  .<span class="fn">finally</span>(() =&gt; <span class="fn">esconderCarregando</span>());</pre>
+
+    <div class="tip"><b>Você precisa saber ler <code>.then</code></b> — ele está
+    em código antigo, em documentação e em resposta de IA. Mas para
+    <b>escrever</b>, a próxima seção é melhor em praticamente todos os casos.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="async">
+    <h2>async e await</h2>
+<pre><span class="kw">async function</span> <span class="fn">carregarEventos</span>(): <span class="ty">Promise</span>&lt;<span class="ty">Evento</span>[]&gt; {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">"/dados/eventos.json"</span>);
+  <span class="kw">const</span> eventos = <span class="kw">await</span> resposta.<span class="fn">json</span>();
+  <span class="kw">return</span> eventos;
+}</pre>
+
+    <ul>
+      <li><b><code>await</code></b> = "espere chegar e me dê o valor, não o vale"</li>
+      <li>Só funciona dentro de função <b><code>async</code></b> — andam em par</li>
+      <li>Função <code>async</code> <b>sempre</b> devolve uma Promise, mesmo que você retorne um número</li>
+    </ul>
+
+    <div class="tip warn"><b>O erro de esquecer o <code>await</code>:</b> em vez do
+    valor, você fica com o objeto Promise. O sintoma é
+    <code>[object Promise]</code> na tela, ou <code>undefined</code> ao acessar um
+    campo. Com TypeScript, isso vira erro no editor — mais um motivo pra ligar o
+    <code>strict</code>.</div>
+
+    <div class="tip">É a mesma dupla que aparece no Next.js lendo dados no
+    servidor, na aula 11. A sintaxe não muda — muda o lugar onde ela roda.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="fetch">
+    <h2>fetch e tratamento de erro</h2>
+
+    <div class="tip warn"><b>A pegadinha que derruba todo mundo:</b> o
+    <code>fetch</code> <b>só rejeita se a rede falhar</b>. Um 404 ou um 500 chegam
+    como resposta normal, resolvida. Se você não conferir, o
+    <code>.json()</code> tenta interpretar uma página de erro como JSON e falha
+    com uma mensagem incompreensível sobre token inesperado.</div>
+
+<pre><span class="kw">async function</span> <span class="fn">carregarEventos</span>(): <span class="ty">Promise</span>&lt;<span class="ty">Evento</span>[]&gt; {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">"/dados/eventos.json"</span>);
+
+  <span class="cm">// ⚠️ obrigatório</span>
+  <span class="kw">if</span> (!resposta.ok) {
+    <span class="kw">throw new</span> <span class="ty">Error</span>(<span class="st">`Servidor respondeu ${resposta.status}`</span>);
+  }
+
+  <span class="kw">return</span> resposta.<span class="fn">json</span>();
+}</pre>
+
+    <h3>Onde tratar o erro</h3>
+<pre><span class="kw">async function</span> <span class="fn">iniciar</span>() {
+  <span class="fn">mostrarCarregando</span>();
+  <span class="kw">try</span> {
+    <span class="kw">const</span> eventos = <span class="kw">await</span> <span class="fn">carregarEventos</span>();
+    eventos.length ? <span class="fn">render</span>(eventos) : <span class="fn">mostrarVazio</span>();
+  } <span class="kw">catch</span> (erro) {
+    <span class="fn">console</span>.<span class="fn">error</span>(erro);
+    <span class="fn">mostrarErro</span>(<span class="st">"Não consegui carregar os eventos."</span>);
+  } <span class="kw">finally</span> {
+    <span class="fn">esconderCarregando</span>();
+  }
+}</pre>
+
+    <div class="tip"><b>Quem busca lança; quem desenha decide o que mostrar.</b> A
+    função de dados não deveria mexer na tela — ela lança o erro e deixa quem
+    chamou escolher a mensagem. Essa separação é a mesma que você vai usar com
+    services no Angular.</div>
+
+    <div class="tip warn"><b>Três estados, sempre.</b> Toda tela que busca dados
+    tem <b>carregando</b>, <b>erro</b> e <b>vazio</b> — além do caso feliz.
+    Esquecer o vazio é o mais comum: uma busca sem resultado que mostra apenas
+    uma área em branco parece site quebrado. Isso está na rubrica.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="paralelo">
+    <h2>Vários pedidos</h2>
+    <div class="duo">
+      <div class="box no">
+        <h4>Em série — lento</h4>
+<pre><span class="kw">const</span> a = <span class="kw">await</span> <span class="fn">buscar</span>(<span class="st">1</span>);
+<span class="kw">const</span> b = <span class="kw">await</span> <span class="fn">buscar</span>(<span class="st">2</span>);
+<span class="cm">// 300ms + 300ms</span></pre>
+      </div>
+      <div class="box ok">
+        <h4>Em paralelo — rápido</h4>
+<pre><span class="kw">const</span> [a, b] = <span class="kw">await</span> <span class="ty">Promise</span>.<span class="fn">all</span>([
+  <span class="fn">buscar</span>(<span class="st">1</span>), <span class="fn">buscar</span>(<span class="st">2</span>),
+]);
+<span class="cm">// 300ms no total</span></pre>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>Método</th><th>Comportamento</th></tr>
+      <tr><td><code>Promise.all</code></td><td>Falha inteiro se <b>um</b> falhar</td></tr>
+      <tr><td><code>Promise.allSettled</code></td><td>Espera todos e diz o que deu certo e o que não</td></tr>
+      <tr><td><code>Promise.race</code></td><td>Devolve o primeiro que terminar</td></tr>
+    </table>
+
+    <div class="tip"><b>Só use paralelo quando forem independentes.</b> Se o
+    segundo pedido precisa do resultado do primeiro, a fila é obrigatória — e
+    tentar paralelizar aí só gera bug.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="loop">
+    <h2>O laço de eventos</h2>
+    <p>JavaScript tem <b>uma</b> fila de execução. Enquanto uma função roda, nada
+    mais acontece: nem clique, nem rolagem, nem animação.</p>
+
+    <div class="duo">
+      <div class="box ok">
+        <h4>Não trava a tela</h4>
+        <p>Esperar rede, timer, leitura de arquivo. Quem está esperando é o
+        navegador, não o seu código — a fila fica livre.</p>
+      </div>
+      <div class="box no">
+        <h4>Trava a tela</h4>
+        <p>Laço de 10 milhões de voltas, ordenar 500 mil itens,
+        <code>JSON.parse</code> de 40 MB. Aqui o seu código <b>está ocupando</b> a
+        fila.</p>
+      </div>
+    </div>
+
+    <div class="tip"><b>A conclusão que importa:</b> <code>await</code> não deixa
+    nada mais rápido. Ele só <b>libera a vez</b> enquanto a resposta não chega. Se
+    a sua página travar, procure processamento pesado — não chamada de rede.</div>
+
+    <div class="tip warn"><b>Ordem que surpreende:</b> uma Promise já resolvida
+    roda <b>antes</b> de um <code>setTimeout(…, 0)</code>. São filas de prioridade
+    diferentes. Não precisa decorar — só não se assuste quando acontecer.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="porque-ts">
+    <h2>Por que TypeScript</h2>
+<pre><span class="cm">// JavaScript: descobre em produção</span>
+<span class="fn">render</span>(evento.titlo);       <span class="cm">// undefined na tela, silêncio total</span>
+
+<span class="cm">// TypeScript: descobre enquanto você digita</span>
+<span class="fn">render</span>(evento.titlo);
+<span class="cm">//            ~~~~~ Property 'titlo' does not exist on type 'Evento'.</span>
+<span class="cm">//                  Did you mean 'titulo'?</span></pre>
+
+    <ul>
+      <li><b>Erro cedo</b> — typo e campo inexistente aparecem no editor</li>
+      <li><b>Autocompletar de verdade</b> — o editor conhece o formato dos dados</li>
+      <li><b>Refatoração segura</b> — renomeou um campo? Ele lista os 14 lugares que quebraram</li>
+      <li><b>Documentação que não desatualiza</b> — o tipo é a assinatura</li>
+    </ul>
+
+    <div class="tip"><b>O tipo some no build.</b> Nada disso existe no navegador —
+    é ferramenta de tempo de escrita. Por isso "TypeScript deixa o site mais
+    lento" não faz sentido: no fim, o que roda é JavaScript.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="tipos">
+    <h2>Tipos e inferência</h2>
+<pre><span class="cm">// deixe ele deduzir</span>
+<span class="kw">let</span> titulo = <span class="st">"Meetup"</span>;       <span class="cm">// string</span>
+<span class="kw">let</span> vagas = <span class="st">40</span>;              <span class="cm">// number</span>
+
+<span class="cm">// anote onde ele NÃO tem como deduzir</span>
+<span class="kw">function</span> <span class="fn">formatar</span>(data: <span class="ty">string</span>): <span class="ty">string</span> {
+  <span class="kw">return new</span> <span class="ty">Date</span>(data).<span class="fn">toLocaleDateString</span>(<span class="st">"pt-BR"</span>);
+}
+
+<span class="cm">// estruturas vazias precisam de ajuda</span>
+<span class="kw">const</span> titulos: <span class="ty">string</span>[] = [];
+<span class="kw">const</span> porSlug: <span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">Evento</span>&gt; = {};</pre>
+
+    <div class="tip"><b>Não anote o óbvio.</b>
+    <code>const titulo: string = "Meetup"</code> é ruído — ele já sabe. Anote
+    <b>parâmetro, retorno e estrutura de dados</b>; o resto ele deduz melhor que
+    você.</div>
+
+    <div class="tip warn"><b><code>any</code> desliga o TypeScript.</b> É a saída
+    fácil quando o erro incomoda, e ela devolve exatamente o problema que você
+    instalou TypeScript pra evitar. Se precisar de escape, use
+    <code>unknown</code>: ele obriga você a checar antes de usar.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="formato">
+    <h2>Descrevendo os dados</h2>
+    <div class="file">📄 dados/tipos.ts</div>
+<pre><span class="kw">export type</span> <span class="ty">Formato</span> = <span class="st">"Presencial"</span> | <span class="st">"Online"</span> | <span class="st">"Híbrido"</span>;
+<span class="kw">export type</span> <span class="ty">Nivel</span> = <span class="st">"Iniciante"</span> | <span class="st">"Intermediário"</span> | <span class="st">"Avançado"</span>;
+
+<span class="kw">export type</span> <span class="ty">Evento</span> = {
+  id: <span class="ty">string</span>;
+  slug: <span class="ty">string</span>;
+  titulo: <span class="ty">string</span>;
+  resumo: <span class="ty">string</span>;
+  descricao: <span class="ty">string</span>;
+  organizador: <span class="ty">string</span>;
+  organizadorSlug: <span class="ty">string</span>;
+  categoria: <span class="ty">string</span>;
+  formato: <span class="ty">Formato</span>;
+  cidade?: <span class="ty">string</span>;          <span class="cm">// opcional: evento online não tem</span>
+  inicioEm: <span class="ty">string</span>;         <span class="cm">// ISO 8601</span>
+  duracaoMin: <span class="ty">number</span>;
+  gratuito: <span class="ty">boolean</span>;
+  vagas: <span class="ty">number</span> | <span class="kw">null</span>;    <span class="cm">// null = ilimitado, de propósito</span>
+  nivel: <span class="ty">Nivel</span>;
+};</pre>
+
+    <h3>União literal em vez de string solta</h3>
+    <p><code>formato: Formato</code> em vez de <code>formato: string</code> muda
+    tudo: escrever <code>"presencial"</code> em minúscula vira erro no editor, e o
+    autocompletar oferece os três valores.</p>
+
+    <h3><code>?</code> ou <code>| null</code>?</h3>
+    <table>
+      <tr><th>Escolha</th><th>Significa</th></tr>
+      <tr><td><code>cidade?: string</code></td><td>O campo <b>pode não vir</b></td></tr>
+      <tr><td><code>vagas: number | null</code></td><td>O campo <b>vem sempre</b>, e <code>null</code> tem significado próprio</td></tr>
+    </table>
+    <div class="tip">No projeto, <code>vagas: null</code> quer dizer
+    <b>"ilimitado"</b> — é informação, não ausência. Por isso ele é
+    <code>| null</code> e não <code>?</code>. Essa distinção parece detalhe e
+    evita muita confusão depois.</div>
+
+    <h3>type ou interface?</h3>
+    <p>Para descrever o formato dos seus dados, <code>type</code> resolve e é mais
+    flexível (aceita união, que <code>interface</code> não aceita).
+    <code>interface</code> brilha quando algo vai ser <b>estendido ou
+    implementado por classe</b> — o que aparece bastante no Angular. <b>Na dúvida,
+    <code>type</code>.</b></p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="narrowing">
+    <h2>Narrowing</h2>
+    <p>O recurso mais útil e menos ensinado do TypeScript: dentro de um
+    <code>if</code>, ele <b>sabe mais</b> do que sabia fora.</p>
+
+<pre><span class="kw">function</span> <span class="fn">local</span>(evento: <span class="ty">Evento</span>): <span class="ty">string</span> {
+  <span class="cm">// aqui, cidade é: string | undefined</span>
+
+  <span class="kw">if</span> (evento.cidade === <span class="kw">undefined</span>) {
+    <span class="kw">return</span> <span class="st">"Online"</span>;
+  }
+
+  <span class="cm">// ✨ aqui embaixo é string. Sem cast, sem "!"</span>
+  <span class="kw">return</span> evento.cidade.<span class="fn">toUpperCase</span>();
+}</pre>
+
+    <h3>Com <code>find</code>, que é o caso do projeto</h3>
+<pre><span class="kw">const</span> evento = eventos.<span class="fn">find</span>((e) =&gt; e.slug === slug);
+<span class="cm">// evento: Evento | undefined</span>
+
+<span class="kw">if</span> (!evento) {
+  <span class="fn">mostrarNaoEncontrado</span>();
+  <span class="kw">return</span>;
+}
+
+<span class="cm">// daqui pra baixo é Evento — o TS garante</span>
+<span class="fn">render</span>(evento.titulo);</pre>
+
+    <div class="tip"><b><code>find</code> devolver <code>| undefined</code> é bom,
+    não chato.</b> É o TypeScript te obrigando a tratar o "não achei" — que na
+    tela vira a página de 404. Sem isso, o caso passa despercebido até alguém
+    digitar um slug errado.</div>
+
+    <div class="tip warn"><b>Evite o <code>!</code>.</b>
+    <code>evento!.titulo</code> diz "confia, existe" e desliga a checagem. Se você
+    estiver errado, volta o erro de runtime que o TypeScript existia pra
+    prevenir. Prefira um <code>if</code> de verdade.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="genericos">
+    <h2>Genéricos</h2>
+<pre><span class="cm">// sem genérico: perde o tipo</span>
+<span class="kw">function</span> <span class="fn">primeiro</span>(lista: <span class="ty">any</span>[]): <span class="ty">any</span> { <span class="kw">return</span> lista[<span class="st">0</span>]; }
+
+<span class="cm">// com genérico: "o que entrar é o que sai"</span>
+<span class="kw">function</span> <span class="fn">primeiro</span>&lt;<span class="ty">T</span>&gt;(lista: <span class="ty">T</span>[]): <span class="ty">T</span> | <span class="kw">undefined</span> {
+  <span class="kw">return</span> lista[<span class="st">0</span>];
+}
+
+<span class="kw">const</span> e = <span class="fn">primeiro</span>(eventos);    <span class="cm">// Evento | undefined ✓</span>
+<span class="kw">const</span> n = <span class="fn">primeiro</span>([<span class="st">1</span>, <span class="st">2</span>]);    <span class="cm">// number | undefined ✓</span></pre>
+
+    <p>O <code>&lt;T&gt;</code> é um <b>espaço em branco pro tipo</b>, preenchido
+    na hora da chamada.</p>
+
+    <h3>Com restrição</h3>
+<pre><span class="cm">// T precisa ter pelo menos um campo slug</span>
+<span class="kw">function</span> <span class="fn">buscarPorSlug</span>&lt;<span class="ty">T</span> <span class="kw">extends</span> { slug: <span class="ty">string</span> }&gt;(
+  lista: <span class="ty">T</span>[],
+  slug: <span class="ty">string</span>,
+): <span class="ty">T</span> | <span class="kw">undefined</span> {
+  <span class="kw">return</span> lista.<span class="fn">find</span>((item) =&gt; item.slug === slug);
+}
+
+<span class="cm">// serve pra Evento e pra Organizador, mantendo o tipo certo</span></pre>
+
+    <div class="tip"><b>Você vai ler genéricos muito mais do que escrever:</b>
+    <code>signal&lt;Evento[]&gt;([])</code> no Angular,
+    <code>useState&lt;Evento | null&gt;(null)</code> no React. Reconhecer a forma
+    já resolve 90% dos casos.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="utility">
+    <h2>Utility types</h2>
+    <table>
+      <tr><th>Tipo</th><th>O que faz</th><th>Uso no projeto</th></tr>
+      <tr><td><code>Partial&lt;T&gt;</code></td><td>Todos os campos opcionais</td><td>Formulário de edição</td></tr>
+      <tr><td><code>Required&lt;T&gt;</code></td><td>Todos obrigatórios</td><td>Depois de validar</td></tr>
+      <tr><td><code>Omit&lt;T, K&gt;</code></td><td>Tira campos</td><td>Criar: o id vem do servidor</td></tr>
+      <tr><td><code>Pick&lt;T, K&gt;</code></td><td>Fica só com esses</td><td>Resposta enxuta</td></tr>
+      <tr><td><code>Readonly&lt;T&gt;</code></td><td>Nada alterável</td><td>Reforçar imutabilidade</td></tr>
+      <tr><td><code>Record&lt;K, V&gt;</code></td><td>Objeto de chave → valor</td><td>Agrupar por categoria</td></tr>
+    </table>
+
+<pre><span class="cm">// o que o formulário de novo evento envia</span>
+<span class="kw">type</span> <span class="ty">NovoEvento</span> = <span class="ty">Omit</span>&lt;<span class="ty">Evento</span>, <span class="st">"id"</span>&gt;;
+
+<span class="cm">// o que a edição aceita</span>
+<span class="kw">type</span> <span class="ty">EdicaoEvento</span> = <span class="ty">Partial</span>&lt;<span class="ty">NovoEvento</span>&gt;;
+
+<span class="cm">// agrupamento</span>
+<span class="kw">const</span> porCategoria: <span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">Evento</span>[]&gt; = {};</pre>
+
+    <div class="tip"><b>A vantagem é a fonte única.</b> Adicione um campo em
+    <code>Evento</code> e os três derivados se atualizam sozinhos. Se você tivesse
+    copiado o tipo três vezes, teria três lugares pra esquecer.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="strict">
+    <h2>strict</h2>
+    <div class="file">📄 tsconfig.json</div>
+<pre>{
+  <span class="st">"compilerOptions"</span>: {
+    <span class="st">"strict"</span>: <span class="kw">true</span>,
+    <span class="st">"noUncheckedIndexedAccess"</span>: <span class="kw">true</span>,
+    <span class="st">"target"</span>: <span class="st">"ES2022"</span>,
+    <span class="st">"module"</span>: <span class="st">"ESNext"</span>,
+    <span class="st">"moduleResolution"</span>: <span class="st">"bundler"</span>,
+    <span class="st">"noEmit"</span>: <span class="kw">true</span>
+  },
+  <span class="st">"include"</span>: [<span class="st">"src"</span>]
+}</pre>
+
+    <table>
+      <tr><th>Opção</th><th>O que muda</th></tr>
+      <tr><td><code>strict</code></td><td>Liga um pacote de checagens. A principal é <code>strictNullChecks</code>: <code>null</code> e <code>undefined</code> deixam de caber em qualquer tipo</td></tr>
+      <tr><td><code>noUncheckedIndexedAccess</code></td><td><code>lista[0]</code> passa a ser <code>T | undefined</code> — porque o índice realmente pode não existir</td></tr>
+    </table>
+
+    <div class="tip warn"><b>Sem <code>strict</code>, TypeScript é decoração.</b>
+    Ele aceita <code>null</code> em tudo e você perde justamente a checagem que
+    previne o erro nº 1 de JavaScript — o famoso "cannot read property of
+    undefined".</div>
+
+    <div class="tip"><b>No TypeScript 7, <code>strict</code> já é padrão</b>, e as
+    depreciações do 6 viraram erro. É um bom sinal de para onde a linguagem foi —
+    e mais um motivo pra começar com ele ligado.</div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="erros">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>Cannot use import statement outside a module</h4>
+    <p>Faltou <code>type="module"</code> no <code>&lt;script&gt;</code>.</p>
+
+    <h4>CORS / origem nula ao usar fetch</h4>
+    <p>Você abriu o HTML com duplo clique (<code>file://</code>). Módulos e
+    <code>fetch</code> exigem um servidor: use a extensão Live Server do VS Code
+    ou <code>npx serve</code>.</p>
+
+    <h4>Unexpected token '&lt;' in JSON</h4>
+    <p>O <code>fetch</code> recebeu HTML (uma página de 404) e tentou interpretar
+    como JSON. Faltou <code>if (!resposta.ok)</code>.</p>
+
+    <h4>Apareceu [object Promise] na tela</h4>
+    <p>Faltou <code>await</code>. E confira se a função tem <code>async</code>.</p>
+
+    <h4>Mudei a lista e a tela não atualizou</h4>
+    <p>Você mutou. <code>push</code>, <code>sort</code>, <code>splice</code>
+    mantêm a mesma referência. Use <code>[...lista, x]</code> ou
+    <code>toSorted()</code>.</p>
+
+    <h4>O valor 0 sumiu / virou o padrão</h4>
+    <p><code>||</code> troca qualquer valor falso. Use <code>??</code>.</p>
+
+    <h4>Object is possibly 'undefined'</h4>
+    <p>É o <code>strict</code> funcionando. Trate com <code>if</code>, não com
+    <code>!</code>.</p>
+
+    <h4>ERESOLVE ao instalar typescript num projeto Angular</h4>
+    <p>Você pegou o 7. O Angular 22 exige <code>&gt;=6.0 &lt;6.1</code>. Instale
+    <code>typescript@6.0.3</code>.</p>
+
+    <h4>this é undefined dentro do callback</h4>
+    <p>Você usou <code>function</code> onde cabia arrow. Troque por
+    <code>() =&gt;</code>.</p>
+  </section>
+
+  <!-- ==================================================================== -->
+  <section id="cola">
+    <h2>Cola rápida</h2>
+
+<pre><span class="cm">// ---------- módulos ----------</span>
+export const x    ·  import { x } from "./a.js"
+export default y  ·  import y from "./a.js"
+import type { T } from "./tipos.js"
+&lt;script type="module" src="main.js"&gt;
+
+<span class="cm">// ---------- desestruturar ----------</span>
+const { titulo, cidade = "Online" } = evento;
+const { id, ...resto } = evento;
+function Card({ titulo }: Evento) { }
+
+<span class="cm">// ---------- imutável ----------</span>
+[...lista, novo]        <span class="cm">em vez de  push</span>
+lista.toSorted()        <span class="cm">em vez de  sort</span>
+lista.toSpliced(0, 1)   <span class="cm">em vez de  splice</span>
+lista.with(0, x)        <span class="cm">em vez de  lista[0] = x</span>
+{ ...evento, titulo }   <span class="cm">em vez de  evento.titulo =</span>
+
+<span class="cm">// ---------- array ----------</span>
+map     transforma   ·  filter  seleciona
+find    um ou undefined  ·  reduce  vira um valor
+
+<span class="cm">// ---------- operadores ----------</span>
+a?.b?.c          undefined se algo faltar
+a ?? padrão      só troca null/undefined
+a || padrão      troca 0 e "" também  ⚠️
+
+<span class="cm">// ---------- assíncrono ----------</span>
+async function f() { const x = await g(); }
+if (!resposta.ok) throw new Error(...)   <span class="cm">SEMPRE</span>
+await Promise.all([a(), b()])            <span class="cm">independentes</span>
+try / catch / finally                    <span class="cm">3 estados na tela</span>
+
+<span class="cm">// ---------- tipos ----------</span>
+type Formato = "Online" | "Presencial";
+type Evento = { id: string; cidade?: string; vagas: number | null };
+type Novo = Omit&lt;Evento, "id"&gt;;
+type Edicao = Partial&lt;Novo&gt;;
+function f&lt;T&gt;(l: T[]): T | undefined { }
+
+<span class="cm">// ---------- versões ----------</span>
+Angular 22  →  typescript 6.0.x   <span class="cm">(obrigatório)</span>
+Next.js 16  →  typescript 7.x     <span class="cm">(pode)</span>
+
+<span class="cm">// ---------- as 3 perguntas do dia ----------</span>
+1. estou mutando ou criando novo?   → imutabilidade
+2. tratei carregando, erro e vazio? → assíncrono
+3. usei any pra calar o erro?       → então volte atrás</pre>
+
+    <a class="cta primary" href="desafio.html">🎯 Ir para o desafio</a>
+    <a class="cta" href="codigos-desafio.html">🧩 Código comentado</a>
+    <a class="cta" href="/cursos/frontend-avancado/projeto/brief.html">🎟️ Briefing do projeto</a>
+    <a class="cta" href="slides.html">▶ Slides</a>
+
+    <div class="foot">Guia da Aula 02 · Frontend Avançado · NickDev 💜</div>
+  </section>
+
+</main>
+</div>
+</body>
+</html>
