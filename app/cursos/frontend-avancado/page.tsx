@@ -28,9 +28,9 @@ type Aula = {
 };
 
 /**
- * Monta a fileira de materiais de uma aula.
- * `previa` é a resposta renderizada; `repo` é o código dela no GitHub e,
- * quando existe, ocupa o lugar do roteiro de condução na fileira.
+ * Monta a fileira de materiais de uma aula — só o que é voltado para a turma.
+ * O roteiro de condução e o briefing do projeto ficam de fora: o primeiro é
+ * material de quem ensina, e o segundo tem lugar próprio no card do projeto.
  */
 function materiaisDaAula({
   base,
@@ -49,10 +49,9 @@ function materiaisDaAula({
     { href: `${base}/desafio.html`, label: "🎯 Desafio técnico" },
     { href: `${base}/codigos-desafio.html`, label: "🧩 Código do desafio" },
     ...(previa ? [{ href: previa, label: "👁️ Prévia da resposta" }] : []),
-    repo
-      ? { href: repo, label: "💻 Código no GitHub", externo: true }
-      : { href: `${base}/roteiro-aula.html`, label: "🛠️ Roteiro da aula" },
-    { href: `${PROJETO}/brief.html`, label: "🎟️ Briefing do projeto" },
+    ...(repo
+      ? [{ href: repo, label: "💻 Código no GitHub", externo: true }]
+      : []),
   ];
 }
 
