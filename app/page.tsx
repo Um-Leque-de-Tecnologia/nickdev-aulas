@@ -74,16 +74,11 @@ export default function Home() {
           <div className="meta">16 aulas de 4h · em breve</div>
         </Link>
 
-        <Link className="card" href="/cursos/nextjs-ia">
-          <span className="num">06</span>
-          <h3>Next.js + IA</h3>
-          <p>
-            Simulação de trabalho em 8 aulas: você entra num time, pega tickets
-            do backlog e entrega por Pull Request. Construindo o LequePlay sobre
-            uma API real, do primeiro bug até uma feature de IA em produção.
-          </p>
-          <div className="meta">8 aulas de 2h30 · em breve</div>
-        </Link>
+        {/*
+          Next.js + IA é um curso pago e não entra nesta listagem — ele vive em
+          /cursos/nextjs-ia e passará para uma área logada. Ao criar a área,
+          mova o link para lá em vez de reintroduzir o card aqui.
+        */}
       </div>
 
       <Footer />
