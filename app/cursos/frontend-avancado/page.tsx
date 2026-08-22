@@ -13,7 +13,12 @@ const AULA_01 = "/cursos/frontend-avancado/aula-01-html-css";
 const AULA_02 = "/cursos/frontend-avancado/aula-02-javascript-typescript";
 const PROJETO = "/cursos/frontend-avancado/projeto";
 
-type Material = { href: string; label: string; primary?: boolean };
+type Material = {
+  href: string;
+  label: string;
+  primary?: boolean;
+  externo?: boolean;
+};
 
 type Aula = {
   n: string;
@@ -22,18 +27,31 @@ type Aula = {
   materiais?: Material[];
 };
 
-function materiaisDaAula(
-  base: string,
-  guia: string,
-  previa?: string,
-): Material[] {
+/**
+ * Monta a fileira de materiais de uma aula.
+ * `previa` é a resposta renderizada; `repo` é o código dela no GitHub e,
+ * quando existe, ocupa o lugar do roteiro de condução na fileira.
+ */
+function materiaisDaAula({
+  base,
+  guia,
+  previa,
+  repo,
+}: {
+  base: string;
+  guia: string;
+  previa?: string;
+  repo?: string;
+}): Material[] {
   return [
     { href: `${base}/slides.html`, label: "▶ Slides da aula", primary: true },
     { href: `${base}/${guia}`, label: "📘 Guia de conteúdo" },
     { href: `${base}/desafio.html`, label: "🎯 Desafio técnico" },
     { href: `${base}/codigos-desafio.html`, label: "🧩 Código do desafio" },
     ...(previa ? [{ href: previa, label: "👁️ Prévia da resposta" }] : []),
-    { href: `${base}/roteiro-aula.html`, label: "🛠️ Roteiro da aula" },
+    repo
+      ? { href: repo, label: "💻 Código no GitHub", externo: true }
+      : { href: `${base}/roteiro-aula.html`, label: "🛠️ Roteiro da aula" },
     { href: `${PROJETO}/brief.html`, label: "🎟️ Briefing do projeto" },
   ];
 }
@@ -55,7 +73,12 @@ const FUNDAMENTOS: Aula[] = [
         bem diferentes — e que volta nas aulas 03 e 10.
       </>
     ),
-    materiais: materiaisDaAula(AULA_01, "guia-html-css.html", `${AULA_01}/previa/index.html`),
+    materiais: materiaisDaAula({
+      base: AULA_01,
+      guia: "guia-html-css.html",
+      previa: `${AULA_01}/previa/index.html`,
+      repo: "https://github.com/Nicoly-Almeida/leque-de-eventos-html-css",
+    }),
   },
   {
     n: "02",
@@ -74,7 +97,10 @@ const FUNDAMENTOS: Aula[] = [
         versão <span className="mono">6.0</span>, que é a que o Angular 22 exige.
       </>
     ),
-    materiais: materiaisDaAula(AULA_02, "guia-javascript-typescript.html"),
+    materiais: materiaisDaAula({
+      base: AULA_02,
+      guia: "guia-javascript-typescript.html",
+    }),
   },
 ];
 
@@ -280,6 +306,9 @@ function ListaDeAulas({ aulas }: { aulas: Aula[] }) {
                     className={m.primary ? "mat primary" : "mat"}
                     href={m.href}
                     key={m.href}
+                    {...(m.externo
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                   >
                     {m.label}
                   </a>
