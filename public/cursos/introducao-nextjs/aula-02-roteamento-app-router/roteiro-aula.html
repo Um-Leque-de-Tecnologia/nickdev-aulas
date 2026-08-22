@@ -215,12 +215,14 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 }</pre>
     <div class="dica"><b>O momento da aula.</b> Trocar <code>/vagas/1</code> por <code>/vagas/2</code> na barra de endereço e a tela responder — <b>sem você ter criado nada</b>. Faça isso lentamente, com o dedo na barra. Depois digite qualquer besteira e mostre que ela também responde. Deixe o silêncio durar.</div>
     <div class="dica"><b>Erre o <code>await</code> de propósito.</b> Tire, salve, mostre o <code>[object Promise]</code> ou o erro no terminal. Depois recoloque. Quando o erro aparecer no desafio deles — e vai —, eles vão reconhecer o sintoma em vez de travar.</div>
+    <div class="dica"><b>E erre as chaves de propósito também.</b> Troque <code>({ params }: …)</code> por <code>(params: …)</code>, salve, e deixe a tela mostrar <b>"Vaga" sem o número</b>. Espere alguém perguntar onde está o erro — <b>não há erro nenhum</b>: terminal limpo, e o <code>npm run build</code> passa. Este é o momento de dizer a regra: <b>sumiu o valor e o terminal está calado? Olhe as chaves antes do await.</b> Explique com a imagem da sacola: o Next entrega uma sacola <code>{ params, searchParams }</code>, e as chaves são o que tira o params de dentro dela.</div>
     <ul class="check">
       <li>Todo mundo com uma rota <code>[id]</code> respondendo a qualquer valor</li>
       <li>Ninguém saiu achando que precisa criar uma pasta por vaga</li>
       <li>Todo mundo viu o sintoma do <code>await</code> esquecido</li>
+      <li>Todo mundo viu o sintoma das <b>chaves</b> esquecidas — o valor sumindo <b>sem dar erro</b></li>
     </ul>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 6–7</span></div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 6–8</span></div>
   </div>
 
   <div class="bloco">
@@ -242,7 +244,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
       <li>Todo mundo viu as três telas especiais aparecerem <b>de verdade</b></li>
       <li>Ninguém foi mandado embora achando que precisa importar esses arquivos</li>
     </ul>
-    <div class="meta"><span class="chip mao">live code</span><span class="chip">slides 8–14</span></div>
+    <div class="meta"><span class="chip mao">live code</span><span class="chip">slides 9–15</span></div>
   </div>
 
   <div class="bloco">
@@ -256,7 +258,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     </ul>
     <div class="dica"><b>O exemplo do Instagram funciona muito bem.</b> Todo mundo já viu aquele modal, e ninguém imagina que é roteamento. Vale os trinta segundos: mostra que o framework resolve coisas que pareciam impossíveis. Mas <b>não abra o código</b>.</div>
     <div class="dica"><b>Corte aqui primeiro se estiver atrasada.</b> Só o route group é obrigatório — ele cai no desafio. Catch-all e as avançadas podem virar leitura do guia sem prejuízo nenhum.</div>
-    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 15–17</span></div>
+    <div class="meta"><span class="chip fala">exposição</span><span class="chip">slides 16–18</span></div>
   </div>
 
   <div class="bloco">
@@ -273,7 +275,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
       <li>Todo mundo com o menu marcando a página atual</li>
       <li>A turma viu <b>por que</b> o <code>"use client"</code> fica no componente pequeno, não no layout</li>
     </ul>
-    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 18–21</span></div>
+    <div class="meta"><span class="chip mao">mão na massa</span><span class="chip">slides 19–22</span></div>
   </div>
 
   <div class="bloco">
@@ -281,7 +283,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
     <p>O entregável institucional da aula. Não deixe pro finalzinho corrido.</p>
     <ul>
       <li>Apresente o <b>Leque de Vagas</b> pelo problema, não pelas telas: quem é a pessoa, o que incomoda ela</li>
-      <li>Projete o <b>mapa de rotas do projeto</b> (slide 27) e mostre que cada linha é uma coisa da aula de hoje</li>
+      <li>Projete o <b>mapa de rotas do projeto</b> (slide 28) e mostre que cada linha é uma coisa da aula de hoje</li>
       <li>Abra o <b>briefing</b> e percorra os quatro checkpoints e a <b>rubrica</b></li>
       <li>Confirme as equipes formadas na aula 01, e encaixe quem ficou solto</li>
       <li>Combinem <b>na sala</b> quem faz o quê no desafio — as rotas são separadas, dá pra dividir</li>
@@ -293,7 +295,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
       <li>Ninguém sem equipe</li>
       <li>Todo mundo sabe que este desafio é <b>de equipe</b> e que os commits são olhados</li>
     </ul>
-    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 25–28</span></div>
+    <div class="meta"><span class="chip mao">marco do projeto</span><span class="chip">slides 26–29</span></div>
   </div>
 
   <div class="label">Se atrasar</div>
@@ -316,6 +318,7 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
   <div class="bloco">
     <ul>
       <li><b>Metade da turma com <code>[object Promise]</code></b> — pare tudo e faça o coletivo: "todo mundo confere se tem <code>async</code> na função e <code>await</code> antes de params". É o erro nº 1 desta aula.</li>
+      <li><b>"Professora, não aparece o número e não dá erro"</b> — é o erro nº 2, e o mais caro em tempo, porque não há nada pra ler. São as <b>chaves</b>: <code>(params: …)</code> em vez de <code>({ params }: …)</code>. Peça pra pessoa ler a assinatura em voz alta; quase sempre ela mesma acha. Se acontecer com três ou mais, faça coletivo — e considere mandar a turma toda pro <code>PageProps&lt;"/vagas/[id]"&gt;</code>, que sublinha o erro no editor.</li>
       <li><b>A vaga nunca é encontrada</b> — o <code>id</code> nos dados está como número. O que vem da URL é texto. Se você distribuir o <code>data/vagas.ts</code> pronto, esse problema some — considere isso se o tempo estiver curto.</li>
       <li><b>Pasta com parênteses virando URL</b> — a pessoa usou colchetes. Acontece muito porque as duas ideias foram vistas com dez minutos de diferença.</li>
       <li><b>Erro de <code>usePathname</code> em cascata</b> — se muita gente puser <code>"use client"</code> no layout raiz, pare e explique de novo com o desenho: a linha vai no <b>menor arquivo possível</b>.</li>
