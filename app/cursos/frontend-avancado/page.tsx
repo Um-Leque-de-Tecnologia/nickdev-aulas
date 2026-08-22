@@ -314,6 +314,17 @@ export default function FrontendAvancado() {
       </p>
       <div className="brand-rule" />
 
+      <p style={{ marginTop: 26, marginBottom: 0 }}>
+        <a
+          className="glow-btn"
+          href="https://chat.whatsapp.com/CsSUEhPBuWwFp6UGWHALR6"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          💬 Entrar no grupo da turma
+        </a>
+      </p>
+
       <div className="section-label">Projeto do curso</div>
 
       <div className="lessons">
