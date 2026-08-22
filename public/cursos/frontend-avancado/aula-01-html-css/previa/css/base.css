@@ -1,0 +1,101 @@
+/* ==========================================================================
+   base.css — reset e estilos de elemento. Nada de componente aqui.
+   ========================================================================== */
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  /* Respeita quem pediu menos movimento no sistema. Os dois !important
+     desta regra são a ÚNICA exceção à regra de zero !important do projeto:
+     isto precisa vencer qualquer animação escrita depois, porque movimento
+     pode causar enjoo e crise em quem tem sensibilidade vestibular. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+
+    /* Rodapé sempre embaixo, sem position absolute nem cálculo de altura.
+       dvh e não vh: a barra de endereço do celular entra na conta do vh. */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100dvh;
+  }
+
+  /* Tipografia fluida: acompanha a tela sem quebrar nos extremos.
+     rem e não px, para respeitar quem aumentou a fonte do navegador. */
+  h1 {
+    font-size: clamp(1.75rem, 4vw + 1rem, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: clamp(1.35rem, 2vw + 0.8rem, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+
+  p {
+    max-width: var(--largura-texto);
+  }
+
+  a {
+    color: var(--cor-marca);
+  }
+
+  /* Imagem nunca estoura o container, e nunca fica esticada. */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* iOS dá zoom no campo quando a fonte é menor que 16px. */
+  input,
+  button,
+  select {
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  /* ⭐ O foco. :focus-visible aparece para quem navega por teclado e não
+     aparece no clique de mouse — que era a reclamação de quem escrevia
+     outline: none. Nunca remova sem colocar um substituto. */
+  :focus-visible {
+    outline: 2px solid var(--cor-marca);
+    outline-offset: 2px;
+    border-radius: var(--raio-p);
+  }
+}

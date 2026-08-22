@@ -1,0 +1,75 @@
+/* ==========================================================================
+   tokens.css — toda decisão visual mora aqui, e em nenhum outro lugar.
+   Nenhuma cor literal deve aparecer em base.css ou componentes.css.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* Faz o NAVEGADOR adaptar o que você não controla: barra de rolagem,
+       campos de formulário, seletor de data. Sem isto, site escuro com
+       input branco brilhante. */
+    color-scheme: light dark;
+
+    /* --- cor: nomeada pelo PAPEL, nunca pela aparência ------------------- */
+    --cor-fundo: #ffffff;
+    --cor-superficie: #f4f4f5;
+    --cor-superficie-2: #e9e9ed;
+    --cor-texto: #18181b;
+    --cor-texto-2: #52525b;
+    --cor-marca: #6d28d9;
+    --cor-marca-suave: #f3ecff;
+    --cor-ok: #15803d;
+    --cor-ok-suave: #e8f6ec;
+    --cor-linha: rgb(0 0 0 / 0.12);
+
+    /* --- espaço: uma escala. Sem 13px, 17px, 22px soltos ----------------- */
+    --esp-1: 0.5rem;
+    --esp-2: 1rem;
+    --esp-3: 1.5rem;
+    --esp-4: 2.5rem;
+    --esp-5: 4rem;
+
+    /* --- forma ----------------------------------------------------------- */
+    --raio: 12px;
+    --raio-p: 8px;
+    --borda: 1px solid var(--cor-linha);
+
+    /* --- medida de leitura ----------------------------------------------- */
+    --largura-texto: 68ch;
+    --largura-pagina: 72rem;
+  }
+
+  /* Quem prefere escuro no sistema operacional. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --cor-fundo: #0d0b14;
+      --cor-superficie: #161122;
+      --cor-superficie-2: #1e1830;
+      --cor-texto: #f3f0fa;
+      --cor-texto-2: #b4aec6;
+
+      /* A marca CLAREIA no escuro. Trocar só o fundo e manter o roxo
+         original reprovaria no contraste — este é o erro nº 1 de tema. */
+      --cor-marca: #a98ce0;
+      --cor-marca-suave: #241b3a;
+      --cor-ok: #5fd08a;
+      --cor-ok-suave: #13291d;
+      --cor-linha: rgb(255 255 255 / 0.12);
+    }
+  }
+
+  /* A escolha manual do botão de tema vence as duas regras acima.
+     Feita com :has() e um checkbox — sem uma linha de JavaScript. */
+  html:has(#alternar-tema:checked) {
+    --cor-fundo: #0d0b14;
+    --cor-superficie: #161122;
+    --cor-superficie-2: #1e1830;
+    --cor-texto: #f3f0fa;
+    --cor-texto-2: #b4aec6;
+    --cor-marca: #a98ce0;
+    --cor-marca-suave: #241b3a;
+    --cor-ok: #5fd08a;
+    --cor-ok-suave: #13291d;
+    --cor-linha: rgb(255 255 255 / 0.12);
+  }
+}
