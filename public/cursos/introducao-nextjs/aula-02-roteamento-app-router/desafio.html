@@ -433,6 +433,7 @@ data/
   <ul class="check no">
     <li>Uma pasta por vaga — <code>app/vagas/vaga-1/</code>, <code>vaga-2/</code>… é exatamente o problema que a aula resolve</li>
     <li><code>params</code> sem <code>await</code></li>
+    <li><code>params</code> <b>sem as chaves</b> na assinatura — é <code>({ params }: { params: … })</code>. Sem elas o valor some da tela <b>sem dar erro</b></li>
     <li><code>useRouter</code> importado de <code>next/router</code> (é <code>next/navigation</code>)</li>
     <li><code>&lt;a href&gt;</code> para navegação interna</li>
     <li><code>"use client"</code> no <code>layout.tsx</code> raiz pra "resolver" o erro do menu — o componente que precisa é o <code>MenuLink</code>, não o layout inteiro</li>

@@ -356,6 +356,37 @@
     vez do valor. Quando ver isso, procure um <code>await</code> faltando —
     é quase sempre isso.</div>
 
+    <h3>As chaves em volta de <code>params</code> não são enfeite</h3>
+    <p>Este é o erro que mais aparece, e o mais difícil de achar sozinho. Repare
+    nos dois:</p>
+
+<pre><span class="cm">// ERRADO — sem as chaves</span>
+<span class="kw">export default async function</span> <span class="ty">PaginaDaVaga</span>(params: <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span> }&gt;) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;   <span class="cm">id fica undefined</span>
+
+<span class="cm">// CERTO — com as chaves</span>
+<span class="kw">export default async function</span> <span class="ty">PaginaDaVaga</span>({ params }: { params: <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span> }&gt; }) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;   <span class="cm">"12"</span></pre>
+
+    <p>O Next não entrega a caixinha na sua mão. Ele entrega uma <b>sacola</b> com
+    a caixinha dentro — mais ou menos assim:</p>
+
+<pre>{ params: <span class="ty">Promise</span>&lt;{ id }&gt;, searchParams: <span class="ty">Promise</span>&lt;{ … }&gt; }</pre>
+
+    <p>As chaves em <code>{ params }</code> são o que diz "tire o <code>params</code>
+    de dentro da sacola". Sem elas, você só deu o <b>apelido</b> <code>params</code>
+    pra sacola inteira — e a sacola não tem nenhum <code>id</code> dentro. O
+    resultado é <code>undefined</code>.</p>
+
+    <div class="tip warn"><b>Por que ele é traiçoeiro.</b> O React simplesmente
+    <b>não escreve nada</b> quando o valor é <code>undefined</code>. Então não há
+    erro vermelho, não há aviso no terminal, e o <code>npm run build</code>
+    <b>passa normalmente</b>. Você só vê "Vaga" sozinho na tela, sem o número.
+    <br><br>A regra: <b>sumiu o valor e o terminal está limpo? Olhe as chaves
+    antes de olhar o <code>await</code>.</b> O <code>[object Promise]</code> é o
+    sintoma do <code>await</code> faltando; o <b>buraco calado</b> é o sintoma das
+    chaves faltando.</div>
+
     <h3>Um jeito mais curto de escrever o tipo</h3>
     <p>Escrever <code>Promise&lt;{ id: string }&gt;</code> à mão funciona, mas o
     Next 16 já sabe quais são os pedaços de cada rota. Dá pra pedir pra ele:</p>
@@ -368,6 +399,13 @@
     <p>Não precisa importar nada: <code>PageProps</code> já existe sozinho. As
     duas formas estão certas — <b>use a que você entender melhor</b>. No desafio,
     qualquer uma serve.</p>
+
+    <div class="tip"><b>Uma vantagem concreta desta forma.</b> Aqui não existe
+    chave pra esquecer: você escreve <code>props.params</code> e pronto. E se
+    errar mesmo assim, o editor sublinha <b>na hora</b>, com o nome do problema:
+    <code>Property 'id' does not exist on type PageProps&lt;"/vagas/[id]"&gt;</code>.
+    Na forma escrita à mão, o mesmo erro passa calado. Se você é do tipo que
+    prefere o computador avisando, <b>fique com esta</b>.</div>
 
     <h3>E o que vem depois do <code>?</code> na URL</h3>
     <p>Endereços como <code>/vagas?area=dados</code> têm uma segunda caixinha,
@@ -901,6 +939,14 @@
     <h4>Apareceu [object Promise] na tela</h4>
     <p>Faltou <code>await</code> antes de <code>params</code>. E confira se a
     função tem <code>async</code> na frente — os dois andam em par.</p>
+
+    <h4>A página abre, mas o valor não aparece</h4>
+    <p>Aparece "Vaga" e o número some, sem nenhum erro no terminal. Quase sempre
+    são as <b>chaves</b>: é <code>({ params }: { params: … })</code>, e não
+    <code>(params: …)</code>. Sem as chaves, <code>params</code> vira a sacola
+    inteira de props e o <code>id</code> sai <code>undefined</code> — e
+    <code>undefined</code> o React não escreve na tela. Detalhe cruel: o
+    <code>npm run build</code> passa mesmo assim.</p>
 
     <h4>404 na rota dinâmica que acabei de criar</h4>
     <p>Confira se a pasta está com colchetes <b>de verdade</b>:

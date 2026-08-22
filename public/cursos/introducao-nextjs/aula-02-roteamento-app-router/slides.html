@@ -243,26 +243,62 @@
     <div class="eyebrow">live code · como a página lê a URL</div>
     <h2>params: o que veio no endereço</h2>
     <span class="filetab">📄 app/vagas/[id]/page.tsx</span>
-<div class="code"><span class="kw">export default async function</span> <span class="fn">PaginaDaVaga</span>({ params }) {
+<div class="code"><span class="kw">export default async function</span> <span class="fn">PaginaDaVaga</span>({
+  params,
+}: {
+  params: <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span> }&gt;;
+}) {
   <span class="kw">const</span> { id } = <span class="kw">await</span> params;   <span class="cm">// ← o pedaço que veio na URL</span>
 
   <span class="kw">return</span> &lt;<span class="ty">h1</span>&gt;Vaga {id}&lt;/<span class="ty">h1</span>&gt;;
 }</div>
     <ul class="clean" style="margin-top:18px">
+      <li><strong>{ params }</strong> — as chaves tiram a caixinha de dentro das props. <b>Guarde essas chaves</b>: o próximo slide é sobre elas.</li>
       <li><strong>params</strong> é a caixinha com o que veio na URL. A chave dentro dela tem o nome que está entre colchetes.</li>
+      <li>A parte depois dos <span class="code-inline">:</span> é só o <b>tipo</b> — você está avisando ao TypeScript o que vem na caixinha.</li>
       <li><strong>await</strong> quer dizer "espere chegar". A caixinha demora um instante pra ficar pronta, e essa palavra segura a fila até lá.</li>
       <li>Pra usar <span class="code-inline">await</span>, a função precisa de <span class="code-inline">async</span> na frente. Vêm sempre em par.</li>
     </ul>
     <p class="note">Não precisa entender <strong>por que</strong> ela demora — isso é assunto da aula 04. Hoje basta saber o sintoma: se esquecer o <span class="code-inline">await</span>, o Next reclama ou aparece <span class="code-inline">[object Promise]</span> na tela em vez do valor.</p>
   </section>
 
-  <!-- 8 PARADA: ARQUIVOS -->
+  <!-- 8 ARMADILHA DAS CHAVES -->
+  <section class="slide">
+    <div class="eyebrow">a pegadinha · a que mais me chamam pra socorrer</div>
+    <h2>O valor <span class="grad">some</span> — e ninguém avisa</h2>
+    <div class="grid2">
+      <div class="card no">
+        <h3 class="key">🚫 Sem as chaves</h3>
+<div class="code" style="margin-top:12px"><span class="fn">PaginaDaVaga</span>(params: …)</div>
+        <p style="margin-top:14px">Na tela aparece <strong>"Vaga"</strong> sozinho. Sem erro vermelho, sem nada no terminal.</p>
+      </div>
+      <div class="card ok">
+        <h3 class="grn">✅ Com as chaves</h3>
+<div class="code" style="margin-top:12px"><span class="fn">PaginaDaVaga</span>({ params }: …)</div>
+        <p style="margin-top:14px">Na tela aparece <strong>"Vaga 12"</strong>.</p>
+      </div>
+    </div>
+    <ul class="clean" style="margin-top:16px">
+      <li>O Next entrega uma <strong>sacola</strong> com a caixinha dentro — <span class="code-inline">{ params, searchParams }</span>. As <strong>chaves</strong> são o que tira o <span class="code-inline">params</span> de dentro dela.</li>
+      <li>Sem as chaves, você deu o apelido <span class="code-inline">params</span> <strong>pra sacola inteira</strong>. O <span class="code-inline">id</span> sai <span class="code-inline">undefined</span> — e <span class="code-inline">undefined</span> o React <strong>não escreve na tela</strong>.</li>
+    </ul>
+    <div class="card ok" style="margin-top:18px">
+      <h3 class="grn">A vacina: deixe o Next escrever o tipo</h3>
+<div class="code" style="margin-top:12px"><span class="kw">export default async function</span> <span class="fn">PaginaDaVaga</span>(props: <span class="ty">PageProps</span>&lt;<span class="st">"/vagas/[id]"</span>&gt;) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> props.params;
+}</div>
+      <p style="margin-top:12px">Aqui não tem chave pra esquecer — e se errar, o editor <b>sublinha na hora</b>.</p>
+    </div>
+    <p class="note">Pior que o do <span class="code-inline">await</span>: o <span class="code-inline">[object Promise]</span> pelo menos aparece. Este deixa um buraco calado, e o <span class="code-inline">build</span> passa igual. <strong>Sumiu o valor e o terminal está limpo? Confira as chaves antes do await.</strong></p>
+  </section>
+
+  <!-- 9 PARADA: ARQUIVOS -->
   <section class="slide parada">
     <div class="badge">parte 2 · os nomes reservados</div>
     <h1>Arquivos que o Next já conhece</h1>
   </section>
 
-  <!-- 9 TABELA DOS ARQUIVOS -->
+  <!-- 10 TABELA DOS ARQUIVOS -->
   <section class="slide">
     <div class="eyebrow">o conceito · guarde esta tabela</div>
     <h2>O nome do arquivo <span class="grad">é</span> a instrução</h2>
@@ -279,7 +315,7 @@
     <p class="note">Cada um vale só pra <strong>pasta onde está e as de dentro dela</strong>. Um <span class="code-inline">error.tsx</span> em <span class="code-inline">app/vagas/</span> não cobre o resto do site.</p>
   </section>
 
-  <!-- 10 LAYOUTS ANINHADOS -->
+  <!-- 11 LAYOUTS ANINHADOS -->
   <section class="slide">
     <div class="eyebrow">layout · agora em camadas</div>
     <h2>Moldura dentro de moldura</h2>
@@ -300,7 +336,7 @@
     <p class="note">Foi o gancho que ficou no fim da aula passada: "por que a página não pisca ao navegar?" — <strong>é isto</strong>. O Next troca só a parte que mudou.</p>
   </section>
 
-  <!-- 11 LOADING -->
+  <!-- 12 LOADING -->
   <section class="slide">
     <div class="eyebrow">loading · o "peraí, tô indo"</div>
     <h2>Uma tela de espera de graça</h2>
@@ -316,7 +352,7 @@
     <p class="note">É a diferença entre uma tela branca e um site que responde. Custa três linhas.</p>
   </section>
 
-  <!-- 12 ERROR -->
+  <!-- 13 ERROR -->
   <section class="slide">
     <div class="eyebrow">error · quando alguma coisa quebra</div>
     <h2>Um erro não derruba o site inteiro</h2>
@@ -334,7 +370,7 @@
     <p class="note"><strong>Sobre o <span class="code-inline">"use client"</span>:</strong> essa linha diz "este arquivo também roda no navegador da pessoa". Por que ela existe e quando usar é a <strong>aula 03 inteira</strong>. Hoje o combinado é: onde eu escrever essa linha, escreva também — e siga.</p>
   </section>
 
-  <!-- 13 NOT FOUND -->
+  <!-- 14 NOT FOUND -->
   <section class="slide">
     <div class="eyebrow">not-found · quando não existe</div>
     <h2>O 404 que você escreve</h2>
@@ -364,7 +400,7 @@
     <p class="note">Sem isso, <span class="code-inline">/vagas/banana</span> mostraria uma página quebrada. Com isso, mostra uma tela sua, com o cabeçalho no lugar e um caminho de volta. <strong>Rota dinâmica sem 404 é rota dinâmica pela metade.</strong></p>
   </section>
 
-  <!-- 14 COMO SE ENCAIXAM -->
+  <!-- 15 COMO SE ENCAIXAM -->
   <section class="slide">
     <div class="eyebrow">o encaixe · quem envolve quem</div>
     <h2>A ordem das camadas</h2>
@@ -381,7 +417,7 @@
     <p class="note">Consequência prática: um erro dentro do <span class="code-inline">layout.tsx</span> <strong>não</strong> é pego pelo <span class="code-inline">error.tsx</span> da mesma pasta, porque o layout está por fora dele. Quem pega é o error da pasta de cima.</p>
   </section>
 
-  <!-- 15 ROUTE GROUPS -->
+  <!-- 16 ROUTE GROUPS -->
   <section class="slide">
     <div class="eyebrow">route group · organizar sem mudar o endereço</div>
     <h2>A pasta entre parênteses</h2>
@@ -394,7 +430,7 @@
     <p class="note">Não é <span class="code-inline">/institucional/termos</span> — é <span class="code-inline">/termos</span> mesmo. Serve pra dar um layout diferente pra um grupo de páginas, ou só pra arrumar a casa quando <span class="code-inline">app/</span> começa a ficar cheia.</p>
   </section>
 
-  <!-- 16 CATCH-ALL -->
+  <!-- 17 CATCH-ALL -->
   <section class="slide">
     <div class="eyebrow">catch-all · quando você não sabe quantos pedaços vêm</div>
     <h2>Três pontinhos, todos os níveis</h2>
@@ -408,7 +444,7 @@
     <p class="note">Serve pra documentação, categorias aninhadas, caminho de migalhas. No projeto de vocês provavelmente não vai aparecer — mas quando aparecer numa vaga de emprego, você já viu.</p>
   </section>
 
-  <!-- 17 PARALELAS E INTERCEPTADAS -->
+  <!-- 18 PARALELAS E INTERCEPTADAS -->
   <section class="slide">
     <div class="eyebrow">só pra você conhecer o nome · não cai no desafio</div>
     <h2>Existem mais duas, e são avançadas</h2>
@@ -425,13 +461,13 @@
     <p class="note"><strong>Nenhuma das duas entra no desafio.</strong> Estou mostrando só pra que o nome não seja novidade quando você esbarrar nele — e pra você saber que dá pra fazer aquele modal do Instagram sem gambiarra.</p>
   </section>
 
-  <!-- 18 PARADA: NAVEGACAO -->
+  <!-- 19 PARADA: NAVEGACAO -->
   <section class="slide parada">
     <div class="badge">parte 3 · andar entre as telas</div>
     <h1>Navegação</h1>
   </section>
 
-  <!-- 19 LINK -->
+  <!-- 20 LINK -->
   <section class="slide">
     <div class="eyebrow">Link · o que ele faz que o &lt;a&gt; não faz</div>
     <h2>Ele adianta o serviço</h2>
@@ -451,7 +487,7 @@
     <p class="note">Esse adiantamento chama <strong>prefetch</strong>, e só acontece <strong>no site publicado</strong> — em <span class="code-inline">npm run dev</span> ele fica desligado. Se a navegação parecer lenta na sua máquina e rápida na Vercel, é isso, e está tudo certo.</p>
   </section>
 
-  <!-- 20 USEPATHNAME -->
+  <!-- 21 USEPATHNAME -->
   <section class="slide">
     <div class="eyebrow">link ativo · marcar em que página a pessoa está</div>
     <h2>usePathname: onde eu estou?</h2>
@@ -474,7 +510,7 @@
     <p class="note">De novo o <span class="code-inline">"use client"</span>: saber em que endereço a pessoa está só é possível <strong>no navegador dela</strong>. Por isso este arquivo precisa da linha. Na aula 03 isso vira uma regra clara, não um combinado.</p>
   </section>
 
-  <!-- 21 USEROUTER -->
+  <!-- 22 USEROUTER -->
   <section class="slide">
     <div class="eyebrow">useRouter · navegar sem clique num link</div>
     <h2>Quando quem manda é o código</h2>
@@ -496,7 +532,7 @@
     <p class="note"><strong>Regra:</strong> se dá pra usar <span class="code-inline">&lt;Link&gt;</span>, use <span class="code-inline">&lt;Link&gt;</span>. O <span class="code-inline">useRouter</span> é pra quando não existe link pra clicar — depois de enviar um formulário, por exemplo. Vem de <span class="code-inline">next/navigation</span>, nunca de <span class="code-inline">next/router</span> (esse é o Next antigo).</p>
   </section>
 
-  <!-- 22 AQUECIMENTO -->
+  <!-- 23 AQUECIMENTO -->
   <section class="slide">
     <div class="eyebrow">joga no chat · 3 minutos</div>
     <h2>Aquecimento</h2>
@@ -509,7 +545,7 @@
     <p class="note">Respostas: <span class="code-inline">app/empresas/[slug]/page.tsx</span> · <span class="code-inline">app/vagas/loading.tsx</span> · <span class="code-inline">app/(institucional)/termos/page.tsx</span>, com um <span class="code-inline">layout.tsx</span> dentro do grupo.</p>
   </section>
 
-  <!-- 23 CONFIRA COM A IA -->
+  <!-- 24 CONFIRA COM A IA -->
   <section class="slide">
     <div class="eyebrow">agora confira · use a IA a seu favor</div>
     <h2>Pergunte — e cobre a explicação</h2>
@@ -529,7 +565,7 @@ Não use nenhum termo técnico sem explicar na mesma frase.</div>
     <p class="note">A penúltima linha é o pulo do gato. <strong>Muito material de Next na internet é de versão antiga</strong>, e a IA aprendeu com ele. Dizer a versão logo no começo evita metade das respostas erradas.</p>
   </section>
 
-  <!-- 24 A IA ERRA -->
+  <!-- 25 A IA ERRA -->
   <section class="slide">
     <div class="eyebrow">importante · como saber se a resposta é velha</div>
     <h2>Os sinais de resposta desatualizada</h2>
@@ -555,13 +591,13 @@ Não use nenhum termo técnico sem explicar na mesma frase.</div>
     <p class="note">Achou uma diferença e não sabe quem está certo? <strong>Me pergunte.</strong> Isso não é falha sua — é a internet estar cheia de material de 2022 que ninguém marcou como antigo.</p>
   </section>
 
-  <!-- 25 PARADA: PROJETO -->
+  <!-- 26 PARADA: PROJETO -->
   <section class="slide parada">
     <div class="badge">marco do projeto · agora vale nota</div>
     <h1>Leque de Vagas</h1>
   </section>
 
-  <!-- 26 BRIEFING -->
+  <!-- 27 BRIEFING -->
   <section class="slide">
     <div class="eyebrow">o projeto do semestre · briefing</div>
     <h2>O que a gente vai construir</h2>
@@ -574,7 +610,7 @@ Não use nenhum termo técnico sem explicar na mesma frase.</div>
     <p class="note">O briefing completo — telas, dados de cada vaga, o que entra em cada checkpoint e <strong>a rubrica de avaliação</strong> — está na página do curso, no botão <strong>Briefing do projeto</strong>. Leiam em equipe ainda esta semana.</p>
   </section>
 
-  <!-- 27 MAPA DE ROTAS -->
+  <!-- 28 MAPA DE ROTAS -->
   <section class="slide">
     <div class="eyebrow">o projeto · o mapa que vocês vão montar</div>
     <h2>As rotas do Leque de Vagas</h2>
@@ -598,7 +634,7 @@ Não use nenhum termo técnico sem explicar na mesma frase.</div>
     <p class="note">Cada linha aí é uma coisa que a gente viu hoje. <strong>É literalmente o desafio da semana</strong> — e é a fundação sobre a qual as outras 17 aulas vão construir.</p>
   </section>
 
-  <!-- 28 DESAFIO -->
+  <!-- 29 DESAFIO -->
   <section class="slide">
     <div class="eyebrow">desafio · até a próxima quarta</div>
     <h2>O esqueleto do Leque de Vagas</h2>
@@ -614,7 +650,7 @@ Não use nenhum termo técnico sem explicar na mesma frase.</div>
     <p class="note">Enunciado completo, código de referência e modelo de resposta na página da aula. <strong>Este é o primeiro entregável da equipe</strong> — combinem quem faz o quê ainda hoje.</p>
   </section>
 
-  <!-- 29 FIM -->
+  <!-- 30 FIM -->
   <section class="slide center">
     <div class="big-emoji">🗺️</div>
     <h1>O mapa <span class="grad">do site</span></h1>

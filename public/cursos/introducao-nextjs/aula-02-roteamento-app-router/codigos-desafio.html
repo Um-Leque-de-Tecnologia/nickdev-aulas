@@ -672,6 +672,11 @@ tr:last-child td{border-bottom:0}
 <span class="out">→ faltou await antes de params.
    e confira o async na frente da função.</span>
 
+<span class="cm"># a pagina abre mas o valor nao aparece ("Vaga" sem o numero)</span>
+<span class="out">→ faltaram as chaves: ({ params }: { params: … }), nao (params: …).
+   sem elas params vira a sacola de props inteira e o id sai undefined.
+   nao da erro nenhum e o build passa — por isso demora pra achar.</span>
+
 <span class="cm"># 404 na rota dinamica que voce criou</span>
 <span class="out">→ a pasta esta com colchetes mesmo? [id], nao (id) nem id.
    e o arquivo dentro se chama exatamente page.tsx?</span>
