@@ -22,13 +22,17 @@ type Aula = {
   materiais?: Material[];
 };
 
-function materiaisDaAula(base: string, guia: string): Material[] {
+function materiaisDaAula(
+  base: string,
+  guia: string,
+  previa?: string,
+): Material[] {
   return [
     { href: `${base}/slides.html`, label: "▶ Slides da aula", primary: true },
     { href: `${base}/${guia}`, label: "📘 Guia de conteúdo" },
     { href: `${base}/desafio.html`, label: "🎯 Desafio técnico" },
     { href: `${base}/codigos-desafio.html`, label: "🧩 Código do desafio" },
-    { href: `${base}/modelo-resposta.html`, label: "🧑‍💻 Modelo de resposta" },
+    ...(previa ? [{ href: previa, label: "👁️ Prévia da resposta" }] : []),
     { href: `${base}/roteiro-aula.html`, label: "🛠️ Roteiro da aula" },
     { href: `${PROJETO}/brief.html`, label: "🎟️ Briefing do projeto" },
   ];
@@ -51,7 +55,7 @@ const FUNDAMENTOS: Aula[] = [
         bem diferentes — e que volta nas aulas 03 e 10.
       </>
     ),
-    materiais: materiaisDaAula(AULA_01, "guia-html-css.html"),
+    materiais: materiaisDaAula(AULA_01, "guia-html-css.html", `${AULA_01}/previa/index.html`),
   },
   {
     n: "02",

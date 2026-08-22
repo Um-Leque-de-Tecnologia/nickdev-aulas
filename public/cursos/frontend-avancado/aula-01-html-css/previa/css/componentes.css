@@ -1,0 +1,409 @@
+/* ==========================================================================
+   componentes.css — as peças da interface.
+   Está na camada "componentes", que vem DEPOIS de "base" na ordem
+   declarada no <head>. Por isso vence base.css mesmo com seletor mais
+   fraco — e é assim que o projeto tem zero !important.
+   ========================================================================== */
+
+@layer componentes {
+  /* --- pular para o conteúdo ------------------------------------------- */
+  /* Fora da tela, mas ainda focável. display:none o removeria da ordem de
+     foco, e o link deixaria de existir para quem mais precisa dele. */
+  .pular {
+    position: absolute;
+    left: -9999px;
+    z-index: 20;
+    background: var(--cor-marca);
+    color: var(--cor-fundo);
+    padding: var(--esp-1) var(--esp-2);
+    border-radius: 0 0 var(--raio) 0;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .pular:focus {
+    left: 0;
+    top: 0;
+  }
+
+  /* --- utilitário: some da tela, permanece para o leitor de tela ------- */
+  .so-leitor {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* --- cabeçalho -------------------------------------------------------- */
+  .cabecalho {
+    border-bottom: var(--borda);
+    background: var(--cor-fundo);
+  }
+  .cabecalho__interno {
+    width: min(100% - var(--esp-3) * 2, var(--largura-pagina));
+    margin-inline: auto;
+    padding-block: var(--esp-2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--esp-2);
+  }
+  .cabecalho h1 {
+    font-size: 1.15rem;
+    margin-inline-end: auto;
+  }
+  .cabecalho h1 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .cabecalho nav {
+    display: flex;
+    gap: var(--esp-2);
+  }
+  .cabecalho nav a {
+    color: var(--cor-texto-2);
+    text-decoration: none;
+    padding-block: var(--esp-1);
+  }
+  .cabecalho nav a:hover,
+  .cabecalho nav a[aria-current="page"] {
+    color: var(--cor-texto);
+  }
+  .cabecalho nav a[aria-current="page"] {
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 var(--cor-marca);
+  }
+
+  /* --- botão de tema, sem JavaScript ----------------------------------- */
+  /* O checkbox real fica escondido (.so-leitor) e a label é o botão.
+     O :has() lá no tokens.css lê o estado dele e repinta o site inteiro. */
+  .btn-tema {
+    cursor: pointer;
+    border: var(--borda);
+    border-radius: 999px;
+    padding: var(--esp-1) var(--esp-2);
+    font-size: 0.875rem;
+    color: var(--cor-texto-2);
+    background: var(--cor-superficie);
+    user-select: none;
+  }
+  .btn-tema:hover {
+    color: var(--cor-texto);
+    border-color: var(--cor-marca);
+  }
+  /* O foco vive no input escondido, então espelhamos na label. */
+  #alternar-tema:focus-visible + .btn-tema {
+    outline: 2px solid var(--cor-marca);
+    outline-offset: 2px;
+  }
+
+  /* --- estrutura da página --------------------------------------------- */
+  .conteudo {
+    width: min(100% - var(--esp-3) * 2, var(--largura-pagina));
+    margin-inline: auto;
+    padding-block: var(--esp-4) var(--esp-5);
+  }
+  .secao + .secao {
+    margin-block-start: var(--esp-5);
+  }
+  .secao__titulo {
+    margin-block-end: var(--esp-3);
+  }
+
+  .rodape {
+    border-top: var(--borda);
+    color: var(--cor-texto-2);
+    font-size: 0.9rem;
+  }
+  .rodape__interno {
+    width: min(100% - var(--esp-3) * 2, var(--largura-pagina));
+    margin-inline: auto;
+    padding-block: var(--esp-3);
+  }
+
+  /* --- lista de eventos -------------------------------------------------- */
+  .lista-eventos {
+    display: grid;
+    gap: var(--esp-3);
+    list-style: none; /* tira a bolinha, mantém a semântica de lista */
+    padding: 0;
+
+    /* ⭐ auto-fit + minmax: 1 coluna no celular, 2 no tablet, 3 no monitor.
+       Sem uma media query sequer.
+       O min(280px, 100%) evita rolagem horizontal em telas de 320px —
+       sem ele, 280px + padding estoura e aparece barra lateral. */
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+
+    /* ⭐ declara que os FILHOS podem medir ESTE elemento.
+       Vai no pai, nunca no card que se quer estilizar. */
+    container-type: inline-size;
+    container-name: lista;
+  }
+
+  /* --- card de evento ---------------------------------------------------- */
+  .card-evento {
+    background: var(--cor-superficie);
+    border: var(--borda);
+    border-radius: var(--raio);
+    overflow: hidden;
+    height: 100%; /* cards da mesma linha ficam da mesma altura */
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+  }
+  .card-evento:hover {
+    border-color: var(--cor-marca);
+    transform: translateY(-2px);
+  }
+  .card-evento__capa {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--cor-superficie-2);
+  }
+  .card-evento__corpo {
+    padding: var(--esp-3);
+    display: flex; /* uma direção → flex */
+    flex-direction: column;
+    gap: var(--esp-1);
+    flex: 1;
+  }
+  .card-evento h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .card-evento h3 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .card-evento__resumo {
+    color: var(--cor-texto-2);
+    font-size: 0.95rem;
+  }
+  .card-evento__meta {
+    color: var(--cor-texto-2);
+    font-size: 0.85rem;
+    margin-block-start: auto; /* empurra a meta para o rodapé do card */
+    padding-block-start: var(--esp-1);
+  }
+
+  /* ⭐ :has() — estiliza o PAI pelo que existe dentro dele.
+     Antes disso, isto exigia JavaScript adicionando uma classe. */
+  .card-evento:has(.selo-gratuito) {
+    border-color: color-mix(in srgb, var(--cor-ok) 45%, transparent);
+  }
+
+  .selo {
+    align-self: start;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+  }
+  .selo-gratuito {
+    color: var(--cor-ok);
+    background: var(--cor-ok-suave);
+  }
+
+  /* ⭐ container query: reage ao espaço que o card RECEBEU, não ao tamanho
+     da janela. É o que permite a mesma lista funcionar no meio largo da
+     página e numa barra lateral estreita, sem prop e sem classe extra. */
+  @container lista (min-width: 30rem) {
+    .card-evento {
+      display: grid;
+      grid-template-columns: 11rem 1fr;
+    }
+    .card-evento__capa {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+  }
+
+  /* --- estado vazio, só com CSS ---------------------------------------- */
+  .lista-eventos:not(:has(.card-evento)) {
+    display: grid;
+    place-items: center;
+    min-height: 30vh;
+    border: 1px dashed var(--cor-linha);
+    border-radius: var(--raio);
+  }
+  .lista-eventos:not(:has(.card-evento))::after {
+    content: "Nenhum evento encontrado.";
+    color: var(--cor-texto-2);
+  }
+
+  /* --- busca e filtros --------------------------------------------------- */
+  .busca {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-1);
+    margin-block-end: var(--esp-3);
+  }
+  .busca input {
+    flex: 1 1 16rem;
+    padding: var(--esp-1) var(--esp-2);
+    border: var(--borda);
+    border-radius: var(--raio-p);
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+  }
+  .busca button {
+    padding: var(--esp-1) var(--esp-3);
+    border: 0;
+    border-radius: var(--raio-p);
+    background: var(--cor-marca);
+    color: var(--cor-fundo);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .filtros {
+    border: var(--borda);
+    border-radius: var(--raio);
+    padding: var(--esp-2) var(--esp-3);
+    margin-block-end: var(--esp-3);
+  }
+  .filtros legend {
+    font-weight: 600;
+    padding-inline: var(--esp-1);
+  }
+  .filtros__opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-2);
+  }
+  .filtros label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--cor-texto-2);
+    cursor: pointer;
+  }
+
+  /* --- página de detalhe ------------------------------------------------- */
+  .evento {
+    display: grid;
+    gap: var(--esp-4);
+    grid-template-columns: 1fr;
+  }
+  @media (width >= 60rem) {
+    .evento {
+      grid-template-columns: 2fr 1fr;
+      align-items: start;
+    }
+  }
+  .evento__capa {
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    object-fit: cover;
+    border-radius: var(--raio);
+    background: var(--cor-superficie-2);
+    margin-block-end: var(--esp-3);
+  }
+  .evento__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-1);
+    margin-block: var(--esp-2);
+    padding: 0;
+    list-style: none;
+  }
+  .evento__tags .selo {
+    color: var(--cor-texto-2);
+  }
+  .evento__texto > * + * {
+    margin-block-start: var(--esp-2);
+  }
+
+  .ficha {
+    background: var(--cor-superficie);
+    border: var(--borda);
+    border-radius: var(--raio);
+    padding: var(--esp-3);
+    position: sticky;
+    top: var(--esp-2);
+  }
+  .ficha dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--esp-1) var(--esp-2);
+    margin-block: var(--esp-2);
+  }
+  .ficha dt {
+    color: var(--cor-texto-2);
+    font-size: 0.9rem;
+  }
+  .ficha dd {
+    margin: 0;
+    font-weight: 500;
+  }
+  .ficha__acao {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: var(--esp-2);
+    border: 0;
+    border-radius: var(--raio-p);
+    background: var(--cor-marca);
+    color: var(--cor-fundo);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* --- destaque da home -------------------------------------------------- */
+  .hero {
+    padding-block: var(--esp-4);
+  }
+  .hero p {
+    color: var(--cor-texto-2);
+    font-size: clamp(1rem, 1.5vw + 0.5rem, 1.25rem);
+    margin-block-start: var(--esp-2);
+  }
+  .hero__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-2);
+    margin-block-start: var(--esp-3);
+  }
+  .botao {
+    display: inline-block;
+    padding: var(--esp-1) var(--esp-3);
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    border: var(--borda);
+    color: var(--cor-texto);
+  }
+  .botao--principal {
+    background: var(--cor-marca);
+    color: var(--cor-fundo);
+    border-color: transparent;
+  }
+
+  /* --- a coluna estreita que prova o container query --------------------- */
+  .colunas {
+    display: grid;
+    gap: var(--esp-4);
+    grid-template-columns: 1fr;
+  }
+  @media (width >= 60rem) {
+    .colunas {
+      grid-template-columns: 1fr 20rem;
+    }
+  }
+  .lateral h2 {
+    font-size: 1.1rem;
+    margin-block-end: var(--esp-2);
+  }
+  .nota {
+    font-size: 0.85rem;
+    color: var(--cor-texto-2);
+    margin-block-start: var(--esp-2);
+  }
+}

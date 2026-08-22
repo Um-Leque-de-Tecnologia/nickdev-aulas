@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Recife · Meetup #42 — Leque de Eventos</title>
+<meta name="description" content="Uma noite sobre Signals e o futuro da reatividade. 12 de setembro, 19h, Recife.">
+
+<style>@layer reset, base, componentes, utilitarios;</style>
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/componentes.css">
+</head>
+<body>
+
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="cabecalho">
+  <div class="cabecalho__interno">
+    <h1><a href="index.html">🎟️ Leque de Eventos</a></h1>
+    <nav aria-label="Principal">
+      <a href="index.html">Início</a>
+      <a href="eventos.html">Eventos</a>
+    </nav>
+    <input class="so-leitor" type="checkbox" id="alternar-tema">
+    <label class="btn-tema" for="alternar-tema">🌗 Alternar tema</label>
+  </div>
+</header>
+
+<main id="conteudo" class="conteudo">
+
+  <!-- Um nav secundário precisa de aria-label próprio para não se confundir
+       com o principal na lista de landmarks. -->
+  <nav aria-label="Trilha" style="margin-block-end:var(--esp-3)">
+    <a href="eventos.html">← Todos os eventos</a>
+  </nav>
+
+  <div class="evento">
+
+    <article class="evento__texto">
+      <img class="evento__capa" src="img/react-recife.svg" alt=""
+           width="960" height="420" decoding="async">
+
+      <h2 style="font-size:clamp(1.9rem,4vw + 1rem,2.6rem);letter-spacing:-.02em">
+        React Recife · Meetup #42
+      </h2>
+
+      <!-- Lista de características: é uma lista, então é <ul>. -->
+      <ul class="evento__tags">
+        <li class="selo">Front-end</li>
+        <li class="selo">Presencial</li>
+        <li class="selo">Intermediário</li>
+        <li class="selo selo-gratuito">Gratuito</li>
+      </ul>
+
+      <p>
+        Uma noite sobre Signals e o futuro da reatividade no front-end. Duas
+        palestras curtas, espaço para perguntas e pizza no fim — do jeito que
+        meetup de comunidade tem que ser.
+      </p>
+
+      <h3>O que vai rolar</h3>
+      <p>
+        Na primeira palestra, um panorama de como os frameworks convergiram para
+        um mesmo modelo reativo nos últimos anos, e o que isso muda no código do
+        dia a dia. Na segunda, a migração de um app de verdade para zoneless —
+        incluindo o que deu errado no caminho.
+      </p>
+
+      <h3>Para quem é</h3>
+      <p>
+        Pessoas que já escrevem componentes em algum framework e querem entender
+        o que está acontecendo por baixo. Não é preciso conhecer Angular: os
+        conceitos valem para React, Vue e Svelte também.
+      </p>
+
+      <h3>Como chegar</h3>
+      <p>
+        O encontro acontece no auditório do Porto Digital, com entrada pela
+        Rua do Apolo. O prédio tem acesso por rampa e elevador, e o auditório
+        tem espaço reservado para cadeira de rodas na primeira fileira.
+      </p>
+    </article>
+
+    <!-- A ficha técnica é uma lista de definições: cada rótulo tem um valor.
+         <dl> descreve exatamente isso, e o leitor de tela anuncia os pares. -->
+    <aside class="ficha" aria-labelledby="tit-ficha">
+      <h3 id="tit-ficha">Ficha do evento</h3>
+
+      <dl>
+        <dt>Quando</dt>
+        <dd><time datetime="2026-09-12T19:00">12 de setembro, 19h</time></dd>
+
+        <dt>Duração</dt>
+        <dd><time datetime="PT3H">3 horas</time></dd>
+
+        <dt>Onde</dt>
+        <dd>Porto Digital · Recife</dd>
+
+        <dt>Organiza</dt>
+        <dd><a href="#">React Recife</a></dd>
+
+        <dt>Vagas</dt>
+        <dd>120</dd>
+
+        <dt>Investimento</dt>
+        <dd>Gratuito</dd>
+      </dl>
+
+      <!-- É um link disfarçado de botão? Não: leva para outro lugar,
+           então é <a>. Botão seria se fizesse algo aqui mesmo. -->
+      <a class="ficha__acao" href="#">Garantir minha vaga</a>
+    </aside>
+
+  </div>
+
+  <section class="secao" aria-labelledby="tit-relacionados">
+    <h2 class="secao__titulo" id="tit-relacionados">Do mesmo organizador</h2>
+
+    <ul class="lista-eventos">
+      <li>
+        <article class="card-evento">
+          <div class="card-evento__corpo">
+            <h3><a href="evento.html">React Recife · Meetup #41</a></h3>
+            <p class="card-evento__resumo">
+              Server Components na prática, com um estudo de caso de migração.
+            </p>
+            <p class="card-evento__meta">
+              <time datetime="2026-08-08T19:00">8 de agosto, 19h</time>
+              · Recife · Presencial
+            </p>
+            <p class="selo selo-gratuito">Gratuito</p>
+          </div>
+        </article>
+      </li>
+      <li>
+        <article class="card-evento">
+          <div class="card-evento__corpo">
+            <h3><a href="evento.html">React Recife · Especial de carreira</a></h3>
+            <p class="card-evento__resumo">
+              Mesa redonda com pessoas que migraram de área nos últimos dois anos.
+            </p>
+            <p class="card-evento__meta">
+              <time datetime="2026-10-17T19:00">17 de outubro, 19h</time>
+              · Recife · Presencial
+            </p>
+            <p class="selo selo-gratuito">Gratuito</p>
+          </div>
+        </article>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="rodape__interno">
+    <p>
+      Leque de Eventos · protótipo estático da entrega 0 —
+      curso de Frontend Avançado · NickDev
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
