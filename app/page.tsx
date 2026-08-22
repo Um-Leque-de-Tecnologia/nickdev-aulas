@@ -73,6 +73,17 @@ export default function Home() {
           </p>
           <div className="meta">16 aulas de 4h · em breve</div>
         </Link>
+
+        <Link className="card" href="/cursos/nextjs-ia">
+          <span className="num">06</span>
+          <h3>Next.js + IA</h3>
+          <p>
+            Simulação de trabalho em 8 aulas: você entra num time, pega tickets
+            do backlog e entrega por Pull Request — do primeiro bug até uma
+            feature de IA publicada e defendida num Demo Day.
+          </p>
+          <div className="meta">8 aulas · 4 sprints · em breve</div>
+        </Link>
       </div>
 
       <Footer />
