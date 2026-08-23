@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 03 — Livro &amp; Leitor · NickDev</title>
+<meta name="description" content="Desafio da aula 03: modele e implemente as classes Livro e Leitor, com atributos, métodos, new, parâmetros, retorno e um diagrama de classes simples.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{
+  position:fixed; top:16px; left:18px; z-index:100; display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--mono); font-size:12.5px; color:var(--text-2);
+  background:rgba(16,13,27,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  border:1px solid var(--line-strong); padding:7px 13px; border-radius:100px; transition:.2s;
+}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:860px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:60ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{
+  display:flex;gap:16px;align-items:flex-start;
+  background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);
+  border-radius:14px;padding:22px 24px;margin-top:38px;
+}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 20px}
+
+.step{
+  position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:24px 26px 24px 30px;margin-bottom:16px;
+}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.step .n{
+  font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);
+  border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step h3{font-size:19px;font-weight:600}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step p + p{margin-top:8px}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:10px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{
+  background:#0b0913;border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;margin-top:14px;overflow-x:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;
+}
+pre .kw{color:#F24487}    /* palavra-chave */
+pre .ty{color:#7B4FD0}    /* tipo/classe */
+pre .st{color:#A98CE0}    /* string/valor */
+pre .fn{color:#E88BB8}    /* método/chamada */
+pre .cm{color:#6f6a83}    /* comentário */
+.diagrama{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.7;color:#d8d3e6;white-space:pre}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+/* checklist */
+.check{list-style:none;display:grid;gap:10px}
+.check li{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start;
+}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+
+/* CTA */
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;
+  padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s;
+}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+
+@media(max-width:560px){
+  .goal{flex-direction:column;gap:10px}
+  .step{padding:22px 20px}
+}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true">
+  <span class="glow magenta"></span>
+  <span class="glow purple"></span>
+</div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Desafio · Aula 03</div>
+  <h1>Livro &amp; Leitor <span class="grad">ganham vida</span> 📚</h1>
+  <p class="lead">
+    Lembra da pergunta da aula 01 — "como você organizaria o código de um
+    sistema de biblioteca?" Chegou a hora de responder de verdade: modele e
+    implemente as classes <code>Livro</code> e <code>Leitor</code>, crie
+    objetos com <code>new</code> e faça os dois conversarem através de
+    parâmetros e retorno.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo</h3>
+      <p>Sair da teoria e escrever seu primeiro par de classes de verdade. São cinco coisas:</p>
+      <ol style="margin-top:8px">
+        <li>Desenhar um <b>diagrama de classes</b> simples, antes de codar</li>
+        <li>Escrever a classe <code>Livro</code>, com atributos e métodos</li>
+        <li>Escrever a classe <code>Leitor</code>, que <b>conhece</b> um <code>Livro</code></li>
+        <li>Implementar métodos com <b>parâmetro</b> (um objeto) e <b>retorno</b></li>
+        <li>Escrever um <code>main</code> que cria e usa os objetos, e mostra tudo no terminal</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">📖</span>
+    <div>
+      <h3>Travou numa palavra?</h3>
+      <p>Instância, referência, null, parâmetro, retorno — se alguma dessas
+      aparecer aqui e você não lembrar o que é, o guia da aula tem um
+      <a href="guia-classes-objetos.html#dicionario" style="color:var(--pink-light);text-decoration:underline">dicionário
+      com todas elas em português simples</a>.</p>
+    </div>
+  </div>
+
+  <div class="label">Passo a passo</div>
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><h3>Desenhe o diagrama primeiro</h3></div>
+    <p>Antes de abrir a IDE, desenhe (no papel, no caderno, ou num app tipo
+    Excalidraw) duas caixas: <code>Livro</code> e <code>Leitor</code>. Em cada
+    uma, liste os atributos e os métodos que você imagina que a classe vai
+    ter. Puxe uma linha entre as duas mostrando que <code>Leitor</code>
+    conhece um <code>Livro</code>.</p>
+<div class="diagrama">┌─────────────────┐        ┌─────────────────┐
+│      Livro       │        │      Leitor       │
+├─────────────────┤        ├─────────────────┤
+│ titulo            │        │ nome                │
+│ autor              │        │ livroAtual: Livro   │
+│ anoPublicacao      │        └─────────────────┘
+│ disponivel         │                  │
+├─────────────────┤                  │ conhece um Livro
+│ emprestar()        │◄─────────────────┘
+│ devolver()          │
+│ mostrarFicha()      │
+└─────────────────┘</div>
+    <p class="tip"><b>Pode ser bem simples.</b> O objetivo aqui não é ficar bonito, é <b>pensar antes de codar</b>. Uma foto do desenho no papel resolve — o guia da aula tem esse mesmo diagrama, se quiser conferir.</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><h3>Crie a classe Livro</h3></div>
+    <p>Crie o arquivo <code>Livro.java</code> com os atributos e pelo menos
+    dois métodos: um que <b>não</b> devolve nada (<code>void</code>) e um que
+    devolve um valor:</p>
+<pre><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="kw">int</span> anoPublicacao;
+  <span class="kw">boolean</span> disponivel;
+
+  <span class="kw">void</span> <span class="fn">mostrarFicha</span>() {
+    <span class="cm">// TODO: imprimir titulo, autor e anoPublicacao</span>
+  }
+
+  <span class="kw">boolean</span> <span class="fn">emprestar</span>() {
+    <span class="cm">// TODO: se disponivel, marcar como emprestado e devolver true</span>
+    <span class="cm">// TODO: senão, devolver false</span>
+    <span class="kw">return</span> <span class="kw">false</span>;
+  }
+
+  <span class="kw">void</span> <span class="fn">devolver</span>() {
+    <span class="cm">// TODO: marcar disponivel = true</span>
+  }
+}</pre>
+    <p class="tip"><b>Sem construtor, de propósito.</b> Ainda não vimos construtor (isso é aula 04). Os objetos vão ser criados com <code>new Livro()</code> vazio, e os atributos preenchidos direto, um a um.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><h3>Crie a classe Leitor</h3></div>
+    <p>Crie o arquivo <code>Leitor.java</code>. O atributo <code>livroAtual</code>
+    é do tipo <code>Livro</code> — uma referência que começa <code>null</code>,
+    porque no início ninguém pegou nada emprestado:</p>
+<pre><span class="kw">class</span> <span class="ty">Leitor</span> {
+  <span class="ty">String</span> nome;
+  <span class="ty">Livro</span> livroAtual; <span class="cm">// null até pegar algo emprestado</span>
+
+  <span class="kw">boolean</span> <span class="fn">pegarEmprestado</span>(<span class="ty">Livro</span> livro) {
+    <span class="cm">// TODO: se livro.disponivel, chamar livro.emprestar(),</span>
+    <span class="cm">// guardar em livroAtual e devolver true; senão, false</span>
+    <span class="kw">return</span> <span class="kw">false</span>;
+  }
+
+  <span class="kw">void</span> <span class="fn">devolverLivro</span>() {
+    <span class="cm">// TODO: se livroAtual != null, chamar livroAtual.devolver()</span>
+    <span class="cm">// e voltar livroAtual pra null</span>
+  }
+}</pre>
+    <p class="tip"><b>O detalhe que mais derruba gente nova:</b> <code>devolverLivro()</code> precisa conferir <code>livroAtual != null</code> <b>antes</b> de tentar usar. Chamar um método em cima de <code>null</code> é <code>NullPointerException</code> na certa.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><h3>Escreva o main</h3></div>
+    <p>Crie uma terceira classe, <code>TesteBiblioteca.java</code>, só com o
+    <code>main</code>. Nela, crie pelo menos <b>2 objetos Livro</b> e
+    <b>1 objeto Leitor</b>, preencha os atributos, e exercite os métodos —
+    inclusive um caso em que o empréstimo <b>falha</b> (livro já emprestado) e
+    um em que a devolução acontece em cima de um <code>Leitor</code> sem nada
+    emprestado (pra provar que o <code>!= null</code> segura a explosão):</p>
+<pre><span class="kw">public class</span> <span class="ty">TesteBiblioteca</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+    duna.titulo = <span class="st">"Duna"</span>;
+    duna.autor = <span class="st">"Frank Herbert"</span>;
+    duna.anoPublicacao = <span class="st">1965</span>;
+    duna.disponivel = <span class="kw">true</span>;
+
+    <span class="ty">Leitor</span> nicoly = <span class="kw">new</span> <span class="ty">Leitor</span>();
+    nicoly.nome = <span class="st">"Nicoly"</span>;
+
+    <span class="cm">// TODO: nicoly pega duna emprestado, mostre se deu certo</span>
+    <span class="cm">// TODO: crie um segundo Leitor tentando pegar duna também — e mostre que falha</span>
+    <span class="cm">// TODO: nicoly devolve duna</span>
+    <span class="cm">// TODO: nicoly tenta devolver de novo, sem ter nada emprestado</span>
+  }
+}</pre>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>Compile, rode e publique</h3></div>
+    <p>Compile as três classes e rode <code>TesteBiblioteca</code> pelo terminal:</p>
+    <div class="terminal"><span class="p">$</span> javac Livro.java Leitor.java TesteBiblioteca.java
+<span class="p">$</span> java TesteBiblioteca</div>
+    <p>Publique no mesmo repositório GitHub das aulas anteriores, numa pasta
+    <code>aula-03</code> — junto com uma foto ou arquivo do diagrama do passo 01.</p>
+  </div>
+
+  <div class="label">Requisitos mínimos</div>
+  <ul class="check">
+    <li>Diagrama de classes simples (papel ou digital) com <code>Livro</code> e <code>Leitor</code>, atributos e métodos</li>
+    <li>Classe <code>Livro</code> com os quatro atributos e pelo menos 2 métodos, um deles com retorno</li>
+    <li>Classe <code>Leitor</code> com atributo <code>livroAtual</code> do tipo <code>Livro</code> (referência, começa null)</li>
+    <li>Método <code>pegarEmprestado(Livro livro)</code> recebendo um objeto como parâmetro</li>
+    <li>Método <code>devolverLivro()</code> conferindo <code>!= null</code> antes de usar <code>livroAtual</code></li>
+    <li>Nenhum construtor — objetos criados com <code>new</code> vazio, atributos preenchidos direto</li>
+    <li>Classe <code>TesteBiblioteca</code> com <code>main</code>, criando e usando pelo menos 2 <code>Livro</code> e 2 <code>Leitor</code></li>
+    <li>Compilado com <code>javac</code> e executado com <code>java</code>, pelo terminal</li>
+    <li>Publicado no repositório GitHub da turma, numa pasta <code>aula-03</code></li>
+  </ul>
+
+  <div class="label">Desafios extras (pra quem quer brilhar ✨)</div>
+  <ul class="check extra">
+    <li>Crie uma terceira classe <code>Biblioteca</code>, com um array de <code>Livro</code> e um método <code>buscarPorTitulo(String titulo)</code> que devolve o <code>Livro</code> encontrado — ou <code>null</code>, se nenhum bater</li>
+    <li>Adicione um método <code>listarDisponiveis()</code> na <code>Biblioteca</code>, percorrendo o array com <code>for</code></li>
+    <li>Troque o <code>Leitor</code> por um domínio próprio (ex.: <code>ContaBancaria</code> e <code>Cliente</code>, ou <code>Personagem</code> e <code>Inventario</code>) — desde que mantenha os mesmos conceitos: referência, null, parâmetro, retorno</li>
+    <li>No diagrama, adicione a terceira classe e a linha de conexão dela com <code>Livro</code></li>
+  </ul>
+
+  <div class="label">Materiais de apoio</div>
+  <p class="lead" style="margin-top:0">Revise classe × objeto, referências, null, parâmetros e retorno no guia. Travou? Espie o <b>código do desafio</b> — mas tente antes. 💜</p>
+  <div class="cta-row">
+    <a class="btn primary" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver modelo de resposta</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="guia-classes-objetos.html">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Desafio 03 · Orientação a Objetos com Java · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

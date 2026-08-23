@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 
 const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
 const AULA_02 = "/cursos/orientacao-objetos-java/aula-02-fundamentos-linguagem";
+const AULA_03 = "/cursos/orientacao-objetos-java/aula-03-classes-objetos";
 const PROJETO = "/cursos/orientacao-objetos-java/projeto";
 
 export default function OrientacaoObjetosJava() {
@@ -123,7 +124,7 @@ export default function OrientacaoObjetosJava() {
           </div>
         </div>
 
-        <div className="lesson soon">
+        <div className="lesson">
           <div className="idx">03</div>
           <div className="body">
             <h3>Classes e objetos</h3>
@@ -131,9 +132,26 @@ export default function OrientacaoObjetosJava() {
               Abstração: classe × objeto. Atributos e métodos. Instanciação
               com <span className="mono">new</span>, referências e{" "}
               <span className="mono">null</span>. Parâmetros e retorno.
-              Modelagem de um domínio simples.
+              Modelagem de um domínio simples, com um primeiro diagrama de
+              classes — ainda sem construtor, isso fica pra aula 04.
             </p>
-            <span className="soon-tag">em breve</span>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_03}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_03}/guia-classes-objetos.html`}>
+                📘 Guia de classes e objetos
+              </a>
+              <a className="mat" href={`${AULA_03}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_03}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
+            </div>
           </div>
         </div>
 

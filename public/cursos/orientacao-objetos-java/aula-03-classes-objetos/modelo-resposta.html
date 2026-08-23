@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de resposta — Livro &amp; Leitor · Aula 03 · NickDev</title>
+<meta name="description" content="Modelo de resposta completo do desafio da aula 03: as classes Livro e Leitor prontas, com a saída real do terminal, e um bônus com a classe Biblioteca.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{
+  position:fixed; top:16px; left:18px; z-index:100; display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--mono); font-size:12.5px; color:var(--text-2);
+  background:rgba(16,13,27,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  border:1px solid var(--line-strong); padding:7px 13px; border-radius:100px; transition:.2s;
+}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:920px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:64ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 20px}
+
+.panes{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start;margin-top:8px}
+@media(max-width:820px){.panes{grid-template-columns:1fr}}
+.pane{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface)}
+.panehd{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.panehd .dot{width:9px;height:9px;border-radius:50%}
+.panehd .dot.r{background:#ff5f56}.panehd .dot.y{background:#ffbd2e}.panehd .dot.g{background:#27c93f}
+.panehd b{color:var(--text);font-weight:500}
+
+pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:#d8d3e6;margin:0}
+.kw{color:#F24487}
+.ty{color:#7B4FD0}
+.st{color:#A98CE0}
+.fn{color:#E88BB8}
+.cm{color:#6f6a83}
+
+.term{background:#0b0913;padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto}
+.term .p{color:var(--text-3)}
+.term .cmdline{color:var(--text)}
+.term .out{color:#9ee39e}
+
+.exlabel{font-family:var(--mono);font-size:12px;color:var(--pink-light);margin:36px 0 8px;letter-spacing:.04em}
+.exlabel:first-of-type{margin-top:8px}
+
+.diagrama{background:#0b0913;border:1px solid var(--line);border-radius:16px;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.7;color:#d8d3e6;white-space:pre;margin-top:8px}
+
+.recap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+@media(max-width:700px){.recap{grid-template-columns:1fr}}
+.recap .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.recap .card h3{font-size:15px;margin-bottom:6px;color:var(--pink-light)}
+.recap .card p{font-size:13.5px;color:var(--text-2)}
+
+.check{list-style:none;display:grid;gap:10px;margin-top:8px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+
+.tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:13px 16px;margin-top:14px;font-size:14.5px;color:var(--text-2)}
+.tipbox b{color:var(--purple-light)}
+.tipbox.star{border-left-color:var(--magenta)}
+.tipbox.star b{color:var(--pink-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Modelo de resposta · Aula 03</div>
+  <h1>Livro &amp; Leitor <span class="grad">funcionando</span> 📚✅</h1>
+  <p class="lead">
+    O diagrama de classes sugerido, as três classes completas
+    (<code>Livro</code>, <code>Leitor</code> e <code>TesteBiblioteca</code>)
+    e a saída real de rodar tudo pelo terminal — mais um bônus com a classe
+    extra <code>Biblioteca</code>, pra quem foi atrás dos desafios extras.
+  </p>
+  <div class="rule"></div>
+
+  <div class="label">O diagrama do passo 01</div>
+  <div class="diagrama">┌─────────────────────────┐        ┌─────────────────────────┐
+│          Livro           │        │          Leitor           │
+├─────────────────────────┤        ├─────────────────────────┤
+│ titulo: String            │        │ nome: String                │
+│ autor: String              │        │ livroAtual: Livro           │
+│ anoPublicacao: int         │        └─────────────────────────┘
+│ disponivel: boolean        │                      │
+├─────────────────────────┤                      │ conhece um Livro
+│ emprestar(): boolean       │◄─────────────────────┘
+│ devolver(): void           │
+│ mostrarFicha(): void       │
+└─────────────────────────┘</div>
+  <p class="lead" style="font-size:14.5px;margin-top:10px">No seu desafio, esse diagrama pode ter sido feito à mão e fotografado — o que importa é ele existir <b>antes</b> do código, não a ferramenta usada pra desenhar.</p>
+
+  <div class="label">Código &amp; saída</div>
+
+  <div class="exlabel">01 · Livro.java</div>
+  <div class="panes">
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">Livro.java</b></div>
+      <pre><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="kw">int</span> anoPublicacao;
+  <span class="kw">boolean</span> disponivel;
+
+  <span class="kw">void</span> <span class="fn">mostrarFicha</span>() {
+    <span class="ty">System</span>.out.<span class="fn">println</span>(titulo + <span class="st">" — "</span> + autor + <span class="st">" ("</span> + anoPublicacao + <span class="st">") · "</span>
+        + (disponivel ? <span class="st">"disponível"</span> : <span class="st">"emprestado"</span>));
+  }
+
+  <span class="kw">boolean</span> <span class="fn">emprestar</span>() {
+    <span class="kw">if</span> (disponivel) {
+      disponivel = <span class="kw">false</span>;
+      <span class="kw">return</span> <span class="kw">true</span>;
+    }
+    <span class="kw">return</span> <span class="kw">false</span>;
+  }
+
+  <span class="kw">void</span> <span class="fn">devolver</span>() {
+    disponivel = <span class="kw">true</span>;
+  }
+}</pre>
+    </div>
+    <div class="pane">
+      <div class="panehd"><span class="dot" style="background:#27c93f"></span><b>o que ele resolve</b></div>
+      <div class="term" style="white-space:normal;line-height:1.7;color:var(--text-2);font-family:'Space Grotesk',sans-serif;font-size:13.5px">
+      Quatro atributos simples. <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">emprestar()</code> devolve
+      <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">boolean</code> — <b style="color:var(--text)">true</b> se conseguiu, <b style="color:var(--text)">false</b> se já
+      estava emprestado. Quem decide se pode emprestar é o próprio
+      <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">Livro</code>, não quem chama o método.
+      </div>
+    </div>
+  </div>
+
+  <div class="exlabel">02 · Leitor.java</div>
+  <div class="panes">
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">Leitor.java</b></div>
+      <pre><span class="kw">class</span> <span class="ty">Leitor</span> {
+  <span class="ty">String</span> nome;
+  <span class="ty">Livro</span> livroAtual;
+
+  <span class="kw">boolean</span> <span class="fn">pegarEmprestado</span>(<span class="ty">Livro</span> livro) {
+    <span class="kw">boolean</span> conseguiu = livro.<span class="fn">emprestar</span>();
+    <span class="kw">if</span> (conseguiu) {
+      livroAtual = livro;
+    }
+    <span class="kw">return</span> conseguiu;
+  }
+
+  <span class="kw">void</span> <span class="fn">devolverLivro</span>() {
+    <span class="kw">if</span> (livroAtual != <span class="kw">null</span>) {
+      livroAtual.<span class="fn">devolver</span>();
+      livroAtual = <span class="kw">null</span>;
+    } <span class="kw">else</span> {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(nome + <span class="st">" não tem nenhum livro emprestado."</span>);
+    }
+  }
+}</pre>
+    </div>
+    <div class="pane">
+      <div class="panehd"><span class="dot" style="background:#27c93f"></span><b>o que ele resolve</b></div>
+      <div class="term" style="white-space:normal;line-height:1.7;color:var(--text-2);font-family:'Space Grotesk',sans-serif;font-size:13.5px">
+      <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">livro</code> chega como <b style="color:var(--text)">parâmetro</b> —
+      uma referência pro mesmo objeto de fora, não uma cópia. E
+      <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">devolverLivro()</code> confere
+      <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">!= null</code> antes de mexer —
+      sem isso, chamar duas vezes seguidas explodiria em <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:4px">NullPointerException</code>.
+      </div>
+    </div>
+  </div>
+
+  <div class="exlabel">03 · TesteBiblioteca.java (main)</div>
+  <div class="panes">
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">TesteBiblioteca.java</b></div>
+      <pre><span class="kw">public class</span> <span class="ty">TesteBiblioteca</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+    duna.titulo = <span class="st">"Duna"</span>;
+    duna.autor = <span class="st">"Frank Herbert"</span>;
+    duna.anoPublicacao = <span class="st">1965</span>;
+    duna.disponivel = <span class="kw">true</span>;
+
+    <span class="ty">Leitor</span> nicoly = <span class="kw">new</span> <span class="ty">Leitor</span>();
+    nicoly.nome = <span class="st">"Nicoly"</span>;
+
+    <span class="ty">Leitor</span> outro = <span class="kw">new</span> <span class="ty">Leitor</span>();
+    outro.nome = <span class="st">"Marcos"</span>;
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(nicoly.nome + <span class="st">" tentando pegar Duna: "</span> + nicoly.<span class="fn">pegarEmprestado</span>(duna));
+    <span class="ty">System</span>.out.<span class="fn">println</span>(outro.nome + <span class="st">" tentando pegar Duna também: "</span> + outro.<span class="fn">pegarEmprestado</span>(duna));
+
+    duna.<span class="fn">mostrarFicha</span>();
+
+    nicoly.<span class="fn">devolverLivro</span>();
+    duna.<span class="fn">mostrarFicha</span>();
+
+    outro.<span class="fn">devolverLivro</span>();
+  }
+}</pre>
+    </div>
+    <div class="pane">
+      <div class="panehd"><span class="dot" style="background:#27c93f"></span><b>terminal</b></div>
+      <div class="term">
+<span class="p">$</span> <span class="cmdline">javac Livro.java Leitor.java TesteBiblioteca.java</span>
+<span class="p">$</span> <span class="cmdline">java TesteBiblioteca</span>
+<span class="out">Nicoly tentando pegar Duna: true
+Marcos tentando pegar Duna também: false
+Duna — Frank Herbert (1965) · emprestado
+Duna — Frank Herbert (1965) · disponível
+Marcos não tem nenhum livro emprestado.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">Bônus · indo além com a classe Biblioteca ✨</div>
+  <p class="lead" style="font-size:14.5px;margin-top:0">Um dos desafios extras: uma terceira classe guardando vários livros num array, com um método que <b>devolve null</b> quando não encontra nada — a referência e o null da aula 03, agora resolvendo um problema real.</p>
+  <div class="panes">
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">Biblioteca.java</b></div>
+      <pre><span class="kw">class</span> <span class="ty">Biblioteca</span> {
+  <span class="ty">Livro</span>[] acervo;
+
+  <span class="ty">Livro</span> <span class="fn">buscarPorTitulo</span>(<span class="ty">String</span> titulo) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="st">0</span>; i &lt; acervo.length; i++) {
+      <span class="kw">if</span> (acervo[i].titulo.<span class="fn">equals</span>(titulo)) {
+        <span class="kw">return</span> acervo[i];
+      }
+    }
+    <span class="kw">return</span> <span class="kw">null</span>; <span class="cm">// não achou nenhum com esse título</span>
+  }
+}</pre>
+    </div>
+    <div class="pane">
+      <div class="panehd"><span class="dot" style="background:#27c93f"></span><b>usando</b></div>
+      <pre><span class="ty">Biblioteca</span> biblioteca = <span class="kw">new</span> <span class="ty">Biblioteca</span>();
+biblioteca.acervo = <span class="kw">new</span> <span class="ty">Livro</span>[] { duna, hobbit };
+
+<span class="ty">Livro</span> encontrado = biblioteca.<span class="fn">buscarPorTitulo</span>(<span class="st">"Duna"</span>);
+<span class="kw">if</span> (encontrado != <span class="kw">null</span>) {
+  encontrado.<span class="fn">mostrarFicha</span>();
+} <span class="kw">else</span> {
+  <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Não achei esse livro."</span>);
+}</pre>
+    </div>
+  </div>
+  <div class="tipbox star"><b>Por que devolver <code>null</code> aqui faz sentido:</b> nem todo método precisa <i>sempre</i> conseguir devolver algo. <code>buscarPorTitulo</code> devolve o <code>Livro</code> quando acha, e <code>null</code> quando não acha — e quem chama o método é <b>obrigado</b>, na prática, a conferir antes de usar o resultado. É o mesmo cuidado do <code>devolverLivro()</code>, só que do lado de quem chama.</div>
+
+  <div class="label">Por que essa solução funciona</div>
+  <div class="recap">
+    <div class="card"><h3>Diagrama antes do código</h3><p>Duas caixas, atributos e métodos, uma linha de conexão — pensado no papel antes de abrir a IDE.</p></div>
+    <div class="card"><h3>Sem construtor, de propósito</h3><p>Todo objeto nasce com <code>new Classe()</code> vazio, atributos preenchidos direto. Construtor é aula 04.</p></div>
+    <div class="card"><h3>Objeto como parâmetro</h3><p><code>pegarEmprestado(Livro livro)</code> recebe a <b>referência</b> pro objeto de fora, não uma cópia.</p></div>
+    <div class="card"><h3><code>null</code> tratado de verdade</h3><p><code>devolverLivro()</code> confere <code>!= null</code> antes de mexer — nenhuma <code>NullPointerException</code> escondida.</p></div>
+    <div class="card"><h3>Retorno com propósito</h3><p><code>emprestar()</code> e <code>pegarEmprestado()</code> devolvem <code>boolean</code>: quem chamou sabe se deu certo, sem precisar adivinhar.</p></div>
+    <div class="card"><h3>Uma responsabilidade por classe</h3><p><code>Livro</code> cuida do próprio estado; <code>Leitor</code> decide o que fazer com o resultado. Cada um no seu quadrado.</p></div>
+  </div>
+
+  <div class="label">Checklist batido</div>
+  <ul class="check">
+    <li>Diagrama de classes simples, feito antes do código</li>
+    <li>Classe <code>Livro</code> com 4 atributos e 3 métodos, um deles com retorno</li>
+    <li>Classe <code>Leitor</code> com atributo <code>livroAtual</code> do tipo <code>Livro</code> (referência, começa null)</li>
+    <li>Método <code>pegarEmprestado(Livro livro)</code> recebendo um objeto como parâmetro</li>
+    <li>Método <code>devolverLivro()</code> conferindo <code>!= null</code> antes de usar</li>
+    <li>Nenhum construtor usado — só <code>new</code> vazio e atributos preenchidos direto</li>
+    <li><code>TesteBiblioteca</code> com <code>main</code>, criando e usando 2 <code>Livro</code> e 2 <code>Leitor</code></li>
+    <li>Compilado com <code>javac</code> e executado com <code>java</code>, pelo terminal</li>
+  </ul>
+
+  <div class="label">Continue por aqui</div>
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Rever o desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código comentado, passo a passo</a>
+    <a class="btn" href="guia-classes-objetos.html">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Modelo de resposta · Aula 03 · Orientação a Objetos com Java · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

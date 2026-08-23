@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia · Classes e objetos · Aula 03 · NickDev</title>
+<meta name="description" content="Guia da aula 03: classe × objeto, atributos, métodos, instanciação com new, referências, null, parâmetros e retorno, e como modelar um domínio simples com um diagrama de classes básico.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1240px;margin:0 auto;gap:0}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:6px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:14px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 80px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:52px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17px;margin:22px 0 6px;color:var(--text)}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+  th{color:var(--text);font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em}
+  td b{color:var(--text)}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.star{border-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .grid2 .card,.grid3 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .grid2 .card h4,.grid3 .card h4{font-size:14px;margin-bottom:6px;color:var(--pink-light)}
+  .grid2 .card p,.grid3 .card p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .diagrama{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d8d3e6;white-space:pre}
+
+  .refwrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:420px;margin:18px auto}
+  .refvars{display:flex;gap:50px}
+  .refvar{font-family:var(--mono);background:var(--surface);border:1px solid var(--purple);color:var(--purple-light);padding:9px 18px;border-radius:10px;font-size:13.5px}
+  .refarrows{font-family:var(--mono);color:var(--text-3);font-size:18px;letter-spacing:.4em}
+  .refobj{font-family:var(--mono);background:var(--surface);border:1px solid var(--magenta);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;text-align:left;white-space:pre}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#dicionario">📖 O dicionário desta aula</a>
+    <div class="grp">O conceito central</div>
+    <a href="#classe-objeto">Classe × objeto</a>
+    <div class="grp">Dentro da classe</div>
+    <a href="#atributos">Atributos</a>
+    <a href="#metodos">Métodos</a>
+    <div class="grp">Criando objetos</div>
+    <a href="#instanciacao">Instanciação com new</a>
+    <a href="#referencias-null">Referências e null</a>
+    <div class="grp">Comunicação</div>
+    <a href="#parametros-retorno">Parâmetros e retorno</a>
+    <div class="grp">Modelagem</div>
+    <a href="#modelando-dominio">Modelando um domínio simples</a>
+    <div class="grp">Na prática</div>
+    <a href="#proximos-passos">Próximos passos</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 03 · guia de apoio</div>
+  <h1>Classes e <span class="g">objetos</span></h1>
+  <p class="lead">A diferença entre classe e objeto, o que são atributos e métodos, como criar objetos com <code>new</code>, o que de fato uma variável guarda (referências), o que é <code>null</code>, e como um objeto conversa com outro através de parâmetros e retorno. Fecha com um primeiro diagrama de classes.</p>
+
+  <div class="tip star" style="margin-top:26px"><b>📖 Perdida(o) numa palavra?</b> Comece pelo <a href="#dicionario" style="color:var(--pink-light,#E88BB8);text-decoration:underline">dicionário desta aula</a> — todo termo técnico traduzido pra português normal.</div>
+  <div class="rule"></div>
+
+  <section id="dicionario">
+    <h2>O dicionário desta aula</h2>
+    <p>Hoje o vocabulário de orientação a objetos deixa de ser só teoria e vira coisa que você escreve. Volte aqui sempre que precisar — consultar dicionário não é trapaça, é o que todo mundo que programa faz o dia inteiro.</p>
+    <table>
+      <thead><tr><th>Palavra</th><th>O que é, em palavras simples</th></tr></thead>
+      <tbody>
+        <tr><td><b>Classe</b></td><td>O <b>molde</b>: descreve que atributos e métodos toda coisa daquele tipo vai ter. Não é uma coisa específica.</td></tr>
+        <tr><td><b>Objeto</b></td><td>Uma coisa <b>de verdade</b>, criada a partir de uma classe, com valores próprios em cada atributo.</td></tr>
+        <tr><td><b>Instância</b></td><td>Outro nome pra <b>objeto</b> — "uma instância da classe Livro" é o mesmo que "um objeto Livro".</td></tr>
+        <tr><td><b>Instanciar</b></td><td>O <b>verbo</b>: o ato de criar um objeto a partir de uma classe, usando <code>new</code>.</td></tr>
+        <tr><td><code>new</code></td><td>A palavra-chave que efetivamente <b>fabrica</b> um objeto na memória do computador.</td></tr>
+        <tr><td><b>Atributo</b></td><td>Uma variável que mora <b>dentro</b> da classe — um dado que cada objeto guarda.</td></tr>
+        <tr><td><b>Método</b></td><td>Uma ação que o objeto sabe executar — geralmente mexendo nos próprios atributos.</td></tr>
+        <tr><td><b>Referência</b></td><td>O que uma variável de tipo classe realmente guarda: não o objeto em si, mas o "caminho" até onde ele mora na memória.</td></tr>
+        <tr><td><code>null</code></td><td>O valor especial de uma referência que <b>não aponta pra nenhum objeto</b>.</td></tr>
+        <tr><td><b>NullPointerException</b></td><td>O erro que acontece quando você tenta usar (chamar método, ler atributo) uma referência que está <code>null</code>.</td></tr>
+        <tr><td><b>Parâmetro</b></td><td>A variável que um método declara pra <b>receber</b> informação de fora, entre os parênteses da assinatura.</td></tr>
+        <tr><td><b>Argumento</b></td><td>O valor real que você passa <b>na hora de chamar</b> o método — o que "preenche" o parâmetro.</td></tr>
+        <tr><td><b>Retorno</b></td><td>O valor que um método <b>devolve</b> pra quem chamou ele, com a palavra-chave <code>return</code>.</td></tr>
+        <tr><td><code>void</code></td><td>O "tipo de retorno" que diz: este método <b>não devolve</b> nenhum valor.</td></tr>
+        <tr><td><b>Assinatura de método</b></td><td>O "cabeçalho" dele: tipo de retorno, nome e parâmetros — o suficiente pra saber como chamá-lo.</td></tr>
+        <tr><td><b>Diagrama de classes</b></td><td>Um desenho simples que mostra as classes de um sistema, seus atributos, métodos e como elas se conectam.</td></tr>
+      </tbody>
+    </table>
+    <div class="tip"><b>Não decore nada disto.</b> Boa parte já apareceu, de raspão, no vocabulário da aula 01. A diferença é que hoje você vai <b>usar</b> cada uma delas escrevendo código — e é usando que elas realmente colam.</div>
+  </section>
+
+  <section id="classe-objeto">
+    <h2>Classe × objeto</h2>
+
+    <h3>A pergunta que ficou em aberto</h3>
+    <p>Na aula 01 a gente perguntou: <i>"como você organizaria o código de um sistema de biblioteca?"</i> — e respondeu com uma metáfora: um cartãozinho por pessoa, com nome, telefone e aniversário juntos, em vez de três listas separadas. Você viu um <code>Livro</code> em Python e depois em Java, mas só como <b>leitura</b>. Hoje você escreve o seu.</p>
+
+    <h3>Uma forma de bolo não é um bolo</h3>
+    <p>Pense numa forma de fazer bolo em formato de coração. A forma <b>descreve</b> o formato que todo bolo feito nela vai ter — mas a forma em si não é um bolo, não dá pra comer ela. Cada vez que você usa a forma com massa de verdade, sai um bolo <b>de verdade</b>, comestível, que existe fisicamente.</p>
+    <ul>
+      <li>A <b>classe</b> é a forma: descreve o que todo objeto daquele tipo vai <i>ter</i> (atributos) e <i>fazer</i> (métodos).</li>
+      <li>O <b>objeto</b> é o bolo: uma coisa concreta, com valores reais em cada atributo, existindo na memória do programa enquanto ele roda.</li>
+    </ul>
+    <p>De uma classe só, você tira quantos objetos quiser — assim como de uma forma só você assa vários bolos. Cada um deles é independente: mudar o título de um <code>Livro</code> não muda o título de outro.</p>
+
+    <div class="tip star"><b>Uma classe, muitos objetos:</b> a classe <code>Livro</code> existe uma vez só no seu código-fonte. Mas em tempo de execução, o seu programa pode ter cinco, cem, mil objetos <code>Livro</code> diferentes ao mesmo tempo — cada um com seu próprio título, autor e situação de empréstimo.</p></div>
+
+    <h3>Onde vive uma classe em Java</h3>
+    <p>Uma classe começa vazia — um molde sem nada dentro ainda:</p>
+    <pre><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="cm">// por enquanto, vazia</span>
+}</pre>
+    <p>Isso já compila. É só um tipo novo que o Java passa a conhecer, sem nenhuma informação nem comportamento definidos ainda. As próximas duas seções preenchem essa classe.</p>
+  </section>
+
+  <section id="atributos">
+    <h2>Atributos</h2>
+    <p>Atributos são <b>variáveis que moram dentro da classe</b>, fora de qualquer método. Cada objeto criado a partir da classe tem o seu próprio valor pra cada atributo — é o que faz um <code>Livro</code> ser diferente do outro.</p>
+    <pre><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="ty">int</span> anoPublicacao;
+  <span class="kw">boolean</span> disponivel;
+}</pre>
+    <p>A sintaxe é a mesma de declarar uma variável comum (<code>tipo nome;</code>), que você já usa desde a aula 02. A única diferença de posição: ela mora <b>dentro da classe</b>, não solta dentro de um <code>main</code>.</p>
+    <div class="tip"><b>Sem valor inicial, tudo bem.</b> Atributos declarados sem <code>= valor</code> recebem um <b>valor padrão</b> automaticamente: <code>0</code> para números, <code>false</code> para <code>boolean</code>, e <code>null</code> para tipos como <code>String</code>. Isso é diferente de uma variável local (dentro de um método), que o Java <b>obriga</b> você a inicializar antes de usar.</div>
+  </section>
+
+  <section id="metodos">
+    <h2>Métodos</h2>
+    <p>Métodos são as <b>ações</b> que um objeto sabe executar — normalmente lendo ou alterando os próprios atributos dele.</p>
+    <pre><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="ty">int</span> anoPublicacao;
+  <span class="kw">boolean</span> disponivel;
+
+  <span class="kw">void</span> <span class="fn">mostrarFicha</span>() {
+    <span class="ty">System</span>.out.<span class="fn">println</span>(titulo + <span class="st">" — "</span> + autor + <span class="st">" ("</span> + anoPublicacao + <span class="st">")"</span>);
+  }
+}</pre>
+    <p>Dentro do método, <code>titulo</code>, <code>autor</code> e <code>anoPublicacao</code> não precisam de nenhum prefixo — o método já sabe que está lendo os atributos <b>do objeto que o chamou</b>. Isso só funciona porque o método vive dentro da mesma classe que declara esses atributos.</p>
+    <div class="tip"><b>Atributo × variável local.</b> Um atributo é declarado direto na classe e existe enquanto o objeto existir. Uma variável local é declarada dentro de um método (ou dentro do <code>main</code>) e só existe enquanto aquele método está rodando — depois, ela some.</div>
+  </section>
+
+  <section id="instanciacao">
+    <h2>Instanciação com new</h2>
+    <p>Ter a classe pronta não cria nenhum objeto — é só o molde. Pra fabricar um objeto de verdade, você usa a palavra-chave <code>new</code>:</p>
+    <pre><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();</pre>
+    <table>
+      <thead><tr><th>Parte</th><th>O que é</th></tr></thead>
+      <tbody>
+        <tr><td><code>Livro</code> (1ª vez)</td><td>O <b>tipo</b> da variável — que classe de objeto ela vai guardar.</td></tr>
+        <tr><td><code>duna</code></td><td>O <b>nome</b> que você escolheu pra essa variável.</td></tr>
+        <tr><td><code>new Livro()</code></td><td>A ordem "crie um Livro agora". É esse <code>new</code> que de fato fabrica o objeto na memória.</td></tr>
+      </tbody>
+    </table>
+    <p>Esse ato de criar um objeto a partir de uma classe se chama <b>instanciar</b> a classe — e o objeto resultante é chamado de <b>instância</b>. "Uma instância de Livro" e "um objeto Livro" significam a mesma coisa.</p>
+
+    <h3>Preenchendo e usando</h3>
+    <p>Com o objeto criado, você acessa atributos e chama métodos usando o operador ponto (<code>.</code>):</p>
+    <pre><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+
+duna.titulo = <span class="st">"Duna"</span>;
+duna.autor = <span class="st">"Frank Herbert"</span>;
+duna.anoPublicacao = <span class="st">1965</span>;
+duna.disponivel = <span class="kw">true</span>;
+
+duna.<span class="fn">mostrarFicha</span>(); <span class="cm">// Duna — Frank Herbert (1965)</span></pre>
+    <p><code>objeto.atributo</code> lê ou escreve um dado; <code>objeto.metodo()</code> executa uma ação. Repare que só existe um <code>Livro</code> aqui — quer mais um, é só chamar <code>new</code> de novo, guardando numa variável diferente.</p>
+
+    <div class="tip star"><b>Sem construtor, de propósito.</b> A classe <code>Livro</code> da aula 01 tinha um construtor (<code>Livro(String nome) { ... }</code>), que deixava criar o objeto já com o título pronto: <code>new Livro("Duna")</code>. Hoje a gente <b>não</b> usa construtor ainda — criamos com <code>new Livro()</code> vazio e preenchemos atributo por atributo, na mão. Construtor de verdade, com toda a lógica de "nascer já pronto", é conteúdo da <b>aula 04</b>, junto com encapsulamento.</div>
+  </section>
+
+  <section id="referencias-null">
+    <h2>Referências e null</h2>
+
+    <h3>A variável não é o objeto</h3>
+    <p>Isso é o pulo do gato de hoje. Diferente de um <code>int</code> — que guarda o número dentro da própria variável — uma variável de tipo classe, como <code>Livro duna</code>, guarda uma <b>referência</b>: o "caminho" até onde o objeto realmente mora, na memória.</p>
+    <div class="diagrama">Livro duna  ─────►  objeto Livro { titulo: "Duna", autor: "Frank Herbert", ... }
+(a variável)         (os dados de verdade vivem aqui)</div>
+    <p>Pense num <code>int</code> como uma caixa com o valor dentro dela. Uma referência é mais como um <b>endereço escrito num papel</b> — ela aponta pra onde o valor está, sem ser o valor.</p>
+
+    <h3>Cuidado com isso: copiar a referência não copia o objeto</h3>
+    <pre><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+duna.titulo = <span class="st">"Duna"</span>;
+
+<span class="ty">Livro</span> copia = duna; <span class="cm">// NÃO cria outro livro</span>
+copia.titulo = <span class="st">"Outro nome"</span>;
+
+<span class="ty">System</span>.out.<span class="fn">println</span>(duna.titulo); <span class="cm">// "Outro nome" — mudou os dois!</span></pre>
+    <div class="refwrap">
+      <div class="refvars"><div class="refvar">duna</div><div class="refvar">copia</div></div>
+      <div class="refarrows">↘&nbsp;&nbsp;↙</div>
+      <div class="refobj">Livro
+  titulo: "Outro nome"</div>
+    </div>
+    <p><code>copia = duna</code> não cria um segundo livro — copia só o <b>endereço</b>. As duas variáveis apontam pro mesmíssimo objeto na memória, então mexer usando uma delas afeta o que a outra "vê" também. Esse comportamento chama-se <b>aliasing</b> (duas variáveis, um "apelido" cada, pro mesmo objeto).</p>
+    <div class="tip"><b>Isso é diferente de um int.</b> Se fosse <code>int a = 5; int b = a; b = 10;</code>, <code>a</code> continuaria <code>5</code> — porque <code>int</code> copia o <b>valor</b>. Com objetos, <code>copia = duna</code> copia a <b>referência</b>, não o objeto. É uma das maiores fontes de confusão de quem está começando em OO — vale reler esse trecho quantas vezes precisar.</div>
+
+    <h3>null: quando a referência não aponta pra nada</h3>
+    <p>Uma variável de tipo classe, declarada sem <code>new</code>, não fica com "lixo" nem dá erro de compilação — ela recebe um valor especial: <code>null</code>, que significa "esta referência não aponta pra objeto nenhum".</p>
+    <pre><span class="ty">Livro</span> proximo; <span class="cm">// declarada, mas sem new</span>
+<span class="ty">System</span>.out.<span class="fn">println</span>(proximo); <span class="cm">// null</span></pre>
+    <div class="tip"><b><code>null</code> só existe pra referências.</b> Tipos primitivos (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>char</code>) nunca podem ser <code>null</code> — eles sempre têm um valor padrão numérico ou lógico. Só tipos de classe (<code>String</code>, <code>Livro</code>, qualquer classe sua) podem.</div>
+
+    <h3>NullPointerException: o erro mais famoso do Java</h3>
+    <p>Chamar um método ou acessar um atributo em cima de uma referência <code>null</code> é pedir pro Java conversar com um objeto que não existe. O programa compila normalmente — o erro só aparece quando essa linha roda:</p>
+    <pre><span class="ty">Livro</span> proximo = <span class="kw">null</span>;
+proximo.<span class="fn">mostrarFicha</span>(); <span class="cm">// 💥 explode aqui</span></pre>
+    <div class="terminal"><span class="p">$</span> java Teste
+Exception in thread "main" java.lang.NullPointerException</div>
+    <div class="tip star"><b>O hábito que evita isso:</b> antes de usar uma referência que <i>pode</i> não ter sido preenchida, confira com <code>if (variavel != null)</code>. É exatamente o que a classe <code>Leitor</code> faz mais adiante, no método <code>devolverLivro()</code> — conferir antes de mexer.</div>
+  </section>
+
+  <section id="parametros-retorno">
+    <h2>Parâmetros e retorno</h2>
+
+    <h3>Parâmetros: métodos que recebem informação</h3>
+    <p>Um método pode declarar <b>parâmetros</b> — variáveis que só existem durante a execução dele, recebendo valores de fora:</p>
+    <pre><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="cm">// ...atributos...</span>
+
+  <span class="kw">void</span> <span class="fn">emprestarPara</span>(<span class="ty">String</span> nomeDoLeitor) {
+    disponivel = <span class="kw">false</span>;
+    <span class="ty">System</span>.out.<span class="fn">println</span>(titulo + <span class="st">" foi emprestado para "</span> + nomeDoLeitor);
+  }
+}
+
+duna.<span class="fn">emprestarPara</span>(<span class="st">"Nicoly"</span>);</pre>
+    <p><code>nomeDoLeitor</code> é o <b>parâmetro</b>, declarado entre os parênteses junto com seu tipo. <code>"Nicoly"</code>, no momento em que o método é chamado, é o <b>argumento</b> — o valor real que preenche aquele parâmetro. Um método pode ter zero, um ou vários parâmetros, separados por vírgula.</p>
+
+    <h3>Parâmetros também podem ser objetos</h3>
+    <p>Um parâmetro não precisa ser um tipo primitivo ou <code>String</code> — pode ser qualquer classe sua:</p>
+    <pre><span class="kw">boolean</span> <span class="fn">pegarEmprestado</span>(<span class="ty">Livro</span> livro) {
+  <span class="kw">if</span> (livro.disponivel) {
+    livro.disponivel = <span class="kw">false</span>;
+    <span class="kw">return</span> <span class="kw">true</span>;
+  }
+  <span class="kw">return</span> <span class="kw">false</span>;
+}</pre>
+    <p>Aqui, <code>livro</code> é uma referência pro <b>mesmo objeto</b> que existe fora do método — não uma cópia. Alterar <code>livro.disponivel</code> lá dentro muda o objeto original de verdade, do lado de fora também.</p>
+
+    <h3>Retorno: void × devolver um valor</h3>
+    <p>Todo método declara, antes do nome, o que ele devolve pra quem chamou. <code>void</code> quer dizer "nada":</p>
+    <pre><span class="kw">void</span> <span class="fn">devolver</span>() {          <span class="cm">// não devolve nada</span>
+  disponivel = <span class="kw">true</span>;
+}
+
+<span class="kw">boolean</span> <span class="fn">emprestar</span>() {      <span class="cm">// devolve um boolean</span>
+  <span class="kw">if</span> (disponivel) {
+    disponivel = <span class="kw">false</span>;
+    <span class="kw">return</span> <span class="kw">true</span>;
+  }
+  <span class="kw">return</span> <span class="kw">false</span>;
+}
+
+<span class="kw">boolean</span> deuCerto = duna.<span class="fn">emprestar</span>(); <span class="cm">// guarda o retorno numa variável</span></pre>
+    <p>Quando o método devolve algo, o tipo declarado antes do nome (<code>boolean</code>, no exemplo) precisa bater com o que vem depois de <code>return</code>. O Java confere isso ao compilar — se prometeu <code>boolean</code> e você tentar devolver um <code>String</code>, é erro de compilação.</p>
+    <div class="tip"><b><code>return</code> também encerra o método na hora.</b> Assim que uma linha <code>return</code> executa, o método termina ali — mesmo que existam linhas depois dela. Em <code>emprestar()</code> acima, se <code>disponivel</code> for <code>true</code>, o segundo <code>return false;</code> nunca chega a rodar.</div>
+
+    <h3>Duas classes conversando: Livro e Leitor</h3>
+    <p>Um atributo também pode ser outro objeto seu, não só um tipo primitivo ou <code>String</code>. É assim que classes começam a se conectar:</p>
+    <pre><span class="kw">class</span> <span class="ty">Leitor</span> {
+  <span class="ty">String</span> nome;
+  <span class="ty">Livro</span> livroAtual; <span class="cm">// referência — começa null</span>
+
+  <span class="kw">boolean</span> <span class="fn">pegarEmprestado</span>(<span class="ty">Livro</span> livro) {
+    <span class="kw">if</span> (livro.disponivel) {
+      livro.disponivel = <span class="kw">false</span>;
+      livroAtual = livro;
+      <span class="kw">return</span> <span class="kw">true</span>;
+    }
+    <span class="kw">return</span> <span class="kw">false</span>;
+  }
+
+  <span class="kw">void</span> <span class="fn">devolverLivro</span>() {
+    <span class="kw">if</span> (livroAtual != <span class="kw">null</span>) {
+      livroAtual.disponivel = <span class="kw">true</span>;
+      livroAtual = <span class="kw">null</span>;
+    }
+  }
+}</pre>
+    <p>Juntando tudo, num <code>main</code>:</p>
+    <pre><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+duna.titulo = <span class="st">"Duna"</span>;
+duna.disponivel = <span class="kw">true</span>;
+
+<span class="ty">Leitor</span> nicoly = <span class="kw">new</span> <span class="ty">Leitor</span>();
+nicoly.nome = <span class="st">"Nicoly"</span>;
+
+nicoly.<span class="fn">pegarEmprestado</span>(duna);
+<span class="ty">System</span>.out.<span class="fn">println</span>(duna.disponivel); <span class="cm">// false</span>
+
+nicoly.<span class="fn">devolverLivro</span>();
+<span class="ty">System</span>.out.<span class="fn">println</span>(duna.disponivel); <span class="cm">// true</span></pre>
+    <p>Repare que <code>devolverLivro()</code> confere <code>livroAtual != null</code> antes de mexer nele — sem essa checagem, chamar <code>devolverLivro()</code> num <code>Leitor</code> que nunca pegou nada emprestado explodiria em <code>NullPointerException</code>.</p>
+  </section>
+
+  <section id="modelando-dominio">
+    <h2>Modelando um domínio simples</h2>
+    <p><b>Modelar</b> é decidir quais classes vão existir num sistema, o que cada uma sabe (atributos) e o que cada uma faz (métodos), antes — ou enquanto — você escreve o código. Um jeito simples de começar:</p>
+    <div class="grid3">
+      <div class="card"><h4>Substantivos → classes</h4><p>"Um <b>leitor</b> pega um <b>livro</b> emprestado" tem dois substantivos concretos: candidatos fortes a virarem classes.</p></div>
+      <div class="card"><h4>Verbos → métodos</h4><p>"Pega emprestado", "devolve" viram <code>pegarEmprestado()</code>, <code>devolver()</code> — ações que um objeto sabe fazer.</p></div>
+      <div class="card"><h4>Características → atributos</h4><p>Nome do leitor, título do livro, se está disponível — os "detalhes" de cada substantivo viram atributos.</p></div>
+    </div>
+    <p>Não existe fórmula perfeita nem resposta única — duas pessoas podem modelar o mesmo domínio de jeitos diferentes, e as duas podem estar certas. O que importa é conseguir <b>explicar</b> a escolha. Esse instinto fica mais afiado a cada aula, principalmente a partir da aula 05, com relacionamentos entre objetos.</p>
+
+    <h3>Um primeiro diagrama de classes</h3>
+    <p>Um diagrama de classes é só um desenho que mostra as classes, seus atributos e métodos, e como elas se conectam. Nada de notação UML chique por enquanto — só caixas e linhas, legíveis por qualquer pessoa:</p>
+    <div class="diagrama">┌─────────────────────────┐        ┌─────────────────────────┐
+│          Livro           │        │          Leitor           │
+├─────────────────────────┤        ├─────────────────────────┤
+│ titulo: String            │        │ nome: String                │
+│ autor: String              │        │ livroAtual: Livro           │
+│ anoPublicacao: int         │        └─────────────────────────┘
+│ disponivel: boolean        │                      │
+├─────────────────────────┤                      │ conhece um Livro
+│ emprestar(): boolean       │◄─────────────────────┘
+│ devolver(): void           │
+│ mostrarFicha(): void       │
+└─────────────────────────┘</div>
+    <p>A convenção que usamos aqui: a caixa tem três partes (nome da classe, atributos, métodos), e uma linha entre duas caixas mostra que uma classe conhece a outra — no exemplo, todo <code>Leitor</code> pode conhecer um <code>Livro</code> através do atributo <code>livroAtual</code>.</p>
+    <div class="tip star"><b>Por que desenhar antes de codar?</b> Um diagrama, mesmo simples e feito à mão no papel, é muito mais barato de mudar do que código já escrito. Errar no papel custa uma borracha; errar direto no código custa refatoração. O desafio de hoje pede o seu primeiro diagrama — pode ser desenhado à mão e fotografado.</div>
+
+    <p style="margin-top:22px">Pronta(o) pra modelar a sua própria biblioteca? Encara o desafio 👇</p>
+    <a class="cta" href="desafio.html">🎯 Ir para o desafio</a>
+  </section>
+
+  <section id="proximos-passos">
+    <h2>Próximos passos</h2>
+    <p>Na <b>aula 04</b> a gente conserta um detalhe incômodo de hoje: os atributos de <code>Livro</code> e <code>Leitor</code> estão todos abertos, qualquer código de fora pode mexer neles sem controle nenhum. Isso é <b>falta de encapsulamento</b> — o assunto da próxima aula, junto com construtores de verdade, <code>this</code>, modificadores de acesso e membros <code>static</code>/<code>final</code>.</p>
+  </section>
+</main>
+</div>
+
+</body>
+</html>

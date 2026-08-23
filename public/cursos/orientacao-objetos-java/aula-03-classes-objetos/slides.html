@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classes e objetos · NickDev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E;
+    --canvas-2:#100D1B;
+    --paper:#f6f4ef;
+    --ink:#F3F0FA;
+    --muted:#8B84A0;
+    --tag:#7B4FD0;       /* estrutura / tags */
+    --str:#A98CE0;       /* strings / sucesso */
+    --key:#F24487;       /* palavras-chave / destaque */
+    --attr:#E88BB8;      /* atributos / parada */
+    --green:#5fd08a;     /* acerto / caminho bom */
+    --line:rgba(255,255,255,.09);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --serif:'Newsreader',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--body);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(26px,5.2vw,64px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6.6vw,82px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(26px,4.4vw,52px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.4vw,27px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;color:var(--ink);max-width:60ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.9em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:820px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(14px,1.5vw,17px)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.ok h3{color:var(--green)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.no h3{color:var(--key)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+
+  ul.clean{list-style:none;max-width:64ch}
+  ul.clean li{position:relative;padding-left:26px;margin:12px 0;font-size:clamp(15px,1.7vw,20px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;
+    font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;
+    border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+
+  .agenda{display:flex;flex-direction:column;gap:2px;max-width:940px;width:100%}
+  .row{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;padding:12px 16px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:14px}
+  .row .d{font-size:clamp(14px,1.6vw,18px)}
+  .row .tag{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.55}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;gap:0;width:100%;max-width:960px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+  .flow .node .ico{font-size:34px;margin-bottom:10px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(15px,1.8vw,20px);margin-bottom:6px}
+  .flow .arw{display:flex;align-items:center;padding:0 14px;color:var(--tag);font-size:26px}
+  @media(max-width:820px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg)}}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(12.5px,1.4vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:760px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .termline{font-family:var(--mono);font-size:clamp(12.5px,1.4vw,15px);color:#9ee39e}
+  .termline .p{color:var(--muted)}
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:760px;white-space:pre;overflow-x:auto}
+
+  .steps{counter-reset:s;max-width:760px;width:100%}
+  .steps .st{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:34px;height:34px;min-width:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:15px}
+  .steps .st .body h3{font-size:clamp(16px,1.9vw,21px);margin-bottom:2px}
+  .steps .st .body p{font-size:clamp(13px,1.5vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:13px;color:var(--attr);border-left:2px solid var(--attr);padding-left:14px;margin-top:22px;max-width:60ch;line-height:1.5}
+
+  .big-emoji{font-size:clamp(40px,7vw,72px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  table.slidetable{width:100%;max-width:840px;border-collapse:collapse}
+  table.slidetable th,table.slidetable td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);font-size:clamp(13px,1.5vw,16px)}
+  table.slidetable th{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--muted)}
+  table.slidetable td b{color:#fff}
+
+  .responsividade,.slide{justify-content:safe center}
+  h1,h2,.tagtitle{overflow-wrap:break-word}
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:64px 1fr;gap:10px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center) > *{margin-inline:auto;width:100%;max-width:960px}
+</style>
+<style>
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .deck{z-index:2}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+</style>
+<style>
+  /* diagrama de referência: variável(s) apontando pra objeto na memória */
+  .refwrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:560px}
+  .refvars{display:flex;gap:70px}
+  .refvar{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--tag);color:var(--tag);padding:10px 20px;border-radius:10px;font-size:15px}
+  .refarrows{font-family:var(--mono);color:var(--muted);font-size:22px;letter-spacing:.5em}
+  .refobj{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--key);color:var(--ink);padding:16px 24px;border-radius:10px;font-size:14px;text-align:left;white-space:pre}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 CAPA -->
+  <section class="slide active center">
+    <div class="eyebrow"><span class="b">curso</span> · aula 03 · orientação a objetos com java</div>
+    <div class="tagtitle"><span class="br">&lt;</span><span class="nm">classes-e-objetos</span><span class="br">&gt;</span></div>
+    <h1 style="margin:24px 0 14px">Da classe<br>ao <span class="grad">objeto de verdade.</span></h1>
+    <p class="lead" style="max-width:58ch">Hoje: classe × objeto, atributos, métodos, o <span class="code-inline">new</span>, referências, <span class="code-inline">null</span>, parâmetros e retorno — e o primeiro diagrama de classes da sua vida.</p>
+  </section>
+
+  <!-- 2 RECAP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">recap</span> · aula 02 em 30 segundos</div>
+    <h2>Onde a gente parou</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">Tipos e variáveis</h3><p><span class="code-inline">int</span>, <span class="code-inline">double</span>, <span class="code-inline">boolean</span>, <span class="code-inline">char</span> — e o <span class="code-inline">String</span> que já era, secretamente, uma classe.</p></div>
+      <div class="card"><h3 class="attr">Decisão e repetição</h3><p><span class="code-inline">if/else</span>, <span class="code-inline">switch</span>, <span class="code-inline">for</span>, <span class="code-inline">while</span> — tudo isso continua valendo <strong>dentro</strong> de métodos, o tempo todo.</p></div>
+      <div class="card"><h3 class="key">Arrays e Scanner</h3><p>Guardar várias coisas do mesmo tipo, e ler o que o usuário digita. A Lista 1 juntou tudo isso.</p></div>
+    </div>
+    <p class="note">Tudo isso ainda era <strong>paradigma estruturado</strong> — variáveis soltas, comandos em sequência dentro de um <span class="code-inline">main</span>. Hoje isso muda de verdade.</p>
+  </section>
+
+  <!-- 3 AGENDA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">agenda</span> · aula 03</div>
+    <h2>O mapa de hoje</h2>
+    <div class="agenda">
+      <div class="row"><span class="t">15 min</span><span class="d">Recap + a pergunta que ficou em aberto na aula 01</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d">Classe × objeto: a forma de bolo, agora com sintaxe Java</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d">Atributos e métodos: construindo a classe Livro</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d"><span class="mono">new</span>, instanciação e referências</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">20 min</span><span class="d"><span class="mono">null</span> e o erro mais famoso do Java</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d">Parâmetros, retorno e dois objetos conversando</span><span class="tag">live code</span></div>
+      <div class="row"><span class="t">15 min</span><span class="d">Diagrama de classes e como modelar um domínio</span><span class="tag">conceitos</span></div>
+      <div class="row"><span class="t">10 min</span><span class="d">Desafio + dúvidas + encerramento</span><span class="tag">🎉</span></div>
+    </div>
+  </section>
+
+  <!-- 4 A PERGUNTA DA AULA 01 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>ficou em aberto desde a aula 01</div>
+    <h2>Lembra da pergunta do primeiro dia?</h2>
+    <p class="lead" style="max-width:58ch">"Como você organizaria o código de um <strong>sistema de biblioteca</strong>?" A gente respondeu com uma metáfora — o cartãozinho com nome, telefone e aniversário juntos — e mostrou um <span class="code-inline">Livro</span> em Python e em Java. Mas você nunca escreveu um objeto de verdade com a sua própria mão.</p>
+    <p class="note">Hoje muda isso. E olha só: vamos resolver essa mesma pergunta da biblioteca — só que agora <strong>de verdade</strong>, no desafio do fim da aula.</p>
+  </section>
+
+  <!-- 5 CLASSE = FORMA DE BOLO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o conceito central</span> · classe × objeto</div>
+    <h2>Uma forma de bolo <span class="grad">não é um bolo</span></h2>
+    <div class="grid2" style="margin-top:8px">
+      <div class="card">
+        <h3 class="tagc">Classe</h3>
+        <p>O <strong>molde</strong>. Descreve o que todo livro <em>tem</em> (título, autor, ano) e o que todo livro <em>faz</em> (ser emprestado, ser devolvido). Não é um livro específico — é a receita de "como é um livro".</p>
+      </div>
+      <div class="card">
+        <h3 class="key">Objeto</h3>
+        <p>Um livro <strong>de verdade</strong>, feito a partir daquele molde. "Duna", de Frank Herbert, publicado em 1965, disponível. De uma classe só, você tira quantos objetos quiser.</p>
+      </div>
+    </div>
+    <p class="note">É a mesma ideia da aula 01, só que agora você vai <strong>escrever</strong> a classe e <strong>criar</strong> os objetos — não só ler o exemplo pronto.</p>
+  </section>
+
+  <!-- 6 ANATOMIA DE UMA CLASSE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintaxe</span> · o molde vazio</div>
+    <h2>Criando a classe <span class="grad">Livro</span></h2>
+    <div class="code"><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="cm">// por enquanto, vazia</span>
+}</div>
+    <p class="note">Isso já <strong>compila</strong>. É um molde sem nada dentro — ainda não descreve nenhuma informação nem nenhuma ação. Vamos preencher, uma peça de cada vez.</p>
+  </section>
+
+  <!-- 7 ATRIBUTOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">dentro da classe</span> · atributos</div>
+    <h2>Atributos: o que um <span class="grad">Livro</span> tem</h2>
+    <p>Atributos são <strong>variáveis que moram dentro da classe</strong>. Cada objeto criado a partir dela vai ter o seu próprio valor pra cada uma:</p>
+    <div class="code" style="margin-top:18px"><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="ty">int</span> anoPublicacao;
+  <span class="kw">boolean</span> disponivel;
+}</div>
+    <p class="note">Repare: é exatamente a mesma sintaxe de declarar uma variável (<span class="code-inline">tipo nome;</span>) que você já usa desde a aula 02 — só que agora ela mora <strong>dentro</strong> da classe, não solta dentro de um <span class="code-inline">main</span>.</p>
+  </section>
+
+  <!-- 8 MÉTODOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">dentro da classe</span> · métodos</div>
+    <h2>Métodos: o que um <span class="grad">Livro</span> faz</h2>
+    <p>Métodos são <strong>ações</strong> que o objeto sabe executar — geralmente usando os próprios atributos dele:</p>
+    <div class="code" style="margin-top:18px"><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="ty">int</span> anoPublicacao;
+  <span class="kw">boolean</span> disponivel;
+
+  <span class="kw">void</span> <span class="fn">mostrarFicha</span>() {
+    <span class="ty">System</span>.out.<span class="fn">println</span>(titulo + <span class="st">" — "</span> + autor + <span class="st">" ("</span> + anoPublicacao + <span class="st">")"</span>);
+  }
+}</div>
+    <p class="note">Dentro do método, <span class="code-inline">titulo</span>, <span class="code-inline">autor</span> e <span class="code-inline">anoPublicacao</span> não precisam de nenhum prefixo — o método já sabe que está falando dos atributos <strong>do próprio objeto</strong> que o chamou.</p>
+  </section>
+
+  <!-- 9 INSTANCIAÇÃO COM NEW -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">criando objetos</span> · a palavra-chave new</div>
+    <h2>Do molde ao livro de verdade</h2>
+    <div class="code"><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();</div>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card"><h3 class="tagc">Livro</h3><p>O <strong>tipo</strong> da variável — que classe de objeto ela vai guardar.</p></div>
+      <div class="card"><h3 class="attr">duna</h3><p>O <strong>nome</strong> que você escolheu pra essa variável.</p></div>
+      <div class="card"><h3 class="key">new Livro()</h3><p>A ordem <strong>"cria um Livro agora"</strong>. É esse <span class="code-inline">new</span> que efetivamente fabrica o objeto na memória.</p></div>
+    </div>
+    <p class="note">Isso se chama <strong>instanciar</strong> a classe — criar uma <strong>instância</strong> (um objeto) dela. Sem <span class="code-inline">new</span>, nenhum objeto é criado — só existe o molde.</p>
+  </section>
+
+  <!-- 10 ACESSANDO ATRIBUTOS E MÉTODOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">usando o objeto</span> · o ponto (.)</div>
+    <h2>Preenchendo e chamando</h2>
+    <div class="code"><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+
+duna.titulo = <span class="st">"Duna"</span>;
+duna.autor = <span class="st">"Frank Herbert"</span>;
+duna.anoPublicacao = <span class="st">1965</span>;
+duna.disponivel = <span class="kw">true</span>;
+
+duna.<span class="fn">mostrarFicha</span>(); <span class="cm">// Duna — Frank Herbert (1965)</span></div>
+    <p class="note">O ponto (<span class="code-inline">.</span>) é o operador de acesso: <span class="code-inline">objeto.atributo</span> pra ler/escrever um dado, <span class="code-inline">objeto.metodo()</span> pra executar uma ação.</p>
+  </section>
+
+  <!-- 11 REFERÊNCIA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o que a variável guarda, de verdade</div>
+    <h2>A variável <span class="grad">não é</span> o objeto</h2>
+    <p style="max-width:62ch">Diferente de um <span class="code-inline">int</span>, a variável <span class="code-inline">duna</span> não guarda o objeto Livro dentro dela. Ela guarda uma <strong>referência</strong> — o "caminho" até onde o objeto mora na memória.</p>
+    <div class="flow" style="margin-top:22px">
+      <div class="node"><div class="ico">🏷️</div><b>Livro duna</b><span class="muted">a variável guarda uma referência</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📦</div><b>objeto Livro</b><span class="muted">os dados de verdade vivem aqui, na memória</span></div>
+    </div>
+    <p class="note">Um <span class="code-inline">int</span> é uma caixa com o valor dentro. Uma referência é mais como o <strong>endereço</strong> escrito num papel — ela aponta pra onde o valor está, sem ser o valor.</p>
+  </section>
+
+  <!-- 12 ALIASING -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">cuidado com isso</span> · duas variáveis, um objeto só</div>
+    <h2>Copiar a referência <span class="grad">não copia o objeto</span></h2>
+    <div class="code"><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+duna.titulo = <span class="st">"Duna"</span>;
+
+<span class="ty">Livro</span> copia = duna; <span class="cm">// NÃO cria outro livro</span>
+copia.titulo = <span class="st">"Outro nome"</span>;
+
+<span class="ty">System</span>.out.<span class="fn">println</span>(duna.titulo); <span class="cm">// "Outro nome" — mudou os dois!</span></div>
+    <div class="refwrap" style="margin-top:20px">
+      <div class="refvars"><div class="refvar">duna</div><div class="refvar">copia</div></div>
+      <div class="refarrows">↘&nbsp;&nbsp;↙</div>
+      <div class="refobj">Livro
+  titulo: "Outro nome"</div>
+    </div>
+    <p class="note"><span class="code-inline">copia = duna</span> copiou a <strong>referência</strong>, não o livro. As duas variáveis apontam pro mesmíssimo objeto — mexer por uma mexe pela outra também.</p>
+  </section>
+
+  <!-- 13 NULL -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">referências</span> · quando não aponta pra nada</div>
+    <h2>O valor <span class="grad">null</span></h2>
+    <div class="code"><span class="ty">Livro</span> proximo; <span class="cm">// declarada, mas sem new</span>
+<span class="ty">System</span>.out.<span class="fn">println</span>(proximo); <span class="cm">// null</span></div>
+    <p style="margin-top:18px">Enquanto um <span class="code-inline">int</span> sem valor não existe em Java (o compilador não deixa usar), uma referência sem <span class="code-inline">new</span> assume um valor especial: <span class="code-inline">null</span> — "não aponta pra objeto nenhum".</p>
+    <p class="note"><span class="code-inline">null</span> só existe pra <strong>tipos de referência</strong> (classes, como <span class="code-inline">Livro</span> e <span class="code-inline">String</span>). Um <span class="code-inline">int</span>, <span class="code-inline">double</span> ou <span class="code-inline">boolean</span> nunca pode ser <span class="code-inline">null</span>.</p>
+  </section>
+
+  <!-- 14 NULLPOINTEREXCEPTION -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">cuidado com isso</span> · o erro mais famoso do Java</div>
+    <h2>NullPointerException</h2>
+    <div class="code"><span class="ty">Livro</span> proximo = <span class="kw">null</span>;
+proximo.<span class="fn">mostrarFicha</span>(); <span class="cm">// 💥 explode em tempo de execução</span></div>
+    <div class="terminal" style="margin-top:16px"><div class="termline"><span class="p">$</span> java Teste</div><div class="termline">Exception in thread "main" java.lang.NullPointerException</div></div>
+    <p class="note">Chamar um método <strong>em cima de null</strong> é pedir pro Java falar com um objeto que não existe. Sempre que usar uma referência que pode não ter sido preenchida, pergunte: <strong>isso pode estar null aqui?</strong></p>
+  </section>
+
+  <!-- 15 PARÂMETROS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">comunicação entre objetos</span> · parâmetros</div>
+    <h2>Métodos que recebem informação</h2>
+    <div class="code"><span class="kw">class</span> <span class="ty">Livro</span> {
+  <span class="cm">// ...atributos...</span>
+
+  <span class="kw">void</span> <span class="fn">emprestarPara</span>(<span class="ty">String</span> nomeDoLeitor) {
+    disponivel = <span class="kw">false</span>;
+    <span class="ty">System</span>.out.<span class="fn">println</span>(titulo + <span class="st">" foi emprestado para "</span> + nomeDoLeitor);
+  }
+}
+
+duna.<span class="fn">emprestarPara</span>(<span class="st">"Nicoly"</span>); <span class="cm">// "Nicoly" é o argumento</span></div>
+    <p class="note"><span class="code-inline">nomeDoLeitor</span> é o <strong>parâmetro</strong> — a variável que existe só durante a execução do método, recebendo o valor de fora. <span class="code-inline">"Nicoly"</span>, no momento da chamada, é o <strong>argumento</strong>.</p>
+  </section>
+
+  <!-- 16 RETORNO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">comunicação entre objetos</span> · retorno</div>
+    <h2><span class="grad">void</span> × devolver um valor</h2>
+    <div class="code"><span class="kw">boolean</span> <span class="fn">emprestar</span>() {
+  <span class="kw">if</span> (disponivel) {
+    disponivel = <span class="kw">false</span>;
+    <span class="kw">return</span> <span class="kw">true</span>;
+  }
+  <span class="kw">return</span> <span class="kw">false</span>;
+}
+
+<span class="kw">boolean</span> deuCerto = duna.<span class="fn">emprestar</span>(); <span class="cm">// guarda o retorno</span></div>
+    <p class="note"><span class="code-inline">void</span> quer dizer "esse método não devolve nada". Quando ele devolve algo, o tipo <strong>antes do nome</strong> do método (aqui, <span class="code-inline">boolean</span>) precisa bater com o que vem depois de <span class="code-inline">return</span>.</p>
+  </section>
+
+  <!-- 17 SEGUNDA CLASSE: LEITOR -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>uma classe pode conhecer outra</div>
+    <h2>A classe <span class="grad">Leitor</span></h2>
+    <div class="code"><span class="kw">class</span> <span class="ty">Leitor</span> {
+  <span class="ty">String</span> nome;
+  <span class="ty">Livro</span> livroAtual; <span class="cm">// referência — começa null</span>
+}</div>
+    <p class="note">Um atributo <strong>não precisa</strong> ser um tipo primitivo ou <span class="code-inline">String</span> — pode ser outro objeto seu, como <span class="code-inline">Livro</span>. É assim que classes começam a se conectar formando um domínio.</p>
+  </section>
+
+  <!-- 18 JUNTANDO TUDO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">live code</span> · Livro e Leitor conversando</div>
+    <h2>Um objeto como <span class="grad">parâmetro</span></h2>
+    <div class="code"><span class="kw">class</span> <span class="ty">Leitor</span> {
+  <span class="ty">String</span> nome;
+  <span class="ty">Livro</span> livroAtual;
+
+  <span class="kw">boolean</span> <span class="fn">pegarEmprestado</span>(<span class="ty">Livro</span> livro) {
+    <span class="kw">if</span> (livro.disponivel) {
+      livro.disponivel = <span class="kw">false</span>;
+      livroAtual = livro;
+      <span class="kw">return</span> <span class="kw">true</span>;
+    }
+    <span class="kw">return</span> <span class="kw">false</span>;
+  }
+
+  <span class="kw">void</span> <span class="fn">devolverLivro</span>() {
+    <span class="kw">if</span> (livroAtual != <span class="kw">null</span>) {
+      livroAtual.disponivel = <span class="kw">true</span>;
+      livroAtual = <span class="kw">null</span>;
+    }
+  }
+}</div>
+    <p class="note">Repare o parâmetro <span class="code-inline">Livro livro</span>: um método pode receber um <strong>objeto inteiro</strong> como argumento, não só números e textos. E <span class="code-inline">devolverLivro()</span> confere <span class="code-inline">!= null</span> antes de mexer — exatamente pra evitar a explosão do slide 14.</p>
+  </section>
+
+  <!-- 19 DIAGRAMA DE CLASSES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">modelagem</span> · um primeiro diagrama de classes</div>
+    <h2>Duas classes, num desenho</h2>
+    <div class="code" style="max-width:960px;font-size:clamp(11px,1.3vw,13.5px)">┌─────────────────────────┐        ┌─────────────────────────┐
+│          Livro           │        │          Leitor           │
+├─────────────────────────┤        ├─────────────────────────┤
+│ titulo: String            │        │ nome: String                │
+│ autor: String              │        │ livroAtual: Livro           │
+│ anoPublicacao: int         │        └─────────────────────────┘
+│ disponivel: boolean        │                      │
+├─────────────────────────┤                      │ conhece um Livro
+│ emprestar(): boolean       │◄─────────────────────┘
+│ devolver(): void           │
+│ mostrarFicha(): void       │
+└─────────────────────────┘</div>
+    <p class="note">Nada de UML chique por enquanto: só <strong>caixas</strong> com nome, atributos e métodos, e uma <strong>linha</strong> mostrando quem conhece quem. Isso já é um diagrama de classes de verdade.</p>
+  </section>
+
+  <!-- 20 COMO MODELAR UM DOMÍNIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">modelagem</span> · um método simples pra achar as classes</div>
+    <h2>Substantivo, verbo, característica</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="tagc">Substantivos → classes</h3><p>"Um <strong>leitor</strong> pega um <strong>livro</strong> emprestado" → duas classes candidatas: <span class="code-inline">Leitor</span> e <span class="code-inline">Livro</span>.</p></div>
+      <div class="card"><h3 class="key">Verbos → métodos</h3><p>"Pega emprestado", "devolve" → viram <span class="code-inline">pegarEmprestado()</span>, <span class="code-inline">devolver()</span>.</p></div>
+      <div class="card"><h3 class="attr">Características → atributos</h3><p>Nome do leitor, título do livro, se está disponível → viram os atributos de cada classe.</p></div>
+    </div>
+    <p class="note">Não existe fórmula mágica nem resposta única — modelagem é sobre fazer escolhas razoáveis e conseguir <strong>explicar</strong> por quê. Isso vai ficar mais afiado a cada aula.</p>
+  </section>
+
+  <!-- 21 DESAFIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">desafio</span> · sua vez</div>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <h2 style="margin-bottom:8px">A biblioteca <span class="grad">é sua agora</span></h2>
+        <ul class="clean">
+          <li>Modele 2 a 4 classes de um domínio simples</li>
+          <li>Atributos, métodos, <span class="code-inline">new</span>, parâmetros e retorno</li>
+          <li>Um <span class="code-inline">main</span> que cria e usa objetos de verdade</li>
+          <li>Ainda <strong>sem construtor</strong> — isso é conteúdo da aula 04</li>
+        </ul>
+      </div>
+      <div class="card"><h3 class="str">Por quê?</h3><p>É a primeira vez que você modela e escreve objetos do zero — a base de tudo que vem depois, inclusive do projeto do curso.</p></div>
+    </div>
+    <p class="note">Instruções completas, diagrama sugerido e modelo de resposta na página da aula.</p>
+  </section>
+
+  <!-- 22 FIM -->
+  <section class="slide center">
+    <div class="big-emoji">📚</div>
+    <h1>Primeiro objeto <span class="grad">criado com as suas mãos.</span></h1>
+    <p class="lead" style="margin-top:18px">Na próxima aula: encapsulamento, construtores, <span class="code-inline">this</span> e por que atributo público é considerado falta de educação.</p>
+    <p class="mono" style="margin-top:18px;color:var(--muted)">NickDev · Orientação a Objetos com Java · aula 03</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
+<div class="nav">
+  <span id="counter">01 / 22</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>
