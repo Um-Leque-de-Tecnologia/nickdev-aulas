@@ -368,7 +368,7 @@ export default function FrontendAvancadoNextjs() {
                 🧩 Código do desafio
               </a>
               <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
-                🧑‍💻 Modelo de resposta
+                👁️ Prévia da resposta
               </a>
             </div>
           </div>
