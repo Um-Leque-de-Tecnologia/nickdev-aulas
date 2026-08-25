@@ -358,6 +358,35 @@ JavaScript nenhum para aparecer.</pre>
     </div>
   </div>
 
+  <div class="label">O que a correção procura</div>
+
+  <table class="audit">
+    <tr><th>sinal</th><th>o que ele indica</th></tr>
+    <tr><td>✅ A fronteira está na folha</td><td>Nenhuma página, nenhum layout de cliente. Os arquivos com <code>"use client"</code> somam poucas linhas juntos.</td></tr>
+    <tr><td>✅ O print do terminal</td><td>Alguém rodou e olhou. É a diferença entre entregar e conferir.</td></tr>
+    <tr><td>✅ A justificativa nomeia a causa</td><td>"Usa <code>usePathname</code>" é meia resposta. A boa diz <b>por quê</b>: porque o endereço atual é informação do navegador.</td></tr>
+    <tr><td>✅ Acharam fronteira grande demais</td><td>Ninguém pediu que encontrassem um problema — pediram que procurassem. Quem achou e consertou entendeu a aula.</td></tr>
+    <tr><td>❌ <code>"use client"</code> na página</td><td>"Porque assim funciona." Funciona mesmo — e leva a vaga inteira para o navegador sem precisar. É o erro que o desafio existe para pegar.</td></tr>
+    <tr><td>❌ O <code>await</code> na página</td><td>A tela fica branca dois segundos e o <code>Suspense</code> vira decoração.</td></tr>
+    <tr><td>❌ Justificativa que repete o enunciado</td><td>"É de cliente porque precisa do navegador" não diz nada. <i>O que</i> precisa do navegador?</td></tr>
+    <tr><td>❌ Um <code>useState</code> do nada</td><td>Não foi ensinado, não era necessário — quase sempre vem de código copiado sem leitura.</td></tr>
+  </table>
+
+  <div class="goal roxo">
+    <span class="ico">🌱</span>
+    <div>
+      <h3>Onde isso continua</h3>
+      <p>Na <b>aula 04</b> a espera de dois segundos que vocês simularam vira uma
+      busca de dados de verdade — e aí o <code>Suspense</code> deixa de ser
+      exercício e passa a ser a razão de a página abrir rápido mesmo com um banco
+      lento do outro lado.</p>
+      <p>Composição avançada — como um componente de cliente pode <b>envolver</b>
+      um de servidor usando <code>children</code> — está no
+      <a href="/guias/nextjs.html" style="color:var(--pink-light);text-decoration:underline">guia
+      de Next.js</a>. Não é exigido agora, mas é o próximo degrau.</p>
+    </div>
+  </div>
+
   <div class="cta-row">
     <a class="btn primary" href="desafio.html">🎯 Voltar ao desafio</a>
     <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
