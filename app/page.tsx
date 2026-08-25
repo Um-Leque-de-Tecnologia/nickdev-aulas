@@ -1,6 +1,7 @@
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import { GUIAS, hrefDoGuia } from "@/lib/guias";
 
 export default function Home() {
   return (
@@ -79,6 +80,33 @@ export default function Home() {
           /cursos/nextjs-ia e passará para uma área logada. Ao criar a área,
           mova o link para lá em vez de reintroduzir o card aqui.
         */}
+      </div>
+
+      {/*
+        Os guias não pertencem a curso nenhum — são a documentação das
+        tecnologias, e vários cursos apontam para o mesmo guia. Por isso vivem
+        aqui e não dentro da pasta de uma aula, como era antes.
+      */}
+      <div className="section-label" id="guias">
+        Guias de tecnologia
+      </div>
+      <p style={{ color: "var(--text-2)", fontSize: 15, marginBottom: 18 }}>
+        Documentação de consulta, independente de curso. Cada uma reúne o que
+        antes estava espalhado em várias aulas.
+      </p>
+
+      <div className="guia-grid">
+        {GUIAS.map((g) => (
+          <a className="guia" href={hrefDoGuia(g.slug)} key={g.slug}>
+            <span className="nome">
+              <span className="e" aria-hidden="true">
+                {g.emoji}
+              </span>
+              {g.nome}
+            </span>
+            <p>{g.resumo}</p>
+          </a>
+        ))}
       </div>
 
       <Footer />

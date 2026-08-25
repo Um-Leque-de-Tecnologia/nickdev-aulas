@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript · Guias · NickDev</title>
+<meta name="description" content="Guia de TypeScript: por que tipar, inferência, como descrever os dados, narrowing, genéricos, utility types e o modo strict — com a versão certa para cada projeto.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/#guias">← todos os guias</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#versoes">⚠️ Qual versão instalar</a>
+    <a href="#porque-ts">Por que TypeScript</a>
+    <div class="grp">Os tipos</div>
+    <a href="#tipos">Tipos e inferência</a>
+    <a href="#formato">Descrevendo os dados</a>
+    <a href="#narrowing">Narrowing</a>
+    <div class="grp">Indo além</div>
+    <a href="#genericos">Genéricos</a>
+    <a href="#utility">Utility types</a>
+    <div class="grp">Rigor</div>
+    <a href="#strict">strict</a>
+    <div class="grp">Fechando</div>
+    <a href="#erros">Erros comuns 🔧</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Guia · TypeScript</div>
+  <h1>TypeScript, <span class="g">o JavaScript que avisa antes</span></h1>
+  <p class="lead">Tipar não é burocracia: é mover o erro do usuário para o seu editor. Da inferência automática ao narrowing, dos genéricos ao strict — e qual versão instalar sem quebrar o projeto.</p>
+  <div class="rule"></div>
+
+
+  <div class="divisor">Antes de tudo</div>
+
+<section id="versoes">
+    <h2>⚠️ Qual TypeScript instalar</h2>
+    <p>Comece por aqui, porque errar isto custa uma tarde inteira na aula 03.</p>
+
+    <table>
+      <tr><th>Versão</th><th>O que é</th><th>Serve para</th></tr>
+      <tr>
+        <td><b><code>7.0.2</code></b></td>
+        <td>A mais recente. O compilador foi <b>portado para Go</b> e ficou de 8 a 12× mais rápido.</td>
+        <td>Next.js ✓ · <b>Angular ✗</b></td>
+      </tr>
+      <tr>
+        <td><b><code>6.0.3</code></b></td>
+        <td>A faixa que o Angular 22 exige: <code>typescript &gt;=6.0 &lt;6.1</code></td>
+        <td><b>O nosso curso</b> ✓</td>
+      </tr>
+    </table>
+
+    <p><b>Por que o Angular não pode usar o 7 ainda:</b> o TypeScript 7 ainda não
+    expõe a <b>API pública de compilador</b> que ferramentas usam pra analisar
+    código. O Angular precisa dela pra checar os tipos dentro dos templates HTML
+    — então ele fica na faixa 6.0.x até o port terminar. O mesmo vale, por
+    enquanto, para Vue, Svelte e Astro.</p>
+
+    <div class="terminal"><span class="p">$</span> npm install typescript@latest   <span class="cm"># num projeto Angular</span>
+<span class="err">✗ ERESOLVE unable to resolve dependency tree
+  @angular/compiler-cli requires typescript &gt;=6.0 &lt;6.1</span></div>
+
+    <div class="tip"><b>A boa notícia: a linguagem é a mesma.</b> O 7 é um
+    <b>port</b>, não uma reescrita da semântica — as regras de tipo vieram do 6
+    de propósito. Tudo que você aprender aqui vale nas duas versões. O que muda é
+    a velocidade do compilador, não o que é válido.</div>
+
+    <div class="tip warn"><b>Não tente "resolver" com <code>--force</code> ou
+    <code>--legacy-peer-deps</code>.</b> O aviso não é burocracia: com o TS
+    errado, a checagem de template do Angular simplesmente não roda, e você perde
+    exatamente a rede de segurança pela qual instalou TypeScript.</div>
+  </section>
+<section id="porque-ts">
+    <h2>Por que TypeScript</h2>
+<pre><span class="cm">// JavaScript: descobre em produção</span>
+<span class="fn">render</span>(evento.titlo);       <span class="cm">// undefined na tela, silêncio total</span>
+
+<span class="cm">// TypeScript: descobre enquanto você digita</span>
+<span class="fn">render</span>(evento.titlo);
+<span class="cm">//            ~~~~~ Property 'titlo' does not exist on type 'Evento'.</span>
+<span class="cm">//                  Did you mean 'titulo'?</span></pre>
+
+    <ul>
+      <li><b>Erro cedo</b> — typo e campo inexistente aparecem no editor</li>
+      <li><b>Autocompletar de verdade</b> — o editor conhece o formato dos dados</li>
+      <li><b>Refatoração segura</b> — renomeou um campo? Ele lista os 14 lugares que quebraram</li>
+      <li><b>Documentação que não desatualiza</b> — o tipo é a assinatura</li>
+    </ul>
+
+    <div class="tip"><b>O tipo some no build.</b> Nada disso existe no navegador —
+    é ferramenta de tempo de escrita. Por isso "TypeScript deixa o site mais
+    lento" não faz sentido: no fim, o que roda é JavaScript.</div>
+  </section>
+
+  <div class="divisor">Os tipos</div>
+
+<section id="tipos">
+    <h2>Tipos e inferência</h2>
+<pre><span class="cm">// deixe ele deduzir</span>
+<span class="kw">let</span> titulo = <span class="st">"Meetup"</span>;       <span class="cm">// string</span>
+<span class="kw">let</span> vagas = <span class="st">40</span>;              <span class="cm">// number</span>
+
+<span class="cm">// anote onde ele NÃO tem como deduzir</span>
+<span class="kw">function</span> <span class="fn">formatar</span>(data: <span class="ty">string</span>): <span class="ty">string</span> {
+  <span class="kw">return new</span> <span class="ty">Date</span>(data).<span class="fn">toLocaleDateString</span>(<span class="st">"pt-BR"</span>);
+}
+
+<span class="cm">// estruturas vazias precisam de ajuda</span>
+<span class="kw">const</span> titulos: <span class="ty">string</span>[] = [];
+<span class="kw">const</span> porSlug: <span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">Evento</span>&gt; = {};</pre>
+
+    <div class="tip"><b>Não anote o óbvio.</b>
+    <code>const titulo: string = "Meetup"</code> é ruído — ele já sabe. Anote
+    <b>parâmetro, retorno e estrutura de dados</b>; o resto ele deduz melhor que
+    você.</div>
+
+    <div class="tip warn"><b><code>any</code> desliga o TypeScript.</b> É a saída
+    fácil quando o erro incomoda, e ela devolve exatamente o problema que você
+    instalou TypeScript pra evitar. Se precisar de escape, use
+    <code>unknown</code>: ele obriga você a checar antes de usar.</div>
+  </section>
+<section id="formato">
+    <h2>Descrevendo os dados</h2>
+    <div class="file">📄 dados/tipos.ts</div>
+<pre><span class="kw">export type</span> <span class="ty">Formato</span> = <span class="st">"Presencial"</span> | <span class="st">"Online"</span> | <span class="st">"Híbrido"</span>;
+<span class="kw">export type</span> <span class="ty">Nivel</span> = <span class="st">"Iniciante"</span> | <span class="st">"Intermediário"</span> | <span class="st">"Avançado"</span>;
+
+<span class="kw">export type</span> <span class="ty">Evento</span> = {
+  id: <span class="ty">string</span>;
+  slug: <span class="ty">string</span>;
+  titulo: <span class="ty">string</span>;
+  resumo: <span class="ty">string</span>;
+  descricao: <span class="ty">string</span>;
+  organizador: <span class="ty">string</span>;
+  organizadorSlug: <span class="ty">string</span>;
+  categoria: <span class="ty">string</span>;
+  formato: <span class="ty">Formato</span>;
+  cidade?: <span class="ty">string</span>;          <span class="cm">// opcional: evento online não tem</span>
+  inicioEm: <span class="ty">string</span>;         <span class="cm">// ISO 8601</span>
+  duracaoMin: <span class="ty">number</span>;
+  gratuito: <span class="ty">boolean</span>;
+  vagas: <span class="ty">number</span> | <span class="kw">null</span>;    <span class="cm">// null = ilimitado, de propósito</span>
+  nivel: <span class="ty">Nivel</span>;
+};</pre>
+
+    <h3>União literal em vez de string solta</h3>
+    <p><code>formato: Formato</code> em vez de <code>formato: string</code> muda
+    tudo: escrever <code>"presencial"</code> em minúscula vira erro no editor, e o
+    autocompletar oferece os três valores.</p>
+
+    <h3><code>?</code> ou <code>| null</code>?</h3>
+    <table>
+      <tr><th>Escolha</th><th>Significa</th></tr>
+      <tr><td><code>cidade?: string</code></td><td>O campo <b>pode não vir</b></td></tr>
+      <tr><td><code>vagas: number | null</code></td><td>O campo <b>vem sempre</b>, e <code>null</code> tem significado próprio</td></tr>
+    </table>
+    <div class="tip">No projeto, <code>vagas: null</code> quer dizer
+    <b>"ilimitado"</b> — é informação, não ausência. Por isso ele é
+    <code>| null</code> e não <code>?</code>. Essa distinção parece detalhe e
+    evita muita confusão depois.</div>
+
+    <h3>type ou interface?</h3>
+    <p>Para descrever o formato dos seus dados, <code>type</code> resolve e é mais
+    flexível (aceita união, que <code>interface</code> não aceita).
+    <code>interface</code> brilha quando algo vai ser <b>estendido ou
+    implementado por classe</b> — o que aparece bastante no Angular. <b>Na dúvida,
+    <code>type</code>.</b></p>
+  </section>
+<section id="narrowing">
+    <h2>Narrowing</h2>
+    <p>O recurso mais útil e menos ensinado do TypeScript: dentro de um
+    <code>if</code>, ele <b>sabe mais</b> do que sabia fora.</p>
+
+<pre><span class="kw">function</span> <span class="fn">local</span>(evento: <span class="ty">Evento</span>): <span class="ty">string</span> {
+  <span class="cm">// aqui, cidade é: string | undefined</span>
+
+  <span class="kw">if</span> (evento.cidade === <span class="kw">undefined</span>) {
+    <span class="kw">return</span> <span class="st">"Online"</span>;
+  }
+
+  <span class="cm">// ✨ aqui embaixo é string. Sem cast, sem "!"</span>
+  <span class="kw">return</span> evento.cidade.<span class="fn">toUpperCase</span>();
+}</pre>
+
+    <h3>Com <code>find</code>, que é o caso do projeto</h3>
+<pre><span class="kw">const</span> evento = eventos.<span class="fn">find</span>((e) =&gt; e.slug === slug);
+<span class="cm">// evento: Evento | undefined</span>
+
+<span class="kw">if</span> (!evento) {
+  <span class="fn">mostrarNaoEncontrado</span>();
+  <span class="kw">return</span>;
+}
+
+<span class="cm">// daqui pra baixo é Evento — o TS garante</span>
+<span class="fn">render</span>(evento.titulo);</pre>
+
+    <div class="tip"><b><code>find</code> devolver <code>| undefined</code> é bom,
+    não chato.</b> É o TypeScript te obrigando a tratar o "não achei" — que na
+    tela vira a página de 404. Sem isso, o caso passa despercebido até alguém
+    digitar um slug errado.</div>
+
+    <div class="tip warn"><b>Evite o <code>!</code>.</b>
+    <code>evento!.titulo</code> diz "confia, existe" e desliga a checagem. Se você
+    estiver errado, volta o erro de runtime que o TypeScript existia pra
+    prevenir. Prefira um <code>if</code> de verdade.</div>
+  </section>
+
+  <div class="divisor">Indo além</div>
+
+<section id="genericos">
+    <h2>Genéricos</h2>
+<pre><span class="cm">// sem genérico: perde o tipo</span>
+<span class="kw">function</span> <span class="fn">primeiro</span>(lista: <span class="ty">any</span>[]): <span class="ty">any</span> { <span class="kw">return</span> lista[<span class="st">0</span>]; }
+
+<span class="cm">// com genérico: "o que entrar é o que sai"</span>
+<span class="kw">function</span> <span class="fn">primeiro</span>&lt;<span class="ty">T</span>&gt;(lista: <span class="ty">T</span>[]): <span class="ty">T</span> | <span class="kw">undefined</span> {
+  <span class="kw">return</span> lista[<span class="st">0</span>];
+}
+
+<span class="kw">const</span> e = <span class="fn">primeiro</span>(eventos);    <span class="cm">// Evento | undefined ✓</span>
+<span class="kw">const</span> n = <span class="fn">primeiro</span>([<span class="st">1</span>, <span class="st">2</span>]);    <span class="cm">// number | undefined ✓</span></pre>
+
+    <p>O <code>&lt;T&gt;</code> é um <b>espaço em branco pro tipo</b>, preenchido
+    na hora da chamada.</p>
+
+    <h3>Com restrição</h3>
+<pre><span class="cm">// T precisa ter pelo menos um campo slug</span>
+<span class="kw">function</span> <span class="fn">buscarPorSlug</span>&lt;<span class="ty">T</span> <span class="kw">extends</span> { slug: <span class="ty">string</span> }&gt;(
+  lista: <span class="ty">T</span>[],
+  slug: <span class="ty">string</span>,
+): <span class="ty">T</span> | <span class="kw">undefined</span> {
+  <span class="kw">return</span> lista.<span class="fn">find</span>((item) =&gt; item.slug === slug);
+}
+
+<span class="cm">// serve pra Evento e pra Organizador, mantendo o tipo certo</span></pre>
+
+    <div class="tip"><b>Você vai ler genéricos muito mais do que escrever:</b>
+    <code>signal&lt;Evento[]&gt;([])</code> no Angular,
+    <code>useState&lt;Evento | null&gt;(null)</code> no React. Reconhecer a forma
+    já resolve 90% dos casos.</div>
+  </section>
+<section id="utility">
+    <h2>Utility types</h2>
+    <table>
+      <tr><th>Tipo</th><th>O que faz</th><th>Uso no projeto</th></tr>
+      <tr><td><code>Partial&lt;T&gt;</code></td><td>Todos os campos opcionais</td><td>Formulário de edição</td></tr>
+      <tr><td><code>Required&lt;T&gt;</code></td><td>Todos obrigatórios</td><td>Depois de validar</td></tr>
+      <tr><td><code>Omit&lt;T, K&gt;</code></td><td>Tira campos</td><td>Criar: o id vem do servidor</td></tr>
+      <tr><td><code>Pick&lt;T, K&gt;</code></td><td>Fica só com esses</td><td>Resposta enxuta</td></tr>
+      <tr><td><code>Readonly&lt;T&gt;</code></td><td>Nada alterável</td><td>Reforçar imutabilidade</td></tr>
+      <tr><td><code>Record&lt;K, V&gt;</code></td><td>Objeto de chave → valor</td><td>Agrupar por categoria</td></tr>
+    </table>
+
+<pre><span class="cm">// o que o formulário de novo evento envia</span>
+<span class="kw">type</span> <span class="ty">NovoEvento</span> = <span class="ty">Omit</span>&lt;<span class="ty">Evento</span>, <span class="st">"id"</span>&gt;;
+
+<span class="cm">// o que a edição aceita</span>
+<span class="kw">type</span> <span class="ty">EdicaoEvento</span> = <span class="ty">Partial</span>&lt;<span class="ty">NovoEvento</span>&gt;;
+
+<span class="cm">// agrupamento</span>
+<span class="kw">const</span> porCategoria: <span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">Evento</span>[]&gt; = {};</pre>
+
+    <div class="tip"><b>A vantagem é a fonte única.</b> Adicione um campo em
+    <code>Evento</code> e os três derivados se atualizam sozinhos. Se você tivesse
+    copiado o tipo três vezes, teria três lugares pra esquecer.</div>
+  </section>
+
+  <div class="divisor">Rigor</div>
+
+<section id="strict">
+    <h2>strict</h2>
+    <div class="file">📄 tsconfig.json</div>
+<pre>{
+  <span class="st">"compilerOptions"</span>: {
+    <span class="st">"strict"</span>: <span class="kw">true</span>,
+    <span class="st">"noUncheckedIndexedAccess"</span>: <span class="kw">true</span>,
+    <span class="st">"target"</span>: <span class="st">"ES2022"</span>,
+    <span class="st">"module"</span>: <span class="st">"ESNext"</span>,
+    <span class="st">"moduleResolution"</span>: <span class="st">"bundler"</span>,
+    <span class="st">"noEmit"</span>: <span class="kw">true</span>
+  },
+  <span class="st">"include"</span>: [<span class="st">"src"</span>]
+}</pre>
+
+    <table>
+      <tr><th>Opção</th><th>O que muda</th></tr>
+      <tr><td><code>strict</code></td><td>Liga um pacote de checagens. A principal é <code>strictNullChecks</code>: <code>null</code> e <code>undefined</code> deixam de caber em qualquer tipo</td></tr>
+      <tr><td><code>noUncheckedIndexedAccess</code></td><td><code>lista[0]</code> passa a ser <code>T | undefined</code> — porque o índice realmente pode não existir</td></tr>
+    </table>
+
+    <div class="tip warn"><b>Sem <code>strict</code>, TypeScript é decoração.</b>
+    Ele aceita <code>null</code> em tudo e você perde justamente a checagem que
+    previne o erro nº 1 de JavaScript — o famoso "cannot read property of
+    undefined".</div>
+
+    <div class="tip"><b>No TypeScript 7, <code>strict</code> já é padrão</b>, e as
+    depreciações do 6 viraram erro. É um bom sinal de para onde a linguagem foi —
+    e mais um motivo pra começar com ele ligado.</div>
+  </section>
+
+  <div class="divisor">Fechando</div>
+
+<section id="erros">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>Object is possibly 'undefined'</h4>
+    <p>É o <code>strict</code> funcionando. Trate com <code>if</code>, não com
+    <code>!</code>.</p>
+
+    <h4>ERESOLVE ao instalar typescript num projeto Angular</h4>
+    <p>Você pegou o 7. O Angular 22 exige <code>&gt;=6.0 &lt;6.1</code>. Instale
+    <code>typescript@6.0.3</code>.</p>
+
+    </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="/#guias" style="color:var(--pink-light)">todos os guias</a>
+  </div>
+</main>
+</div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  // Copiar código. O botão só aparece no hover — num guia de consulta o gesto
+  // é frequente, mas o botão não pode competir com o código.
+  document.querySelectorAll('.code').forEach(box => {
+    const btn = box.querySelector('.cp'), pre = box.querySelector('pre');
+    if (!btn || !pre) return;
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText).then(() => {
+        btn.textContent = 'copiado ✓'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('done'); }, 1400);
+      });
+    });
+  });
+
+  // Prévia ao vivo: o HTML do atributo data-src vira uma página dentro do
+  // iframe, com um estilo neutro por baixo para o exemplo não herdar o tema
+  // escuro do guia.
+  const baseDaPrevia = "<!doctype html><html><head><meta charset='utf-8'><style>"
+    + "body{margin:0;padding:14px;font-family:system-ui,'Segoe UI',sans-serif;color:#1a1a2e;line-height:1.5}"
+    + "h1{color:#7B4FD0;margin:.2em 0}h2,h3{margin:.2em 0}a{color:#F24487}"
+    + "input,textarea,select,button{font-size:14px;padding:6px 8px;font-family:inherit}button{cursor:pointer}"
+    + "</style></head><body>";
+  document.querySelectorAll('iframe[data-src]').forEach(f => {
+    f.srcdoc = baseDaPrevia + f.getAttribute('data-src') + "</body></html>";
+    f.addEventListener('load', () => {
+      try { f.style.height = Math.max(90, f.contentWindow.document.body.scrollHeight + 8) + 'px'; }
+      catch (e) { f.style.height = '140px'; }
+    });
+  });
+
+  // Demo responsivo: só existe no guia de CSS, então sai de cena em silêncio
+  // nos outros seis.
+  (function () {
+    const frame = document.getElementById('rdemo-frame');
+    const iframe = document.getElementById('rdemo-iframe');
+    if (!frame || !iframe) return;
+    iframe.srcdoc = "<!doctype html><html><head><meta charset='utf-8'><style>"
+      + "*{margin:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;color:#1a1a2e}"
+      + "header{background:#7B4FD0;color:#fff;padding:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}"
+      + ".tag{font-size:11px;background:rgba(255,255,255,.25);padding:3px 9px;border-radius:20px;white-space:nowrap}"
+      + ".desk{display:none}"
+      + ".wrap{display:flex;flex-direction:column;gap:10px;padding:14px}"
+      + ".card{background:#eef2f8;border-radius:10px;padding:20px;font-size:14px;text-align:center}"
+      + "@media(min-width:700px){.wrap{flex-direction:row}.card{flex:1}.mob{display:none}.desk{display:inline}}"
+      + "</style></head><body>"
+      + "<header>🐸 Meu Site <span class='tag'><span class='mob'>📱 empilhado</span><span class='desk'>💻 lado a lado</span></span></header>"
+      + "<div class='wrap'><div class='card'>Bloco 1</div><div class='card'>Bloco 2</div><div class='card'>Bloco 3</div></div>"
+      + "</body></html>";
+    document.querySelectorAll('#rdemo-btns .rbtn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#rdemo-btns .rbtn').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        frame.style.width = b.dataset.w;
+      });
+    });
+  })();
+
+  const tt = document.getElementById('totop');
+  addEventListener('scroll', () => { tt.classList.toggle('show', scrollY > 500); });
+</script>
+
+</body>
+</html>

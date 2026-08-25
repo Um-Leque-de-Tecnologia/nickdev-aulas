@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
 
 export const metadata: Metadata = {
   title: "Next.js + IA · NickDev",
@@ -32,6 +33,29 @@ type Sprint = {
   resumo: React.ReactNode;
   aulas: Aula[];
 };
+
+const COMO_FUNCIONA = [
+  {
+    emoji: "🎫",
+    titulo: "Trabalho por ticket",
+    desc: "Card do backlog entra, PR mergeado sai.",
+  },
+  {
+    emoji: "🗓️",
+    titulo: "A aula é a cerimônia",
+    desc: "O código acontece na semana, com acompanhamento.",
+  },
+  {
+    emoji: "🔌",
+    titulo: "O backend já existe",
+    desc: "Você é o front: consome, protege, desconfia.",
+  },
+  {
+    emoji: "🤖",
+    titulo: "IA em dois papéis",
+    desc: "Copiloto de quem desenvolve, e feature do produto.",
+  },
+];
 
 const SPRINTS: Sprint[] = [
   {
@@ -422,53 +446,24 @@ export default function NextjsIA() {
         <strong>feature de IA publicada em produção</strong> e defendida num
         Demo Day.
       </p>
+      <BadgesDeTecnologia tecnologias={["nextjs"]} />
       <div className="brand-rule" />
 
       <div className="section-label">Como funciona</div>
 
-      <div className="card-grid">
-        <div className="card">
-          <span className="num">🎫</span>
-          <h3>Você trabalha por ticket</h3>
-          <p>
-            Nada de exercício solto. Cada sprint abre um card do backlog — um
-            bug, um débito técnico, uma feature priorizada — e fecha com o PR
-            mergeado e publicado.
-          </p>
-        </div>
-
-        <div className="card">
-          <span className="num">🗓️</span>
-          <h3>A aula é a cerimônia; a semana é a sprint</h3>
-          <p>
-            O encontro ao vivo é onde o trabalho é planejado, destravado e
-            revisado — como numa equipe de verdade. O código acontece{" "}
-            <strong>durante a semana</strong>, de forma assíncrona e com
-            acompanhamento.
-          </p>
-        </div>
-
-        <div className="card">
-          <span className="num">🔌</span>
-          <h3>O backend já existe</h3>
-          <p>
-            Você é a pessoa de front-end. A API está no ar, tem documentação —
-            e alguns defeitos. Aprender a consumir, proteger e não confiar
-            cegamente numa API alheia faz parte do trabalho.
-          </p>
-        </div>
-
-        <div className="card">
-          <span className="num">🤖</span>
-          <h3>A IA aparece em dois papéis</h3>
-          <p>
-            Como <strong>copiloto</strong> — o GitHub Copilot no seu editor e
-            nos PRs, sempre auditado. E como <strong>produto</strong>, virando a
-            feature que o usuário final usa. São coisas diferentes, e o curso
-            trata cada uma no seu lugar.
-          </p>
-        </div>
-      </div>
+      <ul className="faixa">
+        {COMO_FUNCIONA.map((c) => (
+          <li key={c.titulo}>
+            <p className="faixa__titulo">
+              <span className="e" aria-hidden="true">
+                {c.emoji}
+              </span>
+              {c.titulo}
+            </p>
+            <p className="faixa__desc">{c.desc}</p>
+          </li>
+        ))}
+      </ul>
 
       <div className="section-label">O produto</div>
 
@@ -488,49 +483,6 @@ export default function NextjsIA() {
               que quase ninguém ensina — o <strong>modal com URL própria</strong>{" "}
               sobre a grade de pôsteres, e a navegação{" "}
               <strong>série → temporada → episódio</strong> em rotas aninhadas.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="section-label">Os dois papéis da IA</div>
-
-      <div className="lessons">
-        <div className="lesson">
-          <div className="idx">🤖</div>
-          <div className="body">
-            <h3>IA copiloto — o GitHub Copilot no seu fluxo</h3>
-            <p>
-              Entender um codebase que você acabou de clonar, ler a documentação
-              da API, traduzir um stack trace, rascunhar validação e gerar o
-              primeiro esboço de um teste. No PR, o{" "}
-              <strong>Copilot Code Review</strong> passa antes do humano — e as{" "}
-              <em>custom instructions</em> e os <em>prompt files</em> ficam{" "}
-              <strong>versionados no repositório</strong>, como qualquer outro
-              código do time.
-            </p>
-            <p style={{ marginBottom: 0 }}>
-              <strong>A regra do curso é uma só:</strong> tudo que o Copilot
-              produz passa por auditoria sua. Código que você não sabe explicar
-              não é entregue — nem aqui, nem numa entrevista.
-            </p>
-          </div>
-        </div>
-
-        <div className="lesson">
-          <div className="idx">✨</div>
-          <div className="body">
-            <h3>IA no produto — a feature que o usuário usa</h3>
-            <p>
-              <strong>Busca semântica</strong> na sprint 6 e a{" "}
-              <strong>feature-carro-chefe</strong> na 7, com streaming da
-              resposta, custo medido e falha tratada. Catálogo de mídia é o
-              melhor caso possível para isso: ninguém procura filme por
-              palavra-chave exata — procura por <em>vontade</em>.
-            </p>
-            <p style={{ marginBottom: 0 }}>
-              É a parte que quase nenhum curso de front-end cobre — e a que mais
-              chama atenção num portfólio hoje.
             </p>
           </div>
         </div>

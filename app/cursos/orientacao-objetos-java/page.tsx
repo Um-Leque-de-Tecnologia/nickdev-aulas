@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
 
 export const metadata: Metadata = {
   title: "Orientação a Objetos com Java · NickDev",
@@ -31,6 +32,7 @@ export default function OrientacaoObjetosJava() {
         exceções, generics, lambdas e persistência, até uma arquitetura em
         camadas com testes. Sem pré-requisito de Java.
       </p>
+      <BadgesDeTecnologia tecnologias={["java"]} />
       <div className="brand-rule" />
 
       <div className="section-label">Projeto do curso</div>
@@ -72,9 +74,6 @@ export default function OrientacaoObjetosJava() {
             <div className="mats">
               <a className="mat primary" href={`${AULA_01}/slides.html`}>
                 ▶ Slides da aula
-              </a>
-              <a className="mat" href={`${AULA_01}/guia-ecossistema-java.html`}>
-                📘 Guia do ecossistema Java
               </a>
               <a className="mat" href={`${AULA_01}/desafio.html`}>
                 🎯 Desafio

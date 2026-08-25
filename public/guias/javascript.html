@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript · Guias · NickDev</title>
+<meta name="description" content="Guia de JavaScript: variáveis, tipos, funções, arrays e objetos, DOM e eventos, módulos ES, closures, imutabilidade, assíncrono com Promise e async/await, fetch e o laço de eventos.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/#guias">← todos os guias</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#dicionario">📖 O dicionário</a>
+    <div class="grp">Fundamentos</div>
+    <a href="#console">Console e variáveis</a>
+    <a href="#tipos">Tipos de dado</a>
+    <a href="#strings">Strings e template</a>
+    <a href="#operadores">Operadores</a>
+    <a href="#condicionais">Condicionais</a>
+    <div class="grp">Estruturas</div>
+    <a href="#funcoes">Funções</a>
+    <a href="#arrays">Arrays</a>
+    <a href="#loops">Loops</a>
+    <a href="#objetos">Objetos</a>
+    <a href="#desestruturacao">Desestruturação e spread</a>
+    <a href="#metodos-de-array">Métodos de array</a>
+    <a href="#imutabilidade">Imutabilidade</a>
+    <div class="grp">No navegador</div>
+    <a href="#dom">DOM</a>
+    <a href="#eventos">Eventos</a>
+    <a href="#pratica">Prática: juntando tudo</a>
+    <div class="grp">JavaScript moderno</div>
+    <a href="#modulos">Módulos ES</a>
+    <a href="#escopo">Escopo e closures</a>
+    <a href="#this">Arrow e o this</a>
+    <a href="#operadores-nulos">?. e ??</a>
+    <div class="grp">Assíncrono</div>
+    <a href="#promise">Promise</a>
+    <a href="#async">async e await</a>
+    <a href="#fetch">fetch e erros</a>
+    <a href="#paralelo">Vários pedidos</a>
+    <a href="#laco-de-eventos">O laço de eventos</a>
+    <div class="grp">Ferramentas</div>
+    <a href="#node">Node e npm</a>
+    <div class="grp">Fechando</div>
+    <a href="#erros">Erros comuns 🔧</a>
+    <a href="#cola">Cola rápida</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Guia · JavaScript</div>
+  <h1>JavaScript, <span class="g">do console ao assíncrono</span></h1>
+  <p class="lead">Do primeiro console.log até entender por que a tela não atualizou quando você mudou a lista. Começa do zero e vai até fetch, async/await e o laço de eventos.</p>
+  <div class="rule"></div>
+
+
+  <div class="divisor">Antes de tudo</div>
+
+<section id="dicionario">
+    <h2>O dicionário desta aula</h2>
+    <table>
+      <tr><th>Palavra</th><th>O que é</th></tr>
+      <tr><td><b>Módulo</b></td><td>Um <b>arquivo</b> que exporta e importa coisas. Tem escopo próprio: nada vaza pro resto da página.</td></tr>
+      <tr><td><b>Escopo</b></td><td>A <b>região onde um nome existe</b>. Fora dele, é como se não existisse.</td></tr>
+      <tr><td><b>Closure</b></td><td>Uma função que <b>lembra do lugar onde nasceu</b> e continua tendo acesso às variáveis de lá.</td></tr>
+      <tr><td><b>Referência</b></td><td>O <b>endereço</b> de um objeto na memória. Duas variáveis podem apontar pro mesmo objeto.</td></tr>
+      <tr><td><b>Mutação</b></td><td><b>Alterar</b> um objeto ou array existente, em vez de criar um novo.</td></tr>
+      <tr><td><b>Imutabilidade</b></td><td>A prática de <b>nunca alterar</b> — sempre criar uma cópia com a mudança.</td></tr>
+      <tr><td><b>Promise</b></td><td>Um objeto que representa <b>um valor que ainda não chegou</b>. Um vale.</td></tr>
+      <tr><td><b>Assíncrono</b></td><td>Código que <b>não bloqueia</b>: dispara a tarefa e continua, tratando o resultado quando chegar.</td></tr>
+      <tr><td><b>Laço de eventos</b></td><td>O mecanismo que decide <b>o que roda em seguida</b>. Existe só um — por isso código pesado trava a tela.</td></tr>
+      <tr><td><b>Tipo</b></td><td>Uma <b>descrição do formato</b> de um valor. Existe só enquanto você escreve; some no build.</td></tr>
+      <tr><td><b>Inferência</b></td><td>Quando o TypeScript <b>deduz o tipo sozinho</b>, sem você escrever.</td></tr>
+      <tr><td><b>Narrowing</b></td><td>Quando o TypeScript <b>afina o tipo</b> dentro de um <code>if</code>, porque ali ele sabe mais.</td></tr>
+      <tr><td><b>Genérico</b></td><td>Um <b>espaço em branco pro tipo</b>, preenchido na hora da chamada. É o <code>&lt;T&gt;</code>.</td></tr>
+    </table>
+  </section>
+
+  <div class="divisor">Fundamentos</div>
+
+<section id="console">
+    <h2>Console &amp; variáveis</h2>
+    <p><code>console.log()</code> mostra qualquer valor no console — é como o JS "fala" com você.</p>
+    <pre><span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Oi, mundo! 👋"</span>);</pre>
+    <h3>Variáveis: <code>let</code> e <code>const</code></h3>
+    <p>Variável é uma caixinha com etiqueta que guarda um valor.</p>
+    <pre><span class="kw">let</span> pontos = <span class="st">0</span>;      <span class="cm">// pode mudar depois</span>
+pontos = <span class="st">10</span>;
+
+<span class="kw">const</span> nome = <span class="st">"Nick"</span>;  <span class="cm">// fixo, não muda</span></pre>
+    <div class="tip"><b>Regra prática:</b> use <code>const</code> sempre. Só troque pra <code>let</code> quando o valor realmente precisar mudar.</div>
+  </section>
+<section id="tipos">
+    <h2>Tipos de dado</h2>
+    <ul>
+      <li><b>String</b> — texto, entre aspas: <code>"Nicoly"</code></li>
+      <li><b>Number</b> — números, sem aspas: <code>25</code>, <code>3.14</code></li>
+      <li><b>Boolean</b> — <code>true</code> ou <code>false</code></li>
+      <li><b>Array</b> — lista: <code>[1, 2, 3]</code></li>
+      <li><b>Object</b> — ficha: <code>{ nome: "Nick" }</code></li>
+    </ul>
+    <pre><span class="fn">typeof</span> <span class="st">"oi"</span>;   <span class="cm">// "string"</span>
+<span class="fn">typeof</span> <span class="st">25</span>;     <span class="cm">// "number"</span>
+<span class="fn">typeof</span> <span class="st">true</span>;   <span class="cm">// "boolean"</span></pre>
+  </section>
+<section id="strings">
+    <h2>Strings &amp; template literals</h2>
+    <p>Pra juntar texto com variáveis, use <b>crase</b> (`) e <code>${ }</code>:</p>
+    <pre><span class="kw">const</span> nome = <span class="st">"Ana"</span>;
+<span class="kw">const</span> idade = <span class="st">20</span>;
+
+<span class="cm">// jeito antigo</span>
+<span class="st">"Oi, "</span> + nome + <span class="st">", "</span> + idade + <span class="st">" anos"</span>;
+
+<span class="cm">// jeito moderno (template literal) 👇</span>
+<span class="st">`Oi, ${nome}, ${idade} anos`</span>;</pre>
+    <h3>Métodos úteis de string</h3>
+    <pre>nome.<span class="fn">toUpperCase</span>();   <span class="cm">// "ANA"</span>
+nome.<span class="fn">length</span>;         <span class="cm">// 3</span>
+nome.<span class="fn">includes</span>(<span class="st">"A"</span>);  <span class="cm">// true</span></pre>
+  </section>
+<section id="operadores">
+    <h2>Operadores</h2>
+    <ul>
+      <li><b>Aritméticos:</b> <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code> (resto)</li>
+      <li><b>Comparação:</b> <code>===</code> (igual) <code>!==</code> (diferente) <code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code></li>
+      <li><b>Lógicos:</b> <code>&amp;&amp;</code> (E) <code>||</code> (OU) <code>!</code> (NÃO)</li>
+    </ul>
+    <pre><span class="st">10</span> % <span class="st">2</span>;        <span class="cm">// 0  → resto da divisão (par!)</span>
+<span class="st">7</span> === <span class="st">7</span>;       <span class="cm">// true</span>
+idade &gt;= <span class="st">18</span> &amp;&amp; temCarteira;  <span class="cm">// as duas precisam ser true</span></pre>
+    <div class="tip"><b>Cuidado:</b> <code>=</code> guarda um valor. <code>===</code> compara. São coisas diferentes!</div>
+  </section>
+<section id="condicionais">
+    <h2>Condicionais</h2>
+    <p>Fazem o código decidir o caminho: <b>"se isso, faça aquilo"</b>.</p>
+    <pre><span class="kw">const</span> hora = <span class="st">14</span>;
+
+<span class="kw">if</span> (hora &lt; <span class="st">12</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Bom dia ☀️"</span>);
+} <span class="kw">else if</span> (hora &lt; <span class="st">18</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Boa tarde 🌤️"</span>);
+} <span class="kw">else</span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Boa noite 🌙"</span>);
+}</pre>
+    <h3>Atalho: operador ternário</h3>
+    <pre><span class="kw">const</span> status = idade &gt;= <span class="st">18</span> ? <span class="st">"maior"</span> : <span class="st">"menor"</span>;</pre>
+
+    <h3><code>switch</code>: quando são vários valores fixos</h3>
+    <p>Ótimo pra comparar uma variável com <b>várias opções exatas</b> — mais limpo que muitos <code>else if</code>.</p>
+    <pre><span class="kw">const</span> dia = <span class="st">"sábado"</span>;
+
+<span class="kw">switch</span> (dia) {
+  <span class="kw">case</span> <span class="st">"sábado"</span>:
+  <span class="kw">case</span> <span class="st">"domingo"</span>:
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Fim de semana! 🎉"</span>);
+    <span class="kw">break</span>;
+  <span class="kw">default</span>:
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Dia útil 💻"</span>);
+}</pre>
+    <div class="tip"><b>Não esqueça o <code>break</code>!</b> Sem ele, o JS continua executando os próximos <code>case</code>. O <code>default</code> é o "senão" — roda quando nenhum <code>case</code> bate.</div>
+  </section>
+
+  <div class="divisor">Estruturas</div>
+
+<section id="funcoes">
+    <h2>Funções</h2>
+    <p>Uma receita reutilizável: recebe <b>parâmetros</b> e pode <b>retornar</b> um resultado.</p>
+    <pre><span class="cm">// declaração</span>
+<span class="kw">function</span> <span class="fn">saudar</span>(nome) {
+  <span class="kw">return</span> <span class="st">`Oi, ${nome}!`</span>;
+}
+
+<span class="cm">// arrow function (versão curta e moderna)</span>
+<span class="kw">const</span> <span class="fn">saudar</span> = (nome) => <span class="st">`Oi, ${nome}!`</span>;
+
+<span class="fn">saudar</span>(<span class="st">"Nick"</span>);  <span class="cm">// "Oi, Nick!"</span></pre>
+    <div class="tip"><b>return</b> devolve o resultado pra quem chamou. Sem <code>return</code>, a função faz algo mas não "entrega" valor.</div>
+  </section>
+<section id="arrays">
+    <h2>Arrays</h2>
+    <p>Lista ordenada de valores. O primeiro item tem índice <b>0</b>.</p>
+    <pre><span class="kw">const</span> hobbies = [<span class="st">"café"</span>, <span class="st">"código"</span>, <span class="st">"música"</span>];
+
+hobbies[<span class="st">0</span>];          <span class="cm">// "café"</span>
+hobbies.<span class="fn">length</span>;      <span class="cm">// 3</span>
+hobbies.<span class="fn">push</span>(<span class="st">"games"</span>);  <span class="cm">// adiciona no fim</span></pre>
+    <h3>Descobrir o que tem dentro</h3>
+    <pre>hobbies.<span class="fn">length</span>;            <span class="cm">// 3   → quantos itens</span>
+hobbies.<span class="fn">includes</span>(<span class="st">"café"</span>);   <span class="cm">// true → esse item existe?</span>
+hobbies.<span class="fn">indexOf</span>(<span class="st">"música"</span>);   <span class="cm">// 2   → em qual posição está</span>
+hobbies.<span class="fn">at</span>(-<span class="st">1</span>);             <span class="cm">// "música" → o último item</span>
+hobbies.<span class="fn">some</span>(h => h.<span class="fn">length</span> > <span class="st">5</span>);   <span class="cm">// true  → ALGUM item passa no teste?</span>
+hobbies.<span class="fn">every</span>(h => h.<span class="fn">length</span> > <span class="st">2</span>);  <span class="cm">// true  → TODOS passam?</span></pre>
+
+    <h3>Adicionar e remover</h3>
+    <pre>hobbies.<span class="fn">push</span>(<span class="st">"games"</span>);    <span class="cm">// adiciona no FIM</span>
+hobbies.<span class="fn">pop</span>();            <span class="cm">// remove o ÚLTIMO (e devolve ele)</span>
+hobbies.<span class="fn">unshift</span>(<span class="st">"chá"</span>);   <span class="cm">// adiciona no INÍCIO</span>
+hobbies.<span class="fn">shift</span>();          <span class="cm">// remove o PRIMEIRO</span></pre>
+    <div class="tip">Macete: <b>p</b>ush/<b>p</b>op mexem no fim; <b>sh</b>ift/un<b>sh</b>ift mexem no início.</div>
+
+    <h3>Percorrer e transformar</h3>
+    <p>Estes recebem uma função e rodam ela pra cada item. Os 3 últimos criam uma <b>lista nova</b> (não mexem na original).</p>
+    <pre><span class="cm">// forEach → faz algo com cada item (não devolve nada)</span>
+hobbies.<span class="fn">forEach</span>(h => <span class="fn">console</span>.<span class="fn">log</span>(h));
+
+<span class="cm">// map → NOVA lista transformada, item por item</span>
+<span class="kw">const</span> maiusculas = hobbies.<span class="fn">map</span>(h => h.<span class="fn">toUpperCase</span>());  <span class="cm">// ["CAFÉ", ...]</span>
+
+<span class="cm">// filter → NOVA lista só com quem passa no teste</span>
+<span class="kw">const</span> curtos = hobbies.<span class="fn">filter</span>(h => h.<span class="fn">length</span> &lt;= <span class="st">4</span>);  <span class="cm">// ["café", "chá"]</span>
+
+<span class="cm">// find → o PRIMEIRO item que bate (ou undefined)</span>
+<span class="kw">const</span> achado = hobbies.<span class="fn">find</span>(h => h.<span class="fn">startsWith</span>(<span class="st">"c"</span>));  <span class="cm">// "café"</span></pre>
+
+    <h3>Resumir e organizar</h3>
+    <pre><span class="cm">// reduce → junta tudo num só valor (ex.: somar)</span>
+<span class="kw">const</span> numeros = [<span class="st">10</span>, <span class="st">20</span>, <span class="st">30</span>];
+<span class="kw">const</span> total = numeros.<span class="fn">reduce</span>((soma, n) => soma + n, <span class="st">0</span>);  <span class="cm">// 60</span>
+
+hobbies.<span class="fn">sort</span>();          <span class="cm">// ordena (alfabética por padrão)</span>
+hobbies.<span class="fn">reverse</span>();       <span class="cm">// inverte a ordem</span>
+hobbies.<span class="fn">slice</span>(<span class="st">0</span>, <span class="st">2</span>);     <span class="cm">// PEDAÇO: ["café", "código"] (não altera o original)</span>
+hobbies.<span class="fn">join</span>(<span class="st">", "</span>);      <span class="cm">// vira texto: "café, código, música"</span></pre>
+
+    <h3>Bônus: item aleatório</h3>
+    <pre><span class="kw">const</span> sorteado = hobbies[<span class="fn">Math</span>.<span class="fn">floor</span>(<span class="fn">Math</span>.<span class="fn">random</span>() * hobbies.<span class="fn">length</span>)];</pre>
+
+    <div class="tip"><b>Cuidado — muda ou não muda?</b> <code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code>, <code>sort</code>, <code>reverse</code> e <code>splice</code> <b>alteram</b> o array original. Já <code>map</code>, <code>filter</code>, <code>slice</code> e <code>join</code> devolvem algo novo e <b>deixam</b> o original em paz.</div>
+  </section>
+<section id="loops">
+    <h2>Loops</h2>
+    <p>Repetir uma ação sem copiar e colar.</p>
+    <pre><span class="cm">// for clássico</span>
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="st">0</span>; i &lt; <span class="st">3</span>; i++) {
+  <span class="fn">console</span>.<span class="fn">log</span>(i);   <span class="cm">// 0, 1, 2</span>
+}
+
+<span class="cm">// for...of (percorre uma lista)</span>
+<span class="kw">for</span> (<span class="kw">const</span> hobby <span class="kw">of</span> hobbies) {
+  <span class="fn">console</span>.<span class="fn">log</span>(hobby);
+}</pre>
+  </section>
+<section id="objetos">
+    <h2>Objetos</h2>
+    <p>Agrupam dados relacionados em pares <b>chave: valor</b>.</p>
+    <pre><span class="kw">const</span> pessoa = {
+  nome: <span class="st">"Nicoly"</span>,
+  idade: <span class="st">25</span>,
+  dev: <span class="st">true</span>,
+};
+
+pessoa.nome;        <span class="cm">// "Nicoly"</span>
+pessoa.idade = <span class="st">26</span>;   <span class="cm">// alterar</span>
+pessoa.cidade = <span class="st">"SP"</span>; <span class="cm">// adicionar</span></pre>
+  </section>
+<section id="desestruturacao">
+    <h2>Desestruturação e spread</h2>
+    <p>A sintaxe que mais aparece em código de framework. Vale automatizar.</p>
+
+<pre><span class="cm">// tirar campos, com apelido e valor padrão</span>
+<span class="kw">const</span> { titulo, cidade = <span class="st">"Online"</span>, organizador: quem } = evento;
+
+<span class="cm">// pegar o resto</span>
+<span class="kw">const</span> { id, ...semId } = evento;
+
+<span class="cm">// em array, por posição</span>
+<span class="kw">const</span> [primeiro, segundo] = eventos;
+
+<span class="cm">// direto no parâmetro — o padrão de componente</span>
+<span class="kw">function</span> <span class="fn">Card</span>({ titulo, inicioEm }: <span class="ty">Evento</span>) { … }</pre>
+
+    <h3>Spread: copiar mudando</h3>
+<pre><span class="cm">// objeto novo, com um campo diferente</span>
+<span class="kw">const</span> destacado = { ...evento, destaque: <span class="kw">true</span> };
+
+<span class="cm">// array novo, com um item a mais</span>
+<span class="kw">const</span> comNovo = [...eventos, novoEvento];
+
+<span class="cm">// juntar dois</span>
+<span class="kw">const</span> todos = [...gratuitos, ...pagos];</pre>
+
+    <div class="tip warn"><b>O spread é raso.</b>
+    <code>{ ...evento }</code> copia o primeiro nível; objetos aninhados
+    continuam <b>compartilhados</b> com o original. Se precisar de cópia
+    profunda, use <code>structuredClone(evento)</code> — mas na maior parte dos
+    casos, copiar só o nível que você vai mudar é o certo, e é mais rápido.</div>
+  </section>
+<section id="metodos-de-array">
+    <h2>Métodos de array</h2>
+    <table>
+      <tr><th>Método</th><th>Devolve</th><th>Use quando</th></tr>
+      <tr><td><code>map</code></td><td>Array do mesmo tamanho</td><td>Transformar cada item</td></tr>
+      <tr><td><code>filter</code></td><td>Array menor ou igual</td><td>Selecionar por condição</td></tr>
+      <tr><td><code>find</code></td><td>Um item, ou <code>undefined</code></td><td>Achar o primeiro que bate</td></tr>
+      <tr><td><code>some</code> / <code>every</code></td><td><code>boolean</code></td><td>"Algum?" / "Todos?"</td></tr>
+      <tr><td><code>reduce</code></td><td>Um valor só</td><td>Somar, agrupar, achatar</td></tr>
+      <tr><td><code>sort</code></td><td>O <b>mesmo</b> array, alterado ⚠️</td><td>— prefira <code>toSorted</code></td></tr>
+      <tr><td><code>toSorted</code></td><td>Array <b>novo</b>, ordenado</td><td>Ordenar sem mutar</td></tr>
+    </table>
+
+<pre><span class="cm">// encadear é o normal</span>
+<span class="kw">const</span> proximosGratis = eventos
+  .<span class="fn">filter</span>((e) =&gt; e.gratuito)
+  .<span class="fn">filter</span>((e) =&gt; <span class="kw">new</span> <span class="ty">Date</span>(e.inicioEm) &gt; <span class="kw">new</span> <span class="ty">Date</span>())
+  .<span class="fn">toSorted</span>((a, b) =&gt; a.inicioEm.<span class="fn">localeCompare</span>(b.inicioEm));
+
+<span class="cm">// agrupar por categoria com reduce</span>
+<span class="kw">const</span> porCategoria = eventos.<span class="fn">reduce</span>&lt;<span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">Evento</span>[]&gt;&gt;(
+  (acc, e) =&gt; {
+    (acc[e.categoria] ??= []).<span class="fn">push</span>(e);
+    <span class="kw">return</span> acc;
+  },
+  {},
+);</pre>
+
+    <div class="tip"><b>Se <code>reduce</code> ficar difícil de ler, use um laço
+    <code>for...of</code>.</b> Legibilidade ganha de elegância. <code>reduce</code>
+    brilha em soma e agrupamento; fora disso, costuma atrapalhar.</div>
+  </section>
+<section id="imutabilidade">
+    <h2>Imutabilidade</h2>
+    <p>O conceito mais importante desta aula para o resto do curso.</p>
+
+    <h3>O problema, concretamente</h3>
+<pre><span class="kw">const</span> lista = [<span class="st">"a"</span>, <span class="st">"b"</span>];
+<span class="kw">const</span> mesma = lista;
+
+lista.<span class="fn">push</span>(<span class="st">"c"</span>);
+
+lista === mesma;      <span class="cm">// true — é o MESMO array</span>
+mesma.length;         <span class="cm">// 3 — mudou sem ninguém pedir</span></pre>
+
+    <p>Framework reativo detecta mudança <b>comparando referências</b>: "o valor
+    de antes é o mesmo objeto de agora?" Se for, ele conclui que nada mudou e
+    <b>não redesenha a tela</b>.</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>Muta — a tela não atualiza</h4>
+<pre>lista.<span class="fn">push</span>(novo);
+lista.<span class="fn">sort</span>();
+lista.<span class="fn">splice</span>(<span class="st">0</span>, <span class="st">1</span>);
+evento.titulo = <span class="st">"x"</span>;</pre>
+      </div>
+      <div class="box ok">
+        <h4>Cria novo — funciona</h4>
+<pre><span class="kw">const</span> l = [...lista, novo];
+<span class="kw">const</span> l = lista.<span class="fn">toSorted</span>();
+<span class="kw">const</span> l = lista.<span class="fn">toSpliced</span>(<span class="st">0</span>, <span class="st">1</span>);
+<span class="kw">const</span> e = { ...evento, titulo };</pre>
+      </div>
+    </div>
+
+    <h3>Os métodos que não mutam</h3>
+    <table>
+      <tr><th>Em vez de</th><th>Use</th></tr>
+      <tr><td><code>sort()</code></td><td><code>toSorted()</code></td></tr>
+      <tr><td><code>reverse()</code></td><td><code>toReversed()</code></td></tr>
+      <tr><td><code>splice()</code></td><td><code>toSpliced()</code></td></tr>
+      <tr><td><code>lista[0] = x</code></td><td><code>lista.with(0, x)</code></td></tr>
+      <tr><td><code>push()</code></td><td><code>[...lista, x]</code></td></tr>
+    </table>
+
+    <div class="tip"><b>Por que isso aparece hoje e não na aula de Angular.</b>
+    Porque quando o <code>computed()</code> não recalcular na aula 05, você vai
+    ter duas hipóteses: "o Angular está com bug" ou "eu mutei". Sabendo disto,
+    você vai direto na segunda — que é sempre a certa.</div>
+
+    <div class="tip warn"><b>Cuidado com o encadeamento.</b>
+    <code>lista.filter(...).sort()</code> é seguro: o <code>filter</code> já
+    criou um array novo, então o <code>sort</code> muta a cópia. Mas
+    <code>lista.sort()</code> direto muta o original. Na dúvida, use sempre
+    <code>toSorted</code>.</div>
+  </section>
+
+  <div class="divisor">No navegador</div>
+
+<section id="dom">
+    <h2>DOM — controlando o HTML</h2>
+    <p>O <b>DOM</b> é a sua página vista como uma árvore de objetos. Com JavaScript você <b>seleciona</b> um elemento e <b>transforma</b> ele: muda texto, cor, cria coisas novas, apaga... Os exemplos abaixo <b>rodam de verdade</b> — o resultado aparece logo embaixo de cada código.</p>
+
+    <h3>1. Selecionar elementos</h3>
+    <pre><span class="cm">// por seletor de CSS (o mais usado)</span>
+<span class="kw">const</span> titulo = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"h1"</span>);      <span class="cm">// o primeiro &lt;h1&gt;</span>
+<span class="kw">const</span> botao  = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#enviar"</span>);  <span class="cm">// id → #</span>
+<span class="kw">const</span> cards  = <span class="fn">document</span>.<span class="fn">querySelectorAll</span>(<span class="st">".card"</span>); <span class="cm">// TODOS com a classe → lista</span>
+
+<span class="cm">// atalho clássico por id</span>
+<span class="kw">const</span> caixa = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="st">"caixa"</span>);</pre>
+    <div class="tip"><code>querySelector</code> pega <b>o primeiro</b> que bate. <code>querySelectorAll</code> pega <b>todos</b> numa lista (dá pra usar <code>forEach</code> nela).</div>
+
+    <h3>2. Ler e mudar conteúdo</h3>
+    <pre>titulo.<span class="fn">textContent</span> = <span class="st">"Mudei pelo JavaScript!"</span>;  <span class="cm">// troca o texto</span>
+titulo.<span class="fn">style</span>.color = <span class="st">"#F24487"</span>;                <span class="cm">// muda o estilo (CSS)</span>
+titulo.<span class="fn">style</span>.fontSize = <span class="st">"28px"</span>;</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado</div>
+      <iframe data-demo="dom1" height="90" title="demo textContent e style"></iframe>
+    </div>
+    <div class="tip"><code>textContent</code> troca só o <b>texto</b>. <code>innerHTML</code> aceita <b>tags HTML</b> (<code>el.innerHTML = "&lt;b&gt;oi&lt;/b&gt;"</code>) — mas cuidado ao usar com texto que veio do usuário.</div>
+
+    <h3>3. Mudar classes e atributos</h3>
+    <pre><span class="cm">// classes CSS — a forma mais organizada de mudar visual</span>
+caixa.<span class="fn">classList</span>.<span class="fn">add</span>(<span class="st">"ativo"</span>);      <span class="cm">// adiciona</span>
+caixa.<span class="fn">classList</span>.<span class="fn">remove</span>(<span class="st">"ativo"</span>);   <span class="cm">// remove</span>
+caixa.<span class="fn">classList</span>.<span class="fn">toggle</span>(<span class="st">"ativo"</span>);   <span class="cm">// liga/desliga</span>
+caixa.<span class="fn">classList</span>.<span class="fn">contains</span>(<span class="st">"ativo"</span>); <span class="cm">// tem essa classe? true/false</span>
+
+<span class="cm">// atributos</span>
+link.<span class="fn">setAttribute</span>(<span class="st">"href"</span>, <span class="st">"https://nickdeve.com"</span>);
+img.<span class="fn">src</span> = <span class="st">"foto.jpg"</span>;
+input.<span class="fn">value</span>;  <span class="cm">// o que a pessoa digitou num &lt;input&gt;</span></pre>
+
+    <h3>4. Criar, inserir e remover elementos</h3>
+    <pre><span class="cm">// criar um elemento do zero</span>
+<span class="kw">const</span> item = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"li"</span>);
+item.<span class="fn">textContent</span> = <span class="st">"Novo item"</span>;
+
+<span class="cm">// colocar dentro de outro (no fim)</span>
+lista.<span class="fn">appendChild</span>(item);
+
+<span class="cm">// apagar</span>
+item.<span class="fn">remove</span>();</pre>
+    <p>Isso combinado com um <b>loop</b> é como se monta uma lista a partir de dados:</p>
+    <pre><span class="kw">const</span> frutas = [<span class="st">"🍎 Maçã"</span>, <span class="st">"🍌 Banana"</span>, <span class="st">"🍇 Uva"</span>];
+
+frutas.<span class="fn">forEach</span>(fruta => {
+  <span class="kw">const</span> li = <span class="fn">document</span>.<span class="fn">createElement</span>(<span class="st">"li"</span>);
+  li.<span class="fn">textContent</span> = fruta;
+  lista.<span class="fn">appendChild</span>(li);
+});</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado</div>
+      <iframe data-demo="dom2" height="120" title="demo createElement em loop"></iframe>
+    </div>
+
+    <h3>5. Reagindo a você (prévia de eventos)</h3>
+    <p>Quando o DOM encontra os <b>eventos</b>, a página fica viva. Estes dois demos são <b>clicáveis / digitáveis</b> — pode brincar:</p>
+    <pre><span class="cm">// contador de curtidas</span>
+<span class="kw">let</span> curtidas = <span class="st">0</span>;
+botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  curtidas++;
+  contador.<span class="fn">textContent</span> = curtidas + <span class="st">" ❤️"</span>;
+});</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado <span class="try">clica no botão 👆</span></div>
+      <iframe data-demo="dom3" height="120" title="demo contador de curtidas"></iframe>
+    </div>
+    <pre><span class="cm">// eco do que você digita (evento input)</span>
+campo.<span class="fn">addEventListener</span>(<span class="st">"input"</span>, () => {
+  saida.<span class="fn">textContent</span> = <span class="st">"Oi, "</span> + campo.<span class="fn">value</span> + <span class="st">"! 👋"</span>;
+});</pre>
+    <div class="demo">
+      <div class="demo-hd"><span class="d"></span> resultado <span class="try">digite algo ⌨️</span></div>
+      <iframe data-demo="dom4" height="130" title="demo input ao vivo"></iframe>
+    </div>
+
+    <div class="tip"><b>Resumo dos poderes:</b> <code>textContent</code>/<code>innerHTML</code> (conteúdo) · <code>style</code> (visual direto) · <code>classList</code> (classes CSS) · <code>value</code> (inputs) · <code>createElement</code>/<code>appendChild</code>/<code>remove</code> (criar e apagar) · <code>addEventListener</code> (reagir).</div>
+  </section>
+<section id="eventos">
+    <h2>Eventos</h2>
+    <p>Fazem a página <b>reagir</b>: "quando acontecer X, execute Y".</p>
+    <pre>botao.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Clicou! 🎉"</span>);
+});
+
+<span class="cm">// ler o que o usuário digita, ao vivo</span>
+input.<span class="fn">addEventListener</span>(<span class="st">"input"</span>, () => {
+  <span class="fn">console</span>.<span class="fn">log</span>(input.<span class="fn">value</span>);
+});</pre>
+    <p>Eventos comuns: <code>click</code>, <code>input</code>, <code>submit</code>, <code>mouseover</code>, <code>keydown</code>.</p>
+  </section>
+<section id="pratica">
+    <h2>Prática — juntando tudo</h2>
+    <p>Um botão que troca o texto de um parágrafo ao ser clicado:</p>
+    <pre><span class="cm">&lt;!-- HTML --&gt;</span>
+&lt;button id="btn"&gt;Clique&lt;/button&gt;
+&lt;p id="msg"&gt;Nada ainda...&lt;/p&gt;
+
+<span class="cm">// JavaScript</span>
+<span class="kw">const</span> btn = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#btn"</span>);
+<span class="kw">const</span> msg = <span class="fn">document</span>.<span class="fn">querySelector</span>(<span class="st">"#msg"</span>);
+
+btn.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, () => {
+  msg.<span class="fn">textContent</span> = <span class="st">"Você clicou! ✨"</span>;
+});</pre>
+    <p>Pronto pra valer? Encara o desafio da aula 👇</p>
+  </section>
+
+  <div class="divisor">JavaScript moderno</div>
+
+<section id="modulos">
+    <h2>Módulos ES</h2>
+    <p>Um arquivo, um assunto. Cada módulo tem <b>escopo próprio</b>: o que você
+    declara ali não vaza para o resto da página.</p>
+
+    <div class="file">📄 dados/eventos.ts</div>
+<pre><span class="kw">export const</span> eventos = [ … ];
+
+<span class="kw">export function</span> <span class="fn">porSlug</span>(slug: <span class="ty">string</span>) {
+  <span class="kw">return</span> eventos.<span class="fn">find</span>((e) =&gt; e.slug === slug);
+}
+
+<span class="cm">// um "principal" por arquivo, se fizer sentido</span>
+<span class="kw">export default</span> eventos;</pre>
+
+    <div class="file">📄 main.ts</div>
+<pre><span class="cm">// nomeados: entre chaves, com o nome exato</span>
+<span class="kw">import</span> { eventos, porSlug } <span class="kw">from</span> <span class="st">"./dados/eventos.js"</span>;
+
+<span class="cm">// default: sem chaves, e o nome é escolha sua</span>
+<span class="kw">import</span> lista <span class="kw">from</span> <span class="st">"./dados/eventos.js"</span>;
+
+<span class="cm">// só o tipo — some no build</span>
+<span class="kw">import type</span> { <span class="ty">Evento</span> } <span class="kw">from</span> <span class="st">"./dados/tipos.js"</span>;</pre>
+
+    <p>No HTML:</p>
+<pre>&lt;<span class="ty">script</span> type=<span class="st">"module"</span> src=<span class="st">"main.js"</span>&gt;&lt;/<span class="ty">script</span>&gt;</pre>
+
+    <div class="tip warn"><b>Sem <code>type="module"</code>, o <code>import</code>
+    não existe</b> e o navegador dá erro de sintaxe. Módulo também já vem com
+    <code>defer</code> embutido — ele espera o HTML terminar sozinho, então não
+    precisa colocar o script no fim do <code>&lt;body&gt;</code>.</div>
+
+    <div class="tip"><b>Por que a extensão <code>.js</code> no import de um arquivo
+    <code>.ts</code>?</b> Porque o import é resolvido em <b>tempo de execução</b>,
+    quando o arquivo já virou <code>.js</code>. É estranho no começo e vira
+    automático depois.</div>
+  </section>
+<section id="escopo">
+    <h2>Escopo e closures</h2>
+
+    <h3>const não é imutável</h3>
+<pre><span class="kw">const</span> eventos = [];
+eventos.<span class="fn">push</span>(<span class="st">"a"</span>);      <span class="cm">// ✓ permitido: o conteúdo mudou</span>
+eventos = [];             <span class="cm">// ✗ erro: a ligação não pode mudar</span></pre>
+    <p><code>const</code> congela <b>a ligação entre o nome e o valor</b>, não o
+    valor. Para um objeto, isso significa que você não pode trocá-lo por outro —
+    mas pode mexer no de dentro à vontade. Guarde isso para a seção de
+    imutabilidade.</p>
+
+    <h3>Closure</h3>
+<pre><span class="kw">function</span> <span class="fn">criarContador</span>() {
+  <span class="kw">let</span> total = <span class="st">0</span>;              <span class="cm">// vive só aqui dentro</span>
+  <span class="kw">return</span> {
+    <span class="fn">incrementar</span>: () =&gt; ++total,
+    <span class="fn">ler</span>: () =&gt; total,
+  };
+}
+
+<span class="kw">const</span> c = <span class="fn">criarContador</span>();
+c.<span class="fn">incrementar</span>();
+c.<span class="fn">ler</span>();                     <span class="cm">// 1</span>
+<span class="cm">// não existe jeito de mexer em "total" por fora</span></pre>
+
+    <div class="tip"><b>Closure não é curiosidade de entrevista.</b> É o
+    mecanismo de estado privado, e é literalmente como <code>signal()</code>
+    funciona por dentro no Angular. Quando você chamar
+    <code>const total = signal(0)</code> na aula 05, vai estar usando isto.</div>
+  </section>
+<section id="this">
+    <h2>Arrow e o this</h2>
+<pre><span class="kw">const</span> obj = {
+  nome: <span class="st">"Leque"</span>,
+  <span class="fn">normal</span>() { <span class="kw">return</span> <span class="kw">this</span>.nome; },      <span class="cm">// "Leque"  ✓</span>
+  <span class="fn">seta</span>: () =&gt; <span class="kw">this</span>.nome,                <span class="cm">// undefined ✗</span>
+};</pre>
+
+    <p>Função normal recebe um <code>this</code> que depende de <b>como ela foi
+    chamada</b>. Arrow <b>não tem <code>this</code> próprio</b> — ela usa o de
+    fora, decidido onde foi escrita.</p>
+
+    <p>Parece defeito, mas é justamente o que você quer em callback:</p>
+
+<pre><span class="kw">class</span> <span class="ty">ListaEventos</span> {
+  itens: <span class="ty">Evento</span>[] = [];
+
+  <span class="kw">async</span> <span class="fn">carregar</span>() {
+    <span class="kw">const</span> dados = <span class="kw">await</span> <span class="fn">buscar</span>();
+
+    dados.<span class="fn">forEach</span>((e) =&gt; {
+      <span class="kw">this</span>.itens.<span class="fn">push</span>(e);   <span class="cm">// "this" ainda é a ListaEventos ✓</span>
+    });
+  }
+}</pre>
+
+    <div class="tip"><b>Regra prática:</b> arrow em callback, método normal em
+    objeto e classe. Você quase nunca vai precisar pensar nisso de novo.</div>
+  </section>
+<section id="operadores-nulos">
+    <h2>?. e ??</h2>
+
+<pre><span class="cm">// optional chaining: para e devolve undefined se algo não existir</span>
+<span class="kw">const</span> cidade = evento?.local?.cidade;
+<span class="kw">const</span> primeiro = lista?.[<span class="st">0</span>];
+<span class="fn">callback</span>?.();                    <span class="cm">// só chama se existir</span>
+
+<span class="cm">// nullish: usa o padrão só quando é null ou undefined</span>
+<span class="kw">const</span> vagas = evento.vagas ?? <span class="st">"ilimitadas"</span>;</pre>
+
+    <div class="tip warn"><b>A diferença entre <code>||</code> e <code>??</code> é
+    fonte de bug sutil.</b> <code>||</code> troca <b>qualquer valor falso</b> —
+    incluindo <code>0</code>, <code>""</code> e <code>false</code>:</div>
+
+<pre>evento.vagas = <span class="st">0</span>;
+
+evento.vagas || <span class="st">"ilimitadas"</span>;   <span class="cm">// "ilimitadas"  ✗ errado!</span>
+evento.vagas ?? <span class="st">"ilimitadas"</span>;   <span class="cm">// 0             ✓ certo</span></pre>
+
+    <p>Um evento com <b>zero vagas restantes</b> passa a exibir "ilimitadas". É o
+    tipo de bug que sobrevive meses porque só aparece num caso de borda.</p>
+
+    <div class="tip"><b>E <code>??=</code>:</b>
+    <code>(acc[chave] ??= []).push(x)</code> quer dizer "se não existir, crie uma
+    lista vazia; e me devolva ela". Aparece bastante em agrupamento.</div>
+  </section>
+
+  <div class="divisor">Assíncrono</div>
+
+<section id="promise">
+    <h2>Promise</h2>
+    <p>Um objeto que representa um valor que <b>ainda não chegou</b>. Ele está
+    sempre num de três estados: <b>pendente</b>, <b>resolvido</b> ou
+    <b>rejeitado</b>.</p>
+
+<pre><span class="fn">fetch</span>(<span class="st">"/dados/eventos.json"</span>)
+  .<span class="fn">then</span>((resposta) =&gt; resposta.<span class="fn">json</span>())
+  .<span class="fn">then</span>((eventos) =&gt; <span class="fn">render</span>(eventos))
+  .<span class="fn">catch</span>((erro) =&gt; <span class="fn">mostrarErro</span>(erro))
+  .<span class="fn">finally</span>(() =&gt; <span class="fn">esconderCarregando</span>());</pre>
+
+    <div class="tip"><b>Você precisa saber ler <code>.then</code></b> — ele está
+    em código antigo, em documentação e em resposta de IA. Mas para
+    <b>escrever</b>, a próxima seção é melhor em praticamente todos os casos.</div>
+  </section>
+<section id="async">
+    <h2>async e await</h2>
+<pre><span class="kw">async function</span> <span class="fn">carregarEventos</span>(): <span class="ty">Promise</span>&lt;<span class="ty">Evento</span>[]&gt; {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">"/dados/eventos.json"</span>);
+  <span class="kw">const</span> eventos = <span class="kw">await</span> resposta.<span class="fn">json</span>();
+  <span class="kw">return</span> eventos;
+}</pre>
+
+    <ul>
+      <li><b><code>await</code></b> = "espere chegar e me dê o valor, não o vale"</li>
+      <li>Só funciona dentro de função <b><code>async</code></b> — andam em par</li>
+      <li>Função <code>async</code> <b>sempre</b> devolve uma Promise, mesmo que você retorne um número</li>
+    </ul>
+
+    <div class="tip warn"><b>O erro de esquecer o <code>await</code>:</b> em vez do
+    valor, você fica com o objeto Promise. O sintoma é
+    <code>[object Promise]</code> na tela, ou <code>undefined</code> ao acessar um
+    campo. Com TypeScript, isso vira erro no editor — mais um motivo pra ligar o
+    <code>strict</code>.</div>
+
+    <div class="tip">É a mesma dupla que aparece no Next.js lendo dados no
+    servidor, na aula 11. A sintaxe não muda — muda o lugar onde ela roda.</div>
+  </section>
+<section id="fetch">
+    <h2>fetch e tratamento de erro</h2>
+
+    <div class="tip warn"><b>A pegadinha que derruba todo mundo:</b> o
+    <code>fetch</code> <b>só rejeita se a rede falhar</b>. Um 404 ou um 500 chegam
+    como resposta normal, resolvida. Se você não conferir, o
+    <code>.json()</code> tenta interpretar uma página de erro como JSON e falha
+    com uma mensagem incompreensível sobre token inesperado.</div>
+
+<pre><span class="kw">async function</span> <span class="fn">carregarEventos</span>(): <span class="ty">Promise</span>&lt;<span class="ty">Evento</span>[]&gt; {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">"/dados/eventos.json"</span>);
+
+  <span class="cm">// ⚠️ obrigatório</span>
+  <span class="kw">if</span> (!resposta.ok) {
+    <span class="kw">throw new</span> <span class="ty">Error</span>(<span class="st">`Servidor respondeu ${resposta.status}`</span>);
+  }
+
+  <span class="kw">return</span> resposta.<span class="fn">json</span>();
+}</pre>
+
+    <h3>Onde tratar o erro</h3>
+<pre><span class="kw">async function</span> <span class="fn">iniciar</span>() {
+  <span class="fn">mostrarCarregando</span>();
+  <span class="kw">try</span> {
+    <span class="kw">const</span> eventos = <span class="kw">await</span> <span class="fn">carregarEventos</span>();
+    eventos.length ? <span class="fn">render</span>(eventos) : <span class="fn">mostrarVazio</span>();
+  } <span class="kw">catch</span> (erro) {
+    <span class="fn">console</span>.<span class="fn">error</span>(erro);
+    <span class="fn">mostrarErro</span>(<span class="st">"Não consegui carregar os eventos."</span>);
+  } <span class="kw">finally</span> {
+    <span class="fn">esconderCarregando</span>();
+  }
+}</pre>
+
+    <div class="tip"><b>Quem busca lança; quem desenha decide o que mostrar.</b> A
+    função de dados não deveria mexer na tela — ela lança o erro e deixa quem
+    chamou escolher a mensagem. Essa separação é a mesma que você vai usar com
+    services no Angular.</div>
+
+    <div class="tip warn"><b>Três estados, sempre.</b> Toda tela que busca dados
+    tem <b>carregando</b>, <b>erro</b> e <b>vazio</b> — além do caso feliz.
+    Esquecer o vazio é o mais comum: uma busca sem resultado que mostra apenas
+    uma área em branco parece site quebrado. Isso está na rubrica.</div>
+  </section>
+<section id="paralelo">
+    <h2>Vários pedidos</h2>
+    <div class="duo">
+      <div class="box no">
+        <h4>Em série — lento</h4>
+<pre><span class="kw">const</span> a = <span class="kw">await</span> <span class="fn">buscar</span>(<span class="st">1</span>);
+<span class="kw">const</span> b = <span class="kw">await</span> <span class="fn">buscar</span>(<span class="st">2</span>);
+<span class="cm">// 300ms + 300ms</span></pre>
+      </div>
+      <div class="box ok">
+        <h4>Em paralelo — rápido</h4>
+<pre><span class="kw">const</span> [a, b] = <span class="kw">await</span> <span class="ty">Promise</span>.<span class="fn">all</span>([
+  <span class="fn">buscar</span>(<span class="st">1</span>), <span class="fn">buscar</span>(<span class="st">2</span>),
+]);
+<span class="cm">// 300ms no total</span></pre>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>Método</th><th>Comportamento</th></tr>
+      <tr><td><code>Promise.all</code></td><td>Falha inteiro se <b>um</b> falhar</td></tr>
+      <tr><td><code>Promise.allSettled</code></td><td>Espera todos e diz o que deu certo e o que não</td></tr>
+      <tr><td><code>Promise.race</code></td><td>Devolve o primeiro que terminar</td></tr>
+    </table>
+
+    <div class="tip"><b>Só use paralelo quando forem independentes.</b> Se o
+    segundo pedido precisa do resultado do primeiro, a fila é obrigatória — e
+    tentar paralelizar aí só gera bug.</div>
+  </section>
+<section id="laco-de-eventos">
+    <h2>O laço de eventos</h2>
+    <p>JavaScript tem <b>uma</b> fila de execução. Enquanto uma função roda, nada
+    mais acontece: nem clique, nem rolagem, nem animação.</p>
+
+    <div class="duo">
+      <div class="box ok">
+        <h4>Não trava a tela</h4>
+        <p>Esperar rede, timer, leitura de arquivo. Quem está esperando é o
+        navegador, não o seu código — a fila fica livre.</p>
+      </div>
+      <div class="box no">
+        <h4>Trava a tela</h4>
+        <p>Laço de 10 milhões de voltas, ordenar 500 mil itens,
+        <code>JSON.parse</code> de 40 MB. Aqui o seu código <b>está ocupando</b> a
+        fila.</p>
+      </div>
+    </div>
+
+    <div class="tip"><b>A conclusão que importa:</b> <code>await</code> não deixa
+    nada mais rápido. Ele só <b>libera a vez</b> enquanto a resposta não chega. Se
+    a sua página travar, procure processamento pesado — não chamada de rede.</div>
+
+    <div class="tip warn"><b>Ordem que surpreende:</b> uma Promise já resolvida
+    roda <b>antes</b> de um <code>setTimeout(…, 0)</code>. São filas de prioridade
+    diferentes. Não precisa decorar — só não se assuste quando acontecer.</div>
+  </section>
+
+  <div class="divisor">Ferramentas</div>
+
+<section id="node">
+    <h2>Node &amp; npm</h2>
+    <div class="tip"><b>Calma:</b> pro desafio de hoje você <b>não precisa</b> disto — tudo roda no navegador. Esta parte é um mapa do que vem nas próximas aulas, quando os projetos crescem.</div>
+
+    <h3>Por que sair do navegador?</h3>
+    <p>Até agora o JavaScript rodou dentro do navegador. O <b>Node.js</b> é um programa que roda JavaScript <b>fora</b> dele — no seu computador, direto no terminal. É o que permite usar ferramentas, servidores e projetos maiores (tipo o próprio site de vocês, feito em Next.js 👀).</p>
+
+    <h3>1. Instalar o Node</h3>
+    <p>Baixe a versão <b>LTS</b> em <code>nodejs.org</code> e instale (é só avançar). Depois, confira no terminal:</p>
+    <pre><span class="cm"># mostra a versão instalada (se aparecer um número, deu certo)</span>
+node -v
+npm -v</pre>
+    <p>O <b>npm</b> (Node Package Manager) já vem junto com o Node. É ele que baixa e organiza os "pacotes" (códigos prontos de outras pessoas).</p>
+
+    <h3>2. Começar um projeto</h3>
+    <pre><span class="cm"># cria o package.json (a "carteira de identidade" do projeto)</span>
+npm init -y
+
+<span class="cm"># instala um pacote (ex.: a biblioteca de datas)</span>
+npm install dayjs</pre>
+    <ul>
+      <li><b>package.json</b> — lista o nome do projeto, os scripts e as dependências.</li>
+      <li><b>node_modules/</b> — pasta onde o npm guarda os pacotes baixados. <b>Nunca</b> se mexe nela na mão (e não sobe pro Git).</li>
+      <li><b>package-lock.json</b> — trava as versões exatas, pra funcionar igual na máquina de todo mundo.</li>
+    </ul>
+
+    <h3>3. Rodar comandos (scripts)</h3>
+    <p>No <code>package.json</code> você define atalhos na parte <code>"scripts"</code> e roda com <code>npm run</code>:</p>
+    <pre><span class="cm">// dentro do package.json</span>
+<span class="st">"scripts"</span>: {
+  <span class="st">"dev"</span>: <span class="st">"next dev"</span>
+}
+
+<span class="cm"># no terminal:</span>
+npm run dev</pre>
+    <div class="tip"><b>Você já viu isso!</b> É exatamente assim que o site da NickDev roda: <code>npm install</code> pra baixar tudo e <code>npm run dev</code> pra ligar.</div>
+  </section>
+
+  <div class="divisor">Fechando</div>
+
+<section id="erros">
+    <h2>Erros comuns 🔧</h2>
+
+    <h4>Cannot use import statement outside a module</h4>
+    <p>Faltou <code>type="module"</code> no <code>&lt;script&gt;</code>.</p>
+
+    <h4>CORS / origem nula ao usar fetch</h4>
+    <p>Você abriu o HTML com duplo clique (<code>file://</code>). Módulos e
+    <code>fetch</code> exigem um servidor: use a extensão Live Server do VS Code
+    ou <code>npx serve</code>.</p>
+
+    <h4>Unexpected token '&lt;' in JSON</h4>
+    <p>O <code>fetch</code> recebeu HTML (uma página de 404) e tentou interpretar
+    como JSON. Faltou <code>if (!resposta.ok)</code>.</p>
+
+    <h4>Apareceu [object Promise] na tela</h4>
+    <p>Faltou <code>await</code>. E confira se a função tem <code>async</code>.</p>
+
+    <h4>Mudei a lista e a tela não atualizou</h4>
+    <p>Você mutou. <code>push</code>, <code>sort</code>, <code>splice</code>
+    mantêm a mesma referência. Use <code>[...lista, x]</code> ou
+    <code>toSorted()</code>.</p>
+
+    <h4>O valor 0 sumiu / virou o padrão</h4>
+    <p><code>||</code> troca qualquer valor falso. Use <code>??</code>.</p>
+
+    <h4>this é undefined dentro do callback</h4>
+    <p>Você usou <code>function</code> onde cabia arrow. Troque por
+    <code>() =&gt;</code>.</p>
+  </section>
+<section id="cola">
+    <h2>Cola rápida</h2>
+
+<pre><span class="cm">// ---------- módulos ----------</span>
+export const x    ·  import { x } from "./a.js"
+export default y  ·  import y from "./a.js"
+import type { T } from "./tipos.js"
+&lt;script type="module" src="/cursos/frontend-avancado/aula-02-javascript-typescript/main.js"&gt;
+
+<span class="cm">// ---------- desestruturar ----------</span>
+const { titulo, cidade = "Online" } = evento;
+const { id, ...resto } = evento;
+function Card({ titulo }: Evento) { }
+
+<span class="cm">// ---------- imutável ----------</span>
+[...lista, novo]        <span class="cm">em vez de  push</span>
+lista.toSorted()        <span class="cm">em vez de  sort</span>
+lista.toSpliced(0, 1)   <span class="cm">em vez de  splice</span>
+lista.with(0, x)        <span class="cm">em vez de  lista[0] = x</span>
+{ ...evento, titulo }   <span class="cm">em vez de  evento.titulo =</span>
+
+<span class="cm">// ---------- array ----------</span>
+map     transforma   ·  filter  seleciona
+find    um ou undefined  ·  reduce  vira um valor
+
+<span class="cm">// ---------- operadores ----------</span>
+a?.b?.c          undefined se algo faltar
+a ?? padrão      só troca null/undefined
+a || padrão      troca 0 e "" também  ⚠️
+
+<span class="cm">// ---------- assíncrono ----------</span>
+async function f() { const x = await g(); }
+if (!resposta.ok) throw new Error(...)   <span class="cm">SEMPRE</span>
+await Promise.all([a(), b()])            <span class="cm">independentes</span>
+try / catch / finally                    <span class="cm">3 estados na tela</span>
+
+<span class="cm">// ---------- tipos ----------</span>
+type Formato = "Online" | "Presencial";
+type Evento = { id: string; cidade?: string; vagas: number | null };
+type Novo = Omit&lt;Evento, "id"&gt;;
+type Edicao = Partial&lt;Novo&gt;;
+function f&lt;T&gt;(l: T[]): T | undefined { }
+
+<span class="cm">// ---------- versões ----------</span>
+Angular 22  →  typescript 6.0.x   <span class="cm">(obrigatório)</span>
+Next.js 16  →  typescript 7.x     <span class="cm">(pode)</span>
+
+<span class="cm">// ---------- as 3 perguntas do dia ----------</span>
+1. estou mutando ou criando novo?   → imutabilidade
+2. tratei carregando, erro e vazio? → assíncrono
+3. usei any pra calar o erro?       → então volte atrás</pre>
+
+    
+  </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="/#guias" style="color:var(--pink-light)">todos os guias</a>
+  </div>
+</main>
+</div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  // Copiar código. O botão só aparece no hover — num guia de consulta o gesto
+  // é frequente, mas o botão não pode competir com o código.
+  document.querySelectorAll('.code').forEach(box => {
+    const btn = box.querySelector('.cp'), pre = box.querySelector('pre');
+    if (!btn || !pre) return;
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText).then(() => {
+        btn.textContent = 'copiado ✓'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('done'); }, 1400);
+      });
+    });
+  });
+
+  // Prévia ao vivo: o HTML do atributo data-src vira uma página dentro do
+  // iframe, com um estilo neutro por baixo para o exemplo não herdar o tema
+  // escuro do guia.
+  const baseDaPrevia = "<!doctype html><html><head><meta charset='utf-8'><style>"
+    + "body{margin:0;padding:14px;font-family:system-ui,'Segoe UI',sans-serif;color:#1a1a2e;line-height:1.5}"
+    + "h1{color:#7B4FD0;margin:.2em 0}h2,h3{margin:.2em 0}a{color:#F24487}"
+    + "input,textarea,select,button{font-size:14px;padding:6px 8px;font-family:inherit}button{cursor:pointer}"
+    + "</style></head><body>";
+  document.querySelectorAll('iframe[data-src]').forEach(f => {
+    f.srcdoc = baseDaPrevia + f.getAttribute('data-src') + "</body></html>";
+    f.addEventListener('load', () => {
+      try { f.style.height = Math.max(90, f.contentWindow.document.body.scrollHeight + 8) + 'px'; }
+      catch (e) { f.style.height = '140px'; }
+    });
+  });
+
+  // Demo responsivo: só existe no guia de CSS, então sai de cena em silêncio
+  // nos outros seis.
+  (function () {
+    const frame = document.getElementById('rdemo-frame');
+    const iframe = document.getElementById('rdemo-iframe');
+    if (!frame || !iframe) return;
+    iframe.srcdoc = "<!doctype html><html><head><meta charset='utf-8'><style>"
+      + "*{margin:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;color:#1a1a2e}"
+      + "header{background:#7B4FD0;color:#fff;padding:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}"
+      + ".tag{font-size:11px;background:rgba(255,255,255,.25);padding:3px 9px;border-radius:20px;white-space:nowrap}"
+      + ".desk{display:none}"
+      + ".wrap{display:flex;flex-direction:column;gap:10px;padding:14px}"
+      + ".card{background:#eef2f8;border-radius:10px;padding:20px;font-size:14px;text-align:center}"
+      + "@media(min-width:700px){.wrap{flex-direction:row}.card{flex:1}.mob{display:none}.desk{display:inline}}"
+      + "</style></head><body>"
+      + "<header>🐸 Meu Site <span class='tag'><span class='mob'>📱 empilhado</span><span class='desk'>💻 lado a lado</span></span></header>"
+      + "<div class='wrap'><div class='card'>Bloco 1</div><div class='card'>Bloco 2</div><div class='card'>Bloco 3</div></div>"
+      + "</body></html>";
+    document.querySelectorAll('#rdemo-btns .rbtn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#rdemo-btns .rbtn').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        frame.style.width = b.dataset.w;
+      });
+    });
+  })();
+
+  const tt = document.getElementById('totop');
+  addEventListener('scroll', () => { tt.classList.toggle('show', scrollY > 500); });
+</script>
+
+</body>
+</html>

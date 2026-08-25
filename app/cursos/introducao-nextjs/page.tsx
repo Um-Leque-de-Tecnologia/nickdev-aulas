@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
 
 export const metadata: Metadata = {
   title: "Introdução ao Next.js · NickDev",
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 
 const AULA_01 = "/cursos/introducao-nextjs/aula-01-abertura-fundamentos";
 const AULA_02 = "/cursos/introducao-nextjs/aula-02-roteamento-app-router";
+const AULA_03 = "/cursos/introducao-nextjs/aula-03-server-client";
 const PROJETO = "/cursos/introducao-nextjs/projeto";
 
 type Aula = {
@@ -18,22 +20,9 @@ type Aula = {
   data: string;
   titulo: string;
   desc: React.ReactNode;
-  marco?: string;
 };
 
 const AULAS: Aula[] = [
-  {
-    n: "03",
-    data: "26/08",
-    titulo: "Server vs Client Components",
-    desc: (
-      <>
-        RSC na prática; a fronteira <span className="mono">&quot;use client&quot;</span>;
-        padrões de composição; props serializáveis; Suspense e streaming.
-      </>
-    ),
-    marco: "Escopo mínimo do projeto definido",
-  },
   {
     n: "04",
     data: "02/09",
@@ -88,7 +77,6 @@ const AULAS: Aula[] = [
         verificação.
       </>
     ),
-    marco: "Checkpoint 1 — protótipo navegável",
   },
   {
     n: "09",
@@ -128,7 +116,6 @@ const AULAS: Aula[] = [
         analyzer; Core Web Vitals; Lighthouse; re-renders.
       </>
     ),
-    marco: "Checkpoint 2 — CRUD + autenticação, com code review em sala",
   },
   {
     n: "13",
@@ -162,7 +149,6 @@ const AULAS: Aula[] = [
         observabilidade; variáveis de ambiente; CSP e OWASP no frontend.
       </>
     ),
-    marco: "Checkpoint 3 — deploy em produção com CI",
   },
   {
     n: "16",
@@ -185,14 +171,12 @@ const AULAS: Aula[] = [
         revisão geral.
       </>
     ),
-    marco: "Congelamento + ensaio",
   },
   {
     n: "18",
     data: "09/12",
     titulo: "2ª Verificação de Aprendizagem",
     desc: <>Apresentação final e defesa do projeto.</>,
-    marco: "Apresentação final e defesa",
   },
   {
     n: "19",
@@ -222,7 +206,19 @@ export default function FrontendAvancadoNextjs() {
         CI/CD. Tudo aplicado no <strong>Leque de Vagas</strong>, um projeto em equipe
         que evolui por checkpoints ao longo do semestre.
       </p>
+      <BadgesDeTecnologia tecnologias={["javascript", "typescript", "nextjs"]} />
       <div className="brand-rule" />
+
+      <div className="acoes">
+        <a
+          className="glow-btn"
+          href="https://www.youtube.com/playlist?list=PLcNjRvNK5MXU"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Aulas gravadas
+        </a>
+      </div>
 
       <div className="section-label">Projeto do curso</div>
 
@@ -280,9 +276,6 @@ export default function FrontendAvancadoNextjs() {
               <a className="mat primary" href={`${AULA_01}/slides.html`}>
                 ▶ Slides da aula
               </a>
-              <a className="mat" href={`${AULA_01}/guia-fundamentos.html`}>
-                📘 Guia de conteúdo
-              </a>
               <a className="mat" href={`${AULA_01}/desafio.html`}>
                 🎯 Desafio técnico
               </a>
@@ -296,12 +289,6 @@ export default function FrontendAvancadoNextjs() {
                 🛠️ Roteiro da aula
               </a>
             </div>
-            <p style={{ marginTop: 12, marginBottom: 0, fontSize: 14 }}>
-              <span className="mono" style={{ color: "var(--pink-light)" }}>
-                marco do projeto
-              </span>{" "}
-              · teaser do escopo e formação das equipes
-            </p>
           </div>
         </div>
 
@@ -329,9 +316,6 @@ export default function FrontendAvancadoNextjs() {
               <a className="mat primary" href={`${AULA_02}/slides.html`}>
                 ▶ Slides da aula
               </a>
-              <a className="mat" href={`${AULA_02}/guia-roteamento.html`}>
-                📘 Guia de conteúdo
-              </a>
               <a className="mat" href={`${AULA_02}/desafio.html`}>
                 🎯 Desafio técnico
               </a>
@@ -348,12 +332,45 @@ export default function FrontendAvancadoNextjs() {
                 💼 Briefing do projeto
               </a>
             </div>
-            <p style={{ marginTop: 12, marginBottom: 0, fontSize: 14 }}>
-              <span className="mono" style={{ color: "var(--pink-light)" }}>
-                marco do projeto
-              </span>{" "}
-              · briefing do Leque de Vagas, entrega da rubrica e o mapa de rotas
+          </div>
+        </div>
+
+        <div className="lesson">
+          <div className="idx">03</div>
+          <div className="body">
+            <h3>
+              Onde o seu código roda{" "}
+              <span
+                className="mono"
+                style={{ fontSize: 13, color: "var(--text-3)" }}
+              >
+                · 26/08
+              </span>
+            </h3>
+            <p>
+              A pergunta que a aula 02 deixou em aberto: por que alguns arquivos
+              levam <span className="mono">&quot;use client&quot;</span> na
+              primeira linha e outros não. Tudo roda no servidor por padrão — e o
+              que isso significa para velocidade e para segredo. Quando isso não
+              basta: clique e APIs do navegador. A fronteira, e por que ela deve
+              ficar na folha e não na raiz. O que atravessa como prop e o que não
+              atravessa. <span className="mono">Suspense</span>: o{" "}
+              <span className="mono">loading.tsx</span> de um pedaço só.
             </p>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_03}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_03}/desafio.html`}>
+                🎯 Desafio técnico
+              </a>
+              <a className="mat" href={`${AULA_03}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
+            </div>
           </div>
         </div>
 
@@ -371,14 +388,6 @@ export default function FrontendAvancadoNextjs() {
                 </span>
               </h3>
               <p>{a.desc}</p>
-              {a.marco && (
-                <p style={{ marginTop: -6, fontSize: 14 }}>
-                  <span className="mono" style={{ color: "var(--pink-light)" }}>
-                    marco do projeto
-                  </span>{" "}
-                  · {a.marco}
-                </p>
-              )}
               <span className="soon-tag">em breve</span>
             </div>
           </div>
