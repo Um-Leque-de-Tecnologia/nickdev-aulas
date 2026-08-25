@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 const AULA_01 = "/cursos/introducao-spring-boot/aula-01-primeira-api";
 const AULA_02 = "/cursos/introducao-spring-boot/aula-02-beans-e-injecao";
+const PROJETO = "/cursos/introducao-spring-boot/projeto";
 
 export default function JavaSpringBoot() {
   return (
@@ -46,6 +47,39 @@ export default function JavaSpringBoot() {
         >
           ▶ Aulas gravadas
         </a>
+      </div>
+
+      <div className="section-label">Projeto do curso</div>
+
+      <div className="lessons">
+        <div className="lesson">
+          <div className="idx">💼</div>
+          <div className="body">
+            <h3>Leque de Vagas — a API</h3>
+            <p>
+              Vagas de tecnologia para quem está migrando de carreira. A turma
+              não constrói a tela — constrói <strong>o outro lado</strong>: o
+              programa que guarda as vagas, as empresas e as candidaturas.{" "}
+              <strong>Quatro frentes, uma por integrante da equipe</strong>, e a
+              cada aula o desafio tem uma parte para cada frente. Nasce na aula
+              02 como três classes e termina como uma API autenticada,
+              documentada e rodando em contêiner.
+            </p>
+            <div className="mats">
+              <a className="mat primary" href={`${PROJETO}/brief.html`}>
+                💼 Briefing e rubrica
+              </a>
+              <a
+                className="mat"
+                href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                💻 O front que consome esta API
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="section-label">Unidade I · Fundamentos do Spring e API REST</div>
@@ -111,7 +145,10 @@ export default function JavaSpringBoot() {
                 🧩 Código do desafio
               </a>
               <a className="mat" href={`${AULA_02}/modelo-resposta.html`}>
-                🧑‍💻 Modelo de resposta
+                👁️ Prévia da resposta
+              </a>
+              <a className="mat" href={`${PROJETO}/brief.html`}>
+                💼 Briefing do projeto
               </a>
             </div>
           </div>
@@ -129,8 +166,8 @@ export default function JavaSpringBoot() {
               <span className="mono">@RequestBody</span>.{" "}
               <span className="mono">ResponseEntity</span> e cabeçalhos. Testes
               manuais com Insomnia e arquivos{" "}
-              <span className="mono">.http</span>. Entrega da proposta do
-              projeto.
+              <span className="mono">.http</span>. Entrega do esqueleto do
+              projeto e início da segunda parte.
             </p>
             <span className="soon-tag">em breve</span>
           </div>

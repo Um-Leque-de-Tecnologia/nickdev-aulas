@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desafio 02 — Um controller virando três · Introdução ao Spring Boot · NickDev</title>
-<meta name="description" content="Desafio da aula 02: separar um controller que guarda a mesma lista copiada três vezes e decide tudo sozinho, em repository, service e controller.">
+<title>Desafio 02 — O esqueleto do Leque de Vagas · Introdução ao Spring Boot · NickDev</title>
+<meta name="description" content="Desafio da aula 02: a primeira evolução do projeto do semestre. Quatro partes, uma por integrante da equipe — cada frente monta o seu recurso em controller, service e repository.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -121,6 +121,26 @@ tr:last-child td{border-bottom:0}
 
   .goal.magenta{border-left-color:var(--magenta)}
 
+
+  .parte{border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;
+    padding:22px 24px;margin-top:20px;background:var(--surface)}
+  .parte-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .parte-hd .n{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bg);
+    background:var(--purple);padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .parte-hd h3{font-size:20px;margin:0}
+  .parte-hd .quem{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .parte .obj{font-size:14.5px;color:var(--text-3);margin:8px 0 14px;border-left:2px solid var(--purple);padding-left:12px}
+  .parte.p1{border-left-color:#F24487}.parte.p1 .n{background:#F24487}.parte.p1 .obj{border-left-color:#F24487}
+  .parte.p2{border-left-color:#7B4FD0}.parte.p2 .n{background:#7B4FD0}.parte.p2 .obj{border-left-color:#7B4FD0}
+  .parte.p3{border-left-color:#5fd08a}.parte.p3 .n{background:#5fd08a}.parte.p3 .obj{border-left-color:#5fd08a}
+  .parte.p4{border-left-color:#E88BB8}.parte.p4 .n{background:#E88BB8}.parte.p4 .obj{border-left-color:#E88BB8}
+  .rotas{border-collapse:collapse;width:100%;margin-top:12px;font-size:14px}
+  .rotas th,.rotas td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .rotas th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  .rotas td{color:var(--text-2)}
+  .rotas td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
+  .rotas tr:last-child td{border-bottom:0}
 </style>
 </head>
 <body>
@@ -135,185 +155,236 @@ tr:last-child td{border-bottom:0}
     <span class="word">NickDev</span>
   </div>
 
-  <div class="eyebrow">Desafio · Aula 02</div>
-  <h1>Um controller <span class="grad">virando três</span> 🔧</h1>
+  <div class="eyebrow">Desafio · Aula 02 · primeira entrega do projeto</div>
+  <h1>O esqueleto do <span class="grad">Leque de Vagas</span> 🦴</h1>
   <p class="lead">
-    Você recebe um controller com <b>três endpoints</b> — e a mesma lista
-    escrita por extenso <b>três vezes</b>, uma em cada método. Sua tarefa é
-    separá-lo em repository, service e controller <b>sem mudar uma vírgula do
-    que a API devolve</b>.
+    A primeira evolução do projeto do semestre. A API vai responder com dados
+    fixos em memória — sem banco, sem validação — mas já <b>separada em
+    controller, service e repository</b>. O desenho certo desde o primeiro dia,
+    porque é muito mais barato do que consertar depois.
   </p>
   <div class="rule"></div>
 
   <div class="goal">
-    <span class="ico">🎯</span>
+    <span class="ico">💼</span>
     <div>
-      <h3>O que este desafio verifica</h3>
-      <p>Exatamente o que a aula treinou, com mais código: reconhecer o que
-      está no lugar errado e mover para onde pertence.</p>
-      <p>É de propósito que a saída não muda. Assim você tem um critério
-      objetivo: <b>se a resposta de qualquer endpoint mudou, você quebrou algo
-      no caminho</b>. Refatorar é melhorar o desenho sem alterar o
-      comportamento — se o comportamento mudou, não foi refatoração.</p>
+      <h3>Ainda não leu o briefing?</h3>
+      <p>Leia antes de qualquer coisa: o
+      <a href="/cursos/introducao-spring-boot/projeto/brief.html" style="color:var(--pink-light);text-decoration:underline">briefing
+      do Leque de Vagas</a> explica o projeto inteiro, as quatro frentes e onde
+      isso chega em dezembro. Este desafio é só o primeiro passo dele.</p>
     </div>
   </div>
 
   <div class="goal roxo">
-    <span class="ico">🧪</span>
+    <span class="ico">👥</span>
     <div>
-      <h3>Faça os labs antes</h3>
-      <p>Este desafio é o mesmo caminho dos quatro labs, com um código maior.
-      Se você não fez os labs, comece por
-      <a href="exercicios.html" style="color:var(--pink-light);text-decoration:underline">exercicios.html</a> —
-      lá cada passo tem gabarito. Aqui não tem.</p>
+      <h3>Quatro pessoas, quatro partes</h3>
+      <p>Cada integrante assume <b>uma frente</b> e faz a parte correspondente.
+      Todas as quatro têm o mesmo tamanho e a mesma forma: um <code>record</code>,
+      um <code>@Repository</code>, um <code>@Service</code> e um
+      <code>@RestController</code>.</p>
+      <p>É de propósito que sejam iguais. Nesta aula todo mundo precisa escrever
+      o padrão com as próprias mãos — a partir da aula 03 as frentes começam a
+      divergir de verdade.</p>
     </div>
   </div>
 
-  <div class="label">O código que você recebe</div>
+  <div class="label">Antes de codar — a combinação de 30 minutos</div>
 
-  <p style="color:var(--text-2);font-size:15px;margin-top:12px">
-    Está inteiro, pronto pra colar, em
-    <a href="codigos-desafio.html" style="color:var(--pink-light);text-decoration:underline">codigos-desafio.html</a>.
-    Adapte para o <b>seu tema</b> — o desenho do problema é o mesmo em qualquer um.
-  </p>
+  <div class="goal magenta">
+    <span class="ico">🤝</span>
+    <div>
+      <h3>A parte 4 depende da parte 1. Resolvam isso agora.</h3>
+      <p>A frente de <b>números</b> conta vagas — e para contar, precisa da lista
+      que a frente de <b>Vaga</b> vai escrever. Se ela esperar a parte 1 ficar
+      pronta, a equipe entrega em série o que podia ter entregado em paralelo.</p>
+      <p><b>Sentem juntos e escrevam estas duas coisas antes de abrir a IDE.</b>
+      Com elas no papel, as quatro pessoas programam ao mesmo tempo.</p>
+    </div>
+  </div>
 
-<pre><span class="an">@RestController</span>
-<span class="kw">public class</span> <span class="ty">CatalogoController</span> {
+<pre><span class="cm">// 1. O record da Vaga — combinado pela equipe, igual para todo mundo.</span>
+<span class="kw">public record</span> <span class="ty">Vaga</span>(
+    <span class="ty">String</span> id,
+    <span class="ty">String</span> titulo,
+    <span class="ty">String</span> descricao,
+    <span class="ty">String</span> area,          <span class="cm">// Front-end, Back-end, Dados, Mobile…</span>
+    <span class="ty">String</span> senioridade,   <span class="cm">// Estágio, Júnior, Pleno, Sênior</span>
+    <span class="ty">String</span> local,
+    <span class="kw">boolean</span> aceitaIniciante,
+    <span class="ty">String</span> empresaSlug
+) { }
 
-    <span class="an">@GetMapping</span>(<span class="st">"/catalogo"</span>)
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">todas</span>() {
-        <span class="kw">return</span> <span class="ty">List</span>.<span class="fn">of</span>( <span class="cm">/* as 12 receitas */</span> );
-    }
-
-    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/rapidas"</span>)
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">rapidas</span>() {
-        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; todas = <span class="ty">List</span>.<span class="fn">of</span>( <span class="cm">/* as 12 de novo */</span> );
-        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
-        <span class="kw">for</span> (<span class="ty">Receita</span> r : todas) {
-            <span class="kw">if</span> (r.<span class="fn">minutos</span>() &lt;= <span class="st">30</span>) saida.<span class="fn">add</span>(r);
-        }
-        <span class="kw">return</span> saida;
-    }
-
-    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/longas"</span>)
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">longas</span>() {
-        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; todas = <span class="ty">List</span>.<span class="fn">of</span>( <span class="cm">/* e mais uma vez */</span> );
-        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
-        <span class="kw">for</span> (<span class="ty">Receita</span> r : todas) {
-            <span class="kw">if</span> (r.<span class="fn">minutos</span>() &gt; <span class="st">60</span>) saida.<span class="fn">add</span>(r);
-        }
-        <span class="kw">return</span> saida;
-    }
+<span class="cm">// 2. A assinatura que a parte 4 vai chamar. A parte 1 promete entregar isto.</span>
+<span class="an">@Repository</span>
+<span class="kw">public class</span> <span class="ty">VagaRepository</span> {
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">todas</span>() { <span class="cm">/* … */</span> }
 }</pre>
 
-  <div class="goal magenta" style="margin-top:22px">
-    <span class="ico">😖</span>
-    <div>
-      <h3>Antes de começar, sinta o problema</h3>
-      <p>Adicione <b>uma receita nova</b> ao catálogo, no código como ele está.
-      Conte quantos lugares você teve que editar.</p>
-      <p>Agora imagine que você esqueceu um deles. O <code>/catalogo</code>
-      mostra 13 itens e o <code>/catalogo/rapidas</code> continua olhando 12.
-      <b>Ninguém recebe erro nenhum</b> — o sistema só passa a mentir.</p>
-    </div>
+  <p class="tip"><b>Escrevam o record primeiro, num commit só, e avisem a
+  equipe.</b> Assim as outras três pessoas já têm o tipo para compilar contra —
+  mesmo antes de a lista existir.</p>
+
+  <div class="label">As quatro partes</div>
+
+  <!-- ============================ PARTE 1 ============================ -->
+  <div class="parte p1">
+    <div class="parte-hd"><span class="n">PARTE 1</span><h3>Vaga</h3><span class="quem">frente 1</span></div>
+    <p class="obj">O recurso principal da API. É a parte que as outras esperam — entregue o <code>record</code> cedo.</p>
+    <ul>
+      <li><code>Vaga</code> — o <code>record</code> combinado com a equipe.</li>
+      <li><code>VagaRepository</code> com <code>@Repository</code> e o método <code>todas()</code>,
+      devolvendo <b>no mínimo 12 vagas</b> escritas à mão.</li>
+      <li><code>VagaService</code> com <code>@Service</code>, recebendo o repository por construtor:
+      <code>listar()</code> e <code>buscarPorId(String id)</code>.</li>
+      <li><code>VagaController</code> com <code>@RestController</code>, recebendo o service.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>devolve</th></tr>
+      <tr><td>GET /vagas</td><td>a lista inteira</td></tr>
+      <tr><td>GET /vagas/{id}</td><td>uma vaga, ou lista vazia se não achar</td></tr>
+    </table>
+    <p class="tip"><b>As 12 vagas precisam variar.</b> Pelo menos 4 áreas
+    diferentes, 3 senioridades e uma mistura de <code>aceitaIniciante</code>.
+    Com dados uniformes, a parte 4 devolve números sem graça e a busca da aula
+    03 não mostra diferença.</p>
   </div>
 
-  <div class="label">Os três defeitos</div>
-
-  <div class="defeito">
-    <h4>1 · A lista está copiada três vezes</h4>
-    <p>Três cópias da mesma verdade. Toda mudança precisa acontecer em três lugares, e esquecer um não gera erro — gera resposta errada em silêncio.</p>
-    <p><b>Você vai:</b> criar um <code>@Repository</code> com a lista <b>uma vez só</b>, num método <code>todas()</code>.</p>
+  <!-- ============================ PARTE 2 ============================ -->
+  <div class="parte p2">
+    <div class="parte-hd"><span class="n">PARTE 2</span><h3>Empresa</h3><span class="quem">frente 2</span></div>
+    <p class="obj">Quem publica as vagas. Independente da parte 1 — dá para fazer em paralelo do começo ao fim.</p>
+    <ul>
+      <li><code>Empresa</code> — <code>record</code> com <code>id</code>, <code>nome</code>,
+      <code>slug</code>, <code>site</code> e <code>descricao</code>.</li>
+      <li><code>EmpresaRepository</code>, <code>EmpresaService</code> e <code>EmpresaController</code>,
+      no mesmo formato da parte 1.</li>
+      <li><b>No mínimo 5 empresas</b>, e os <code>slug</code> delas precisam bater com
+      os <code>empresaSlug</code> que a parte 1 usou nas vagas.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>devolve</th></tr>
+      <tr><td>GET /empresas</td><td>a lista inteira</td></tr>
+      <tr><td>GET /empresas/{slug}</td><td>uma empresa pelo slug</td></tr>
+    </table>
+    <p class="tip"><b>Combinem os slugs com a parte 1.</b> É a segunda coisa que
+    a equipe precisa acertar antes de codar — <code>aurora-tech</code> num lado e
+    <code>auroratech</code> no outro quebra a junção na aula 06.</p>
   </div>
 
-  <div class="defeito">
-    <h4>2 · As regras estão dentro do controller</h4>
-    <p>"Rápida é até 30 minutos" e "longa é mais de 60" são decisões do negócio, não do transporte HTTP. Do jeito que está, para testar essas duas regras é preciso subir um servidor web e abrir o navegador.</p>
-    <p><b>Você vai:</b> mover os dois filtros para um <code>@Service</code>, em dois métodos com nomes que digam a regra.</p>
+  <!-- ============================ PARTE 3 ============================ -->
+  <div class="parte p3">
+    <div class="parte-hd"><span class="n">PARTE 3</span><h3>Pessoa</h3><span class="quem">frente 3</span></div>
+    <p class="obj">Quem se candidata. Também independente — nesta aula ela ainda não se liga a vaga nenhuma.</p>
+    <ul>
+      <li><code>Pessoa</code> — <code>record</code> com <code>id</code>, <code>nome</code>,
+      <code>email</code>, <code>area</code> de interesse e <code>senioridade</code>.</li>
+      <li><code>PessoaRepository</code>, <code>PessoaService</code> e <code>PessoaController</code>,
+      no mesmo formato.</li>
+      <li><b>No mínimo 6 pessoas.</b></li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>devolve</th></tr>
+      <tr><td>GET /pessoas</td><td>a lista inteira</td></tr>
+      <tr><td>GET /pessoas/{id}</td><td>uma pessoa</td></tr>
+    </table>
+    <p class="tip"><b>Sem senha por enquanto.</b> Guardar senha exige cuidado que
+    a gente ainda não tem — o campo entra na aula 10, junto com o jeito certo de
+    guardá-la. E aí <code>GET /pessoas</code> deixa de ser público.</p>
   </div>
 
-  <div class="defeito">
-    <h4>3 · O controller monta tudo sozinho</h4>
-    <p>Ele busca os dados, percorre a lista, decide o que entra e monta a saída. São quatro trabalhos num método só.</p>
-    <p><b>Você vai:</b> deixar cada método do controller com <b>uma linha</b> — chamar o service e devolver. O service chega pelo construtor, num campo <code>final</code>. Nenhum <code>new</code> entre as suas classes.</p>
+  <!-- ============================ PARTE 4 ============================ -->
+  <div class="parte p4">
+    <div class="parte-hd"><span class="n">PARTE 4</span><h3>Números do catálogo</h3><span class="quem">frente 4</span></div>
+    <p class="obj">A única parte sem recurso próprio: ela <b>consulta</b> o que a parte 1 guarda. É a que exige a combinação de contrato.</p>
+    <ul>
+      <li><code>EstatisticasService</code> com <code>@Service</code>, recebendo o
+      <b><code>VagaRepository</code> por construtor</b> — não o service da parte 1.</li>
+      <li><code>EstatisticasController</code> com uma rota só.</li>
+      <li>Os números: <b>total de vagas</b>, <b>quantas aceitam iniciante</b>,
+      <b>quantas por área</b> e <b>quantas por senioridade</b>.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>devolve</th></tr>
+      <tr><td>GET /estatisticas</td><td>um objeto com os quatro números</td></tr>
+    </table>
+<pre><span class="cm">// o formato da resposta, combinado com a equipe</span>
+{
+  <span class="st">"totalDeVagas"</span>: <span class="st">12</span>,
+  <span class="st">"aceitamIniciante"</span>: <span class="st">7</span>,
+  <span class="st">"porArea"</span>: { <span class="st">"Front-end"</span>: <span class="st">4</span>, <span class="st">"Back-end"</span>: <span class="st">3</span>, <span class="st">"Dados"</span>: <span class="st">3</span>, <span class="st">"Mobile"</span>: <span class="st">2</span> },
+  <span class="st">"porSenioridade"</span>: { <span class="st">"Estágio"</span>: <span class="st">2</span>, <span class="st">"Júnior"</span>: <span class="st">6</span>, <span class="st">"Pleno"</span>: <span class="st">4</span> }
+}</pre>
+    <p class="tip"><b>Por que o repository e não o service?</b> Porque
+    estatística é uma regra de negócio, e regra não chama regra por preguiça —
+    ela busca o dado e decide. Se um dia o <code>VagaService</code> filtrar vagas
+    expiradas, a contagem não deve mudar junto sem alguém decidir isso.</p>
   </div>
 
-  <div class="label">Passo a passo</div>
+  <div class="label">Depois: juntar</div>
 
   <div class="step">
-    <div class="step-head"><span class="n">01</span><h3>Rode o código quebrado e guarde as três respostas</h3></div>
-    <p>Cole o código no seu projeto, suba e chame os <b>três</b> endpoints. Copie cada JSON num arquivo à parte. Eles são o seu gabarito: no fim, as três respostas têm que ser idênticas.</p>
+    <div class="step-head"><span class="n">05</span><h3>As quatro partes no mesmo projeto</h3></div>
+    <p>Todo mundo trabalha <b>no mesmo repositório</b>, cada pessoa numa branch,
+    e no fim tudo se encontra na <code>main</code>.</p>
+    <ul>
+      <li>Suba a aplicação e chame <b>as sete rotas</b>, uma a uma.</li>
+      <li>Confira que os <code>empresaSlug</code> das vagas existem em <code>/empresas</code>.</li>
+      <li>Confira que os números de <code>/estatisticas</code> batem com o que <code>/vagas</code> devolve — conte na mão se precisar.</li>
+    </ul>
+    <p class="tip">Achou divergência? <b>Isso é a entrega funcionando.</b> Foi
+    exatamente para pegar esse tipo de coisa que a integração é um passo com
+    nome próprio, e não "e aí a gente junta".</p>
   </div>
 
-  <div class="step">
-    <div class="step-head"><span class="n">02</span><h3>Crie o repository</h3></div>
-    <p>Uma classe com <code>@Repository</code> e um método <code>todas()</code> devolvendo a lista — <b>uma vez só</b>. Apague as três cópias do controller.</p>
-    <p class="tip">O projeto vai quebrar. É esperado, igual ao lab 1.</p>
-  </div>
+  <div class="label">Requisitos mínimos</div>
 
-  <div class="step">
-    <div class="step-head"><span class="n">03</span><h3>Crie o service</h3></div>
-    <p>Uma classe com <code>@Service</code>, recebendo o repository pelo construtor, com <b>dois métodos</b>: um para as rápidas, outro para as longas.</p>
-    <p class="tip">Nomeie os métodos pela regra, não pelo endpoint: <code>rapidas()</code> e <code>longas()</code> — não <code>getCatalogoRapidas()</code>.</p>
-  </div>
+  <ul class="check">
+    <li>As <b>quatro partes</b> entregues, e o Git mostrando <b>quem fez cada uma</b>.</li>
+    <li>As <b>sete rotas</b> respondendo.</li>
+    <li>Toda classe com o estereótipo certo: <code>@Repository</code>, <code>@Service</code>, <code>@RestController</code>.</li>
+    <li>Toda dependência <b>por construtor</b>, em campo <code>final</code>. Nenhum <code>new</code> entre as classes de vocês.</li>
+    <li>Nenhum <code>if</code> nem <code>for</code> de regra dentro de controller.</li>
+    <li>Nenhum <code>record</code> anotado — <code>record</code> é dado, não é bean.</li>
+    <li>README com as quatro frentes e quem assumiu cada uma.</li>
+  </ul>
 
-  <div class="step">
-    <div class="step-head"><span class="n">04</span><h3>Enxugue o controller</h3></div>
-    <p>Campo <code>final</code> do service, construtor recebendo ele, e os três métodos com uma linha cada.</p>
-  </div>
+  <div class="label">O que NÃO pode 🚫</div>
 
-  <div class="step">
-    <div class="step-head"><span class="n">05</span><h3>Compare com o gabarito do passo 1</h3></div>
-    <p>Os três endpoints, mesmos itens, mesma ordem. Diferente? Você mudou comportamento sem querer — ache onde antes de seguir.</p>
-  </div>
+  <ul class="check no">
+    <li><b>Banco de dados.</b> É a aula 05. Aqui a lista é escrita à mão, e é de propósito.</li>
+    <li><b>DTO, validação ou tratamento de erro.</b> São as aulas 03 e 04.</li>
+    <li><b>Uma pessoa fazer duas partes.</b> Se alguém travou, a equipe ajuda — mas o commit é de quem fez.</li>
+    <li><b>Uma classe só com tudo dentro.</b> Foi o que a aula inteira desmontou.</li>
+  </ul>
 
-  <div class="step">
-    <div class="step-head"><span class="n">06</span><h3>Agora a prova de fogo</h3></div>
-    <p>Adicione <b>a mesma receita nova</b> do começo. Quantos arquivos você editou desta vez? Anote o número — ele vai para o <code>DECISOES.md</code>.</p>
-  </div>
-
-  <div class="step">
-    <div class="step-head"><span class="n">07</span><h3>Escreva o <code>DECISOES.md</code></h3></div>
-    <p>Um arquivo curto na raiz do repositório, com <b>uma seção por defeito</b>. Em cada uma, duas frases: o que você fez e <b>por quê</b>. Feche com o número do passo 6, antes e depois.</p>
-    <p class="tip">Este arquivo é parte da nota. Código certo com justificativa vazia mostra que funcionou por acaso.</p>
-  </div>
-
-  <div class="label">Como será avaliado</div>
+  <div class="label">Como isso é avaliado</div>
 
   <table class="criterios">
     <tr><th>critério</th><th>o que se espera</th><th class="peso">peso</th></tr>
-    <tr><td>A lista existe uma vez só</td><td>Num <code>@Repository</code>, num método <code>todas()</code>. Nenhuma cópia sobrando.</td><td class="peso">25%</td></tr>
-    <tr><td>As regras estão no service</td><td>Dois métodos com <code>@Service</code>, nomeados pela regra. Nenhum <code>if</code> de negócio no controller.</td><td class="peso">25%</td></tr>
-    <tr><td>Ligação por construtor</td><td>Nenhum <code>new</code> entre as suas classes, todo campo de dependência <code>final</code>.</td><td class="peso">20%</td></tr>
-    <tr><td>Comportamento idêntico</td><td>Os três endpoints devolvem exatamente o que devolviam antes.</td><td class="peso">15%</td></tr>
-    <tr><td><code>DECISOES.md</code></td><td>Uma seção por defeito, com o porquê, e o número do passo 6.</td><td class="peso">15%</td></tr>
+    <tr><td>As três camadas</td><td>Em todas as quatro partes, com o estereótipo certo em cada classe.</td><td class="peso">30%</td></tr>
+    <tr><td>Ligação por construtor</td><td>Campo <code>final</code>, nenhum <code>new</code> entre classes de vocês.</td><td class="peso">25%</td></tr>
+    <tr><td>As rotas respondendo</td><td>As sete, com dados coerentes entre si.</td><td class="peso">25%</td></tr>
+    <tr><td>Trabalho de equipe</td><td>Commits das quatro pessoas, e o README dizendo quem fez o quê.</td><td class="peso">20%</td></tr>
   </table>
 
-  <div class="goal" style="margin-top:26px">
-    <span class="ico">🚫</span>
-    <div>
-      <h3>O que <b>não</b> entra neste desafio</h3>
-      <p>Banco de dados, DTO, validação, tratamento de erro, teste automatizado
-      e configuração por ambiente são as próximas aulas. Se você já sabe e
-      quiser fazer, faça — mas <b>não conta ponto</b>, e um desafio inchado é
-      mais difícil de corrigir e de te dar retorno útil.</p>
-    </div>
-  </div>
-
   <div class="entrega">
-    <h3>📦 Entrega</h3>
+    <h3>📦 Como entregar</h3>
     <ul>
-      <li>Link do repositório, com o projeto rodando.</li>
-      <li><code>DECISOES.md</code> na raiz.</li>
+      <li>Link do repositório da equipe no GitHub.</li>
+      <li>README com as quatro frentes, quem assumiu cada uma, e como rodar.</li>
+      <li><b>Pelo menos um commit por pessoa</b> — o histórico é a evidência.</li>
       <li>Prazo: <b>até a aula 03 (25/08)</b>, antes do início.</li>
     </ul>
-    <p style="margin-top:12px">Travou? Traga na aula 03 <b>com o erro na tela</b>. Print do stack trace vale mais que descrição do problema.</p>
+    <p style="margin-top:12px">Travou? Traga na aula 03 <b>com o erro na tela</b>.
+    Print do stack trace vale mais que descrição do problema.</p>
   </div>
 
   <div class="cta-row">
     <a class="btn primary" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="/cursos/introducao-spring-boot/projeto/brief.html">💼 Briefing do projeto</a>
     <a class="btn" href="exercicios.html">🧪 Exercícios da aula</a>
-    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
     <a class="btn" href="slides.html">▶ Slides</a>
   </div>
 
