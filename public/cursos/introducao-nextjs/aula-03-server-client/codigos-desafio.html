@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio 03 — A fronteira, linha por linha · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="O desafio 03 resolvido e comentado: o componente de cliente mínimo, a página que continua no servidor, o Suspense num pedaço lento e a auditoria dos quatro &quot;use client&quot; do projeto.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:960px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:20px 22px;margin-top:16px}
+.goal .ico{font-size:24px;line-height:1}
+.goal h3{font-size:16.5px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:14.5px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 14px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+pre .hl{color:#F24487;font-weight:700}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+
+  .arq{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);
+    border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:22px}
+  .arq + pre{border-radius:0 12px 12px 12px;margin-top:-1px}
+  .audit{border-collapse:collapse;width:100%;margin-top:14px;font-size:14px}
+  .audit th,.audit td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  .audit th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  .audit td{color:var(--text-2)}
+  .audit td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
+  .audit tr:last-child td{border-bottom:0}
+  .porque{border:1px solid rgba(123,79,208,.4);background:rgba(123,79,208,.07);border-radius:10px;padding:13px 17px;margin-top:13px}
+  .porque b{color:var(--purple-light);font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px}
+  .porque p{font-size:14.5px;color:var(--text-2);margin:0}
+  .porque p + p{margin-top:8px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Aula 03 · código do desafio</div>
+  <h1>A fronteira, <span class="grad">linha por linha</span></h1>
+  <p class="lead">
+    O desafio resolvido, comentado. Use como referência quando travar — mas
+    <b>tente antes</b>. São três arquivos novos e uma mudança pequena na página
+    da vaga; o que importa aqui não é o tamanho do código, é <b>onde cada
+    pedaço roda</b>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🧩</span>
+    <div>
+      <h3>Três arquivos novos, uma página mexida</h3>
+      <p><code>components/BotaoCopiarLink.tsx</code> ·
+      <code>components/VagasParecidas.tsx</code> ·
+      <code>app/vagas/[id]/page.tsx</code> (alterado).</p>
+      <p>Repare no que <b>não</b> mudou: nenhum <code>layout.tsx</code>, nenhum
+      arquivo da listagem. A interatividade entrou por uma porta pequena.</p>
+    </div>
+  </div>
+
+  <div class="label">1 · O componente de cliente</div>
+
+  <div class="arq">components/BotaoCopiarLink.tsx</div>
+<pre><span class="st">"use client"</span>;
+<span class="cm">// ↑ Primeira linha do arquivo, antes de qualquer import.</span>
+<span class="cm">//   Sem ela, o onClick abaixo não tem quem o escute.</span>
+
+<span class="kw">export default function</span> <span class="fn">BotaoCopiarLink</span>({ titulo }: { titulo: <span class="ty">string</span> }) {
+  <span class="kw">return</span> (
+    <span class="ty">&lt;button</span>
+      <span class="fn">type</span>=<span class="st">"button"</span>
+      <span class="fn">onClick</span>={() =&gt; {
+        <span class="cm">// location e navigator só existem no navegador.</span>
+        <span class="cm">// É a segunda razão para este arquivo ser de cliente.</span>
+        navigator.clipboard.<span class="fn">writeText</span>(location.href);
+        <span class="fn">alert</span>(`Link de "${titulo}" copiado!`);
+      }}
+    &gt;
+      🔗 Copiar link
+    <span class="ty">&lt;/button&gt;</span>
+  );
+}</pre>
+
+  <div class="porque">
+    <b>as duas razões, no mesmo arquivo</b>
+    <p><b>1. O clique.</b> Acontece depois que a página já está na tela, no dedo
+    da pessoa. O servidor terminou o trabalho dele e foi embora.</p>
+    <p><b>2. As APIs do navegador.</b> <code>navigator.clipboard</code> e
+    <code>location</code> são do computador de quem acessa. No servidor, essas
+    palavras não existem.</p>
+    <p>Qualquer uma das duas já obrigaria o <code>"use client"</code>. Aqui as
+    duas aparecem juntas — é o exemplo mais honesto que existe.</p>
+  </div>
+
+  <div class="porque">
+    <b>por que ele recebe titulo por prop</b>
+    <p>O componente poderia ler o título do próprio DOM, ou ter o texto
+    chumbado. Recebendo por prop, ele vira <b>reutilizável</b> — serve para
+    qualquer vaga — e, principalmente, <b>prova que dado atravessa a
+    fronteira</b>: uma string sai do servidor e chega inteira no navegador.</p>
+  </div>
+
+  <div class="label">2 · A seção lenta</div>
+
+  <div class="arq">components/VagasParecidas.tsx</div>
+<pre><span class="cm">// SEM "use client" — este é um Server Component, e é justamente</span>
+<span class="cm">// por isso que ele pode ser async e esperar.</span>
+<span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+<span class="kw">import</span> <span class="ty">Link</span> <span class="kw">from</span> <span class="st">"next/link"</span>;
+
+<span class="kw">export default async function</span> <span class="fn">VagasParecidas</span>({
+  area,
+  idAtual,
+}: {
+  area: <span class="ty">string</span>;
+  idAtual: <span class="ty">string</span>;
+}) {
+  <span class="cm">// Espera de mentira, para você VER o Suspense funcionando.</span>
+  <span class="cm">// Na aula 04 isso vira uma consulta de verdade.</span>
+  <span class="kw">await new</span> <span class="ty">Promise</span>((r) =&gt; <span class="fn">setTimeout</span>(r, <span class="st">2000</span>));
+
+  <span class="kw">const</span> parecidas = vagas.<span class="fn">filter</span>(
+    (v) =&gt; v.area === area &amp;&amp; v.id !== idAtual
+  );
+
+  <span class="kw">if</span> (parecidas.length === <span class="st">0</span>) <span class="kw">return</span> <span class="ty">&lt;p&gt;</span>Nenhuma vaga parecida por enquanto.<span class="ty">&lt;/p&gt;</span>;
+
+  <span class="kw">return</span> (
+    <span class="ty">&lt;ul&gt;</span>
+      {parecidas.<span class="fn">map</span>((v) =&gt; (
+        <span class="ty">&lt;li</span> <span class="fn">key</span>={v.id}&gt;
+          <span class="ty">&lt;Link</span> <span class="fn">href</span>={`/vagas/${v.id}`}&gt;{v.titulo}<span class="ty">&lt;/Link&gt;</span> · {v.empresa}
+        <span class="ty">&lt;/li&gt;</span>
+      ))}
+    <span class="ty">&lt;/ul&gt;</span>
+  );
+}</pre>
+
+  <div class="porque">
+    <b>o await mora aqui dentro, não na página</b>
+    <p>É o detalhe que separa quem entendeu de quem copiou. Se o
+    <code>await</code> dos dois segundos estivesse na <b>página</b>, a página
+    inteira esperaria — e o <code>Suspense</code> não teria o que fazer.</p>
+    <p>Ele está <b>dentro do componente que o Suspense envolve</b>. Assim o Next
+    manda o resto da página na hora e completa este pedaço quando ficar pronto.</p>
+  </div>
+
+  <div class="label">3 · A página, que continua no servidor</div>
+
+  <div class="arq">app/vagas/[id]/page.tsx</div>
+<pre><span class="cm">// Continua SEM "use client". É um Server Component.</span>
+<span class="kw">import</span> { <span class="ty">Suspense</span> } <span class="kw">from</span> <span class="st">"react"</span>;
+<span class="kw">import</span> { notFound } <span class="kw">from</span> <span class="st">"next/navigation"</span>;
+<span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+<span class="kw">import</span> <span class="ty">BotaoCopiarLink</span> <span class="kw">from</span> <span class="st">"@/components/BotaoCopiarLink"</span>;
+<span class="kw">import</span> <span class="ty">VagasParecidas</span> <span class="kw">from</span> <span class="st">"@/components/VagasParecidas"</span>;
+
+<span class="kw">export default async function</span> <span class="fn">PaginaDaVaga</span>({
+  params,
+}: {
+  params: <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span> }&gt;;
+}) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;
+  <span class="kw">const</span> vaga = vagas.<span class="fn">find</span>((v) =&gt; v.id === id);
+  <span class="kw">if</span> (!vaga) <span class="fn">notFound</span>();
+
+  <span class="cm">// A prova do desafio: este log sai no TERMINAL, não no navegador.</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[servidor] montando a vaga"</span>, vaga.id);
+
+  <span class="kw">return</span> (
+    <span class="ty">&lt;article&gt;</span>
+      <span class="ty">&lt;h1&gt;</span>{vaga.titulo}<span class="ty">&lt;/h1&gt;</span>
+      <span class="ty">&lt;p&gt;</span>{vaga.empresa} · {vaga.local}<span class="ty">&lt;/p&gt;</span>
+      <span class="ty">&lt;p&gt;</span>{vaga.descricao}<span class="ty">&lt;/p&gt;</span>
+
+      <span class="cm">{/* Um componente de cliente dentro de um de servidor: pode. */}</span>
+      <span class="cm">{/* O titulo é uma string — atravessa a fronteira sem problema. */}</span>
+      <span class="ty">&lt;BotaoCopiarLink</span> <span class="fn">titulo</span>={vaga.titulo} /&gt;
+
+      <span class="ty">&lt;h2&gt;</span>Vagas parecidas<span class="ty">&lt;/h2&gt;</span>
+      <span class="ty">&lt;Suspense</span> <span class="fn">fallback</span>={<span class="ty">&lt;p&gt;</span>procurando vagas parecidas…<span class="ty">&lt;/p&gt;</span>}&gt;
+        <span class="ty">&lt;VagasParecidas</span> <span class="fn">area</span>={vaga.area} <span class="fn">idAtual</span>={vaga.id} /&gt;
+      <span class="ty">&lt;/Suspense&gt;</span>
+    <span class="ty">&lt;/article&gt;</span>
+  );
+}</pre>
+
+  <div class="porque">
+    <b>três coisas para reparar</b>
+    <p><b>1.</b> O <code>&lt;h2&gt;Vagas parecidas&lt;/h2&gt;</code> está <b>fora</b>
+    do <code>Suspense</code>. Assim o título da seção aparece na hora e a pessoa
+    já sabe o que está carregando ali.</p>
+    <p><b>2.</b> O <code>BotaoCopiarLink</code> é usado como qualquer outro
+    componente. <b>Server usando Client é o caminho fácil</b> — o contrário é que
+    tem regra.</p>
+    <p><b>3.</b> O <code>await params</code> continua igual à aula 02. No Next 16
+    os parâmetros da rota chegam como Promise, e isso não mudou por causa da
+    fronteira.</p>
+  </div>
+
+  <div class="label">4 · A auditoria dos quatro</div>
+
+  <table class="audit">
+    <tr><th>arquivo</th><th>por que é de cliente</th></tr>
+    <tr><td>app/vagas/error.tsx</td><td>Recebe a função <code>retry</code> e a chama num <code>onClick</code> — evento. E precisa reagir a um erro que aconteceu <b>depois</b> de a página já estar na tela.</td></tr>
+    <tr><td>components/MenuLink.tsx</td><td>Usa <code>usePathname</code>: saber em que endereço a pessoa está agora é informação do navegador dela.</td></tr>
+    <tr><td>components/BotaoVoltar.tsx</td><td>Usa <code>useRouter</code> para voltar no histórico. O histórico de navegação é do navegador — o servidor não tem acesso a ele. Um <code>&lt;Link&gt;</code> não resolve porque ele leva a um endereço <b>fixo</b>, e "voltar" depende de onde a pessoa veio.</td></tr>
+    <tr><td>components/BotaoCopiarLink.tsx</td><td><b>As duas razões</b>: tem <code>onClick</code> e usa <code>navigator</code>/<code>location</code>.</td></tr>
+  </table>
+
+  <div class="label">5 · O README</div>
+
+  <div class="arq">README.md · a seção nova</div>
+<pre><span class="cm">## A fronteira</span>
+
+Quatro arquivos do projeto rodam no navegador. Cada um tem motivo:
+
+| arquivo | por quê |
+|---|---|
+| `app/vagas/error.tsx` | chama `retry` num onClick |
+| `components/MenuLink.tsx` | `usePathname` — o endereço é do navegador |
+| `components/BotaoVoltar.tsx` | `useRouter` — o histórico é do navegador |
+| `components/BotaoCopiarLink.tsx` | onClick + `navigator.clipboard` |
+
+Nenhum `layout.tsx` ou `page.tsx` leva a linha.
+
+**A prova:** o `console.log` da página da vaga sai no terminal do
+`npm run dev`, não no console do navegador — print em `docs/servidor.png`.
+
+**O que a pessoa ganha:** com a fronteira na folha, o navegador baixa só
+o código do botão. Com ela na raiz, baixaria também o título, a descrição
+e a lista inteira — que já vieram prontos como HTML e não precisam de
+JavaScript nenhum para aparecer.</pre>
+
+  <div class="label">Como testar</div>
+
+  <div class="goal">
+    <span class="ico">🧪</span>
+    <div>
+      <h3>Os três testes que provam cada entrega</h3>
+      <ul>
+        <li><b>O botão:</b> clique e cole em qualquer lugar. Tem que ser o endereço da vaga.</li>
+        <li><b>O servidor:</b> recarregue com o terminal visível. O <code>[servidor]</code> aparece lá, e nunca no console do navegador.</li>
+        <li><b>O Suspense:</b> recarregue e conte até dois. O título tem que estar visível <b>antes</b> da lista de parecidas.</li>
+      </ul>
+      <p style="margin-top:10px">Para ver o Suspense com calma, use o
+      <em>throttling</em> do painel Network — ou suba a espera para cinco
+      segundos enquanto testa, e volte para dois antes de entregar.</p>
+    </div>
+  </div>
+
+  <div class="label">Se der errado</div>
+
+  <div class="goal magenta">
+    <span class="ico">🔧</span>
+    <div>
+      <h3><code>Event handlers cannot be passed to Client Component props</code></h3>
+      <p>Duas causas. Ou faltou o <code>"use client"</code> no arquivo do botão —
+      e aí o <code>onClick</code> não tem quem o escute. Ou você tentou passar uma
+      <b>função</b> como prop de uma página de servidor para um componente de
+      cliente: função não atravessa a fronteira.</p>
+    </div>
+  </div>
+
+  <div class="goal magenta">
+    <span class="ico">🔧</span>
+    <div>
+      <h3><code>navigator is not defined</code> ou <code>location is not defined</code></h3>
+      <p>O arquivo está rodando no servidor, onde essas palavras não existem.
+      Confirme que o <code>"use client"</code> é a <b>primeira linha</b> do
+      arquivo — antes dos imports, com aspas e ponto e vírgula.</p>
+    </div>
+  </div>
+
+  <div class="goal magenta">
+    <span class="ico">🔧</span>
+    <div>
+      <h3>A página inteira fica branca por dois segundos</h3>
+      <p>O <code>await</code> está no lugar errado — provavelmente na página, e
+      não dentro do componente que o <code>Suspense</code> envolve. Enquanto a
+      página espera, não há o que mostrar.</p>
+    </div>
+  </div>
+
+  <div class="goal magenta">
+    <span class="ico">🔧</span>
+    <div>
+      <h3>O <code>console.log</code> aparece no navegador</h3>
+      <p>Alguma coisa empurrou a página para o cliente. Procure um
+      <code>"use client"</code> no <code>page.tsx</code> ou num
+      <code>layout.tsx</code> acima dele — a linha vale para o arquivo e para
+      tudo que ele importa.</p>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Voltar ao desafio</a>
+    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="btn" href="slides.html">▶ Slides da aula</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Next.js · Aula 03 · Next.js 16 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>

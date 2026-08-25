@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 03 — A fronteira no Leque de Vagas · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Desafio da aula 03: dar interatividade ao Leque de Vagas sem levar a página inteira para o navegador — um componente de cliente mínimo, auditoria de cada &quot;use client&quot; do projeto e Suspense num pedaço lento.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+pre .hl{color:#F24487;font-weight:700}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+
+  .audit{border-collapse:collapse;width:100%;margin-top:14px;font-size:14px}
+  .audit th,.audit td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  .audit th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  .audit td{color:var(--text-2)}
+  .audit td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
+  .audit tr:last-child td{border-bottom:0}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Desafio · Aula 03</div>
+  <h1>A fronteira no <span class="grad">Leque de Vagas</span> 🧭</h1>
+  <p class="lead">
+    O projeto já tem rotas, telas de espera e de erro. Agora ele vai ganhar
+    <b>interatividade</b> — sem que a página inteira desça para o navegador
+    junto. Três entregas: um componente de cliente mínimo, uma auditoria de cada
+    <code>"use client"</code> que já existe no projeto, e um pedaço lento que não
+    trava o resto da página.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo</h3>
+      <p>Até aqui todo arquivo do projeto rodava no servidor e ninguém precisou
+      pensar nisso. A partir de hoje isso vira uma <b>decisão consciente</b>: o
+      que fica no servidor, o que desce para o navegador, e por quê.</p>
+      <p>Este desafio é curto de código e longo de justificativa. É de propósito
+      — a parte difícil de Server e Client Components nunca é escrever a linha,
+      é saber <b>onde</b> pôr.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">👥</span>
+    <div>
+      <h3>Entregável de equipe, no mesmo repositório</h3>
+      <p>Continua no repositório do Leque de Vagas, na mesma branch de trabalho
+      da equipe. Cada pessoa faz pelo menos <b>um commit com autoria própria</b>
+      — o histórico do Git é parte da avaliação.</p>
+    </div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">📖</span>
+    <div>
+      <h3>Travou numa palavra?</h3>
+      <p>Server Component, Client Component, fronteira, prop, serializável,
+      Suspense, streaming — todas estão no
+      <a href="/guias/nextjs.html" style="color:var(--pink-light);text-decoration:underline">guia
+      de Next.js</a>. Consultar não é trapaça: é o que todo mundo que programa
+      faz o dia inteiro.</p>
+    </div>
+  </div>
+
+  <div class="label">Entrega 1 · O componente de cliente</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><h3>Um botão que copia o link da vaga</h3></div>
+    <p>Na página de uma vaga, um botão <b>Copiar link</b>. A pessoa clica e o
+    endereço da vaga vai para a área de transferência.</p>
+    <ul>
+      <li>O componente vive em <code>components/</code>, num arquivo só dele.</li>
+      <li>Ele recebe o <b>título da vaga</b> por prop e usa esse texto no rótulo
+      ou na confirmação — assim você prova que dado atravessa a fronteira.</li>
+      <li>A página da vaga <b>continua sem</b> <code>"use client"</code>.</li>
+    </ul>
+    <p class="tip"><b>Como confirmar que copiou:</b> cole em qualquer lugar
+    depois de clicar. Se quiser dar retorno visual na tela, pode — mas não é
+    exigido, e não vale usar nada que a aula não ensinou.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><h3>A prova de que a página continua no servidor</h3></div>
+    <p>Depois de o botão funcionar, ponha um <code>console.log</code> na página
+    da vaga e recarregue.</p>
+    <ul>
+      <li>Ele tem que aparecer <b>no terminal</b> do <code>npm run dev</code>.</li>
+      <li>Tire um print desse terminal e guarde — vai para o README.</li>
+    </ul>
+    <p class="tip">Se o log aparecer no console do navegador, alguma coisa
+    empurrou a página para o cliente. Ache o quê antes de seguir.</p>
+  </div>
+
+  <div class="label">Entrega 2 · A auditoria da fronteira</div>
+
+  <div class="goal magenta">
+    <span class="ico">🔍</span>
+    <div>
+      <h3>O projeto já tem três <code>"use client"</code></h3>
+      <p>Vocês escreveram os três na aula 02, sem saber o que a linha fazia.
+      Agora sabem. <b>Justifiquem cada um</b> — e confirmem que nenhum está
+      maior do que precisa.</p>
+    </div>
+  </div>
+
+  <table class="audit">
+    <tr><th>arquivo</th><th>o que responder no README</th></tr>
+    <tr><td>app/vagas/error.tsx</td><td>Por que um arquivo de erro precisa rodar no navegador?</td></tr>
+    <tr><td>components/MenuLink.tsx</td><td>O que ele faz que só é possível no navegador?</td></tr>
+    <tr><td>components/BotaoVoltar.tsx</td><td>Mesma pergunta — e por que não dá para resolver com um <code>&lt;Link&gt;</code> comum?</td></tr>
+    <tr><td>o novo botão de copiar</td><td>Quais das duas razões da aula se aplicam a ele: o clique, a API do navegador, ou as duas?</td></tr>
+  </table>
+
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><h3>Procure fronteira grande demais</h3></div>
+    <p>Percorra o projeto e confirme que <b>nenhum</b> <code>"use client"</code>
+    está num arquivo maior do que precisa. Em especial:</p>
+    <ul>
+      <li>Nenhum <code>layout.tsx</code> leva a linha.</li>
+      <li>Nenhum <code>page.tsx</code> leva a linha.</li>
+      <li>Todo arquivo que leva é um componente <b>pequeno</b>, de uma responsabilidade.</li>
+    </ul>
+    <p class="tip">Achou um grande demais? <b>Quebre em dois</b>: a parte que
+    precisa do navegador vira um componente próprio, o resto fica no servidor.
+    Descreva o antes e o depois no README.</p>
+  </div>
+
+  <div class="label">Entrega 3 · O pedaço que não trava a página</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><h3>Uma seção lenta, dentro de Suspense</h3></div>
+    <p>Na página da vaga, acrescente uma seção <b>Vagas parecidas</b> — outras
+    vagas da mesma área ou da mesma empresa.</p>
+    <ul>
+      <li>O componente dessa seção é <code>async</code> e <b>espera de propósito</b>:
+      dois segundos, com <code>await new Promise(r =&gt; setTimeout(r, 2000))</code>.
+      Isso simula um banco lento, que vocês vão ter de verdade mais pra frente.</li>
+      <li>Envolva ele num <code>&lt;Suspense&gt;</code> com um <code>fallback</code>
+      que diga o que está acontecendo.</li>
+      <li>O <b>título e a descrição da vaga têm que aparecer na hora</b>, sem
+      esperar os dois segundos.</li>
+    </ul>
+    <p class="tip"><b>O teste:</b> recarregue e conte. Se a página inteira ficar
+    branca por dois segundos, o <code>Suspense</code> está no lugar errado — ou
+    a espera está acontecendo fora dele.</p>
+  </div>
+
+  <div class="label">O README da equipe</div>
+
+  <div class="goal roxo">
+    <span class="ico">📝</span>
+    <div>
+      <h3>Metade da nota está aqui</h3>
+      <p>Acrescente ao README do projeto uma seção
+      <b><code>## A fronteira</code></b> com:</p>
+      <ul>
+        <li>A tabela da auditoria — os quatro arquivos e a justificativa de cada um.</li>
+        <li>O print do terminal mostrando o <code>console.log</code> do servidor.</li>
+        <li>Se vocês quebraram algum componente em dois: o antes e o depois, e por quê.</li>
+        <li>Uma frase respondendo: <b>o que a pessoa que usa o site ganha</b> com a
+        fronteira estar na folha em vez de na raiz?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="label">Requisitos mínimos</div>
+
+  <ul class="check">
+    <li>O botão de copiar funciona e vive num arquivo próprio, com <code>"use client"</code>.</li>
+    <li>Ele recebe pelo menos <b>uma prop</b> vinda da página.</li>
+    <li>A página da vaga <b>não</b> tem <code>"use client"</code>, e o <code>console.log</code> dela sai no terminal.</li>
+    <li>Nenhum <code>layout.tsx</code> nem <code>page.tsx</code> do projeto tem <code>"use client"</code>.</li>
+    <li>A seção lenta está dentro de <code>&lt;Suspense&gt;</code> e o resto da página não espera por ela.</li>
+    <li>O README tem a seção <code>## A fronteira</code> completa.</li>
+    <li><code>npm run build</code> passa sem erro.</li>
+  </ul>
+
+  <div class="label">Extras, pra quem quiser ir além ✨</div>
+
+  <ul class="check extra">
+    <li>Um segundo <code>&lt;Suspense&gt;</code> na listagem, para um bloco de estatísticas lento.</li>
+    <li>Um <code>fallback</code> que imita o formato do conteúdo real (esqueleto cinza) em vez de um texto.</li>
+    <li>Medir no painel <em>Network</em> o JavaScript baixado antes e depois de encolher a fronteira, e pôr os dois números no README.</li>
+  </ul>
+
+  <div class="label">O que NÃO pode 🚫</div>
+
+  <ul class="check no">
+    <li><code>"use client"</code> em <code>layout.tsx</code> ou em <code>page.tsx</code>. É o erro que este desafio existe para evitar.</li>
+    <li>Passar <b>função</b> como prop para um componente de cliente. Não atravessa — e o erro vai te dizer isso.</li>
+    <li>Usar <code>useState</code>, <code>useEffect</code> ou qualquer hook. <b>Não foi ensinado</b>, não é necessário aqui, e não conta ponto.</li>
+    <li>Buscar dados de API externa. Isso é a aula 04 — aqui a lentidão é simulada de propósito.</li>
+    <li>Instalar biblioteca nova.</li>
+  </ul>
+
+  <div class="label">Como isso é avaliado</div>
+
+  <table class="audit">
+    <tr><th>critério</th><th>o que se espera</th><th>peso</th></tr>
+    <tr><td>A fronteira certa</td><td>Componente de cliente pequeno, num arquivo próprio; página e layout intocados.</td><td>30%</td></tr>
+    <tr><td>A auditoria</td><td>Os quatro arquivos justificados, com o motivo certo em cada um.</td><td>30%</td></tr>
+    <tr><td>Suspense</td><td>O pedaço lento não segura o resto da página.</td><td>20%</td></tr>
+    <tr><td>README</td><td>Seção completa, com o print e a frase sobre o ganho de quem usa.</td><td>20%</td></tr>
+  </table>
+
+  <div class="entrega">
+    <h3>📦 Como entregar</h3>
+    <ul>
+      <li>Link do repositório da equipe, com o projeto rodando.</li>
+      <li>README atualizado com a seção <code>## A fronteira</code>.</li>
+      <li>Pelo menos um commit por pessoa da equipe.</li>
+      <li>Prazo: <b>até a aula 04 (02/09)</b>, antes do início.</li>
+    </ul>
+    <p style="margin-top:12px">Travou? Traga na aula 04 <b>com o erro na tela</b>.
+    Print do stack trace vale mais que descrição do problema.</p>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="btn" href="slides.html">▶ Slides da aula</a>
+    <a class="btn" href="/guias/nextjs.html">📘 Guia de Next.js</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Next.js · Aula 03 · Next.js 16 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>
