@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
 
 export const metadata: Metadata = {
   title: "Frontend — Transição de Carreira · NickDev",
@@ -33,7 +34,19 @@ export default function FrontendTransicao() {
         publicado na internet. A gente aprende fazendo, com joguinhos, projetos e
         muita cor — pensado pra quem está entrando na tech agora.
       </p>
+      <BadgesDeTecnologia tecnologias={["html", "css", "javascript", "nextjs"]} />
       <div className="brand-rule" />
+
+      <div className="acoes">
+        <a
+          className="glow-btn"
+          href="https://www.youtube.com/playlist?list=PLIHR33oCqAMs"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Aulas gravadas
+        </a>
+      </div>
 
       <div className="section-label">Aulas</div>
 
@@ -49,9 +62,6 @@ export default function FrontendTransicao() {
             <div className="mats">
               <a className="mat primary" href={`${AULA_01}/slides.html`}>
                 ▶ Slides da aula
-              </a>
-              <a className="mat" href={`${AULA_01}/guia-html-css.html`}>
-                📘 Guia HTML &amp; CSS
               </a>
               <a className="mat" href={`${AULA_01}/desafio.html`}>
                 🎯 Desafio
@@ -78,9 +88,6 @@ export default function FrontendTransicao() {
               <a className="mat primary" href={`${AULA_02}/slides.html`}>
                 ▶ Slides da aula
               </a>
-              <a className="mat" href={`${AULA_02}/guia-javascript.html`}>
-                📘 Guia de JavaScript
-              </a>
               <a className="mat" href={`${AULA_02}/desafio.html`}>
                 🎯 Desafio
               </a>
@@ -105,9 +112,6 @@ export default function FrontendTransicao() {
             <div className="mats">
               <a className="mat primary" href={`${AULA_03}/slides.html`}>
                 ▶ Slides da aula
-              </a>
-              <a className="mat" href={`${AULA_03}/guia-design-codigo.html`}>
-                📘 Guia
               </a>
               <a className="mat" href={`${AULA_03}/desafio.html`}>
                 🎯 Desafio
@@ -136,9 +140,6 @@ export default function FrontendTransicao() {
             <div className="mats">
               <a className="mat primary" href={`${AULA_04}/slides.html`}>
                 ▶ Slides da aula
-              </a>
-              <a className="mat" href={`${AULA_04}/guia-nextjs.html`}>
-                📘 Guia de Next.js 16
               </a>
               <a className="mat" href={`${AULA_04}/roteiro-projeto.html`}>
                 🛠️ Roteiro do projeto

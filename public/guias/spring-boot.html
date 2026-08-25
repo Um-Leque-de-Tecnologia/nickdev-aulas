@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guia · Do Java ao Spring · Aula 01 · NickDev</title>
-<meta name="description" content="Guia passo a passo da aula 01: o que é framework, inversão de controle, injeção de dependência, JDK 21, Maven, Spring Initializr, anatomia do projeto e o primeiro endpoint.">
+<title>Spring Boot · Guias · NickDev</title>
+<meta name="description" content="Guia de Spring Boot: acoplamento, inversão de controle e injeção de dependência, o ecossistema Spring, autoconfiguração e starters, setup com JDK 21 e Maven, anatomia do projeto e a primeira API REST.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122; --code-bg:#0b0913;
     --magenta:#F24487; --purple:#7B4FD0;
     --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
     --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
@@ -19,8 +19,10 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
   code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
 
   .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
@@ -54,8 +56,11 @@
   ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
   li{margin:5px 0}
   li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
 
-  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
   .cm{color:#6f6a83}
   .kw{color:#F24487}
   .ty{color:#7B4FD0}
@@ -66,9 +71,35 @@
   .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
   .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
 
-  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
   .terminal .p{color:var(--text-3)}
   .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
   .terminal .cm{color:#6f6a83}
 
   .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
@@ -77,12 +108,22 @@
   .tip.warn b{color:var(--pink-light)}
   .tip.ok{border-left-color:var(--green)}
   .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
 
   table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
   th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
   th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
   td{color:var(--text-2)}
   td b{color:var(--text)}
+  td code{font-size:.9em}
   tr:last-child td{border-bottom:0}
 
   .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
@@ -112,7 +153,43 @@
   .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
   .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
 
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
   .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
 
   @media(max-width:900px){
     .wrap{grid-template-columns:1fr}
@@ -126,13 +203,13 @@
 
 <div class="wrap">
 <aside>
-  <a class="voltar-curso" href="/cursos/introducao-spring-boot">← voltar ao curso</a>
+  <a class="voltar-curso" href="/#guias">← todos os guias</a>
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
     <div class="grp">Comece por aqui</div>
     <a href="#como-usar">Como usar este guia</a>
-    <a href="#glossario">Glossário da aula</a>
-    <div class="grp">Parte 1 · O conceito</div>
+    <a href="#glossario">📖 Glossário</a>
+    <div class="grp">O conceito</div>
     <a href="#dependencia">O que é uma dependência</a>
     <a href="#acoplamento">O que é acoplamento</a>
     <a href="#framework">Biblioteca × framework</a>
@@ -140,25 +217,25 @@
     <a href="#ioc">Inversão de controle</a>
     <a href="#di">Injeção de dependência</a>
     <a href="#ioc-vs-di">IoC × DI</a>
-    <a href="#formas">As três formas de injetar</a>
-    <div class="grp">Parte 2 · O Spring</div>
+    <a href="#formas">As formas de injetar</a>
+    <div class="grp">O Spring</div>
     <a href="#ecossistema">O ecossistema Spring</a>
     <a href="#boot">Spring tradicional × Boot</a>
     <a href="#autoconfig">Autoconfiguração</a>
     <a href="#starters">Starters</a>
-    <div class="grp">Parte 3 · A máquina</div>
+    <div class="grp">A máquina</div>
     <a href="#jdk">Instalar o JDK 21</a>
     <a href="#conferir">Conferir a instalação</a>
     <a href="#intellij">Instalar o IntelliJ</a>
     <a href="#maven">Maven e o pom.xml</a>
-    <div class="grp">Parte 4 · O projeto</div>
+    <div class="grp">O projeto</div>
     <a href="#initializr">Criar no Initializr</a>
     <a href="#abrir">Abrir na IDE</a>
     <a href="#estrutura">Anatomia do projeto</a>
     <a href="#main">A classe principal</a>
     <a href="#rodar">Rodar e parar</a>
     <a href="#properties">application.properties</a>
-    <div class="grp">Parte 5 · A API</div>
+    <div class="grp">A API</div>
     <a href="#http">Como a web funciona</a>
     <a href="#endpoint">Primeiro endpoint</a>
     <a href="#fluxo">O caminho da requisição</a>
@@ -172,17 +249,15 @@
 </aside>
 
 <main>
-  <div class="eyebrow">Aula 01 · guia de apoio</div>
+  <div class="eyebrow">Guia · Spring Boot</div>
   <h1>Do Java <span class="g">ao Spring</span></h1>
-  <p class="lead">
-    O guia completo da primeira aula: o que é um framework, o que significa
-    inverter o controle, o que é injeção de dependência — e o passo a passo,
-    do zero, pra colocar sua primeira API REST no ar.
-  </p>
+  <p class="lead">O que é um framework, o que significa inverter o controle, o que é injeção de dependência — e o passo a passo, do zero, até colocar uma API REST no ar.</p>
   <div class="rule"></div>
 
-  <!-- ==================================================================== -->
-  <section id="como-usar">
+
+  <div class="divisor">Comece por aqui</div>
+
+<section id="como-usar">
     <h2>Como usar este guia</h2>
     <p>Este guia foi escrito para quem <b>nunca ouviu falar</b> de inversão de
     controle, injeção de dependência ou Spring. Nenhum termo aparece aqui sem
@@ -207,9 +282,7 @@
       <b>não substitui</b> orientação a objetos, ele organiza o que você já sabe.
     </div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="glossario">
+<section id="glossario">
     <h2>Glossário da aula</h2>
     <p>Guarde esta seção. Todo termo novo do dia está aqui, em uma linha. Se
     você travar em alguma palavra no meio do guia, volte aqui.</p>
@@ -268,11 +341,9 @@
     </dl>
   </section>
 
-  <!-- ==================================================================== -->
-  <!-- PARTE 1 · O CONCEITO                                                 -->
-  <!-- ==================================================================== -->
+  <div class="divisor">O conceito</div>
 
-  <section id="dependencia">
+<section id="dependencia">
     <h2>O que é uma dependência</h2>
     <p>Quando uma classe sua <b>precisa de outra classe pra funcionar</b>, essa
     outra classe é chamada de <b>dependência</b> dela. Só isso — o nome assusta
@@ -309,9 +380,7 @@
     <code>pom.xml</code>, Maven ou "baixar", é dependência-biblioteca. Se fala de
     construtor, classe ou objeto, é dependência entre classes.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="acoplamento">
+<section id="acoplamento">
     <h2>O que é acoplamento</h2>
     <p>Acoplamento é <b>o quanto uma peça está grudada na outra</b>. Quanto mais
     grudadas, mais difícil trocar uma sem quebrar a outra.</p>
@@ -414,9 +483,7 @@
     o seu código do abajur soldado pro abajur com rosca. Sempre que eu disser
     "diminuir o acoplamento", é disso que estou falando.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="framework">
+<section id="framework">
     <h2>Biblioteca × framework: quem chama quem</h2>
     <p>Os dois são código pronto escrito por outra pessoa. A diferença está em
     <b>quem está no comando</b>.</p>
@@ -434,9 +501,7 @@
     de Hollywood</b>, porque é o que dizem aos atores depois do teste. Segure
     essa frase: ela é literalmente a definição de inversão de controle.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="problema">
+<section id="problema">
     <h2>O problema, em código</h2>
     <p>Antes de aprender a solução, precisamos sentir a dor. Vamos escrever um
     código Java puro que <b>funciona</b> — e depois quebrar ele de três jeitos.</p>
@@ -521,9 +586,7 @@
     <p>A solução é separar as duas coisas: <b>alguém de fora fabrica, e a classe
     só usa</b>. Esse "alguém de fora" vai ser o Spring.</p>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="ioc">
+<section id="ioc">
     <h2>Inversão de controle (IoC)</h2>
     <p>Vamos quebrar o nome em pedaços, porque cada palavra significa alguma
     coisa.</p>
@@ -569,9 +632,7 @@
     de arquitetura. Não é uma anotação, não é uma classe, não é código. Você não
     "usa IoC" — você escreve código que <i>respeita</i> IoC.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="di">
+<section id="di">
     <h2>Injeção de dependência (DI)</h2>
     <p>De novo, palavra por palavra:</p>
     <ul>
@@ -661,9 +722,7 @@
     chama-se <b>bean</b>. E o contêiner tem nome de classe em Java:
     <code>ApplicationContext</code>. Vamos abrir os dois na aula 02.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="ioc-vs-di">
+<section id="ioc-vs-di">
     <h2>IoC × DI: são a mesma coisa?</h2>
     <p>Não. Elas se relacionam, mas não são sinônimos — e essa é a pergunta que
     mais volta em entrevista de emprego.</p>
@@ -685,9 +744,7 @@
     "cortar refrigerante" é a técnica. A segunda serve à primeira, mas não são a
     mesma frase.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="formas">
+<section id="formas">
     <h2>As três formas de injetar</h2>
     <p>Existem três jeitos de a dependência entrar na classe. Você vai usar
     <b>um</b>.</p>
@@ -727,11 +784,9 @@
     desde 2016. Nesta disciplina, <b>construtor sempre</b>.</div>
   </section>
 
-  <!-- ==================================================================== -->
-  <!-- PARTE 2 · O SPRING                                                   -->
-  <!-- ==================================================================== -->
+  <div class="divisor">O Spring</div>
 
-  <section id="ecossistema">
+<section id="ecossistema">
     <h2>O ecossistema Spring</h2>
     <p>"Spring" não é um programa só. É uma família de projetos que compartilham
     o mesmo contêiner de objetos.</p>
@@ -747,9 +802,7 @@
     alguma coisa" é um galho que se pluga nele — e todos usam a mesma injeção de
     dependência que você acabou de aprender.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="boot">
+<section id="boot">
     <h2>Spring tradicional × Spring Boot</h2>
     <p>Antes de 2014, usar Spring significava declarar cada objeto na mão, em
     XML:</p>
@@ -782,9 +835,7 @@
     <div class="tip ok"><b>A última linha é a mais importante:</b> o conceito não
     mudou. Tudo que você aprendeu de IoC e DI vale exatamente igual nos dois.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="autoconfig">
+<section id="autoconfig">
     <h2>Autoconfiguração</h2>
     <p>Quando a aplicação sobe, o Spring Boot roda centenas de regrinhas no
     formato <i>"se... então..."</i>:</p>
@@ -804,9 +855,7 @@
     todas as bibliotecas baixadas. Quando eu disser "o Jackson está no
     classpath", leia: "a biblioteca Jackson foi baixada e está disponível".</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="starters">
+<section id="starters">
     <h2>Starters</h2>
     <p>Um <b>starter</b> é uma dependência-combo: sozinha, ela traz um conjunto
     de bibliotecas que já funcionam juntas, nas versões certas.</p>
@@ -836,11 +885,9 @@
     única.</div>
   </section>
 
-  <!-- ==================================================================== -->
-  <!-- PARTE 3 · A MÁQUINA                                                  -->
-  <!-- ==================================================================== -->
+  <div class="divisor">A máquina</div>
 
-  <section id="jdk">
+<section id="jdk">
     <h2>Instalar o JDK 21</h2>
 
     <h3>Primeiro, as três siglas</h3>
@@ -855,8 +902,9 @@
 
     <h3>Qual versão</h3>
     <p><b>JDK 21.</b> É uma versão LTS (<i>Long Term Support</i>, suporte
-    prolongado) e é o mínimo exigido pelo Spring Boot 3.5. Versões 17 ou 11 não
-    servem para este curso.</p>
+    prolongado) e é a que esta disciplina usa. O Spring Boot 4 roda a partir da 17, mas
+    fixamos a 21 para a turma inteira estar na mesma base — e a 11 não serve
+    de jeito nenhum.</p>
 
     <h3>Windows</h3>
     <ul class="passos">
@@ -882,9 +930,7 @@
     várias versões na mesma máquina. O que importa é qual delas o
     <b>projeto</b> vai usar — e isso a gente configura na IDE, não no sistema.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="conferir">
+<section id="conferir">
     <h2>Conferir a instalação</h2>
     <p>Abra o terminal (Prompt de Comando no Windows, Terminal no Mac/Linux) e
     rode:</p>
@@ -906,9 +952,7 @@
     terminal que já estava aberto. O terminal só lê a configuração do sistema
     quando abre — <b>feche e abra de novo</b> antes de concluir que deu errado.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="intellij">
+<section id="intellij">
     <h2>Instalar o IntelliJ IDEA</h2>
     <p><b>IDE</b> significa <i>Integrated Development Environment</i>: um editor
     que entende a linguagem, completa código, mostra erro antes de compilar e
@@ -947,9 +991,7 @@
     Maven <b>baixa dentro do projeto</b> quando você declara no
     <code>pom.xml</code>. Cada projeto tem a sua cópia.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="maven">
+<section id="maven">
     <h2>Maven e o pom.xml</h2>
     <p>Maven é a ferramenta que <b>monta</b> o projeto. Ela faz três coisas que
     você não vai querer fazer na mão:</p>
@@ -974,7 +1016,7 @@
 <span class="ty">&lt;parent&gt;</span>
   <span class="ty">&lt;groupId&gt;</span>org.springframework.boot<span class="ty">&lt;/groupId&gt;</span>
   <span class="ty">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="ty">&lt;/artifactId&gt;</span>
-  <span class="ty">&lt;version&gt;</span>3.5.0<span class="ty">&lt;/version&gt;</span>
+  <span class="ty">&lt;version&gt;</span>4.1.1<span class="ty">&lt;/version&gt;</span>
 <span class="ty">&lt;/parent&gt;</span>
 
 <span class="cm">&lt;!-- 2. as coordenadas deste projeto --&gt;</span>
@@ -1005,11 +1047,9 @@
     autor + título + edição de um livro.</div>
   </section>
 
-  <!-- ==================================================================== -->
-  <!-- PARTE 4 · O PROJETO                                                  -->
-  <!-- ==================================================================== -->
+  <div class="divisor">O projeto</div>
 
-  <section id="initializr">
+<section id="initializr">
     <h2>Criar o projeto no Spring Initializr</h2>
     <p>O <b>Spring Initializr</b> é um site (<code>start.spring.io</code>) que
     gera a pasta inicial do projeto: <code>pom.xml</code>, estrutura de pastas e
@@ -1057,9 +1097,7 @@
     hoje. JPA, H2, Security e Validation entram nas aulas certas — e dá pra
     adicionar depois, editando o <code>pom.xml</code>.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="abrir">
+<section id="abrir">
     <h2>Abrir o projeto na IDE</h2>
     <ul class="passos">
       <li><b>File → Open</b>
@@ -1081,9 +1119,7 @@
     Isso resolve a maioria dos casos de "a IDE não está enxergando as
     bibliotecas".</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="estrutura">
+<section id="estrutura">
     <h2>Anatomia do projeto</h2>
     <p>Foi isso que veio dentro do zip:</p>
 <pre>biblioteca/
@@ -1109,9 +1145,7 @@
     <p>Hoje só três lugares importam: o <b>pom.xml</b>, a pasta do seu pacote em
     <b>src/main/java</b> e o <b>application.properties</b>.</p>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="main">
+<section id="main">
     <h2>A classe principal</h2>
 <div class="file">src/main/java/br/edu/faculdade/biblioteca/BibliotecaApplication.java</div>
 <pre><span class="kw">package</span> br.edu.faculdade.biblioteca;
@@ -1146,9 +1180,7 @@
     devolve 404. <b>Toda classe sua vai dentro do pacote base ou de um subpacote
     dele.</b></div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="rodar">
+<section id="rodar">
     <h2>Rodar e parar a aplicação</h2>
 
     <h3>Rodar</h3>
@@ -1187,9 +1219,7 @@
     <b>Sempre pare antes de rodar de novo</b> — senão a porta 8080 continua
     ocupada pela execução anterior.</p>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="properties">
+<section id="properties">
     <h2>application.properties</h2>
     <p>Este é o arquivo onde você <b>discorda</b> do padrão do Spring Boot. Ele
     fica em <code>src/main/resources/</code> e nasce vazio (ou quase). Cada linha
@@ -1223,11 +1253,9 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
     os dois no mesmo projeto</b>: dá conflito silencioso.</div>
   </section>
 
-  <!-- ==================================================================== -->
-  <!-- PARTE 5 · A API                                                      -->
-  <!-- ==================================================================== -->
+  <div class="divisor">A API</div>
 
-  <section id="http">
+<section id="http">
     <h2>Como a web funciona (o mínimo)</h2>
     <p>Sem isso, o resto vira decoreba. São quatro ideias.</p>
 
@@ -1255,7 +1283,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
       </tbody>
     </table>
 
-    <div class="aviso"><b>É isso que você vai construir neste semestre.</b> Não um
+    <div class="tip"><b>É isso que você vai construir neste semestre.</b> Não um
     site com telas — o <b>outro lado</b>: o programa que guarda os dados e os
     entrega para quem pedir. Depois, em outra disciplina, você aprende a fazer a
     tela que consome uma API dessas.</div>
@@ -1296,9 +1324,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
     <p>Hoje só usamos <code>GET</code>: é o que o navegador manda automaticamente
     quando você digita uma URL. Os outros verbos são a aula 03.</p>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="endpoint">
+<section id="endpoint">
     <h2>Primeiro endpoint</h2>
     <p><b>Endpoint</b> é um endereço da sua API que responde a alguma coisa.
     Vamos criar o primeiro em sete linhas.</p>
@@ -1344,9 +1370,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
     Spring criou o objeto, guardou e chamou o método na hora certa. Isso é
     inversão de controle acontecendo na sua frente.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="fluxo">
+<section id="fluxo">
     <h2>O caminho da requisição</h2>
     <p>O que acontece de verdade entre você apertar Enter e o texto aparecer:</p>
     <ul class="passos">
@@ -1368,9 +1392,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
     Você nunca precisa criá-lo nem configurá-lo; ele veio no
     <code>starter-web</code> e a autoconfiguração o ligou.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="json">
+<section id="json">
     <h2>Devolvendo JSON</h2>
 
     <h3>Antes: o que é JSON</h3>
@@ -1426,9 +1448,7 @@ logging.level.br.edu.faculdade.biblioteca=<span class="st">DEBUG</span></pre>
     <code>equals</code>, <code>hashCode</code> e <code>toString</code> sozinho —
     três linhas viram trinta. Voltamos nisso na aula 04, com DTOs.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="testar">
+<section id="testar">
     <h2>Testar a API</h2>
 
     <h3>1. Navegador</h3>
@@ -1466,8 +1486,9 @@ Accept: application/json</pre>
     quando entrarem <code>POST</code> e corpo de requisição.</p>
   </section>
 
-  <!-- ==================================================================== -->
-  <section id="erros">
+  <div class="divisor">Fechando</div>
+
+<section id="erros">
     <h2>Erros comuns 🔧</h2>
 
     <h4>Port 8080 was already in use</h4>
@@ -1518,9 +1539,7 @@ Accept: application/json</pre>
     sua</b> resolvem 80% dos casos. O Spring escreve mensagens boas — o problema
     é que quase ninguém lê.</div>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="cola">
+<section id="cola">
     <h2>Cola rápida</h2>
 
     <h4>Conceitos</h4>
@@ -1563,9 +1582,7 @@ Accept: application/json</pre>
       <tr><td><code>docs.spring.io/spring-boot/index.html</code></td><td>documentação oficial</td></tr>
     </table>
   </section>
-
-  <!-- ==================================================================== -->
-  <section id="checklist">
+<section id="checklist">
     <h2>Checklist de saída</h2>
     <p>Antes da próxima aula, você deveria conseguir fazer tudo isto sem
     consultar:</p>
@@ -1586,12 +1603,77 @@ Accept: application/json</pre>
       <code>List</code>.</li>
     </ul>
 
-    <a class="cta primary" href="/cursos/introducao-spring-boot/aula-01-primeira-api/desafio.html">🎯 Ir para o desafio</a>
-    <a class="cta" href="/cursos/introducao-spring-boot/aula-01-primeira-api/slides.html">▶ Rever os slides</a>
-
-    <div class="foot">Guia da Aula 01 · Introdução ao Spring Boot · NickDev 💜</div>
+    
   </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="/#guias" style="color:var(--pink-light)">todos os guias</a>
+  </div>
 </main>
 </div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  // Copiar código. O botão só aparece no hover — num guia de consulta o gesto
+  // é frequente, mas o botão não pode competir com o código.
+  document.querySelectorAll('.code').forEach(box => {
+    const btn = box.querySelector('.cp'), pre = box.querySelector('pre');
+    if (!btn || !pre) return;
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText).then(() => {
+        btn.textContent = 'copiado ✓'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('done'); }, 1400);
+      });
+    });
+  });
+
+  // Prévia ao vivo: o HTML do atributo data-src vira uma página dentro do
+  // iframe, com um estilo neutro por baixo para o exemplo não herdar o tema
+  // escuro do guia.
+  const baseDaPrevia = "<!doctype html><html><head><meta charset='utf-8'><style>"
+    + "body{margin:0;padding:14px;font-family:system-ui,'Segoe UI',sans-serif;color:#1a1a2e;line-height:1.5}"
+    + "h1{color:#7B4FD0;margin:.2em 0}h2,h3{margin:.2em 0}a{color:#F24487}"
+    + "input,textarea,select,button{font-size:14px;padding:6px 8px;font-family:inherit}button{cursor:pointer}"
+    + "</style></head><body>";
+  document.querySelectorAll('iframe[data-src]').forEach(f => {
+    f.srcdoc = baseDaPrevia + f.getAttribute('data-src') + "</body></html>";
+    f.addEventListener('load', () => {
+      try { f.style.height = Math.max(90, f.contentWindow.document.body.scrollHeight + 8) + 'px'; }
+      catch (e) { f.style.height = '140px'; }
+    });
+  });
+
+  // Demo responsivo: só existe no guia de CSS, então sai de cena em silêncio
+  // nos outros seis.
+  (function () {
+    const frame = document.getElementById('rdemo-frame');
+    const iframe = document.getElementById('rdemo-iframe');
+    if (!frame || !iframe) return;
+    iframe.srcdoc = "<!doctype html><html><head><meta charset='utf-8'><style>"
+      + "*{margin:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;color:#1a1a2e}"
+      + "header{background:#7B4FD0;color:#fff;padding:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}"
+      + ".tag{font-size:11px;background:rgba(255,255,255,.25);padding:3px 9px;border-radius:20px;white-space:nowrap}"
+      + ".desk{display:none}"
+      + ".wrap{display:flex;flex-direction:column;gap:10px;padding:14px}"
+      + ".card{background:#eef2f8;border-radius:10px;padding:20px;font-size:14px;text-align:center}"
+      + "@media(min-width:700px){.wrap{flex-direction:row}.card{flex:1}.mob{display:none}.desk{display:inline}}"
+      + "</style></head><body>"
+      + "<header>🐸 Meu Site <span class='tag'><span class='mob'>📱 empilhado</span><span class='desk'>💻 lado a lado</span></span></header>"
+      + "<div class='wrap'><div class='card'>Bloco 1</div><div class='card'>Bloco 2</div><div class='card'>Bloco 3</div></div>"
+      + "</body></html>";
+    document.querySelectorAll('#rdemo-btns .rbtn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#rdemo-btns .rbtn').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        frame.style.width = b.dataset.w;
+      });
+    });
+  })();
+
+  const tt = document.getElementById('totop');
+  addEventListener('scroll', () => { tt.classList.toggle('show', scrollY > 500); });
+</script>
+
 </body>
 </html>

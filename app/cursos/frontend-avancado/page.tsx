@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
 
 export const metadata: Metadata = {
   title: "Frontend Avançado · NickDev",
@@ -34,18 +35,15 @@ type Aula = {
  */
 function materiaisDaAula({
   base,
-  guia,
   previa,
   repo,
 }: {
   base: string;
-  guia: string;
   previa?: string;
   repo?: string;
 }): Material[] {
   return [
     { href: `${base}/slides.html`, label: "▶ Slides da aula", primary: true },
-    { href: `${base}/${guia}`, label: "📘 Guia de conteúdo" },
     { href: `${base}/desafio.html`, label: "🎯 Desafio técnico" },
     { href: `${base}/codigos-desafio.html`, label: "🧩 Código do desafio" },
     ...(previa ? [{ href: previa, label: "👁️ Prévia da resposta" }] : []),
@@ -74,7 +72,6 @@ const FUNDAMENTOS: Aula[] = [
     ),
     materiais: materiaisDaAula({
       base: AULA_01,
-      guia: "guia-html-css.html",
       previa: `${AULA_01}/previa/index.html`,
       repo: "https://github.com/Nicoly-Almeida/leque-de-eventos-html-css",
     }),
@@ -98,7 +95,6 @@ const FUNDAMENTOS: Aula[] = [
     ),
     materiais: materiaisDaAula({
       base: AULA_02,
-      guia: "guia-javascript-typescript.html",
     }),
   },
 ];
@@ -344,9 +340,18 @@ export default function FrontendAvancado() {
         JavaScript e TypeScript — porque framework nenhum salva quem não tem
         fundamento.
       </p>
+      <BadgesDeTecnologia tecnologias={["html", "css", "javascript", "typescript", "nextjs"]} />
       <div className="brand-rule" />
 
-      <p style={{ marginTop: 26, marginBottom: 0 }}>
+      <div className="acoes">
+        <a
+          className="glow-btn"
+          href="https://www.youtube.com/playlist?list=PLcHfvbd8oBOI"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Aulas gravadas
+        </a>
         <a
           className="glow-btn"
           href="https://chat.whatsapp.com/CsSUEhPBuWwFp6UGWHALR6"
@@ -355,7 +360,7 @@ export default function FrontendAvancado() {
         >
           💬 Entrar no grupo da turma
         </a>
-      </p>
+      </div>
 
       <div className="section-label">Projeto do curso</div>
 

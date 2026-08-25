@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
 
 export const metadata: Metadata = {
   title: "Introdução ao Spring Boot · NickDev",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 const AULA_01 = "/cursos/introducao-spring-boot/aula-01-primeira-api";
+const AULA_02 = "/cursos/introducao-spring-boot/aula-02-beans-e-injecao";
 
 export default function JavaSpringBoot() {
   return (
@@ -32,7 +34,19 @@ export default function JavaSpringBoot() {
         objetos com Java. A avaliação é um <span className="mono">projeto em
         duas etapas</span> — não há prova.
       </p>
+      <BadgesDeTecnologia tecnologias={["java", "spring-boot"]} />
       <div className="brand-rule" />
+
+      <div className="acoes">
+        <a
+          className="glow-btn"
+          href="https://www.youtube.com/playlist?list=PLcHfvbd8oBOI"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Aulas gravadas
+        </a>
+      </div>
 
       <div className="section-label">Unidade I · Fundamentos do Spring e API REST</div>
 
@@ -54,9 +68,6 @@ export default function JavaSpringBoot() {
               <a className="mat primary" href={`${AULA_01}/slides.html`}>
                 ▶ Slides da aula
               </a>
-              <a className="mat" href={`${AULA_01}/guia-spring-boot.html`}>
-                📘 Guia do Spring Boot
-              </a>
               <a className="mat" href={`${AULA_01}/desafio.html`}>
                 🎯 Desafio
               </a>
@@ -70,22 +81,39 @@ export default function JavaSpringBoot() {
           </div>
         </div>
 
-        <div className="lesson soon">
+        <div className="lesson">
           <div className="idx">02</div>
           <div className="body">
-            <h3>Spring Core: contêiner, beans e injeção</h3>
+            <h3>Controller, service e repository</h3>
             <p>
-              18/08 · O <span className="mono">ApplicationContext</span> por
-              dentro. Estereótipos <span className="mono">@Component</span>,{" "}
-              <span className="mono">@Service</span>,{" "}
-              <span className="mono">@Repository</span> e{" "}
-              <span className="mono">@Configuration</span>. Injeção por
-              construtor e por que evitar <span className="mono">@Autowired</span>{" "}
-              em campo. Escopos e ciclo de vida. Configuração externa com{" "}
-              <span className="mono">@Value</span> e profiles. Entrega da
-              atividade 1 e formação das equipes.
+              18/08 · As três camadas de uma API e o que fica em cada uma. Como
+              se escreve um <span className="mono">@Repository</span>, um{" "}
+              <span className="mono">@Service</span> e um{" "}
+              <span className="mono">@RestController</span> — uma de cada vez,
+              separando o controller da aula 01 que fazia tudo sozinho. A
+              ligação entre elas: a classe recebe pronto pelo construtor o que
+              precisa, em campo <span className="mono">final</span>, sem{" "}
+              <span className="mono">new</span>. Como ler o erro de dependência
+              não encontrada e as suas duas causas. Entrega da atividade 1 e
+              formação das equipes.
             </p>
-            <span className="soon-tag">em breve</span>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_02}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_02}/exercicios.html`}>
+                🧪 Exercícios em aula
+              </a>
+              <a className="mat" href={`${AULA_02}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_02}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_02}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
+            </div>
           </div>
         </div>
 

@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guia · Ecossistema Java &amp; primeiros passos · Aula 01 · NickDev</title>
-<meta name="description" content="Guia da aula 01: paradigma orientado a objetos, JDK/JRE/JVM, bytecode e como instalar o ambiente (JDK 21 + IntelliJ IDEA Community).">
+<title>Java · Guias · NickDev</title>
+<meta name="description" content="Guia de Java: o paradigma orientado a objetos, JDK, JRE e JVM, bytecode, como instalar o ambiente com JDK 21 e IntelliJ, e o primeiro programa compilado e rodado pelo terminal.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122; --code-bg:#0b0913;
     --magenta:#F24487; --purple:#7B4FD0;
     --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
-    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
     --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
     --grad:linear-gradient(100deg,#F24487,#7B4FD0);
     --mono:'JetBrains Mono',ui-monospace,monospace;
@@ -19,71 +19,179 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
-  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
 
   .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
   .ambient .glow{position:absolute;border-radius:50%}
   .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
   .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
 
-  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1240px;margin:0 auto;gap:0}
-  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:6px}
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
   .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
   .voltar-curso:hover{color:var(--pink-light)}
-  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
   .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
-  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:14px;color:var(--text-2);transition:.15s}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
   aside nav a:hover{background:var(--surface);color:var(--text)}
 
-  main{padding:44px clamp(22px,4vw,60px) 80px;min-width:0}
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
   .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
   h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
   h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
   .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
 
-  section{margin-top:52px;scroll-margin-top:20px}
-  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px}
-  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px}
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
   section > p{color:var(--text-2);margin:10px 0}
-  h3{font-size:17px;margin:22px 0 6px;color:var(--text)}
-  ul{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
   li{margin:5px 0}
   li b, p b{color:var(--text)}
-  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px}
-  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--text-2)}
-  th{color:var(--text);font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em}
-  td b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
 
-  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#d8d3e6}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
   .cm{color:#6f6a83}
   .kw{color:#F24487}
   .ty{color:#7B4FD0}
   .st{color:#A98CE0}
   .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
 
   .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
   .tip b{color:var(--purple-light)}
-  .tip.star{border-color:var(--magenta)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
   .tip.star b{color:var(--pink-light)}
 
-  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13.5px;line-height:1.8;white-space:pre;overflow-x:auto}
-  .terminal .p{color:var(--text-3)}
-  .terminal .out{color:#9ee39e}
-
-  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
-
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
   .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
   .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light)}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
   .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
   @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
 
-  @media(max-width:860px){
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
     .wrap{grid-template-columns:1fr}
     aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
     aside nav{columns:2}
@@ -95,14 +203,14 @@
 
 <div class="wrap">
 <aside>
-  <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+  <a class="voltar-curso" href="/#guias">← todos os guias</a>
   <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
   <nav>
     <div class="grp">Antes de tudo</div>
-    <a href="#dicionario">📖 O dicionário desta aula</a>
+    <a href="#dicionario">📖 O dicionário</a>
     <div class="grp">Paradigmas</div>
     <a href="#paradigmas">Estruturado × objetos</a>
-    <div class="grp">Ecossistema Java</div>
+    <div class="grp">O ecossistema</div>
     <a href="#jdk-jre-jvm">JDK, JRE e JVM</a>
     <a href="#bytecode">Bytecode e portabilidade</a>
     <div class="grp">Preparar o ambiente</div>
@@ -110,21 +218,22 @@
     <a href="#instalar-intellij">Instalar o IntelliJ IDEA</a>
     <div class="grp">Primeiro programa</div>
     <a href="#hello-world">Hello, World!</a>
-    <a href="#compilar-rodar">Compilar e rodar (javac/java)</a>
+    <a href="#compilar-rodar">Compilar e rodar</a>
     <div class="grp">Na prática</div>
     <a href="#proximos-passos">Próximos passos</a>
   </nav>
 </aside>
 
 <main>
-  <div class="eyebrow">Aula 01 · guia de apoio</div>
-  <h1>Ecossistema Java &amp; <span class="g">primeiros passos</span></h1>
-  <p class="lead">Duas maneiras de organizar código e por que uma delas venceu; o que significam aquelas siglas todas (JDK, JRE, JVM, bytecode) sem enrolação; e o passo a passo, clique por clique, pra instalar tudo e ver o seu primeiro programa Java rodando.</p>
-
-  <div class="tip star" style="margin-top:26px"><b>📖 Perdida(o) numa palavra?</b> Comece pelo <a href="#dicionario" style="color:var(--pink-light,#E88BB8);text-decoration:underline">dicionário desta aula</a> — todo termo técnico traduzido pra português normal. Ele foi feito exatamente pra ser consultado no meio da leitura.</div>
+  <div class="eyebrow">Guia · Java</div>
+  <h1>Java, do <span class="g">zero ao primeiro programa</span></h1>
+  <p class="lead">O que significam aquelas siglas todas — JDK, JRE, JVM, bytecode — sem enrolação; por que orientação a objetos venceu o código estruturado; e o passo a passo, clique por clique, até ver o seu primeiro programa Java rodando.</p>
   <div class="rule"></div>
 
-  <section id="dicionario">
+
+  <div class="divisor">Antes de tudo</div>
+
+<section id="dicionario">
     <h2>O dicionário desta aula</h2>
     <p>Programação tem muita palavra estranha, e Java tem mais que a média. Aqui estão as desta aula, <b>em português normal</b>. Volte aqui sempre que esbarrar numa que você esqueceu — consultar dicionário não é trapaça, é o que todo mundo que programa faz o dia inteiro.</p>
 
@@ -212,7 +321,9 @@
     <div class="tip"><b>Não decore nada disto.</b> Ninguém aprende vocabulário técnico decorando lista — a gente aprende usando. Você vai ouvir cada uma dessas palavras centenas de vezes ao longo das 18 aulas, e daqui a um mês vai usar sem nem perceber.</div>
   </section>
 
-  <section id="paradigmas">
+  <div class="divisor">Paradigmas</div>
+
+<section id="paradigmas">
     <h2>Paradigma estruturado × orientado a objetos</h2>
 
     <h3>Comece pela agenda de telefone</h3>
@@ -295,7 +406,9 @@ duna.<span class="fn">emprestar</span>();</pre>
     <div class="tip star"><b>Por que isso importa:</b> à medida que um sistema cresce, "dados soltos + funções que mexem em tudo" vira uma bagunça difícil de manter. Agrupar dados e comportamento em objetos é o que permite os quatro pilares que você vai ver nas próximas aulas: <b>encapsulamento</b> (aula 04), <b>herança</b> (aula 06), <b>polimorfismo</b> (aula 07) e <b>abstração</b> (já começando hoje, na ideia de classe).</div>
   </section>
 
-  <section id="jdk-jre-jvm">
+  <div class="divisor">O ecossistema</div>
+
+<section id="jdk-jre-jvm">
     <h2>JDK, JRE e JVM</h2>
     <p>Três siglas que aparecem sempre juntas e confundem todo mundo no começo. A boa notícia: elas são <b>uma dentro da outra</b>, como bonecas russas.</p>
 
@@ -328,8 +441,7 @@ duna.<span class="fn">emprestar</span>();</pre>
 
     <div class="tip star"><b>Se você guardar uma frase só desta seção, guarde esta:</b> instale o <b>JDK</b>. Os outros dois vêm dentro dele, e você nunca vai precisar instalar nenhum dos dois separado.</div>
   </section>
-
-  <section id="bytecode">
+<section id="bytecode">
     <h2>Bytecode e portabilidade</h2>
 
     <h3>Comece por um livro traduzido</h3>
@@ -362,7 +474,9 @@ duna.<span class="fn">emprestar</span>();</pre>
     <div class="tip star"><b>Não existe linguagem melhor, existe troca.</b> Python te dá velocidade pra escrever; Java te dá segurança pra crescer. Neste curso a gente usa Java justamente porque ele obriga a organizar as coisas — e organizar é o que você veio aprender.</div>
   </section>
 
-  <section id="instalar-jdk">
+  <div class="divisor">Preparar o ambiente</div>
+
+<section id="instalar-jdk">
     <h2>Instalar o JDK 21</h2>
     <p>Vamos usar o <b>JDK 21</b> (versão LTS — suporte de longo prazo) durante todo o curso. Baixe pela página oficial da Oracle, a mesma pros três sistemas:</p>
     <p style="margin:8px 0 4px">🔗 <a href="https://www.oracle.com/java/technologies/downloads/#jdk21-windows" target="_blank" rel="noopener noreferrer" style="color:var(--pink-light);text-decoration:underline">oracle.com/java/technologies/downloads</a> — role até <b>JDK 21</b> e escolha a aba do seu sistema.</p>
@@ -380,8 +494,7 @@ duna.<span class="fn">emprestar</span>();</pre>
 <span class="out">javac 21.0.x</span></div>
     <div class="tip"><b>Deu "comando não encontrado"?</b> O JDK não está no <code>PATH</code> do sistema. Reinstale marcando a opção de adicionar ao <code>PATH</code>, ou configure a variável de ambiente manualmente (pesquise "adicionar JDK ao PATH" + seu sistema operacional).</div>
   </section>
-
-  <section id="instalar-intellij">
+<section id="instalar-intellij">
     <h2>Instalar o IntelliJ IDEA Community</h2>
     <p>O <b>IntelliJ IDEA</b> é a IDE (ambiente de desenvolvimento) mais usada pra Java no mercado. Vamos usar a versão <b>Community</b> — gratuita, open source, e suficiente pra tudo que faremos no curso.</p>
     <h3>Passo a passo</h3>
@@ -400,7 +513,9 @@ duna.<span class="fn">emprestar</span>();</pre>
     <div class="tip star"><b>O botão ▶ verde:</b> quando você clica em "Run" no IntelliJ, ele está fazendo por trás exatamente o que a gente vai fazer na mão daqui a pouco: chamando o <code>javac</code> e depois o <code>java</code>.</div>
   </section>
 
-  <section id="hello-world">
+  <div class="divisor">Primeiro programa</div>
+
+<section id="hello-world">
     <h2>Hello, World!</h2>
     <p>Todo caminho em uma linguagem nova começa por aqui. Crie um arquivo chamado <code>Ola.java</code> dentro de <code>src/</code>:</p>
     <pre><span class="kw">public class</span> <span class="ty">Ola</span> {
@@ -430,8 +545,7 @@ duna.<span class="fn">emprestar</span>();</pre>
 
     <div class="tip"><b>Pode decorar essa casca sem culpa.</b> Sério. Cada palavrinha dela tem um motivo, e cada motivo tem sua aula: <code>public</code> e <code>static</code> na <b>aula 04</b>, a ideia de classe na <b>aula 03</b>. Tentar entender tudo hoje só ia atrapalhar. Por enquanto: copie, rode, veja funcionar. O entendimento vem depois — e vem bem melhor depois de você já ter usado.</div>
   </section>
-
-  <section id="compilar-rodar">
+<section id="compilar-rodar">
     <h2>Compilar e rodar pelo terminal</h2>
     <p>Rodar pela IDE é ótimo no dia a dia, mas hoje a gente faz <b>na mão</b> pra entender o que realmente acontece — é exatamente isso que o desafio da semana vai pedir.</p>
     <h3>1. Compilar com <code>javac</code></h3>
@@ -448,15 +562,83 @@ duna.<span class="fn">emprestar</span>();</pre>
 <span class="out">Olá, mundo Java!</span></div>
     <div class="tip star"><b>O fluxo completo:</b> <code>Ola.java</code> (código-fonte, texto) → <code>javac</code> compila → <code>Ola.class</code> (bytecode) → <code>java</code> manda a JVM executar → saída no terminal. Isso é literalmente o mesmo fluxo do slide do bytecode, só que rodando na sua máquina.</div>
     <p style="margin-top:22px">Pronto pra praticar? Encara o desafio 👇</p>
-    <a class="cta" href="desafio.html">🎯 Ir para o desafio</a>
   </section>
 
-  <section id="proximos-passos">
+  <div class="divisor">Na prática</div>
+
+<section id="proximos-passos">
     <h2>Próximos passos</h2>
     <p>Na <b>aula 02</b> a gente segue direto pro coração da linguagem: tipos primitivos, variáveis, operadores, casting, condicionais, repetição, arrays e entrada de dados com <code>Scanner</code>. Chegue com o ambiente já funcionando!</p>
   </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="/#guias" style="color:var(--pink-light)">todos os guias</a>
+  </div>
 </main>
 </div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  // Copiar código. O botão só aparece no hover — num guia de consulta o gesto
+  // é frequente, mas o botão não pode competir com o código.
+  document.querySelectorAll('.code').forEach(box => {
+    const btn = box.querySelector('.cp'), pre = box.querySelector('pre');
+    if (!btn || !pre) return;
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.innerText).then(() => {
+        btn.textContent = 'copiado ✓'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('done'); }, 1400);
+      });
+    });
+  });
+
+  // Prévia ao vivo: o HTML do atributo data-src vira uma página dentro do
+  // iframe, com um estilo neutro por baixo para o exemplo não herdar o tema
+  // escuro do guia.
+  const baseDaPrevia = "<!doctype html><html><head><meta charset='utf-8'><style>"
+    + "body{margin:0;padding:14px;font-family:system-ui,'Segoe UI',sans-serif;color:#1a1a2e;line-height:1.5}"
+    + "h1{color:#7B4FD0;margin:.2em 0}h2,h3{margin:.2em 0}a{color:#F24487}"
+    + "input,textarea,select,button{font-size:14px;padding:6px 8px;font-family:inherit}button{cursor:pointer}"
+    + "</style></head><body>";
+  document.querySelectorAll('iframe[data-src]').forEach(f => {
+    f.srcdoc = baseDaPrevia + f.getAttribute('data-src') + "</body></html>";
+    f.addEventListener('load', () => {
+      try { f.style.height = Math.max(90, f.contentWindow.document.body.scrollHeight + 8) + 'px'; }
+      catch (e) { f.style.height = '140px'; }
+    });
+  });
+
+  // Demo responsivo: só existe no guia de CSS, então sai de cena em silêncio
+  // nos outros seis.
+  (function () {
+    const frame = document.getElementById('rdemo-frame');
+    const iframe = document.getElementById('rdemo-iframe');
+    if (!frame || !iframe) return;
+    iframe.srcdoc = "<!doctype html><html><head><meta charset='utf-8'><style>"
+      + "*{margin:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;color:#1a1a2e}"
+      + "header{background:#7B4FD0;color:#fff;padding:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}"
+      + ".tag{font-size:11px;background:rgba(255,255,255,.25);padding:3px 9px;border-radius:20px;white-space:nowrap}"
+      + ".desk{display:none}"
+      + ".wrap{display:flex;flex-direction:column;gap:10px;padding:14px}"
+      + ".card{background:#eef2f8;border-radius:10px;padding:20px;font-size:14px;text-align:center}"
+      + "@media(min-width:700px){.wrap{flex-direction:row}.card{flex:1}.mob{display:none}.desk{display:inline}}"
+      + "</style></head><body>"
+      + "<header>🐸 Meu Site <span class='tag'><span class='mob'>📱 empilhado</span><span class='desk'>💻 lado a lado</span></span></header>"
+      + "<div class='wrap'><div class='card'>Bloco 1</div><div class='card'>Bloco 2</div><div class='card'>Bloco 3</div></div>"
+      + "</body></html>";
+    document.querySelectorAll('#rdemo-btns .rbtn').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#rdemo-btns .rbtn').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        frame.style.width = b.dataset.w;
+      });
+    });
+  })();
+
+  const tt = document.getElementById('totop');
+  addEventListener('scroll', () => { tt.classList.toggle('show', scrollY > 500); });
+</script>
 
 </body>
 </html>
