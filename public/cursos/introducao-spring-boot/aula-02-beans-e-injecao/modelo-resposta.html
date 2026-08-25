@@ -3,375 +3,419 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modelo de resposta — Desafio 02 · Introdução ao Spring Boot · NickDev</title>
-<meta name="description" content="O desafio 02 resolvido: a lista num repository, as duas regras num service e o controller com três métodos de uma linha.">
+<title>Leque de Vagas — a API respondendo · Prévia do desafio 02</title>
+<meta name="description" content="Prévia da resposta do desafio 02 do curso de Introdução ao Spring Boot: as sete rotas do esqueleto do Leque de Vagas, com o JSON que cada uma devolve.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
-:root{
-  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
-  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
-  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
-  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
-  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
-  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
-  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
-  --mono:'JetBrains Mono',ui-monospace,monospace;
-  --pad-x:clamp(20px,5vw,64px);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-.mono{font-family:var(--mono)}
-.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+  :root{
+    --bg:#08070E; --surface:#100D1B; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;
+    -webkit-font-smoothing:antialiased;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:2px;border-radius:6px}
 
-.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
-.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+  .topo{display:flex;align-items:center;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .topo .marca{font-weight:700}
+  .topo .base{font-family:var(--mono);font-size:12.5px;color:var(--text-3);
+    border:1px solid var(--line);padding:5px 12px;border-radius:100px}
+  .topo .nota{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text-3)}
 
-.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-.glow{position:absolute;border-radius:50%}
-.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
-.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .painel{display:grid;grid-template-columns:300px 1fr;max-width:1180px;margin:0 auto;gap:0;min-height:70vh}
+  @media(max-width:860px){.painel{grid-template-columns:1fr}}
 
-.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
-.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
-.head img{height:38px}
-.head .word{font-weight:700;font-size:18px}
+  aside{border-right:1px solid var(--line);padding:22px 16px}
+  @media(max-width:860px){aside{border-right:0;border-bottom:1px solid var(--line)}}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--text-3);margin:16px 0 6px}
+  .rota{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;
+    border:1px solid transparent;border-radius:9px;padding:8px 10px;cursor:pointer;
+    font-family:var(--mono);font-size:12.5px;color:var(--text-2);transition:.15s;margin-bottom:2px}
+  .rota:hover{background:var(--surface);color:var(--text)}
+  .rota.on{background:var(--surface);border-color:var(--purple);color:var(--text)}
+  .verbo{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--bg);
+    background:var(--green);padding:2px 6px;border-radius:5px}
 
-.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
-h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
-.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
-.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+  main{padding:26px 28px}
+  .barra{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .barra .url{font-family:var(--mono);font-size:15px}
+  .status{font-family:var(--mono);font-size:12px;color:var(--green);
+    border:1px solid rgba(95,208,138,.4);padding:3px 10px;border-radius:100px}
+  .quem{font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:14px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+    font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;color:#d8d3e6;
+    white-space:pre;max-height:60vh}
+  .k{color:var(--pink-light)}
+  .s{color:var(--purple-light)}
+  .n{color:var(--green)}
+  .b{color:var(--magenta)}
 
-.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
-.goal .ico{font-size:26px;line-height:1}
-.goal h3{font-size:17px;margin-bottom:4px}
-.goal p{color:var(--text-2);font-size:15px}
-.goal p + p{margin-top:8px}
-.goal.roxo{border-left-color:var(--purple)}
-.goal.verde{border-left-color:var(--green)}
-
-.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
-.label::after{content:"";flex:1;height:1px;background:var(--line)}
-
-.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
-.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
-.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
-.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
-.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
-.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
-.step li{margin:4px 0}
-.step li b{color:var(--text)}
-.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
-.step .tip b{color:var(--pink-light);font-weight:500}
-
-pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
-pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
-.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
-.terminal .p{color:var(--text-3)}
-.terminal .out{color:#9ee39e}
-.terminal .cm{color:#6f6a83}
-code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
-
-.check{list-style:none;display:grid;gap:10px}
-.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
-.check li::before{content:"✔";color:var(--magenta);font-weight:700}
-.check.extra li::before{content:"★";color:var(--purple-light)}
-.check.no li::before{content:"✕";color:var(--text-4)}
-.check b{color:var(--text)}
-
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-@media(max-width:640px){.grid2{grid-template-columns:1fr}}
-.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
-.mini b{color:var(--text);display:block;margin-bottom:3px}
-
-table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
-th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
-th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
-td b{color:var(--text)}
-tr:last-child td{border-bottom:0}
-
-.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
-.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
-.entrega li{margin:6px 0}
-
-.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
-.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
-.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
-.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
-
-.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
-@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
-
-  .defeito{border:1px solid rgba(242,68,135,.35);border-radius:12px;padding:16px 20px;margin-top:14px;
-    background:rgba(242,68,135,.05)}
-  .defeito h4{font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--pink-light);margin:0 0 6px}
-  .defeito p{font-size:14.5px;color:var(--text-2);margin:0}
-  .defeito p + p{margin-top:8px}
-  .criterios{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
-  .criterios th,.criterios td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-  .criterios th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
-    color:var(--text-3);font-weight:500}
-  .criterios td{color:var(--text-2)}
-  .criterios td:first-child{color:var(--text);width:34%}
-  .criterios td code{color:var(--pink-light);font-size:.92em}
-  .criterios tr:last-child td{border-bottom:0}
-  .peso{font-family:var(--mono);font-size:12px;color:var(--text-3);white-space:nowrap}
-
-  .goal.magenta{border-left-color:var(--magenta)}
-
-  .arq{font-family:var(--mono);font-size:12px;color:var(--text-3);border:1px solid var(--line);
-    border-bottom:0;border-radius:9px 9px 0 0;padding:7px 13px;display:inline-block;background:var(--surface-2);margin-top:20px}
-  .arq + pre{border-radius:0 9px 9px 9px;margin-top:-1px}
-  .porque{border:1px solid rgba(123,79,208,.4);background:rgba(123,79,208,.07);border-radius:10px;
-    padding:13px 17px;margin-top:13px}
-  .porque b{color:#A98CE0;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;
-    text-transform:uppercase;display:block;margin-bottom:6px}
-  .porque p{font-size:14.5px;color:var(--text-2);margin:0}
-  .porque p + p{margin-top:8px}
-  .rubrica{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
-  .rubrica th,.rubrica td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-  .rubrica th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
-    color:var(--text-3);font-weight:500}
-  .rubrica td{color:var(--text-2)}
-  .rubrica td:first-child{width:44%}
-  .rubrica td code{color:var(--pink-light);font-size:.92em}
-  .rubrica tr:last-child td{border-bottom:0}
-  .sinal{font-family:var(--mono);font-size:13px;white-space:nowrap}
-  .sinal.bom{color:#5fd08a}
-  .sinal.ruim{color:#F24487}
+  .rodape{border-top:1px solid var(--line);margin-top:8px;padding:18px 22px;
+    font-family:var(--mono);font-size:12.5px;color:var(--text-3);text-align:center}
+  .rodape a{color:var(--pink-light)}
 </style>
 </head>
 <body>
 
-<a class="voltar" href="/cursos/introducao-spring-boot">← voltar ao curso</a>
-<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
-
-<div class="wrap">
-
-  <div class="head">
-    <img src="/assets/logo/logo-nickdeve.svg" alt="">
-    <span class="word">NickDev</span>
-  </div>
-
-  <div class="eyebrow">Modelo de resposta · Aula 02</div>
-  <h1>Três arquivos, <span class="grad">um assunto cada</span> ✅</h1>
-  <p class="lead">
-    O mesmo comportamento de antes, com cada coisa no seu lugar. Compare com o
-    seu — <b>depois de ter feito</b>. Se a sua solução é diferente da minha mas
-    o <code>DECISOES.md</code> explica por quê, ela vale igual.
-  </p>
-  <div class="rule"></div>
-
-  <div class="goal roxo">
-    <span class="ico">🧭</span>
-    <div>
-      <h3>Não existe uma resposta certa só</h3>
-      <p>Você pode ter chamado a classe de <code>ReceitaService</code>, usado
-      <code>for</code> no lugar de <code>stream</code>, ou posto as classes em
-      subpastas. Tudo isso passa.</p>
-      <p>O que não passa: a lista aparecer mais de uma vez, <code>if</code> de
-      regra dentro do controller, ou <code>new</code> entre as suas classes.</p>
-    </div>
-  </div>
-
-  <div class="label">Defeito 1 · A lista, uma vez só</div>
-
-  <div class="arq">ReceitaRepository.java</div>
-<pre><span class="kw">package</span> br.edu.faculdade.receitas;
-
-<span class="kw">import</span> org.springframework.stereotype.<span class="ty">Repository</span>;
-<span class="kw">import</span> java.util.<span class="ty">List</span>;
-
-<span class="an">@Repository</span>
-<span class="kw">public class</span> <span class="ty">ReceitaRepository</span> {
-
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">todas</span>() {
-        <span class="kw">return</span> <span class="ty">List</span>.<span class="fn">of</span>(
-            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Bolo de fubá"</span>, <span class="st">40</span>),
-            <span class="cm">/* ... as outras onze, exatamente como estavam ... */</span>
-            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Torrada com ovo"</span>, <span class="st">7</span>));
-    }
-}</pre>
-
-  <div class="porque">
-    <b>o que essa classe não tem</b>
-    <p>Nenhum <code>if</code>, nenhum <code>for</code>, nenhum construtor. Ela
-    é a única das três que não precisa de ninguém — só sabe onde o dado está.</p>
-    <p>Na aula 05 esse método vira uma consulta no banco. <b>Nada fora desta
-    classe vai precisar mudar</b> — e é exatamente esse o motivo de ela existir
-    separada hoje, quando a lista ainda é escrita à mão.</p>
-  </div>
-
-  <div class="label">Defeito 2 · As duas regras, no service</div>
-
-  <div class="arq">CatalogoService.java</div>
-<pre><span class="kw">package</span> br.edu.faculdade.receitas;
-
-<span class="kw">import</span> org.springframework.stereotype.<span class="ty">Service</span>;
-<span class="kw">import</span> java.util.<span class="ty">List</span>;
-
-<span class="an">@Service</span>
-<span class="kw">public class</span> <span class="ty">CatalogoService</span> {
-
-    <span class="kw">private final</span> <span class="ty">ReceitaRepository</span> repositorio;
-
-    <span class="kw">public</span> <span class="ty">CatalogoService</span>(<span class="ty">ReceitaRepository</span> repositorio) {
-        <span class="kw">this</span>.repositorio = repositorio;
-    }
-
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">todas</span>() {
-        <span class="kw">return</span> repositorio.<span class="fn">todas</span>();
-    }
-
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">rapidas</span>() {
-        <span class="kw">return</span> repositorio.<span class="fn">todas</span>().<span class="fn">stream</span>()
-                .<span class="fn">filter</span>(r -> r.<span class="fn">minutos</span>() &lt;= <span class="st">30</span>)
-                .<span class="fn">toList</span>();
-    }
-
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">longas</span>() {
-        <span class="kw">return</span> repositorio.<span class="fn">todas</span>().<span class="fn">stream</span>()
-                .<span class="fn">filter</span>(r -> r.<span class="fn">minutos</span>() &gt; <span class="st">60</span>)
-                .<span class="fn">toList</span>();
-    }
-}</pre>
-
-  <div class="porque">
-    <b>duas coisas pra reparar</b>
-    <p><b>1.</b> Os métodos se chamam <code>rapidas()</code> e
-    <code>longas()</code> — o nome diz a <b>regra</b>, não o endereço HTTP. Se
-    amanhã o endpoint virar <code>/catalogo/express</code>, este arquivo não
-    muda. Nome de método de service que fala de HTTP é sinal de que a camada
-    errada está mandando.</p>
-    <p><b>2.</b> Tem um <code>todas()</code> que só repassa para o repository.
-    Parece inútil e não é: o controller <b>nunca</b> fala com o repository
-    direto. Se amanhã "todas" passar a excluir as arquivadas, a mudança cabe
-    aqui e ninguém mais fica sabendo.</p>
-  </div>
-
-  <div class="porque">
-    <b>se você usou for em vez de stream</b>
-    <p>Está certo também. Isto é equivalente e vale a mesma nota:</p>
-<pre style="margin-top:10px"><span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">rapidas</span>() {
-    <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
-    <span class="kw">for</span> (<span class="ty">Receita</span> r : repositorio.<span class="fn">todas</span>()) {
-        <span class="kw">if</span> (r.<span class="fn">minutos</span>() &lt;= <span class="st">30</span>) saida.<span class="fn">add</span>(r);
-    }
-    <span class="kw">return</span> saida;
-}</pre>
-    <p>O que a aula 02 cobra é <b>onde</b> o <code>if</code> mora, não como ele
-    está escrito. Um <code>if</code> aqui está no lugar certo; o mesmo
-    <code>if</code> no controller, não.</p>
-  </div>
-
-  <div class="label">Defeito 3 · O controller, enxuto</div>
-
-  <div class="arq">CatalogoController.java</div>
-<pre><span class="kw">package</span> br.edu.faculdade.receitas;
-
-<span class="kw">import</span> org.springframework.web.bind.annotation.<span class="ty">GetMapping</span>;
-<span class="kw">import</span> org.springframework.web.bind.annotation.<span class="ty">RestController</span>;
-<span class="kw">import</span> java.util.<span class="ty">List</span>;
-
-<span class="an">@RestController</span>
-<span class="kw">public class</span> <span class="ty">CatalogoController</span> {
-
-    <span class="kw">private final</span> <span class="ty">CatalogoService</span> servico;
-
-    <span class="kw">public</span> <span class="ty">CatalogoController</span>(<span class="ty">CatalogoService</span> servico) {
-        <span class="kw">this</span>.servico = servico;
-    }
-
-    <span class="an">@GetMapping</span>(<span class="st">"/catalogo"</span>)
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">todas</span>() {
-        <span class="kw">return</span> servico.<span class="fn">todas</span>();
-    }
-
-    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/rapidas"</span>)
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">rapidas</span>() {
-        <span class="kw">return</span> servico.<span class="fn">rapidas</span>();
-    }
-
-    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/longas"</span>)
-    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">longas</span>() {
-        <span class="kw">return</span> servico.<span class="fn">longas</span>();
-    }
-}</pre>
-
-  <div class="porque">
-    <b>o teste do controller enxuto</b>
-    <p>De 60 linhas para 25, e o que sobrou é só endereço e chamada. Leia
-    qualquer método em voz alta: "devolve as rápidas". Nenhuma decisão, nenhum
-    laço, nenhum dado.</p>
-    <p>Se o seu controller ainda tem <code>if</code>, <code>for</code>,
-    <code>new ArrayList</code> ou algum número solto, sobrou regra nele.</p>
-  </div>
-
-  <div class="label">O <code>DECISOES.md</code></div>
-
-  <p style="color:var(--text-2);font-size:15px;margin-top:12px">
-    Curto assim. O que se avalia é o <b>porquê</b>, não o tamanho.
-  </p>
-
-<pre><span class="cm"># Decisões da refatoração</span>
-
-<span class="cm">## 1. A lista, uma vez só</span>
-As três cópias viraram um método todas() num @Repository. Antes,
-adicionar uma receita significava editar três lugares — e esquecer
-um não dava erro nenhum, só fazia os endpoints discordarem entre si.
-
-<span class="cm">## 2. As regras no service</span>
-Os dois filtros viraram rapidas() e longas() num @Service. Nomeei
-pela regra e não pelo endpoint: se a rota mudar de nome, este
-arquivo não muda. E agora dá pra testar as regras sem subir servidor.
-
-<span class="cm">## 3. O controller enxuto</span>
-Cada método ficou com uma linha. O service chega pelo construtor,
-num campo final — nenhuma classe minha dá new na outra, quem
-constrói é o Spring.
-
-<span class="cm">## A prova</span>
-Adicionar uma receita nova: antes 3 arquivos, agora 1.</pre>
-
-  <div class="label">Correção — o que eu procuro</div>
-
-  <table class="rubrica">
-    <tr><th>sinal</th><th>o que ele indica</th></tr>
-    <tr><td><span class="sinal bom">✓</span> <code>List.of(</code> aparece <b>uma vez</b> no projeto</td><td>O defeito principal foi resolvido de verdade. É o teste mais rápido: busque no projeto inteiro.</td></tr>
-    <tr><td><span class="sinal bom">✓</span> O controller não tem <code>if</code> nem <code>for</code></td><td>As regras foram para onde deviam.</td></tr>
-    <tr><td><span class="sinal bom">✓</span> Todo campo de dependência é <code>final</code></td><td>A ligação é por construtor. Dá pra ver rolando o arquivo.</td></tr>
-    <tr><td><span class="sinal bom">✓</span> Os métodos do service têm nome de regra</td><td>Entendeu que o service não sabe que existe HTTP.</td></tr>
-    <tr><td><span class="sinal bom">✓</span> O <code>DECISOES.md</code> traz o "3 arquivos → 1"</td><td>Fez o passo 6 e percebeu o ganho concreto, em vez de só seguir instrução.</td></tr>
-    <tr><td><span class="sinal ruim">✗</span> A lista foi para o repository <b>e</b> ficou no controller</td><td>Copiou em vez de mover. O problema das três cópias virou quatro.</td></tr>
-    <tr><td><span class="sinal ruim">✗</span> O controller chama o repository direto</td><td>Pulou a camada do meio. Funciona hoje e não tem onde pôr a próxima regra.</td></tr>
-    <tr><td><span class="sinal ruim">✗</span> Sobrou <code>new</code> entre classes suas</td><td>A dependência não passou pelo Spring. Costuma vir junto com "mas funcionou".</td></tr>
-    <tr><td><span class="sinal ruim">✗</span> As respostas mudaram</td><td>Não foi refatoração — foi reescrita. Compare com o gabarito do passo 1.</td></tr>
-  </table>
-
-  <div class="goal" style="margin-top:26px">
-    <span class="ico">🌱</span>
-    <div>
-      <h3>Onde isso continua</h3>
-      <p>Na <b>aula 05</b> o método <code>todas()</code> do repository vira uma
-      consulta em banco de verdade — e nem o service nem o controller mudam uma
-      linha. Na <b>aula 08</b> o service ganha transações. Esse desenho de hoje
-      é o que torna as duas coisas simples.</p>
-    </div>
-  </div>
-
-  <div class="cta-row">
-    <a class="btn primary" href="desafio.html">🎯 Voltar ao desafio</a>
-    <a class="btn" href="codigos-desafio.html">🧩 Código do desafio</a>
-    <a class="btn" href="exercicios.html">🧪 Exercícios da aula</a>
-  </div>
-
-  <div class="foot">
-    Introdução ao Spring Boot · Aula 02 · Spring Boot 4.1 · Java 21 · NickDev
-  </div>
-
+<div class="topo">
+  <span class="marca">💼 Leque de Vagas</span>
+  <span class="base">http://localhost:8080</span>
+  <span class="nota">prévia da resposta · desafio 02</span>
 </div>
+
+<div class="painel">
+  <aside>
+    <div class="grp">Frente 1 · Vaga</div>
+    <div id="g1"></div>
+    <div class="grp">Frente 2 · Empresa</div>
+    <div id="g2"></div>
+    <div class="grp">Frente 3 · Pessoa</div>
+    <div id="g3"></div>
+    <div class="grp">Frente 4 · Números</div>
+    <div id="g4"></div>
+  </aside>
+
+  <main>
+    <div class="barra">
+      <span class="verbo" id="verbo">GET</span>
+      <span class="url" id="url"></span>
+      <span class="status">200 OK</span>
+    </div>
+    <p class="quem" id="quem"></p>
+    <pre id="corpo"></pre>
+  </main>
+</div>
+
+<div class="rodape">
+  Sete rotas, dados fixos em memória, três camadas separadas — o esqueleto da aula 02.<br>
+  <a href="/cursos/introducao-spring-boot/aula-02-beans-e-injecao/desafio.html">← voltar ao desafio</a>
+</div>
+
+<script>
+const ROTAS = [
+  {
+    "metodo": "GET",
+    "caminho": "/vagas",
+    "corpo": [
+      {
+        "id": "1",
+        "titulo": "Pessoa Desenvolvedora Front-end Júnior",
+        "descricao": "Telas do produto em React e Next.js, pareando com gente mais experiente.",
+        "area": "Front-end",
+        "senioridade": "Júnior",
+        "local": "Remoto",
+        "aceitaIniciante": true,
+        "empresaSlug": "aurora-tech"
+      },
+      {
+        "id": "2",
+        "titulo": "Estágio em Front-end",
+        "descricao": "Primeiro contato com HTML, CSS e JavaScript num time de agência.",
+        "area": "Front-end",
+        "senioridade": "Estágio",
+        "local": "Presencial · Olinda",
+        "aceitaIniciante": true,
+        "empresaSlug": "mareh-digital"
+      },
+      {
+        "id": "3",
+        "titulo": "Pessoa Desenvolvedora Front-end Pleno",
+        "descricao": "Dono de features inteiras, do desenho à publicação.",
+        "area": "Front-end",
+        "senioridade": "Pleno",
+        "local": "Remoto",
+        "aceitaIniciante": false,
+        "empresaSlug": "nuvem-rosa"
+      },
+      {
+        "id": "4",
+        "titulo": "Pessoa Desenvolvedora React Júnior",
+        "descricao": "Interface da plataforma de cursos, com foco em acessibilidade.",
+        "area": "Front-end",
+        "senioridade": "Júnior",
+        "local": "Híbrido · Recife",
+        "aceitaIniciante": true,
+        "empresaSlug": "coral-labs"
+      },
+      {
+        "id": "5",
+        "titulo": "Pessoa Desenvolvedora Java Júnior",
+        "descricao": "APIs REST com Spring Boot, integrando transportadoras.",
+        "area": "Back-end",
+        "senioridade": "Júnior",
+        "local": "Remoto",
+        "aceitaIniciante": true,
+        "empresaSlug": "tucano-systems"
+      },
+      {
+        "id": "6",
+        "titulo": "Pessoa Desenvolvedora Back-end Pleno",
+        "descricao": "Serviços de agendamento e faturamento, com fila e cache.",
+        "area": "Back-end",
+        "senioridade": "Pleno",
+        "local": "Remoto",
+        "aceitaIniciante": false,
+        "empresaSlug": "aurora-tech"
+      },
+      {
+        "id": "7",
+        "titulo": "Pessoa Desenvolvedora Node Pleno",
+        "descricao": "Serviço de trilhas e progresso, em TypeScript.",
+        "area": "Back-end",
+        "senioridade": "Pleno",
+        "local": "Híbrido · Recife",
+        "aceitaIniciante": false,
+        "empresaSlug": "coral-labs"
+      },
+      {
+        "id": "8",
+        "titulo": "Analista de Dados Júnior",
+        "descricao": "SQL, planilhas e construção de painéis para clientes do varejo.",
+        "area": "Dados",
+        "senioridade": "Júnior",
+        "local": "Híbrido · Recife",
+        "aceitaIniciante": true,
+        "empresaSlug": "nuvem-rosa"
+      },
+      {
+        "id": "9",
+        "titulo": "Estágio em Dados",
+        "descricao": "Limpeza de base e primeiros painéis, com acompanhamento semanal.",
+        "area": "Dados",
+        "senioridade": "Estágio",
+        "local": "Remoto",
+        "aceitaIniciante": true,
+        "empresaSlug": "nuvem-rosa"
+      },
+      {
+        "id": "10",
+        "titulo": "Pessoa Engenheira de Dados Pleno",
+        "descricao": "Pipelines de rastreamento de carga, em Python e SQL.",
+        "area": "Dados",
+        "senioridade": "Pleno",
+        "local": "Remoto",
+        "aceitaIniciante": false,
+        "empresaSlug": "tucano-systems"
+      },
+      {
+        "id": "11",
+        "titulo": "Pessoa Desenvolvedora Mobile Júnior",
+        "descricao": "Aplicativos em React Native para clientes da agência.",
+        "area": "Mobile",
+        "senioridade": "Júnior",
+        "local": "Remoto",
+        "aceitaIniciante": true,
+        "empresaSlug": "mareh-digital"
+      },
+      {
+        "id": "12",
+        "titulo": "Pessoa Desenvolvedora Android Júnior",
+        "descricao": "Aplicativo de agenda para as clínicas parceiras.",
+        "area": "Mobile",
+        "senioridade": "Júnior",
+        "local": "Presencial · Recife",
+        "aceitaIniciante": false,
+        "empresaSlug": "aurora-tech"
+      }
+    ]
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/vagas/1",
+    "corpo": {
+      "id": "1",
+      "titulo": "Pessoa Desenvolvedora Front-end Júnior",
+      "descricao": "Telas do produto em React e Next.js, pareando com gente mais experiente.",
+      "area": "Front-end",
+      "senioridade": "Júnior",
+      "local": "Remoto",
+      "aceitaIniciante": true,
+      "empresaSlug": "aurora-tech"
+    }
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/empresas",
+    "corpo": [
+      {
+        "id": "1",
+        "nome": "Aurora Tech",
+        "slug": "aurora-tech",
+        "site": "aurora.tech",
+        "descricao": "Produto de gestão para clínicas. Time pequeno, remoto desde 2020."
+      },
+      {
+        "id": "2",
+        "nome": "Nuvem Rosa",
+        "slug": "nuvem-rosa",
+        "site": "nuvemrosa.com.br",
+        "descricao": "Consultoria de dados para o varejo do Nordeste."
+      },
+      {
+        "id": "3",
+        "nome": "Mareh Digital",
+        "slug": "mareh-digital",
+        "site": "mareh.digital",
+        "descricao": "Agência de produtos digitais em Olinda."
+      },
+      {
+        "id": "4",
+        "nome": "Coral Labs",
+        "slug": "coral-labs",
+        "site": "corallabs.io",
+        "descricao": "Plataforma de educação corporativa."
+      },
+      {
+        "id": "5",
+        "nome": "Tucano Systems",
+        "slug": "tucano-systems",
+        "site": "tucano.sys.br",
+        "descricao": "Integrações e APIs para logística."
+      }
+    ]
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/empresas/aurora-tech",
+    "corpo": {
+      "id": "1",
+      "nome": "Aurora Tech",
+      "slug": "aurora-tech",
+      "site": "aurora.tech",
+      "descricao": "Produto de gestão para clínicas. Time pequeno, remoto desde 2020."
+    }
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/pessoas",
+    "corpo": [
+      {
+        "id": "1",
+        "nome": "Ana Nogueira",
+        "email": "ana@exemplo.com",
+        "area": "Front-end",
+        "senioridade": "Júnior"
+      },
+      {
+        "id": "2",
+        "nome": "Bruno Sales",
+        "email": "bruno@exemplo.com",
+        "area": "Back-end",
+        "senioridade": "Júnior"
+      },
+      {
+        "id": "3",
+        "nome": "Carla Menezes",
+        "email": "carla@exemplo.com",
+        "area": "Dados",
+        "senioridade": "Estágio"
+      },
+      {
+        "id": "4",
+        "nome": "Diego Tavares",
+        "email": "diego@exemplo.com",
+        "area": "Front-end",
+        "senioridade": "Pleno"
+      },
+      {
+        "id": "5",
+        "nome": "Elisa Prado",
+        "email": "elisa@exemplo.com",
+        "area": "Mobile",
+        "senioridade": "Júnior"
+      },
+      {
+        "id": "6",
+        "nome": "Fábio Vasconcelos",
+        "email": "fabio@exemplo.com",
+        "area": "Back-end",
+        "senioridade": "Pleno"
+      }
+    ]
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/pessoas/1",
+    "corpo": {
+      "id": "1",
+      "nome": "Ana Nogueira",
+      "email": "ana@exemplo.com",
+      "area": "Front-end",
+      "senioridade": "Júnior"
+    }
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/estatisticas",
+    "corpo": {
+      "totalDeVagas": 12,
+      "aceitamIniciante": 7,
+      "porArea": {
+        "Front-end": 4,
+        "Back-end": 3,
+        "Dados": 3,
+        "Mobile": 2
+      },
+      "porSenioridade": {
+        "Júnior": 6,
+        "Estágio": 2,
+        "Pleno": 4
+      }
+    }
+  }
+];
+
+const GRUPO = { "/vagas": "g1", "/empresas": "g2", "/pessoas": "g3", "/estatisticas": "g4" };
+const DONO = {
+  g1: "Frente 1 · quem assumiu Vaga",
+  g2: "Frente 2 · quem assumiu Empresa",
+  g3: "Frente 3 · quem assumiu Pessoa",
+  g4: "Frente 4 · quem assumiu Números — a única que lê o repository de outra frente",
+};
+
+// Colore o JSON sem depender de biblioteca: chave, texto, número, booleano.
+function pinta(valor) {
+  const bruto = JSON.stringify(valor, null, 2);
+  return bruto
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"([^"]+)":/g, '<span class="k">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="s">"$1"</span>')
+    .replace(/: (-?\d+(?:\.\d+)?)/g, ': <span class="n">$1</span>')
+    .replace(/: (true|false)/g, ': <span class="b">$1</span>');
+}
+
+function grupoDe(caminho) {
+  for (const p of Object.keys(GRUPO)) if (caminho.startsWith(p)) return GRUPO[p];
+  return "g1";
+}
+
+function mostrar(i) {
+  const r = ROTAS[i];
+  document.getElementById("verbo").textContent = r.metodo;
+  document.getElementById("url").textContent = r.caminho;
+  document.getElementById("quem").textContent = DONO[grupoDe(r.caminho)];
+  document.getElementById("corpo").innerHTML = pinta(r.corpo);
+  document.querySelectorAll(".rota").forEach((b, x) => b.classList.toggle("on", x === i));
+}
+
+ROTAS.forEach((r, i) => {
+  const b = document.createElement("button");
+  b.className = "rota";
+  b.type = "button";
+  b.innerHTML = '<span class="verbo">' + r.metodo + "</span>" + r.caminho;
+  b.addEventListener("click", () => mostrar(i));
+  document.getElementById(grupoDe(r.caminho)).appendChild(b);
+});
+
+mostrar(0);
+</script>
 
 </body>
 </html>
