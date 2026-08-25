@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onde o seu código roda · Aula 03 · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Aula 03: Server e Client Components. Onde cada pedaço do seu código roda, a fronteira &quot;use client&quot;, o menor componente de cliente possível, props serializáveis e Suspense. Quatro exercícios práticos.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#100D1B;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.09);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.hi{border-color:rgba(169,140,224,.5)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:880px;
+    white-space:pre;tab-size:2}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:#7B9FE0}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:880px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:86px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:960px;font-size:clamp(12.5px,1.45vw,17px)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:720px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+  .tree .hl{color:var(--key);font-weight:700}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:820px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:72ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+/* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 03</span> · 26 de agosto · introdução ao next.js</div>
+    <div class="tagtitle"><span class="br">"</span><span class="nm">use client</span><span class="br">"</span></div>
+    <h1 style="margin:24px 0 14px">Onde o seu código <span class="grad">roda</span></h1>
+    <p class="lead" style="max-width:56ch">Uma parte do seu site roda num servidor. Outra roda no celular da pessoa. Hoje você aprende onde fica a linha — e como atravessá-la.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">aula de mão na massa · <strong>4 exercícios</strong> · deixe o Leque de Vagas aberto</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar</p>
+  </section>
+
+  <!-- 2 · A DIVIDA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>uma dívida da aula passada</div>
+    <h2>Eu te fiz escrever isto três vezes</h2>
+    <p class="lead">E disse, no próprio comentário, que explicaria depois.</p>
+    <div class="filetab">📄 app/vagas/error.tsx · aula 02</div>
+<pre class="code"><span class="st">"use client"</span>; <span class="cm">// ← obrigatório aqui. explicação na aula 03</span></pre>
+    <p style="margin-top:18px">Você escreveu essa linha no <span class="code-inline">error.tsx</span>, no <span class="code-inline">MenuLink</span> e no <span class="code-inline">BotaoVoltar</span> — <strong>sem saber o que ela faz</strong>. Funcionou, e a gente seguiu.</p>
+    <p class="note"><strong>Hoje é a aula 03.</strong> No fim dela você vai olhar esses três arquivos e saber exatamente por que a linha estava lá — e por que ela <em>não</em> está nos outros.</p>
+  </section>
+
+  <!-- 3 · ONDE RODA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 1</div>
+    <h2>Uma pergunta simples</h2>
+    <p class="lead" style="margin-bottom:18px">Você põe um <span class="code-inline">console.log</span> dentro de uma página. <strong>Onde ele aparece?</strong></p>
+    <div class="filetab">📄 app/vagas/page.tsx</div>
+<pre class="code"><span class="kw">export default function</span> <span class="fn">Vagas</span>() {
+  <span class="ty">console</span>.<span class="fn">log</span>(<span class="st">"oi, alguém me vê?"</span>);
+  <span class="kw">return</span> <span class="tagc">&lt;h1&gt;</span>Vagas<span class="tagc">&lt;/h1&gt;</span>;
+}</pre>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card no"><h3 class="key">No console do navegador</h3><p>É onde quase todo mundo procura. <strong>Não está lá.</strong></p></div>
+      <div class="card ok"><h3 class="grn">No terminal onde você rodou <span class="mono">npm run dev</span></h3><p>É ali que ele aparece. E isso não é detalhe — é a aula inteira.</p></div>
+    </div>
+    <p class="note">O seu componente <strong>rodou no servidor</strong>. O navegador nunca viu esse código — ele recebeu só o resultado.</p>
+  </section>
+
+  <!-- 4 · LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">Ache o seu console.log</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Ponha um <span class="mono">console.log</span> na sua página de vagas</h3><p>Dentro da função do componente, antes do <span class="code-inline">return</span>. Escreva uma mensagem que você reconheça.</p></div></div>
+      <div class="st"><div class="body"><h3>Abra a página no navegador</h3><p>Com o console do navegador aberto (<kbd>F12</kbd>).</p></div></div>
+      <div class="st"><div class="body"><h3>Agora olhe o terminal</h3><p>A janela onde o <span class="code-inline">npm run dev</span> está rodando.</p></div></div>
+      <div class="st"><div class="body"><h3>Recarregue a página duas vezes</h3><p>E veja em qual dos dois lugares a mensagem se repete.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>responda no chat</b>
+      <p>Em qual dos dois a mensagem apareceu? E o que isso te diz sobre <strong>quem executou</strong> a sua função?</p>
+    </div>
+  </section>
+
+  <!-- 5 · O QUE O NAVEGADOR RECEBE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 1 · a consequência</div>
+    <h2>O navegador recebe o resultado, não a receita</h2>
+    <div class="flow" style="margin-top:26px">
+      <div class="node"><div class="ico">🖥️</div><b>O servidor</b><span>roda a sua função<br>e monta o HTML</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📦</div><b>Manda o HTML</b><span>texto pronto,<br>sem o seu código</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📱</div><b>O navegador</b><span>só desenha<br>o que chegou</span></div>
+    </div>
+    <div class="grid3" style="margin-top:26px">
+      <div class="card"><h3 class="grn">Chega mais rápido</h3><p>A pessoa vê conteúdo sem esperar baixar e executar JavaScript.</p></div>
+      <div class="card"><h3 class="attr">Segredo não vaza</h3><p>Senha de banco, chave de API — ficam no servidor. O navegador nunca as vê.</p></div>
+      <div class="card"><h3 class="tagc">Isso é o padrão</h3><p>Todo arquivo que você escreveu até agora é assim. Você não fez nada para isso — <strong>é o normal</strong>.</p></div>
+    </div>
+    <p class="note">Esses arquivos têm nome: <strong>Server Components</strong>. Componentes que rodam no servidor. Você já escreveu uns dez sem saber.</p>
+  </section>
+
+  <!-- 6 · QUANDO NAO BASTA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 2</div>
+    <h2>O dia em que isso não basta</h2>
+    <p class="lead">Você quer um botão <strong>Copiar link da vaga</strong>. A pessoa clica, o endereço vai para a área de transferência.</p>
+    <div class="filetab">📄 o botão que você imagina</div>
+<pre class="code"><span class="kw">export default function</span> <span class="fn">BotaoCopiar</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;button</span> <span class="attr">onClick</span>={() =&gt; <span class="ty">navigator</span>.clipboard.<span class="fn">writeText</span>(<span class="ty">location</span>.href)}<span class="tagc">&gt;</span>
+      Copiar link
+    <span class="tagc">&lt;/button&gt;</span>
+  );
+}</pre>
+    <div class="grid2" style="margin-top:22px">
+      <div class="card no"><h3 class="key">O clique</h3><p>Acontece no <strong>dedo da pessoa</strong>, depois que a página já está na tela. O servidor já terminou o trabalho dele e foi embora.</p></div>
+      <div class="card no"><h3 class="key"><span class="mono">navigator</span></h3><p>É a área de transferência <strong>do computador dela</strong>. No servidor essa palavra não existe.</p></div>
+    </div>
+    <p class="note">Duas coisas que <strong>só existem no navegador</strong>. É por isso que precisa haver um jeito de dizer: <em>este arquivo aqui é diferente</em>.</p>
+  </section>
+
+  <!-- 7 · A FRONTEIRA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 2 · a linha</div>
+    <h2>É essa a linha</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">📄 components/BotaoCopiar.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="st">"use client"</span>;
+
+<span class="kw">export default function</span> <span class="fn">BotaoCopiar</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;button</span> <span class="attr">onClick</span>={() =&gt;
+      <span class="ty">navigator</span>.clipboard.<span class="fn">writeText</span>(<span class="ty">location</span>.href)
+    }<span class="tagc">&gt;</span>
+      Copiar link
+    <span class="tagc">&lt;/button&gt;</span>
+  );
+}</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Vai na <b>primeira linha do arquivo</b>. Antes dos imports, antes de tudo.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Com <b>aspas</b> e ponto e vírgula. Não é comentário, é uma instrução.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Ela diz: <b>mande este arquivo para o navegador também</b>. Aí o clique tem quem o escute.</span></div>
+      </div>
+    </div>
+    <div class="ask" style="border-color:rgba(123,79,208,.45);background:rgba(123,79,208,.07)">
+      <b style="color:var(--tag)">o nome disso</b>
+      <p>Um arquivo com essa linha é um <strong>Client Component</strong>. Sem ela, é um <strong>Server Component</strong> — que é o padrão. <strong>Você nunca escreve "use server" para isso</strong>: o servidor já é o normal.</p>
+    </div>
+  </section>
+
+  <!-- 8 · LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Quebre de propósito</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie <span class="mono">components/BotaoCopiar.tsx</span></h3><p>Com o código do slide anterior — mas <strong>sem</strong> a primeira linha.</p></div></div>
+      <div class="st"><div class="body"><h3>Use ele na página da vaga</h3><p>Importe e ponha o <span class="code-inline">&lt;BotaoCopiar /&gt;</span> em algum lugar visível.</p></div></div>
+      <div class="st"><div class="body"><h3>Rode e leia o erro inteiro</h3><p><strong>Antes de consertar.</strong> Ele diz o que falta e onde.</p></div></div>
+      <div class="st"><div class="body"><h3>Agora ponha a linha e recarregue</h3><p>Clique no botão e cole em algum lugar para confirmar que copiou.</p></div></div>
+    </div>
+<pre class="code" style="margin-top:18px;font-size:12px"><span class="cm">Error: Event handlers cannot be passed to Client Component props.</span>
+<span class="cm">  &lt;button onClick={function onClick}&gt;</span>
+<span class="cm">                  ^^^^^^^^^^^^^^^^^^</span>
+<span class="cm">If you need interactivity, consider converting part of this</span>
+<span class="cm">to a Client Component.</span></pre>
+    <div class="ask">
+      <b>responda</b>
+      <p>A última linha do erro <strong>diz a solução</strong>. Ela fala em converter <em>parte</em> disso — por que <strong>parte</strong>, e não o arquivo todo? Guarde o palpite: é o próximo slide.</p>
+    </div>
+  </section>
+
+  <!-- 9 · A FRONTEIRA DESCE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 3</div>
+    <h2>Marque a folha, não a raiz</h2>
+    <p class="lead">Tudo que um Client Component usa por dentro vai junto para o navegador. Então quanto <strong>menor</strong> ele for, melhor.</p>
+    <div class="duo" style="margin-top:22px">
+      <div>
+        <span class="verdict no">evite</span>
+        <div class="filetab">📄 app/vagas/[slug]/page.tsx</div>
+<pre class="code" style="font-size:12px"><span class="st">"use client"</span>; <span class="cm">// ← na página inteira</span>
+
+<span class="kw">export default function</span> <span class="fn">Vaga</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;article&gt;</span>
+      <span class="tagc">&lt;h1&gt;</span>Pessoa Dev Júnior<span class="tagc">&lt;/h1&gt;</span>
+      <span class="tagc">&lt;p&gt;</span>A descrição inteira…<span class="tagc">&lt;/p&gt;</span>
+      <span class="tagc">&lt;button</span> <span class="attr">onClick</span>={…}<span class="tagc">&gt;</span>Copiar<span class="tagc">&lt;/button&gt;</span>
+    <span class="tagc">&lt;/article&gt;</span>
+  );
+}</pre>
+        <p class="muted" style="font-size:14px;margin-top:8px">O título e a descrição também viajam para o navegador — <strong>sem precisar</strong>.</p>
+      </div>
+      <div>
+        <span class="verdict yes">faça assim</span>
+        <div class="filetab">📄 app/vagas/[slug]/page.tsx</div>
+<pre class="code" style="font-size:12px"><span class="cm">// sem "use client" — segue no servidor</span>
+<span class="kw">import</span> BotaoCopiar <span class="kw">from</span> <span class="st">"@/components/BotaoCopiar"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Vaga</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;article&gt;</span>
+      <span class="tagc">&lt;h1&gt;</span>Pessoa Dev Júnior<span class="tagc">&lt;/h1&gt;</span>
+      <span class="tagc">&lt;p&gt;</span>A descrição inteira…<span class="tagc">&lt;/p&gt;</span>
+      <span class="tagc">&lt;</span><span class="ty">BotaoCopiar</span> <span class="tagc">/&gt;</span>
+    <span class="tagc">&lt;/article&gt;</span>
+  );
+}</pre>
+        <p class="muted" style="font-size:14px;margin-top:8px">Só o botão atravessa. O resto continua sendo HTML pronto.</p>
+      </div>
+    </div>
+    <p class="note"><strong>A regra:</strong> um Server Component pode usar um Client Component à vontade. O contrário é que tem limite — e é o que a gente vê agora.</p>
+  </section>
+
+  <!-- 10 · LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Encolha a fronteira</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Ponha o <span class="mono">"use client"</span> na página inteira</h3><p>Na sua <span class="code-inline">app/vagas/[slug]/page.tsx</span>, no topo. Rode: continua funcionando.</p></div></div>
+      <div class="st"><div class="body"><h3>Abra o painel <em>Network</em> do navegador</h3><p><kbd>F12</kbd> → aba Network → recarregue. Olhe o <strong>tamanho total</strong> de JavaScript baixado e anote.</p></div></div>
+      <div class="st"><div class="body"><h3>Agora tire o <span class="mono">"use client"</span> da página</h3><p>Deixe só no <span class="code-inline">BotaoCopiar</span>. Recarregue e anote de novo.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>responda</b>
+      <p>1. Os dois funcionam igual para quem usa?&nbsp; 2. O número mudou?&nbsp; 3. Numa página com <strong>cinquenta</strong> vagas, qual das duas versões você prefere ter escrito?</p>
+    </div>
+    <p class="note">Se a diferença vier pequena, é esperado: o seu projeto ainda é pequeno. O que interessa é a <strong>direção</strong> — ela só cresce com o tamanho do projeto.</p>
+  </section>
+
+  <!-- 11 · O QUE ATRAVESSA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 4</div>
+    <h2>O que atravessa a fronteira</h2>
+    <p class="lead">O servidor entrega dados prontos para o componente de cliente — mas <strong>só o que couber num pacote de texto</strong>.</p>
+    <div class="grid2" style="margin-top:22px">
+      <div class="card ok">
+        <h3 class="grn">Atravessa</h3>
+        <ul class="clean" style="margin-top:4px">
+          <li>Texto, número, <span class="mono">true</span>/<span class="mono">false</span></li>
+          <li>Listas e objetos de dados</li>
+          <li><span class="mono">null</span> e <span class="mono">undefined</span></li>
+        </ul>
+      </div>
+      <div class="card no">
+        <h3 class="key">Não atravessa</h3>
+        <ul class="clean" style="margin-top:4px">
+          <li><strong>Funções</strong> — a mais comum</li>
+          <li>Datas, classes, coisas com método dentro</li>
+          <li>Conexão de banco, e tudo que é do servidor</li>
+        </ul>
+      </div>
+    </div>
+    <div class="ask" style="border-color:rgba(242,68,135,.42);background:rgba(242,68,135,.07)">
+      <b style="color:var(--key)">por quê</b>
+      <p>O que sai do servidor vira <strong>texto</strong> para viajar pela internet. Um número vira <span class="mono">"42"</span> e volta a ser número. <strong>Uma função não tem como virar texto</strong> — e é por isso que o erro do lab 2 falava em <em>event handlers</em>.</p>
+    </div>
+  </section>
+
+  <!-- 12 · LAB 4 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 4</span>
+      <h2 style="margin:0">Passe dados pela fronteira</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Faça o <span class="mono">BotaoCopiar</span> receber o título da vaga</h3><p>Uma prop <span class="code-inline">titulo</span>, e o botão passa a dizer <span class="code-inline">Copiar link de {titulo}</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Passe o título da página</h3><p>A página é servidor, o botão é cliente. Um texto atravessa sem problema.</p></div></div>
+      <div class="st"><div class="body"><h3>Agora tente passar uma função</h3><p>Na página, escreva <span class="code-inline">&lt;BotaoCopiar aoCopiar={() =&gt; console.log("copiou")} /&gt;</span> e rode.</p></div></div>
+      <div class="st"><div class="body"><h3>Leia o erro e desfaça</h3><p>É o mesmo assunto do lab 2, visto por outro ângulo.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>responda</b>
+      <p>O texto passou e a função não. <strong>Com o que você aprendeu no slide anterior, explique por quê</strong> — em uma frase, sem usar a palavra "serializável".</p>
+    </div>
+  </section>
+
+  <!-- 13 · SUSPENSE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito 5</div>
+    <h2>O <span class="mono">loading.tsx</span>, mas de um pedaço só</h2>
+    <p class="lead">Na aula 02 você fez uma tela de espera para a <strong>página inteira</strong>. E quando só um pedaço é lento?</p>
+    <div class="filetab">📄 app/vagas/[slug]/page.tsx</div>
+<pre class="code"><span class="kw">import</span> { <span class="ty">Suspense</span> } <span class="kw">from</span> <span class="st">"react"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Vaga</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;article&gt;</span>
+      <span class="tagc">&lt;h1&gt;</span>Pessoa Dev Júnior<span class="tagc">&lt;/h1&gt;</span>   <span class="cm">{/* aparece na hora */}</span>
+
+      <span class="tagc">&lt;</span><span class="ty">Suspense</span> <span class="attr">fallback</span>={<span class="tagc">&lt;p&gt;</span>carregando vagas parecidas…<span class="tagc">&lt;/p&gt;</span>}<span class="tagc">&gt;</span>
+        <span class="tagc">&lt;</span><span class="ty">VagasParecidas</span> <span class="tagc">/&gt;</span>          <span class="cm">{/* chega quando ficar pronto */}</span>
+      <span class="tagc">&lt;/</span><span class="ty">Suspense</span><span class="tagc">&gt;</span>
+    <span class="tagc">&lt;/article&gt;</span>
+  );
+}</pre>
+    <p class="note">O título não espera o pedaço lento. O servidor manda o que já tem, e <strong>completa depois</strong> — sem a pessoa olhar para uma tela em branco. É o mesmo que o <span class="code-inline">loading.tsx</span> faz, com a mira menor.</p>
+  </section>
+
+  <!-- 14 · FECHAMENTO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>antes de ir</div>
+    <h2>O que fica de hoje</h2>
+    <ul class="clean">
+      <li><strong>Servidor é o padrão.</strong> Todo arquivo seu roda lá, a menos que você diga o contrário.</li>
+      <li><span class="mono">"use client"</span> na primeira linha manda o arquivo <strong>também</strong> para o navegador.</li>
+      <li>Você precisa dela quando tem <strong>clique</strong> ou algo que só existe no navegador.</li>
+      <li><strong>Marque a folha, não a raiz</strong> — quanto menor o componente de cliente, menos viaja.</li>
+      <li>Pela fronteira passa <strong>dado</strong>. Função, não.</li>
+    </ul>
+    <div class="grid3" style="margin-top:30px">
+      <div class="card"><h3 class="attr">🔍 Volte aos três arquivos</h3><p>Abra o <span class="mono">error.tsx</span>, o <span class="mono">MenuLink</span> e o <span class="mono">BotaoVoltar</span> da aula 02. Agora você sabe por que a linha está em cada um.</p></div>
+      <div class="card"><h3 class="key">🎯 Escopo mínimo</h3><p>A equipe define hoje o <strong>escopo mínimo</strong> do Leque de Vagas — o que entra na primeira entrega, e o que fica de fora.</p></div>
+      <div class="card"><h3 class="grn">📘 Guia</h3><p>Composição avançada, <span class="mono">useRouter</span> e o resto do App Router estão no <a href="/guias/nextjs.html" style="color:var(--green);text-decoration:underline">guia de Next.js</a>.</p></div>
+    </div>
+    <p class="note">Dúvida que ficou? Traga na aula 04 <strong>com o erro na tela</strong>. Print do stack trace vale mais que descrição do problema.</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 14</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

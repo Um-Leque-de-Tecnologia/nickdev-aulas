@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de resposta — Desafio 03 · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Uma entrega completa do desafio da aula 03: o README com a auditoria da fronteira, os três arquivos, e o que separa uma entrega boa de uma mediana.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:960px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 16px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.pane{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);margin-top:12px}
+.panehd{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.panehd .dot{width:9px;height:9px;border-radius:50%}
+.panehd .dot.r{background:#ff5f56}.panehd .dot.y{background:#ffbd2e}.panehd .dot.g{background:#27c93f}
+.panehd b{color:var(--text);font-weight:500}
+
+pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;margin:0;white-space:pre}
+.kw{color:#F24487}.ty{color:#7B9FE0}.st{color:#A98CE0}.fn{color:#E88BB8}.cm{color:#6f6a83}
+.md{background:#0b0913;padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto;color:#d8d3e6}
+.md .h{color:#E88BB8;font-weight:700}
+.md .out{color:#9ee39e}
+.md .cm{color:#6f6a83}
+
+.recap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+@media(max-width:760px){.recap{grid-template-columns:1fr}}
+.recap .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.recap .card h3{font-size:15px;margin-bottom:6px;color:var(--pink-light)}
+.recap .card p{font-size:13.5px;color:var(--text-2)}
+
+.check{list-style:none;display:grid;gap:10px;margin-top:8px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check b{color:var(--text)}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:20px 22px;margin-top:16px}
+.goal .ico{font-size:24px;line-height:1}
+.goal h3{font-size:16.5px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:14.5px}
+.goal.rosa{border-left-color:var(--magenta)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Modelo de resposta · Aula 03</div>
+  <h1>A fronteira <span class="grad">no lugar certo</span> 🧭</h1>
+  <p class="lead">
+    Uma entrega completa, de uma equipe. Repare no tamanho: são <b>umas trinta
+    linhas de código novo</b>. O que separa uma entrega boa de uma mediana aqui
+    é inteiramente o README — porque o difícil desta aula nunca foi escrever a
+    linha, foi saber onde ela vai.
+  </p>
+  <div class="rule"></div>
+
+  <div class="label">O README — metade da nota está aqui</div>
+
+  <div class="pane">
+    <div class="panehd"><span class="dot r"></span><b>README.md</b> · a seção nova</div>
+<div class="md"><span class="h">## A fronteira</span>
+
+Depois desta aula, quatro arquivos do projeto rodam no navegador.
+Nenhum deles é página ou layout.
+
+| arquivo | por que é de cliente |
+|---|---|
+| `app/vagas/error.tsx` | chama `retry` num onClick, e reage a um erro que acontece depois da página montada |
+| `components/MenuLink.tsx` | `usePathname` — em que endereço a pessoa está é informação do navegador dela |
+| `components/BotaoVoltar.tsx` | `useRouter` — o histórico de navegação é do navegador; um `&lt;Link&gt;` não serve porque leva a um endereço fixo, e "voltar" depende de onde a pessoa veio |
+| `components/BotaoCopiarLink.tsx` | as duas razões juntas: tem `onClick` e usa `navigator.clipboard` |
+
+<span class="h">### A prova de que a página continua no servidor</span>
+
+O `console.log` da página da vaga sai no terminal do `npm run dev`,
+nunca no console do navegador. Print em `docs/servidor.png`.
+
+<span class="out">[servidor] montando a vaga 1</span>
+<span class="out">GET /vagas/1 200 in 2143ms</span>
+
+<span class="h">### Um componente que a gente quebrou em dois</span>
+
+O `BotaoVoltar` estava dentro do `Cabecalho`, e a gente tinha posto o
+`"use client"` no cabeçalho inteiro. Separamos: o cabeçalho voltou a ser
+servidor e só o botão desceu. O logo e os links do menu não precisavam
+de JavaScript nenhum para aparecer.
+
+<span class="h">### O que a pessoa que usa o site ganha</span>
+
+Com a fronteira na folha, o navegador baixa só o código dos botões.
+Com ela na raiz, baixaria também o título, a descrição e a lista de
+vagas — que já chegam prontos como HTML e não precisam de JavaScript
+para existir na tela. Em conexão ruim, isso é a diferença entre ler a
+vaga na hora e olhar para uma tela em branco esperando.
+</div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">✍️</span>
+    <div>
+      <h3>Por que esse README pontua</h3>
+      <p><b>Cada justificativa nomeia a causa, não o sintoma.</b> "Usa
+      <code>usePathname</code>" seria meia resposta. A entrega diz <i>por que</i>
+      <code>usePathname</code> obriga o cliente: porque a informação é do
+      navegador. Isso é entendimento, não decoreba.</p>
+      <p><b>A linha do BotaoVoltar responde a pergunta difícil.</b> O desafio
+      perguntava por que um <code>&lt;Link&gt;</code> não resolve. A resposta —
+      "Link leva a um endereço fixo, e voltar depende de onde a pessoa veio" —
+      mostra que a equipe pensou, em vez de repetir o enunciado.</p>
+      <p><b>A seção do componente quebrado em dois é ouro.</b> Ninguém pediu que
+      encontrassem um problema; pediram que procurassem. Eles acharam,
+      consertaram e contaram. É o sinal mais forte de que a aula pegou.</p>
+      <p><b>A última seção fala de gente.</b> "A diferença entre ler a vaga na
+      hora e olhar para uma tela em branco" — a equipe traduziu uma decisão
+      técnica em consequência para quem usa. É isso que se cobra num code review
+      de verdade.</p>
+    </div>
+  </div>
+
+  <div class="label">O código</div>
+
+  <p style="color:var(--text-2);font-size:15px">
+    São três arquivos, e eles estão inteiros e comentados em
+    <a href="codigos-desafio.html" style="color:var(--pink-light);text-decoration:underline">Código
+    do desafio</a>. O resumo do que a equipe escreveu:
+  </p>
+
+  <ul class="check">
+    <li><b><code>components/BotaoCopiarLink.tsx</code></b> — 12 linhas.
+    <code>"use client"</code> na primeira, recebe <code>titulo</code> por prop,
+    copia <code>location.href</code>.</li>
+    <li><b><code>components/VagasParecidas.tsx</code></b> — um Server Component
+    <code>async</code>, com a espera de dois segundos <b>dentro dele</b>.</li>
+    <li><b><code>app/vagas/[id]/page.tsx</code></b> — ganhou quatro linhas: o
+    import dos dois, o <code>&lt;BotaoCopiarLink&gt;</code> e o
+    <code>&lt;Suspense&gt;</code> em volta das parecidas. <b>Não</b> ganhou
+    <code>"use client"</code>.</li>
+    <li><b><code>components/Cabecalho.tsx</code></b> — <i>perdeu</i> o
+    <code>"use client"</code> que tinha desde a aula 02, quando o
+    <code>BotaoVoltar</code> saiu de dentro dele.</li>
+  </ul>
+
+  <div class="label">Por que essa entrega funciona</div>
+
+  <div class="recap">
+    <div class="card">
+      <h3>A fronteira está na folha</h3>
+      <p>Nenhuma página, nenhum layout. Os quatro arquivos de cliente somam
+      menos de 40 linhas juntos.</p>
+    </div>
+    <div class="card">
+      <h3>Testaram, não só criaram</h3>
+      <p>O print do terminal prova o servidor. O relato do Suspense prova que
+      alguém recarregou e olhou a ordem em que as coisas apareceram.</p>
+    </div>
+    <div class="card">
+      <h3>Acharam um problema antigo</h3>
+      <p>O <code>"use client"</code> no cabeçalho vinha da aula 02 e ninguém
+      tinha percebido. A auditoria serviu para o que existe.</p>
+    </div>
+  </div>
+
+  <div class="label">Checklist batido</div>
+
+  <ul class="check">
+    <li>✅ Botão de copiar funciona, em arquivo próprio, recebendo prop.</li>
+    <li>✅ Página da vaga sem <code>"use client"</code>, com o log no terminal.</li>
+    <li>✅ Nenhum <code>layout.tsx</code> ou <code>page.tsx</code> de cliente.</li>
+    <li>✅ Seção lenta dentro de <code>&lt;Suspense&gt;</code>, com o título aparecendo antes.</li>
+    <li>✅ README com a tabela, o print, o antes-e-depois e a frase sobre quem usa.</li>
+    <li>✅ <code>npm run build</code> passa.</li>
+    <li>✅ Commits de todas as pessoas da equipe.</li>
+  </ul>
+
+  <div class="label">O que derruba uma entrega</div>
+
+  <ul class="check">
+    <li>❌ <b><code>"use client"</code> na página</b> "porque assim funciona". Funciona
+    mesmo — e leva a vaga inteira para o navegador sem precisar. É o erro que o
+    desafio existe para pegar.</li>
+    <li>❌ <b>A espera no lugar errado.</b> Se o <code>await</code> dos dois segundos
+    está na página, a tela fica branca e o <code>Suspense</code> vira decoração.</li>
+    <li>❌ <b>Justificativa que repete o enunciado.</b> "É de cliente porque precisa
+    do navegador" não diz nada. <i>O que</i> precisa do navegador?</li>
+    <li>❌ <b>Um <code>useState</code> aparecendo do nada.</b> Não foi ensinado, não
+    era necessário, e quase sempre vem de código copiado sem leitura.</li>
+  </ul>
+
+  <div class="label">Continue por aqui</div>
+
+  <div class="goal">
+    <span class="ico">🌱</span>
+    <div>
+      <h3>O que a aula 04 faz com isto</h3>
+      <p>A espera de dois segundos que vocês simularam vira uma
+      <b>busca de dados de verdade</b>. E aí o <code>Suspense</code> deixa de ser
+      exercício e passa a ser a razão de a página abrir rápido mesmo com um banco
+      lento do outro lado.</p>
+      <p>Composição avançada — como um componente de cliente pode <b>envolver</b>
+      um de servidor usando <code>children</code> — está no
+      <a href="/guias/nextjs.html" style="color:var(--pink-light);text-decoration:underline">guia
+      de Next.js</a>. Não é exigido agora, mas é o próximo degrau natural.</p>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Voltar ao desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="slides.html">▶ Slides da aula</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Next.js · Aula 03 · Next.js 16 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>
