@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio 02 — Um controller virando três · Introdução ao Spring Boot · NickDev</title>
+<meta name="description" content="O código do desafio da aula 02: o controller com a lista copiada três vezes, pronto para colar, mais a estrutura esperada depois da separação em camadas.">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  p code, li code, td code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .glow{position:absolute;border-radius:50%}
+  .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1280px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:26px 18px;display:flex;flex-direction:column;gap:3px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:12px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:8px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 10px;border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--text-2);transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:42px clamp(20px,3.4vw,52px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(28px,4.6vw,44px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.6vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .aviso{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:18px 20px;margin-top:30px}
+  .aviso .ico{font-size:22px;line-height:1}
+  .aviso h3{font-size:16px;margin-bottom:3px}
+  .aviso p{color:var(--text-2);font-size:14.5px}
+  .aviso p + p{margin-top:7px}
+  .aviso.magenta{border-left-color:var(--magenta)}
+
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;display:flex;align-items:center;gap:12px;scroll-margin-top:20px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  section{margin-top:34px;scroll-margin-top:20px}
+  section > h2{font-family:var(--mono);font-size:18px;font-weight:500;display:flex;align-items:center;gap:11px}
+  section > h2::before{content:"";width:8px;height:20px;background:var(--grad);border-radius:3px;flex:none}
+  section > p{color:var(--text-2);margin:9px 0 0;font-size:15px}
+  section > p b{color:var(--text)}
+  h3{font-size:16px;margin:24px 0 4px}
+  ul,ol{margin:9px 0 0 4px;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  li{margin:4px 0}
+  li b{color:var(--text)}
+
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:14px}
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:14px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;white-space:pre;max-width:1000px}
+  .file + pre{border-radius:0 12px 12px 12px;margin-top:-1px}
+  .cm{color:#6f6a83}.kw{color:#F24487}.ty{color:#7B4FD0}.st{color:#A98CE0}.fn{color:#E88BB8}.an{color:#5fd08a}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:14px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto;max-width:1000px}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin-top:14px;font-size:14.5px;color:var(--text-2);max-width:1000px}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+
+  table{border-collapse:collapse;width:100%;max-width:1000px;margin-top:14px;font-size:14px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4);max-width:900px}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+
+  .antes{border-left:3px solid #F24487;padding-left:14px;margin:14px 0}
+  .antes .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#F24487;display:block;margin-bottom:6px}
+  .depois{border-left:3px solid #5fd08a;padding-left:14px;margin:14px 0}
+  .depois .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;display:block;margin-bottom:6px}
+
+  .antes{border-left:3px solid #F24487;padding-left:14px;margin:14px 0}
+  .antes .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#F24487;display:block;margin-bottom:6px}
+  .depois{border-left:3px solid #5fd08a;padding-left:14px;margin:14px 0}
+  .depois .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;display:block;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/introducao-spring-boot">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">O ponto de partida</div>
+    <a href="#modelo">Receita.java</a>
+    <a href="#controller">CatalogoController.java</a>
+    <div class="grp">Para onde vai</div>
+    <a href="#pastas">Estrutura esperada</a>
+    <div class="grp">Verificando</div>
+    <a href="#rodar">As três respostas</a>
+    <a href="#http">requisicoes.http</a>
+    <a href="#erros">Se der errado</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 02 · código do desafio</div>
+  <h1>O ponto de <span class="g">partida</span></h1>
+  <p class="lead">
+    Estes dois arquivos são o <b>problema</b>, não a solução. Cole-os no seu
+    projeto exatamente como estão, confirme que os três endpoints respondem, e
+    só então comece a separar. Refatorar código que você nunca viu funcionar é
+    apostar.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🎨</span>
+    <div>
+      <h3>O tema aqui é receitas — o seu é outro</h3>
+      <p>Se o seu projeto é de discos, troque <code>Receita</code> por
+      <code>Disco</code> e <code>minutos()</code> por <code>faixas()</code>,
+      ajustando os cortes das duas regras. <b>O desenho do problema é o
+      mesmo</b>: a mesma lista escrita três vezes e as regras dentro do
+      controller.</p>
+    </div>
+  </div>
+
+  <div class="divisor" id="modelo">1 · O modelo</div>
+
+  <section>
+    <div class="file">src/main/java/br/edu/faculdade/receitas/Receita.java</div>
+<pre><span class="kw">package</span> br.edu.faculdade.receitas;
+
+<span class="kw">public record</span> <span class="ty">Receita</span>(<span class="ty">String</span> nome, <span class="kw">int</span> minutos) { }</pre>
+    <p class="tip">Um <code>record</code> é só dado. Ele <b>não leva
+    anotação</b> — as três anotações que você aprendeu hoje marcam classes que
+    fazem alguma coisa, e um record não faz nada, ele só guarda.</p>
+  </section>
+
+  <div class="divisor" id="controller">2 · O controller que faz tudo</div>
+
+  <section>
+    <div class="file">src/main/java/br/edu/faculdade/receitas/CatalogoController.java</div>
+<pre><span class="kw">package</span> br.edu.faculdade.receitas;
+
+<span class="kw">import</span> org.springframework.web.bind.annotation.<span class="ty">GetMapping</span>;
+<span class="kw">import</span> org.springframework.web.bind.annotation.<span class="ty">RestController</span>;
+<span class="kw">import</span> java.util.<span class="ty">ArrayList</span>;
+<span class="kw">import</span> java.util.<span class="ty">List</span>;
+
+<span class="an">@RestController</span>
+<span class="kw">public class</span> <span class="ty">CatalogoController</span> {
+
+    <span class="cm">// ---------- DEFEITO 1: a lista, cópia 1 de 3 ----------</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/catalogo"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">todas</span>() {
+        <span class="kw">return</span> <span class="ty">List</span>.<span class="fn">of</span>(
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Bolo de fubá"</span>,       <span class="st">40</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Pão de queijo"</span>,      <span class="st">25</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Omelete"</span>,             <span class="st">8</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Feijoada"</span>,          <span class="st">180</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Vitamina de banana"</span>,  <span class="st">5</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Arroz de forno"</span>,     <span class="st">30</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Lasanha"</span>,            <span class="st">90</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Salada de grão"</span>,     <span class="st">15</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Café coado"</span>,          <span class="st">6</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Panqueca"</span>,           <span class="st">22</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Sopa de legumes"</span>,    <span class="st">45</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Torrada com ovo"</span>,     <span class="st">7</span>));
+    }
+
+    <span class="cm">// ---------- DEFEITO 1: a lista, cópia 2 de 3 ----------</span>
+    <span class="cm">// ---------- DEFEITO 2: e a regra "rápida" mora aqui ----------</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/rapidas"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">rapidas</span>() {
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; todas = <span class="ty">List</span>.<span class="fn">of</span>(
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Bolo de fubá"</span>,       <span class="st">40</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Pão de queijo"</span>,      <span class="st">25</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Omelete"</span>,             <span class="st">8</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Feijoada"</span>,          <span class="st">180</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Vitamina de banana"</span>,  <span class="st">5</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Arroz de forno"</span>,     <span class="st">30</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Lasanha"</span>,            <span class="st">90</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Salada de grão"</span>,     <span class="st">15</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Café coado"</span>,          <span class="st">6</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Panqueca"</span>,           <span class="st">22</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Sopa de legumes"</span>,    <span class="st">45</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Torrada com ovo"</span>,     <span class="st">7</span>));
+
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="ty">Receita</span> r : todas) {
+            <span class="kw">if</span> (r.<span class="fn">minutos</span>() &lt;= <span class="st">30</span>) {
+                saida.<span class="fn">add</span>(r);
+            }
+        }
+        <span class="kw">return</span> saida;
+    }
+
+    <span class="cm">// ---------- DEFEITO 1: a lista, cópia 3 de 3 ----------</span>
+    <span class="cm">// ---------- DEFEITO 2: e a regra "longa" mora aqui ----------</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/longas"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">longas</span>() {
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; todas = <span class="ty">List</span>.<span class="fn">of</span>(
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Bolo de fubá"</span>,       <span class="st">40</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Pão de queijo"</span>,      <span class="st">25</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Omelete"</span>,             <span class="st">8</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Feijoada"</span>,          <span class="st">180</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Vitamina de banana"</span>,  <span class="st">5</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Arroz de forno"</span>,     <span class="st">30</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Lasanha"</span>,            <span class="st">90</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Salada de grão"</span>,     <span class="st">15</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Café coado"</span>,          <span class="st">6</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Panqueca"</span>,           <span class="st">22</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Sopa de legumes"</span>,    <span class="st">45</span>),
+            <span class="kw">new</span> <span class="ty">Receita</span>(<span class="st">"Torrada com ovo"</span>,     <span class="st">7</span>));
+
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="ty">Receita</span> r : todas) {
+            <span class="kw">if</span> (r.<span class="fn">minutos</span>() &gt; <span class="st">60</span>) {
+                saida.<span class="fn">add</span>(r);
+            }
+        }
+        <span class="kw">return</span> saida;
+    }
+}</pre>
+    <p class="warn"><b>Não conserte enquanto lê.</b> Rode primeiro, chame os
+    três endereços, guarde os três JSON. O gabarito do desafio são as respostas
+    originais — sem elas você não tem como provar que a separação não quebrou
+    nada.</p>
+  </section>
+
+  <div class="divisor" id="pastas">Estrutura esperada no fim</div>
+
+  <section>
+    <p>Depois da separação, o pacote deve ficar assim. Os nomes são sugestão; o
+    que é cobrado é a <b>separação</b>.</p>
+<pre>src/main/java/br/edu/faculdade/receitas/
+├── <b>ReceitasApplication.java</b>
+├── <b>Receita.java</b>              <span class="cm">// record, sem anotação</span>
+├── <b>ReceitaRepository.java</b>    <span class="cm">// @Repository — a lista, uma vez só</span>
+├── <b>CatalogoService.java</b>      <span class="cm">// @Service — as duas regras</span>
+└── <b>CatalogoController.java</b>   <span class="cm">// @RestController — três linhas</span></pre>
+    <p class="tip">Tudo no <b>mesmo pacote</b> da <code>Application</code>, ou
+    abaixo dele. Subpastas como <code>controller/</code>, <code>service/</code>
+    e <code>repository/</code> funcionam igual — desde que fiquem <b>dentro</b>
+    de <code>br.edu.faculdade.receitas</code>. Fora dele, o Spring não enxerga.</p>
+  </section>
+
+  <div class="divisor" id="rodar">As três respostas</div>
+
+  <section>
+    <p>Com estas 12 receitas, é isto que os três endpoints devolvem — antes e
+    depois da refatoração, <b>exatamente igual</b>.</p>
+
+    <div class="antes">
+      <span class="rot">/catalogo · 12 itens</span>
+<pre>[ { <span class="st">"nome"</span>: <span class="st">"Bolo de fubá"</span>, <span class="st">"minutos"</span>: <span class="st">40</span> },
+  <span class="cm">/* ... todas as 12, na ordem em que estão escritas ... */</span> ]</pre>
+    </div>
+
+    <div class="depois">
+      <span class="rot">/catalogo/rapidas · 8 itens (até 30 min)</span>
+<pre>Pão de queijo <span class="st">25</span> · Omelete <span class="st">8</span> · Vitamina de banana <span class="st">5</span> · Arroz de forno <span class="st">30</span>
+Salada de grão <span class="st">15</span> · Café coado <span class="st">6</span> · Panqueca <span class="st">22</span> · Torrada com ovo <span class="st">7</span></pre>
+    </div>
+
+    <div class="depois">
+      <span class="rot">/catalogo/longas · 2 itens (mais de 60 min)</span>
+<pre>Feijoada <span class="st">180</span> · Lasanha <span class="st">90</span></pre>
+    </div>
+
+    <p class="tip"><b>Repare que 8 + 2 não dá 12.</b> Bolo de fubá (40) e Sopa
+    de legumes (45) não são rápidas nem longas — ficam de fora das duas listas.
+    Isso é de propósito: se um dos seus filtros devolver 12 itens, ele não está
+    filtrando nada. E <code>Arroz de forno</code> tem exatamente 30 minutos —
+    se ele sumir da lista de rápidas, o seu <code>&lt;=</code> virou
+    <code>&lt;</code>.</p>
+  </section>
+
+  <div class="divisor" id="http">requisicoes.http</div>
+
+  <section>
+    <p>Crie na raiz do projeto. O IntelliJ e o VS Code (extensão REST Client)
+    rodam esse arquivo direto, sem precisar de Insomnia.</p>
+    <div class="file">requisicoes.http</div>
+<pre><span class="cm">### catálogo inteiro</span>
+GET http://localhost:8080/catalogo
+Accept: application/json
+
+<span class="cm">### só as rápidas — tem que vir 8</span>
+GET http://localhost:8080/catalogo/rapidas
+Accept: application/json
+
+<span class="cm">### só as longas — tem que vir 2</span>
+GET http://localhost:8080/catalogo/longas
+Accept: application/json</pre>
+  </section>
+
+  <div class="divisor" id="erros">Se der errado</div>
+
+  <section>
+    <p class="warn"><b><code>required a bean of type 'CatalogoService'</code></b><br>
+    Faltou a anotação na classe, ou ela está fora do pacote da
+    <code>Application</code>. As duas causas do lab 4.</p>
+
+    <p class="warn" style="margin-top:14px"><b><code>variable repositorio might not have been initialized</code></b><br>
+    O campo é <code>final</code> mas o construtor não atribui ele. Falta a linha
+    <code>this.repositorio = repositorio;</code>.</p>
+
+    <p class="warn" style="margin-top:14px"><b><code>UnsupportedOperationException</code></b><br>
+    <code>List.of(...)</code> devolve lista <b>imutável</b>. Se tentar ordenar
+    ou adicionar nela, estoura. Copie antes:
+    <code>new ArrayList&lt;&gt;(origem)</code>.</p>
+
+    <p class="warn" style="margin-top:14px"><b>Um endpoint devolve <code>[]</code> vazio</b><br>
+    A regra filtrou tudo. Confira o sinal da comparação e os valores da sua
+    lista — o filtro está funcionando, os dados é que não batem com ele.</p>
+
+    <p class="warn" style="margin-top:14px"><b>As respostas mudaram depois da refatoração</b><br>
+    Compare item por item com o gabarito do passo 1. A causa mais comum é ter
+    digitado a lista de novo em vez de recortar e colar — e trocado um número
+    no caminho.</p>
+  </section>
+
+  <div style="margin-top:44px">
+    <a class="cta primary" href="desafio.html">🎯 Ver o desafio</a>
+    <a class="cta" href="exercicios.html">🧪 Exercícios da aula</a>
+    <a class="cta" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Spring Boot · Aula 02 · Spring Boot 4.1 · Java 21 · NickDev
+  </div>
+</main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 02 — Um controller virando três · Introdução ao Spring Boot · NickDev</title>
+<meta name="description" content="Desafio da aula 02: separar um controller que guarda a mesma lista copiada três vezes e decide tudo sozinho, em repository, service e controller.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
+.goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+
+  .defeito{border:1px solid rgba(242,68,135,.35);border-radius:12px;padding:16px 20px;margin-top:14px;
+    background:rgba(242,68,135,.05)}
+  .defeito h4{font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--pink-light);margin:0 0 6px}
+  .defeito p{font-size:14.5px;color:var(--text-2);margin:0}
+  .defeito p + p{margin-top:8px}
+  .criterios{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
+  .criterios th,.criterios td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  .criterios th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);font-weight:500}
+  .criterios td{color:var(--text-2)}
+  .criterios td:first-child{color:var(--text);width:34%}
+  .criterios td code{color:var(--pink-light);font-size:.92em}
+  .criterios tr:last-child td{border-bottom:0}
+  .peso{font-family:var(--mono);font-size:12px;color:var(--text-3);white-space:nowrap}
+
+  .goal.magenta{border-left-color:var(--magenta)}
+
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-spring-boot">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Desafio · Aula 02</div>
+  <h1>Um controller <span class="grad">virando três</span> 🔧</h1>
+  <p class="lead">
+    Você recebe um controller com <b>três endpoints</b> — e a mesma lista
+    escrita por extenso <b>três vezes</b>, uma em cada método. Sua tarefa é
+    separá-lo em repository, service e controller <b>sem mudar uma vírgula do
+    que a API devolve</b>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O que este desafio verifica</h3>
+      <p>Exatamente o que a aula treinou, com mais código: reconhecer o que
+      está no lugar errado e mover para onde pertence.</p>
+      <p>É de propósito que a saída não muda. Assim você tem um critério
+      objetivo: <b>se a resposta de qualquer endpoint mudou, você quebrou algo
+      no caminho</b>. Refatorar é melhorar o desenho sem alterar o
+      comportamento — se o comportamento mudou, não foi refatoração.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">🧪</span>
+    <div>
+      <h3>Faça os labs antes</h3>
+      <p>Este desafio é o mesmo caminho dos quatro labs, com um código maior.
+      Se você não fez os labs, comece por
+      <a href="exercicios.html" style="color:var(--pink-light);text-decoration:underline">exercicios.html</a> —
+      lá cada passo tem gabarito. Aqui não tem.</p>
+    </div>
+  </div>
+
+  <div class="label">O código que você recebe</div>
+
+  <p style="color:var(--text-2);font-size:15px;margin-top:12px">
+    Está inteiro, pronto pra colar, em
+    <a href="codigos-desafio.html" style="color:var(--pink-light);text-decoration:underline">codigos-desafio.html</a>.
+    Adapte para o <b>seu tema</b> — o desenho do problema é o mesmo em qualquer um.
+  </p>
+
+<pre><span class="an">@RestController</span>
+<span class="kw">public class</span> <span class="ty">CatalogoController</span> {
+
+    <span class="an">@GetMapping</span>(<span class="st">"/catalogo"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">todas</span>() {
+        <span class="kw">return</span> <span class="ty">List</span>.<span class="fn">of</span>( <span class="cm">/* as 12 receitas */</span> );
+    }
+
+    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/rapidas"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">rapidas</span>() {
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; todas = <span class="ty">List</span>.<span class="fn">of</span>( <span class="cm">/* as 12 de novo */</span> );
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="ty">Receita</span> r : todas) {
+            <span class="kw">if</span> (r.<span class="fn">minutos</span>() &lt;= <span class="st">30</span>) saida.<span class="fn">add</span>(r);
+        }
+        <span class="kw">return</span> saida;
+    }
+
+    <span class="an">@GetMapping</span>(<span class="st">"/catalogo/longas"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">longas</span>() {
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; todas = <span class="ty">List</span>.<span class="fn">of</span>( <span class="cm">/* e mais uma vez */</span> );
+        <span class="ty">List</span>&lt;<span class="ty">Receita</span>&gt; saida = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="ty">Receita</span> r : todas) {
+            <span class="kw">if</span> (r.<span class="fn">minutos</span>() &gt; <span class="st">60</span>) saida.<span class="fn">add</span>(r);
+        }
+        <span class="kw">return</span> saida;
+    }
+}</pre>
+
+  <div class="goal magenta" style="margin-top:22px">
+    <span class="ico">😖</span>
+    <div>
+      <h3>Antes de começar, sinta o problema</h3>
+      <p>Adicione <b>uma receita nova</b> ao catálogo, no código como ele está.
+      Conte quantos lugares você teve que editar.</p>
+      <p>Agora imagine que você esqueceu um deles. O <code>/catalogo</code>
+      mostra 13 itens e o <code>/catalogo/rapidas</code> continua olhando 12.
+      <b>Ninguém recebe erro nenhum</b> — o sistema só passa a mentir.</p>
+    </div>
+  </div>
+
+  <div class="label">Os três defeitos</div>
+
+  <div class="defeito">
+    <h4>1 · A lista está copiada três vezes</h4>
+    <p>Três cópias da mesma verdade. Toda mudança precisa acontecer em três lugares, e esquecer um não gera erro — gera resposta errada em silêncio.</p>
+    <p><b>Você vai:</b> criar um <code>@Repository</code> com a lista <b>uma vez só</b>, num método <code>todas()</code>.</p>
+  </div>
+
+  <div class="defeito">
+    <h4>2 · As regras estão dentro do controller</h4>
+    <p>"Rápida é até 30 minutos" e "longa é mais de 60" são decisões do negócio, não do transporte HTTP. Do jeito que está, para testar essas duas regras é preciso subir um servidor web e abrir o navegador.</p>
+    <p><b>Você vai:</b> mover os dois filtros para um <code>@Service</code>, em dois métodos com nomes que digam a regra.</p>
+  </div>
+
+  <div class="defeito">
+    <h4>3 · O controller monta tudo sozinho</h4>
+    <p>Ele busca os dados, percorre a lista, decide o que entra e monta a saída. São quatro trabalhos num método só.</p>
+    <p><b>Você vai:</b> deixar cada método do controller com <b>uma linha</b> — chamar o service e devolver. O service chega pelo construtor, num campo <code>final</code>. Nenhum <code>new</code> entre as suas classes.</p>
+  </div>
+
+  <div class="label">Passo a passo</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><h3>Rode o código quebrado e guarde as três respostas</h3></div>
+    <p>Cole o código no seu projeto, suba e chame os <b>três</b> endpoints. Copie cada JSON num arquivo à parte. Eles são o seu gabarito: no fim, as três respostas têm que ser idênticas.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><h3>Crie o repository</h3></div>
+    <p>Uma classe com <code>@Repository</code> e um método <code>todas()</code> devolvendo a lista — <b>uma vez só</b>. Apague as três cópias do controller.</p>
+    <p class="tip">O projeto vai quebrar. É esperado, igual ao lab 1.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><h3>Crie o service</h3></div>
+    <p>Uma classe com <code>@Service</code>, recebendo o repository pelo construtor, com <b>dois métodos</b>: um para as rápidas, outro para as longas.</p>
+    <p class="tip">Nomeie os métodos pela regra, não pelo endpoint: <code>rapidas()</code> e <code>longas()</code> — não <code>getCatalogoRapidas()</code>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><h3>Enxugue o controller</h3></div>
+    <p>Campo <code>final</code> do service, construtor recebendo ele, e os três métodos com uma linha cada.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>Compare com o gabarito do passo 1</h3></div>
+    <p>Os três endpoints, mesmos itens, mesma ordem. Diferente? Você mudou comportamento sem querer — ache onde antes de seguir.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">06</span><h3>Agora a prova de fogo</h3></div>
+    <p>Adicione <b>a mesma receita nova</b> do começo. Quantos arquivos você editou desta vez? Anote o número — ele vai para o <code>DECISOES.md</code>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">07</span><h3>Escreva o <code>DECISOES.md</code></h3></div>
+    <p>Um arquivo curto na raiz do repositório, com <b>uma seção por defeito</b>. Em cada uma, duas frases: o que você fez e <b>por quê</b>. Feche com o número do passo 6, antes e depois.</p>
+    <p class="tip">Este arquivo é parte da nota. Código certo com justificativa vazia mostra que funcionou por acaso.</p>
+  </div>
+
+  <div class="label">Como será avaliado</div>
+
+  <table class="criterios">
+    <tr><th>critério</th><th>o que se espera</th><th class="peso">peso</th></tr>
+    <tr><td>A lista existe uma vez só</td><td>Num <code>@Repository</code>, num método <code>todas()</code>. Nenhuma cópia sobrando.</td><td class="peso">25%</td></tr>
+    <tr><td>As regras estão no service</td><td>Dois métodos com <code>@Service</code>, nomeados pela regra. Nenhum <code>if</code> de negócio no controller.</td><td class="peso">25%</td></tr>
+    <tr><td>Ligação por construtor</td><td>Nenhum <code>new</code> entre as suas classes, todo campo de dependência <code>final</code>.</td><td class="peso">20%</td></tr>
+    <tr><td>Comportamento idêntico</td><td>Os três endpoints devolvem exatamente o que devolviam antes.</td><td class="peso">15%</td></tr>
+    <tr><td><code>DECISOES.md</code></td><td>Uma seção por defeito, com o porquê, e o número do passo 6.</td><td class="peso">15%</td></tr>
+  </table>
+
+  <div class="goal" style="margin-top:26px">
+    <span class="ico">🚫</span>
+    <div>
+      <h3>O que <b>não</b> entra neste desafio</h3>
+      <p>Banco de dados, DTO, validação, tratamento de erro, teste automatizado
+      e configuração por ambiente são as próximas aulas. Se você já sabe e
+      quiser fazer, faça — mas <b>não conta ponto</b>, e um desafio inchado é
+      mais difícil de corrigir e de te dar retorno útil.</p>
+    </div>
+  </div>
+
+  <div class="entrega">
+    <h3>📦 Entrega</h3>
+    <ul>
+      <li>Link do repositório, com o projeto rodando.</li>
+      <li><code>DECISOES.md</code> na raiz.</li>
+      <li>Prazo: <b>até a aula 03 (25/08)</b>, antes do início.</li>
+    </ul>
+    <p style="margin-top:12px">Travou? Traga na aula 03 <b>com o erro na tela</b>. Print do stack trace vale mais que descrição do problema.</p>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="exercicios.html">🧪 Exercícios da aula</a>
+    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Spring Boot · Aula 02 · Spring Boot 4.1 · Java 21 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>
