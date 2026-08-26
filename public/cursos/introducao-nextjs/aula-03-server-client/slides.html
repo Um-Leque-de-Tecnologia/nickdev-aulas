@@ -256,8 +256,8 @@
     <div class="tagtitle"><span class="nm">useState</span><span class="br">(</span> <span class="br">)</span></div>
     <h1 style="margin:24px 0 14px">A página que <span class="grad">responde</span></h1>
     <p class="lead" style="max-width:56ch">Até agora a sua página desenhava e ficava parada. Hoje ela passa a reagir ao clique, ao que a pessoa digita e à escolha que ela faz.</p>
-    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">aula de mão na massa · <strong>4 exercícios</strong> · deixe o Leque de Vagas aberto</p>
-    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted);max-width:76ch">quatro atos · <strong>onde o seu código roda</strong> (lab 1) · <strong>a fronteira <span class="mono">"use client"</span></strong> (lab 2) · <strong>a memória do componente</strong> (labs 3 e 4) · <strong>o desafio das quatro frentes</strong> (até 02/09) · Suspense e streaming saíram desta aula: entram na aula 04, quando a espera for de verdade.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">aula de mão na massa · <strong>4 exercícios</strong> · deixe o Leque de Vagas aberto · use <kbd>←</kbd> <kbd>→</kbd> pra navegar</p>
   </section>
 
   <!-- 2 · A DIVIDA DA AULA 02 -->
@@ -271,21 +271,7 @@
     <p class="note"><strong>Hoje é a aula 03.</strong> Na primeira metade você vai saber por que a linha estava em cada um desses três arquivos — e por que ela <em>não</em> está nos outros. Na segunda ela deixa de ser o assunto e vira ferramenta: é ela que abre a porta para o <span class="mono">useState</span>.</p>
   </section>
 
-  <!-- 3 · AGENDA -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>o caminho de hoje</div>
-    <h2>Quatro atos</h2>
-    <div class="agenda">
-      <div class="row"><span class="t">ato 1</span><span class="d">Onde o seu código roda — e por que o <span class="mono">console.log</span> some do navegador</span><span class="tag">lab 1</span></div>
-      <div class="row"><span class="t">ato 2</span><span class="d">A fronteira: a linha <span class="mono">"use client"</span>, onde ela vai e onde ela <em>não</em> precisa ir</span><span class="tag">lab 2</span></div>
-      <div class="row"><span class="t">ato 3</span><span class="d">A memória do componente: <span class="mono">useState</span>, campo controlado, estado derivado</span><span class="tag">labs 3 e 4</span></div>
-      <div class="row"><span class="t">ato 4</span><span class="d">O desafio das quatro frentes — o Leque de Vagas dividido entre a equipe</span><span class="tag">até 02/09</span></div>
-      <div class="row brk"><span class="t">fora</span><span class="d">Suspense e streaming saíram desta aula. Eles entram na aula 04, quando a espera for de verdade.</span><span class="tag">aula 04</span></div>
-    </div>
-    <p class="note">Os quatro labs são curtos e acumulativos: o que você escreve no lab 1 continua na tela no lab 4. Não apague nada.</p>
-  </section>
-
-  <!-- 4 · CONCEITO 1 -->
+  <!-- 3 · ONDE O CODIGO RODA -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 1</div>
     <h2>Uma pergunta simples</h2>
@@ -297,14 +283,27 @@
   <span class="ty">console</span>.<span class="fn">log</span>(<span class="st">"[servidor] montando a listagem"</span>);
   <span class="kw">return</span> <span class="tagc">&lt;h1&gt;</span>Vagas<span class="tagc">&lt;/h1&gt;</span>;
 }</pre>
-    <div class="grid2" style="margin-top:24px">
+    <div class="grid2" style="margin-top:22px">
       <div class="card no"><h3 class="key">No console do navegador</h3><p>É onde quase todo mundo procura primeiro. <strong>Não está lá.</strong></p></div>
       <div class="card ok"><h3 class="grn">No terminal onde você rodou <span class="mono">npm run dev</span></h3><p>É ali que ele aparece. E isso não é um detalhe curioso — é a aula inteira.</p></div>
     </div>
-    <p class="note">O seu componente <strong>rodou no servidor</strong>. O navegador nunca viu esse código: ele recebeu só o resultado.</p>
+    <h3 style="margin-top:30px">O seu componente rodou no servidor: o navegador recebe o resultado, não a receita</h3>
+    <div class="flow" style="margin-top:18px">
+      <div class="node"><div class="ico">🖥️</div><b>O servidor monta</b><span>roda a sua função<br>e escreve o HTML</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📦</div><b>Manda o HTML</b><span>texto pronto,<br>sem o seu código junto</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📱</div><b>O navegador desenha</b><span>só pinta<br>o que chegou</span></div>
+    </div>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><h3 class="grn">Chega mais rápido</h3><p>A pessoa vê conteúdo sem esperar o celular dela baixar e executar JavaScript.</p></div>
+      <div class="card"><h3 class="attr">Segredo não vaza</h3><p>Senha de banco, chave de API — ficam no servidor. O navegador nunca as recebe.</p></div>
+      <div class="card"><h3 class="tagc">Isso é o padrão</h3><p>Todo arquivo que você escreveu até agora funciona assim. Você não fez nada para isso — <strong>é o normal</strong>.</p></div>
+    </div>
+    <p class="note">Esses arquivos têm nome: <strong>Server Components</strong>. Componentes que rodam no servidor. Você já escreveu uns dez sem saber que tinham nome.</p>
   </section>
 
-  <!-- 5 · LAB 1 -->
+  <!-- 4 · LAB 1 -->
   <section class="slide lab">
     <div class="eyebrow"><span class="b">// </span>mão na massa</div>
     <div class="labhead">
@@ -324,26 +323,7 @@
     </div>
   </section>
 
-  <!-- 6 · O RESULTADO, NAO A RECEITA -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>conceito 1 · a consequência</div>
-    <h2>O navegador recebe o resultado, não a receita</h2>
-    <div class="flow" style="margin-top:26px">
-      <div class="node"><div class="ico">🖥️</div><b>O servidor monta</b><span>roda a sua função<br>e escreve o HTML</span></div>
-      <div class="arw">→</div>
-      <div class="node"><div class="ico">📦</div><b>Manda o HTML</b><span>texto pronto,<br>sem o seu código junto</span></div>
-      <div class="arw">→</div>
-      <div class="node"><div class="ico">📱</div><b>O navegador desenha</b><span>só pinta<br>o que chegou</span></div>
-    </div>
-    <div class="grid3" style="margin-top:26px">
-      <div class="card"><h3 class="grn">Chega mais rápido</h3><p>A pessoa vê conteúdo sem esperar o celular dela baixar e executar JavaScript.</p></div>
-      <div class="card"><h3 class="attr">Segredo não vaza</h3><p>Senha de banco, chave de API — ficam no servidor. O navegador nunca as recebe.</p></div>
-      <div class="card"><h3 class="tagc">Isso é o padrão</h3><p>Todo arquivo que você escreveu até agora funciona assim. Você não fez nada para isso — <strong>é o normal</strong>.</p></div>
-    </div>
-    <p class="note">Esses arquivos têm nome: <strong>Server Components</strong>. Componentes que rodam no servidor. Você já escreveu uns dez sem saber que tinham nome.</p>
-  </section>
-
-  <!-- 7 · CONCEITO 2 · O DIA EM QUE NAO BASTA -->
+  <!-- 5 · A LINHA -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 2</div>
     <h2>O dia em que isso não basta</h2>
@@ -364,23 +344,9 @@
                                 <span class="err">^^^^^^^^^^^^^^^^^^</span>
 <span class="cm">If you need interactivity, consider converting part of this to a Client Component.</span></div>
     <p class="note"><strong>Em português:</strong> "você me deu uma função para escutar o clique, e eu não tenho quem escute". O clique acontece no dedo da pessoa, depois que a página já está na tela — e a essa altura o servidor terminou o trabalho e foi embora. <span class="mono">navigator</span> e <span class="mono">location</span> também só existem lá, no navegador dela.</p>
-  </section>
-
-  <!-- 8 · E ESSA A LINHA -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>conceito 2 · a linha</div>
-    <h2>É essa a linha</h2>
+    <h3 style="margin-top:30px">É essa a linha</h3>
     <div class="filetab">📄 components/BotaoCopiarLink.tsx</div>
-<pre class="code"><span class="st">"use client"</span>;
-<span class="cm">// ↑ Primeira linha do arquivo, antes de qualquer import.</span>
-
-<span class="kw">export default function</span> <span class="fn">BotaoCopiarLink</span>({ titulo }) {
-  <span class="kw">return</span> (
-    <span class="tagc">&lt;button</span> <span class="attr">type</span>=<span class="st">"button"</span> <span class="attr">onClick</span>={() =&gt; <span class="ty">navigator</span>.clipboard.<span class="fn">writeText</span>(<span class="ty">location</span>.href)}<span class="tagc">&gt;</span>
-      🔗 Copiar link
-    <span class="tagc">&lt;/button&gt;</span>
-  );
-}</pre>
+<pre class="code"><span class="st">"use client"</span>;</pre>
     <div class="regras">
       <div class="r"><span class="num">1</span><span class="tx"><b>Primeira linha do arquivo</b>, antes de qualquer <span class="mono">import</span>. Com aspas e ponto e vírgula: não é comentário, é uma instrução para o Next.</span></div>
       <div class="r"><span class="num">2</span><span class="tx">Ela <b>não tira o arquivo do servidor</b> — ela <b>acrescenta o navegador</b>. O HTML continua vindo pronto; o que muda é que agora o código também viaja junto, para o clique ter quem o escute.</span></div>
@@ -389,7 +355,7 @@
     <p class="note">Um arquivo com essa linha é um <strong>Client Component</strong>. Sem ela, é um <strong>Server Component</strong> — que é o padrão. Você nunca escreve <span class="mono">"use server"</span> para isso: o servidor já é o normal.</p>
   </section>
 
-  <!-- 9 · A PORTA, NAO CADA MOVEL -->
+  <!-- 6 · A PORTA, NAO CADA MOVEL -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 2 · o mal-entendido nº 1</div>
     <h2>A linha marca a porta, não cada móvel</h2>
@@ -405,7 +371,7 @@
     <p class="note">Repare no <span class="code-inline">Filtros.tsx</span>: ele tem <span class="mono">onChange</span>, tem <span class="mono">onClick</span>, e mesmo assim <strong>não tem a linha</strong>. Ele já nasceu do lado de dentro.</p>
   </section>
 
-  <!-- 10 · LAB 2 -->
+  <!-- 7 · LAB 2 -->
   <section class="slide lab">
     <div class="eyebrow"><span class="b">// </span>mão na massa</div>
     <div class="labhead">
@@ -414,7 +380,7 @@
       <span class="t">~10 min</span>
     </div>
     <div class="steps">
-      <div class="st"><div class="body"><h3>Crie <span class="mono">components/BotaoCopiarLink.tsx</span> <strong>sem</strong> a primeira linha</h3><p>Com o <span class="code-inline">onClick</span> do slide 7. É para dar errado — a gente quer o erro.</p></div></div>
+      <div class="st"><div class="body"><h3>Crie <span class="mono">components/BotaoCopiarLink.tsx</span> <strong>sem</strong> a primeira linha</h3><p>Com o <span class="code-inline">onClick</span> do slide 5. É para dar errado — a gente quer o erro.</p></div></div>
       <div class="st"><div class="body"><h3>Use ele na página da vaga</h3><p>Importe e ponha o <span class="code-inline">&lt;BotaoCopiarLink /&gt;</span> em algum lugar visível de <span class="code-inline">app/vagas/[id]/page.tsx</span>.</p></div></div>
       <div class="st"><div class="body"><h3>Rode e leia o erro <em>inteiro</em>, antes de consertar</h3><p>De cima até a última linha. Ele diz o que falta, onde falta e o que fazer.</p></div></div>
       <div class="st"><div class="body"><h3>Só agora ponha o <span class="mono">"use client"</span> e recarregue</h3><p>Clique no botão e cole em algum lugar para confirmar que copiou mesmo.</p></div></div>
@@ -425,18 +391,11 @@
     </div>
   </section>
 
-  <!-- 11 · PARADA -->
-  <section class="slide parada">
-    <div class="badge">parada de dez segundos</div>
-    <h1>O clique funciona. E a tela continua igual.</h1>
-    <p class="lead" style="margin-top:24px;max-width:44ch">Este é o problema da segunda metade da aula.</p>
-  </section>
-
-  <!-- 12 · CONCEITO 3 · O BOTAO QUE NAO MUDA NADA -->
+  <!-- 8 · O BOTAO QUE NAO MUDA NADA -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 3</div>
     <h2>O botão que não muda nada</h2>
-    <p class="lead" style="margin-bottom:16px">Um botão de curtir a vaga. Você guarda a resposta numa variável e troca ela no clique. Parece certo.</p>
+    <p class="lead" style="margin-bottom:16px"><strong>O clique funciona. E a tela continua igual.</strong> Este é o problema da segunda metade da aula. Um botão de curtir a vaga: você guarda a resposta numa variável e troca ela no clique. Parece certo.</p>
     <div class="filetab">📄 rascunho na aula · não é arquivo do projeto</div>
 <pre class="code"><span class="st">"use client"</span>;
 
@@ -453,16 +412,11 @@
   );
 }</pre>
     <div class="ask" style="border-color:rgba(242,68,135,.42);background:rgba(242,68,135,.07)">
-      <b style="color:var(--key)">pense antes de virar o slide</b>
+      <b style="color:var(--key)">pense dez segundos antes de ler a resposta</b>
       <p>O clique acontece. A variável <span class="mono">curtido</span> vira <span class="mono">true</span> — dá para conferir com um <span class="mono">console.log</span> dentro do <span class="mono">onClick</span>. <strong>Então por que a estrela não muda na tela?</strong></p>
     </div>
-  </section>
-
-  <!-- 13 · PORQUE A FUNCAO RODA DE NOVO -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>conceito 3 · a razão</div>
-    <h2>Porque a função roda de novo</h2>
-    <p class="lead" style="margin-bottom:22px">Um componente é uma função. Desenhar a tela é <strong>chamar essa função</strong>. E a cada chamada, toda variável de dentro nasce do zero.</p>
+    <h3 style="margin-top:30px">Porque a função roda de novo</h3>
+    <p style="margin-bottom:20px">Um componente é uma função. Desenhar a tela é <strong>chamar essa função</strong>. E a cada chamada, toda variável de dentro nasce do zero.</p>
     <div class="flow">
       <div class="node"><div class="ico">1️⃣</div><b>Render 1</b><span>a função roda<br><span class="mono">curtido = false</span><br>a tela mostra ☆</span></div>
       <div class="arw">→</div>
@@ -477,7 +431,7 @@
     <p class="note"><strong>A função do componente não tem memória.</strong> Guarde essa frase: metade dos bugs de estado da sua vida começa por esquecê-la.</p>
   </section>
 
-  <!-- 14 · useState -->
+  <!-- 9 · useState -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 3 · a solução</div>
     <h2><span class="mono">useState</span>: a memória do componente</h2>
@@ -493,13 +447,8 @@
       <div class="r"><span class="num">3</span><span class="tx"><b>O valor inicial só vale na primeira vez.</b> Nos renders seguintes o React devolve o que ele guardou e ignora o que está dentro do <span class="mono">useState(...)</span>.</span></div>
     </div>
     <p class="note">O nome entre colchetes é seu: <span class="mono">[busca, setBusca]</span>, <span class="mono">[aberta, setAberta]</span>, <span class="mono">[aba, setAba]</span>. A convenção <span class="mono">set</span> + nome não é obrigação da linguagem — é o que faz a próxima pessoa entender o seu arquivo em três segundos.</p>
-  </section>
-
-  <!-- 15 · O QUE ACONTECE NO set -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>conceito 3 · o fluxo</div>
-    <h2>O que acontece quando você chama <span class="mono">setCurtido</span></h2>
-    <div class="flow" style="margin-top:24px">
+    <h3 style="margin-top:30px">O que acontece quando você chama <span class="mono">setCurtido</span></h3>
+    <div class="flow" style="margin-top:18px">
       <div class="node"><div class="ico">👆</div><b>Você chama</b><span><span class="mono">setCurtido(true)</span></span></div>
       <div class="arw">→</div>
       <div class="node"><div class="ico">🧠</div><b>O React guarda</b><span>o valor novo fica<br>fora da sua função</span></div>
@@ -508,12 +457,12 @@
       <div class="arw">→</div>
       <div class="node"><div class="ico">✨</div><b>A tela muda</b><span>só o pedaço<br>que ficou diferente</span></div>
     </div>
-    <p class="lead" style="margin-top:26px"><strong>Você não mexe na tela. Você mexe no dado — e a tela vem atrás.</strong></p>
+    <p class="lead" style="margin-top:24px"><strong>Você não mexe na tela. Você mexe no dado — e a tela vem atrás.</strong></p>
     <p style="margin-top:12px">Isso é a virada de chave do curso inteiro. Nada de procurar o botão pelo id e trocar o texto dele na mão: você troca o valor, e o React refaz o que ficou diferente.</p>
     <p class="note">Efeito colateral que confunde: logo depois de <span class="mono">setBusca("a")</span>, um <span class="mono">console.log(busca)</span> mostra o valor <strong>antigo</strong>. Não está quebrado — <span class="mono">busca</span> é a foto daquela rodada. O valor novo chega no render seguinte.</p>
   </section>
 
-  <!-- 16 · LAB 3 -->
+  <!-- 10 · LAB 3 -->
   <section class="slide lab">
     <div class="eyebrow"><span class="b">// </span>mão na massa</div>
     <div class="labhead">
@@ -533,7 +482,7 @@
     </div>
   </section>
 
-  <!-- 17 · CAMPO CONTROLADO -->
+  <!-- 11 · CAMPO CONTROLADO -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 4</div>
     <h2>Campo controlado: <span class="mono">value</span> anda com <span class="mono">onChange</span></h2>
@@ -556,13 +505,13 @@
   <span class="attr">value</span>={busca}
   <span class="attr">onChange</span>={(e) =&gt; <span class="fn">setBusca</span>(e.target.value)}
 <span class="tagc">/&gt;</span></pre>
-        <p class="muted" style="font-size:14px;margin-top:8px">Cada tecla chama <span class="mono">setBusca</span>, o React guarda, roda a função de novo e o campo desenha o valor novo. O ciclo do slide anterior, uma letra por vez.</p>
+        <p class="muted" style="font-size:14px;margin-top:8px">Cada tecla chama <span class="mono">setBusca</span>, o React guarda, roda a função de novo e o campo desenha o valor novo. O ciclo do slide 9, uma letra por vez.</p>
       </div>
     </div>
     <p class="note">Vantagem de ter o texto no estado: agora <strong>o resto da tela também sabe o que a pessoa digitou</strong>. É isso que faz a lista filtrar no lab 4.</p>
   </section>
 
-  <!-- 18 · LAB 4 -->
+  <!-- 12 · LAB 4 -->
   <section class="slide lab">
     <div class="eyebrow"><span class="b">// </span>mão na massa</div>
     <div class="labhead">
@@ -583,10 +532,11 @@
     </div>
   </section>
 
-  <!-- 19 · ESTADO DERIVADO -->
+  <!-- 13 · AS DUAS REGRAS DO DADO -->
   <section class="slide">
-    <div class="eyebrow"><span class="b">⭐ </span>estado derivado · o slide que salva a semana</div>
-    <h2>Se dá para calcular, não guarde</h2>
+    <div class="eyebrow"><span class="b">⭐ </span>conceito 5 · estado derivado · estado que é lista</div>
+    <h2>Duas regras que salvam a semana</h2>
+    <div><span class="passo">regra 1 · se dá para calcular, não guarde</span></div>
     <div class="duo">
       <div>
         <span class="verdict no">dois estados</span>
@@ -614,13 +564,8 @@
       </div>
     </div>
     <p class="note"><strong>Dois estados que precisam combinar são uma dupla que um dia vai brigar.</strong> Antes de escrever um <span class="mono">useState</span>, pergunte: isso eu tenho como calcular do que já está aqui? Se tem, é conta, não é estado.</p>
-  </section>
-
-  <!-- 20 · ESTADO QUE E LISTA -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>conceito 5</div>
-    <h2>Estado que é lista: lista nova, nunca a mesma</h2>
-    <p class="lead" style="margin-bottom:20px">O formulário de candidatura guarda as habilidades que a pessoa adiciona. Aqui mora o erro mais teimoso do dia.</p>
+    <div style="margin-top:30px"><span class="passo">regra 2 · lista nova, nunca a mesma</span></div>
+    <p style="margin-bottom:16px">O formulário de candidatura guarda as habilidades que a pessoa adiciona. Aqui mora o erro mais teimoso do dia.</p>
     <div class="duo">
       <div>
         <span class="verdict no">a tela não atualiza</span>
@@ -647,7 +592,7 @@
     </div>
   </section>
 
-  <!-- 21 · ONDE O ESTADO MORA -->
+  <!-- 14 · ONDE O ESTADO MORA -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>conceito 6</div>
     <h2>Onde o estado mora</h2>
@@ -672,8 +617,7 @@
       <div>
         <span class="verdict mid">quem só recebe</span>
         <div class="filetab">📄 components/Filtros.tsx</div>
-<pre class="code"><span class="cm">// Sem "use client": quem importa este arquivo</span>
-<span class="cm">// já é de cliente. A linha marca a porta.</span>
+<pre class="code"><span class="cm">// Sem "use client": quem importa já é de cliente.</span>
 
 <span class="kw">export default function</span> <span class="fn">Filtros</span>({ busca, aoMudarBusca }) {
   <span class="kw">return</span> (
@@ -686,13 +630,8 @@
       </div>
     </div>
     <p class="note"><strong>Dado desce por prop, aviso sobe por função.</strong> O <span class="mono">Filtros</span> não guarda nada e não decide nada: ele mostra o que recebeu e avisa quando a pessoa mexeu. Componente burro é componente reaproveitável.</p>
-  </section>
-
-  <!-- 22 · A NUANCE DA FRONTEIRA -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>desfazendo o mal-entendido da aula 02</div>
-    <h2>Função não atravessa a fronteira — mas dentro do cliente ela circula à vontade</h2>
-    <p class="lead" style="margin-bottom:20px">Alguém aí travou no slide anterior: <em>"mas você disse que função não pode ir por prop"</em>. Disse. A regra vale <strong>de servidor para cliente</strong>. Entre dois componentes de cliente, é o normal do dia a dia.</p>
+    <h3 style="margin-top:30px">Função não atravessa a fronteira — mas dentro do cliente ela circula à vontade</h3>
+    <p style="margin-bottom:18px">Alguém aí travou nesse par: <em>"mas você disse que função não pode ir por prop"</em>. Disse. A regra vale <strong>de servidor para cliente</strong>. Entre dois componentes de cliente, é o normal do dia a dia.</p>
     <div class="duo">
       <div>
         <span class="verdict no">servidor → cliente</span>
@@ -713,81 +652,15 @@
 
 <span class="kw">return</span> <span class="tagc">&lt;</span><span class="ty">Filtros</span> <span class="attr">busca</span>={busca} <span class="attr">aoMudarBusca</span>={setBusca} <span class="tagc">/&gt;</span>;
 
-<span class="cm">// nenhum erro. os dois já estão do mesmo</span>
-<span class="cm">// lado da fronteira: rodam no navegador.</span></pre>
+<span class="cm">// nenhum erro: os dois rodam no navegador.</span></pre>
         <p class="muted" style="font-size:14px;margin-top:8px">Nada precisou virar texto: ninguém atravessou nada. O <span class="mono">setBusca</span> é uma função que já está na memória do navegador, entregue a outro arquivo que também está lá.</p>
       </div>
     </div>
     <p class="note">Como saber de que lado você está? <strong>Suba a árvore até achar a linha.</strong> Se existe um <span class="mono">"use client"</span> acima de você, você é cliente e passa função à vontade. Se não existe, você é servidor — e aí só dado atravessa.</p>
+    <p class="note">E repare: a <span class="mono">app/vagas/page.tsx</span> continua <strong>sem a linha</strong>. O <span class="mono">console.log</span> do lab 1 continua saindo no terminal — a fronteira desceu para a folha, a página não mudou de lado.</p>
   </section>
 
-  <!-- 23 · A PAGINA CONTINUA NO SERVIDOR -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>juntando as duas metades</div>
-    <h2>A página continua no servidor</h2>
-    <p class="lead" style="margin-bottom:16px">A fronteira desceu para a folha. A página busca os dados e entrega prontos; o componente de cliente cuida só do que muda.</p>
-    <div class="filetab">📄 app/vagas/page.tsx · servidor</div>
-<pre class="code"><span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
-<span class="kw">import</span> <span class="ty">MuralDeVagas</span> <span class="kw">from</span> <span class="st">"@/components/MuralDeVagas"</span>;
-
-<span class="kw">export default function</span> <span class="fn">Vagas</span>() {
-  <span class="cm">// Continua saindo no TERMINAL: a página não virou de cliente.</span>
-  <span class="ty">console</span>.<span class="fn">log</span>(<span class="st">"[servidor] montando a listagem"</span>);
-
-  <span class="kw">return</span> (
-    <span class="tagc">&lt;&gt;</span>
-      <span class="tagc">&lt;h1&gt;</span>Vagas<span class="tagc">&lt;/h1&gt;</span>
-      <span class="tagc">&lt;</span><span class="ty">MuralDeVagas</span> <span class="attr">vagas</span>={vagas} <span class="tagc">/&gt;</span>
-    <span class="tagc">&lt;/&gt;</span>
-  );
-}</pre>
-    <div class="grid3" style="margin-top:22px">
-      <div class="card ok"><h3 class="grn">A página não levou a linha</h3><p>Volte no lab 1 e confira: o <span class="mono">console.log</span> continua no terminal. Nada mudou de lado.</p></div>
-      <div class="card"><h3 class="attr">Um dado atravessou</h3><p><span class="mono">vagas</span> é uma lista de objetos simples — texto, número, <span class="mono">true</span>/<span class="mono">false</span>. Atravessa sem reclamar.</p></div>
-      <div class="card"><h3 class="tagc">Hoje o dado é local</h3><p>Ele vem de <span class="mono">data/vagas.ts</span>. Buscar de uma API de verdade, com a espera que isso traz, é a <strong>aula 04</strong>.</p></div>
-    </div>
-  </section>
-
-  <!-- 24 · A TABELA DOS ERROS -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>eu já vi este filme</div>
-    <h2>Os erros que eu vou ver esta semana</h2>
-    <table>
-      <thead><tr><th>o que você escreve</th><th>o que acontece</th><th>por quê</th></tr></thead>
-      <tbody>
-        <tr><td><code>curtido = true</code></td><td>a tela não muda</td><td>o React não fica sabendo. Só o <code>setCurtido</code> avisa.</td></tr>
-        <tr><td><code>&lt;input value={busca} /&gt;</code> sem <code>onChange</code></td><td>o campo não deixa digitar</td><td>o valor está preso ao estado, e nada troca o estado</td></tr>
-        <tr><td><code>habilidades.push(nova)</code></td><td>a tela não atualiza</td><td>é a <strong>mesma</strong> lista. O React compara a lista com ela mesma e não vê diferença.</td></tr>
-        <tr><td><code>setBusca("a"); console.log(busca)</code></td><td>mostra o valor <strong>antigo</strong></td><td><code>busca</code> é a foto daquele render. O valor novo chega no render seguinte.</td></tr>
-        <tr><td><code>"use client"</code> em <code>page.tsx</code></td><td>tudo desce pro navegador</td><td>a fronteira subiu pra raiz. Marque a folha.</td></tr>
-        <tr><td>dois estados que precisam combinar</td><td>um dia a tela mente</td><td>derive em vez de guardar</td></tr>
-        <tr><td><code>onClick</code> num arquivo sem <code>"use client"</code></td><td>erro citando <em>"Event handlers cannot be passed to Client Component props"</em></td><td>o servidor não tem quem escute o clique</td></tr>
-      </tbody>
-    </table>
-    <p class="note">Nenhum desses é erro de gente desatenta — são os sete jeitos de descobrir que o React funciona por dado, e não por comando direto na tela. Print da tela do erro no chat da equipe resolve em dois minutos o que sozinho leva quarenta.</p>
-  </section>
-
-  <!-- 25 · O QUE NAO E ESTADO + O DESAFIO -->
-  <section class="slide">
-    <div class="eyebrow"><span class="b">// </span>o limite de hoje · e o desafio</div>
-    <h2>O que <em>não</em> é estado</h2>
-    <div class="grid3">
-      <div class="card no"><h3 class="key">O que vem da URL</h3><p>Filtro que a pessoa quer <strong>mandar por link</strong> mora no endereço, não no <span class="mono">useState</span>. Isso é <strong>aula 06</strong>, com <span class="mono">searchParams</span>.</p></div>
-      <div class="card no"><h3 class="key">O que vem do servidor</h3><p>A lista de vagas não vira estado só para existir. Buscar dado de verdade é <strong>aula 04</strong>; guardar de verdade é <strong>aula 05</strong>, com Server Actions.</p></div>
-      <div class="card ok"><h3 class="grn">Estado é o resto</h3><p>O que só existe <strong>naquela aba, naquele momento</strong>: o que a pessoa digitou, a aba aberta, o "ver mais" expandido. Recarregou, sumiu — e hoje tudo bem.</p></div>
-    </div>
-    <h3 style="margin-top:34px;font-size:clamp(19px,2.6vw,30px)">🧩 O desafio: quatro frentes, uma por integrante</h3>
-    <p style="margin-top:6px;margin-bottom:16px">Cada pessoa carrega a sua frente o semestre inteiro — e treina uma <strong>forma diferente de estado</strong>. No fim da semana a equipe inteira viu as quatro. Quem faz a frente 1 aqui tem uma frente irmã no curso de Spring Boot, construindo a API do mesmo Leque de Vagas.</p>
-    <div class="grid4">
-      <div class="frente" style="--c:#F24487"><span class="n">frente 1</span><h3>Vaga</h3><p><span class="mono">data/vagas.ts</span>, o card e a página de detalhe. É o contrato da equipe.</p><span class="forma">booleano · ver mais</span></div>
-      <div class="frente" style="--c:#7B4FD0"><span class="n">frente 2</span><h3>Empresa</h3><p><span class="mono">data/empresas.ts</span> e a página da empresa com abas.</p><span class="forma">texto que escolhe</span></div>
-      <div class="frente" style="--c:#5fd08a"><span class="n">frente 3</span><h3>Pessoa e candidatura</h3><p>O formulário de candidatura, com validação enquanto se digita.</p><span class="forma">controlado + lista</span></div>
-      <div class="frente" style="--c:#E88BB8"><span class="n">frente 4</span><h3>Busca e números</h3><p>Filtros, busca e as contagens do catálogo.</p><span class="forma">derivado + levantado</span></div>
-    </div>
-    <p class="note"><strong>A combinação de 30 minutos:</strong> a frente 1 entrega <span class="mono">data/vagas.ts</span> primeiro, num commit só, e avisa a equipe. As outras três programam contra o tipo <span class="mono">Vaga</span> antes mesmo de as telas existirem. Prazo do desafio: <strong>até a aula 04, 02/09, antes do início</strong>.</p>
-  </section>
-
-  <!-- 26 · FECHAMENTO -->
+  <!-- 15 · FECHAMENTO -->
   <section class="slide">
     <div class="eyebrow"><span class="b">// </span>antes de ir</div>
     <h2>O que fica de hoje</h2>
@@ -798,12 +671,22 @@
       <li><strong>Você não mexe na tela, mexe no dado.</strong> Só a função <span class="mono">set</span> avisa o React — e lista nova, nunca <span class="mono">push</span>.</li>
       <li><strong>Se dá para calcular, não guarde.</strong> Dois estados que precisam combinar são uma dupla que um dia vai brigar.</li>
     </ul>
-    <div class="grid3" style="margin-top:30px">
-      <div class="card"><h3 class="key">🧩 O desafio das quatro frentes</h3><p>Cada integrante entrega um componente de cliente com estado. <a href="/cursos/introducao-nextjs/aula-03-server-client/desafio.html" style="color:var(--key);text-decoration:underline">Abra o desafio</a> — entrega até 02/09.</p></div>
-      <div class="card"><h3 class="attr">🤝 A combinação de 30 minutos</h3><p>Sentem hoje, ainda em aula: quem faz o quê, e a frente 1 sobe <span class="mono">data/vagas.ts</span> primeiro. Os <span class="mono">empresaSlug</span> das vagas precisam existir em <span class="mono">data/empresas.ts</span>.</p></div>
-      <div class="card"><h3 class="grn">📘 O guia de Next.js</h3><p>Tem as seções <em>useState e estado derivado</em>, <em>componente controlado</em> e o dicionário de termos: <a href="/guias/nextjs.html" style="color:var(--green);text-decoration:underline">guia de Next.js</a>. Consultar não é trapaça.</p></div>
+    <h3 style="margin-top:30px">E o que <em>não</em> é estado</h3>
+    <div class="grid3">
+      <div class="card no"><h3 class="key">O que vem da URL</h3><p>Filtro que a pessoa quer mandar por link mora no endereço. É <strong>aula 06</strong>, com <span class="mono">searchParams</span>.</p></div>
+      <div class="card no"><h3 class="key">O que vem do servidor</h3><p>Buscar dado de verdade é <strong>aula 04</strong>; guardar de verdade é <strong>aula 05</strong>, com Server Actions.</p></div>
+      <div class="card ok"><h3 class="grn">Estado é o resto</h3><p>O que só existe naquela aba, naquele momento. Recarregou, sumiu — e hoje tudo bem.</p></div>
     </div>
-    <p class="note">Dúvida que ficou? Traga na aula 04 <strong>com o erro na tela</strong>. Print do stack trace vale mais que descrição do problema.</p>
+    <h3 style="margin-top:34px;font-size:clamp(19px,2.6vw,30px)">🧩 O desafio: quatro frentes, uma por integrante</h3>
+    <p style="margin-top:6px;margin-bottom:16px">Cada pessoa carrega a sua frente o semestre inteiro — e treina uma <strong>forma diferente de estado</strong>. No fim da semana a equipe inteira viu as quatro. Quem faz a frente 1 aqui tem uma frente irmã no curso de Spring Boot, construindo a API do mesmo Leque de Vagas.</p>
+    <div class="grid4">
+      <div class="frente" style="--c:#F24487"><span class="n">frente 1</span><h3>Vaga</h3><p><span class="mono">data/vagas.ts</span>, o card e a página de detalhe. É o contrato da equipe.</p><span class="forma">booleano · ver mais</span></div>
+      <div class="frente" style="--c:#7B4FD0"><span class="n">frente 2</span><h3>Empresa</h3><p><span class="mono">data/empresas.ts</span> e a página da empresa com abas.</p><span class="forma">texto que escolhe</span></div>
+      <div class="frente" style="--c:#5fd08a"><span class="n">frente 3</span><h3>Pessoa e candidatura</h3><p>O formulário de candidatura, com validação enquanto se digita.</p><span class="forma">controlado + lista</span></div>
+      <div class="frente" style="--c:#E88BB8"><span class="n">frente 4</span><h3>Busca e números</h3><p>Filtros, busca e as contagens do catálogo.</p><span class="forma">derivado + levantado</span></div>
+    </div>
+    <p class="note"><strong>A combinação de 30 minutos é hoje, ainda em aula:</strong> quem faz o quê, e a frente 1 sobe <span class="mono">data/vagas.ts</span> primeiro, num commit só. As outras três programam contra o tipo <span class="mono">Vaga</span> antes mesmo de as telas existirem. <a href="/cursos/introducao-nextjs/aula-03-server-client/desafio.html" style="color:var(--attr);text-decoration:underline">Abra o desafio</a> — entrega até <strong>02/09, antes do início da aula 04</strong>.</p>
+    <p class="note">A tabela dos erros mais comuns desta semana está na <a href="/cursos/introducao-nextjs/aula-03-server-client/exercicios.html" style="color:var(--attr);text-decoration:underline">folha de exercícios</a> e na <a href="/cursos/introducao-nextjs/aula-03-server-client/codigos-desafio.html" style="color:var(--attr);text-decoration:underline">página de código do desafio</a> — os arquivos que ficam abertos enquanto se programa. O <a href="/guias/nextjs.html" style="color:var(--attr);text-decoration:underline">guia de Next.js</a> tem as seções <em>useState e estado derivado</em> e <em>componente controlado</em>: consultar não é trapaça. Dúvida que ficou? Traga na aula 04 <strong>com o erro na tela</strong>.</p>
   </section>
 
 </div>
@@ -811,7 +694,7 @@
 <div class="progress" id="progress"></div>
 <div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
 <div class="nav">
-  <span id="counter">01 / 26</span>
+  <span id="counter">01 / 15</span>
   <button id="prev" aria-label="anterior">‹</button>
   <button id="next" aria-label="próximo">›</button>
 </div>
