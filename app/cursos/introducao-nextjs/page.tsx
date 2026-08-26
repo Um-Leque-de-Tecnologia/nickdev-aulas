@@ -31,7 +31,8 @@ const AULAS: Aula[] = [
       <>
         <span className="mono">fetch</span> com cache; revalidação (ISR);{" "}
         <span className="mono">generateStaticParams</span>; static vs dynamic;
-        Partial Prerendering; Metadata API.
+        streaming com <span className="mono">Suspense</span>, agora que a espera
+        é de verdade; Partial Prerendering; Metadata API.
       </>
     ),
   },
@@ -101,7 +102,9 @@ const AULAS: Aula[] = [
     titulo: "Estado e cache no cliente",
     desc: (
       <>
-        Context API; Zustand; TanStack Query; router cache; UI otimista.
+        O estado que a aula 03 deixou preso dentro de um componente, agora
+        compartilhado: Context API; Zustand; TanStack Query; router cache; UI
+        otimista.
       </>
     ),
   },
@@ -233,6 +236,9 @@ export default function FrontendAvancadoNextjs() {
               listagem, busca, autenticação, banco de dados e deploy contínuo.{" "}
               <strong>O tema é o mesmo para a turma inteira</strong> — assim o
               semestre é gasto aprendendo Next.js, não decidindo o que construir.
+              A partir da aula 03 ele se divide em{" "}
+              <strong>quatro frentes, uma por integrante</strong>, e todo desafio
+              semanal passa a ter uma parte para cada uma.
             </p>
             <div className="mats">
               <a className="mat primary" href={`${PROJETO}/brief.html`}>
@@ -339,7 +345,7 @@ export default function FrontendAvancadoNextjs() {
           <div className="idx">03</div>
           <div className="body">
             <h3>
-              Onde o seu código roda{" "}
+              A página que responde{" "}
               <span
                 className="mono"
                 style={{ fontSize: 13, color: "var(--text-3)" }}
@@ -348,18 +354,23 @@ export default function FrontendAvancadoNextjs() {
               </span>
             </h3>
             <p>
-              A pergunta que a aula 02 deixou em aberto: por que alguns arquivos
-              levam <span className="mono">&quot;use client&quot;</span> na
-              primeira linha e outros não. Tudo roda no servidor por padrão — e o
-              que isso significa para velocidade e para segredo. Quando isso não
-              basta: clique e APIs do navegador. A fronteira, e por que ela deve
-              ficar na folha e não na raiz. O que atravessa como prop e o que não
-              atravessa. <span className="mono">Suspense</span>: o{" "}
-              <span className="mono">loading.tsx</span> de um pedaço só.
+              Primeiro a dívida da aula 02: por que alguns arquivos levam{" "}
+              <span className="mono">&quot;use client&quot;</span> na primeira
+              linha e outros não — e por que a fronteira fica na folha, não na
+              raiz. Depois o assunto do dia:{" "}
+              <span className="mono">useState</span>, a memória do componente.
+              Por que mudar uma variável não muda a tela; o campo controlado;{" "}
+              <strong>estado derivado</strong> — a regra que evita metade dos
+              bugs; estado que é lista, e onde o estado mora. Fecha com o
+              projeto se dividindo em <strong>quatro frentes</strong>, uma por
+              integrante da equipe.
             </p>
             <div className="mats">
               <a className="mat primary" href={`${AULA_03}/slides.html`}>
                 ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_03}/exercicios.html`}>
+                🧪 Exercícios em aula
               </a>
               <a className="mat" href={`${AULA_03}/desafio.html`}>
                 🎯 Desafio técnico
@@ -369,6 +380,9 @@ export default function FrontendAvancadoNextjs() {
               </a>
               <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
                 👁️ Prévia da resposta
+              </a>
+              <a className="mat" href={`${PROJETO}/brief.html`}>
+                💼 Briefing do projeto
               </a>
             </div>
           </div>

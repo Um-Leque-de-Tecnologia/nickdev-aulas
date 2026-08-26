@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercícios da aula 03 — Uma coisa de cada vez · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Os quatro labs práticos da aula 03: descobrir onde o seu código roda, provocar o erro da fronteira de propósito, dar memória a um botão com useState e escrever o campo de busca do Mural de Vagas.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
+.goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+
+  /* ---- Aula 02: folha de exercicio ----------------------------------- */
+  /* O gabarito fica dobrado. Aberto por padrao, o aluno le a resposta
+     antes de tentar — e o exercicio vira leitura. */
+  details.gab{border:1px solid var(--line);border-radius:10px;margin-top:14px;background:var(--surface-2)}
+  details.gab summary{cursor:pointer;padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--pink-light);
+    list-style:none;user-select:none}
+  details.gab summary::-webkit-details-marker{display:none}
+  details.gab summary::before{content:'▸ ';color:var(--magenta)}
+  details.gab[open] summary::before{content:'▾ '}
+  details.gab summary:hover{color:var(--text)}
+  details.gab summary:focus-visible{outline:2px solid var(--magenta);outline-offset:-2px;border-radius:10px}
+  details.gab .in{padding:2px 18px 18px;border-top:1px solid var(--line)}
+  details.gab .in p{font-size:14.5px;color:var(--text-2);margin-top:12px}
+  details.gab .in p b{color:var(--text)}
+
+  .lab{border:1px solid var(--line);border-left:4px solid var(--verde,#5fd08a);border-radius:14px;
+    padding:24px 26px;margin-top:22px;background:var(--surface)}
+  .lab-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .lab-head .n{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--bg);
+    background:#5fd08a;padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .lab-head h3{font-size:21px;margin:0}
+  .lab-head .t{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .lab .obj{font-size:15px;color:var(--text-3);margin:6px 0 16px;border-left:2px solid #5fd08a;padding-left:12px}
+  .lab ol{margin:12px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  .lab ol li{margin:7px 0}
+  .lab ol li b{color:var(--text)}
+  .perg{border:1px solid rgba(95,208,138,.4);background:rgba(95,208,138,.06);border-radius:10px;
+    padding:14px 18px;margin-top:16px}
+  .perg b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;margin-bottom:8px}
+  .perg ol{margin:0;padding-left:20px;color:var(--text);font-size:14.5px}
+
+  table.erros{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
+  table.erros th,table.erros td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.erros th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);font-weight:500}
+  table.erros td{color:var(--text-2)}
+  table.erros td code{color:var(--pink-light);font-size:.92em}
+  table.erros tr:last-child td{border-bottom:0}
+
+  /* ---- Aula 03: JSX tem tag e atributo -------------------------------- */
+  /* O molde veio do curso de Java, onde nao existe tag. Sem estas duas cores
+     o componente inteiro sai cinza e a tag some no meio do texto. */
+  pre .tagc{color:#7B4FD0}
+  pre .attr{color:#E88BB8}
+
+  /* ---- Aula 03: o erro do lab 2 tem que gritar ------------------------ */
+  /* No lab 2 o erro nao e ruido: ele e o conteudo do exercicio. A parte que
+     entrega a causa fica marcada para o olho achar sem ninguem apontar. */
+  .terminal .err{color:#ff8da5}
+  .terminal .hl{color:#F24487;font-weight:700;background:rgba(242,68,135,.16);border-radius:4px;padding:1px 4px}
+
+  /* ---- Aula 03: as tres partes da linha do useState -------------------- */
+  /* O .grid2 do molde nao serve aqui: sao tres pedacos de uma linha so, e
+     quebrar em duas fileiras desfaz a leitura da esquerda para a direita. */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  @media(max-width:820px){.grid3{grid-template-columns:1fr}}
+
+  /* ---- Aula 03: o lab 4 usa a cor da frente 4 ------------------------- */
+  /* O lab 4 e o comeco da frente 4 do desafio. Nasce com a mesma cor para o
+     aluno reconhecer a peca quando ela reaparecer no desafio e no brief. */
+  .lab.frente4{border-left-color:var(--pink-light)}
+  .lab.frente4 .lab-head .n{background:var(--pink-light)}
+  .lab.frente4 .obj{border-left-color:var(--pink-light)}
+
+  /* ---- Aula 03: as quatro frentes no fecho ---------------------------- */
+  /* Cada frente tem cor fixa no curso inteiro. A bolinha e o jeito de mostrar
+     isso numa lista sem repetir o nome da cor por escrito. */
+  .frentes{list-style:none;display:grid;gap:10px;margin-top:14px}
+  .frentes li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--text-2)}
+  .frentes .dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px;margin-top:8px}
+  .frentes b{color:var(--text)}
+
+  /* ---- Aula 03: a dica fora do .step ---------------------------------- */
+  /* O molde so estiliza .step .tip, e nesta folha toda dica mora dentro do
+     .lab ou da .entrega. Sem esta regra ela vira paragrafo solto, do mesmo
+     tamanho do texto normal, e some no meio do lab. */
+  .lab .tip,.entrega .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;
+    border-left:2px solid var(--magenta);padding-left:12px}
+  .lab .tip b,.entrega .tip b{color:var(--pink-light);font-weight:500}
+
+  /* ---- Aula 03: lista dentro da caixa --------------------------------- */
+  /* O reset zera o padding de toda ul. O .step ja tem a sua regra; a .goal
+     nao tinha, e os marcadores da caixa "Antes de comecar" ficavam pendurados
+     do lado de fora da borda. */
+  .goal ul{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  .goal ul li{margin:5px 0}
+  .goal ul li b{color:var(--text)}
+
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Exercícios em aula · Aula 03</div>
+  <h1>Uma coisa <span class="grad">de cada vez</span> 🧩</h1>
+  <p class="lead">
+    Hoje você sai da aula com <b>quatro coisas funcionando</b> na sua máquina,
+    uma de cada vez — e a última é o começo do desafio da semana.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🧭</span>
+    <div>
+      <h3>A ordem importa</h3>
+      <p>Primeiro você descobre <b>onde o seu código roda</b>. Depois você
+      atravessa a <b>fronteira</b> entre o servidor e o navegador. Só então dá
+      <b>memória</b> a um componente. É a ordem em que uma coisa depende da
+      outra: sem saber que a página roda no servidor, a linha
+      <code>"use client"</code> parece enfeite; e sem essa linha,
+      <code>useState</code> nem existe.</p>
+      <p>Nos labs 1 e 2 <b>ainda não aparece <code>useState</code></b>. É de
+      propósito. Você vai passar dois labs sentindo a falta que ele faz — e
+      quando ele chegar, no lab 3, chega como remédio de uma dor que você já
+      sentiu, não como mais uma linha para decorar.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">📋</span>
+    <div>
+      <h3>O formato que se repete</h3>
+      <p>Toda memória de componente é <b>uma linha só</b>, sempre com este
+      desenho. Você vai escrevê-lo duas vezes hoje e mais algumas no desafio.
+      <b>Copiar daqui é o esperado.</b></p>
+<pre><span class="kw">const</span> [copiado, <span class="fn">setCopiado</span>] = <span class="fn">useState</span>(<span class="kw">false</span>);
+<span class="cm">//      ↑          ↑                     ↑</span>
+<span class="cm">//      o valor    como mudar            o valor inicial</span></pre>
+      <div class="grid3">
+        <div class="mini"><b>o valor</b>Você lê, e nunca atribui. Ele é a foto daquele render.</div>
+        <div class="mini"><b>como mudar</b>A única forma de mexer. É ele que <b>avisa</b> o React.</div>
+        <div class="mini"><b>o valor inicial</b>Vale só na <b>primeira</b> vez. Depois o React devolve o que guardou.</div>
+      </div>
+      <p style="margin-top:12px">O nome dentro dos colchetes é seu:
+      <code>copiado</code>, <code>busca</code>, <code>aberta</code>. A
+      convenção é que o segundo seja o primeiro com <code>set</code> na frente —
+      <code>busca</code> e <code>setBusca</code>. Não é regra da linguagem, é
+      hábito de quem vai ler o seu código depois.</p>
+    </div>
+  </div>
+
+  <div class="goal verde">
+    <span class="ico">✅</span>
+    <div>
+      <h3>Antes de começar</h3>
+      <ul>
+        <li>O projeto da aula 02 <b>abre</b> no seu editor.</li>
+        <li>Ele <b>sobe</b>: <code>npm run dev</code> e o terminal mostra
+        <code>Ready in ... ms</code>, sem erro vermelho.</li>
+        <li><code>/vagas</code> <b>e</b> <code>/vagas/1</code> respondem no navegador.</li>
+      </ul>
+      <p style="margin-top:10px">Se alguma falhar, <b>resolva agora</b> — os
+      quatro labs dependem das três. Chame na aula: quinze minutos aqui valem
+      mais do que uma hora tentando fazer o lab 4 em cima de um projeto que
+      não sobe.</p>
+    </div>
+  </div>
+
+  <div class="label">Os labs</div>
+
+  <!-- ============================== LAB 1 ============================== -->
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 1</span><h3>Ache o seu console.log</h3><span class="t">~8 min</span></div>
+    <p class="obj">Descobrir, com os seus próprios olhos, que a sua página roda no servidor.</p>
+    <ol>
+      <li>Abra <code>app/vagas/page.tsx</code>. Não mude nada do que já está lá.</li>
+      <li><b>Antes do <code>return</code></b>, escreva um <code>console.log</code> com uma marca que você reconheça.</li>
+      <li>Suba com <code>npm run dev</code> e abra <code>http://localhost:3000/vagas</code>.</li>
+      <li>Abra o console do <b>navegador</b> (<kbd>F12</kbd> → Console). Procure a sua linha.</li>
+      <li>Agora olhe o <b>terminal</b> onde o <code>npm run dev</code> está rodando. Procure de novo.</li>
+      <li>Recarregue a página <b>duas vezes</b> e conte quantas linhas apareceram.</li>
+    </ol>
+<pre><span class="cm">// app/vagas/page.tsx</span>
+<span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Vagas</span>() {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[servidor] montando a listagem"</span>);
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="tagc">h1</span>&gt;Vagas&lt;/<span class="tagc">h1</span>&gt;
+      {<span class="cm">/* o que já estava aqui, sem mexer */</span>}
+    &lt;/&gt;
+  );
+}</pre>
+    <p class="tip"><b>Não achou o terminal?</b> É a janela onde você digitou
+    <code>npm run dev</code> e que ficou "presa", sem devolver o cursor. Ela é o
+    servidor. Deixe-a visível ao lado do navegador durante a aula inteira —
+    metade dos erros de hoje aparece ali primeiro.</p>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>A sua linha apareceu no console do navegador, no terminal, ou nos dois?</li>
+        <li>Você recarregou duas vezes. <b>Quantas linhas</b> saíram no terminal?</li>
+        <li>Se essa função roda no servidor, o navegador recebeu <b>o quê</b>?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>ver a resposta — depois de tentar</summary>
+      <div class="in">
+        <p><b>1.</b> Só no <b>terminal</b>. E isso costuma dar um susto, porque a sua cabeça diz "é JavaScript, e JavaScript roda no navegador". Hoje não. Essa função foi executada na <b>sua máquina, pelo servidor do Next</b>, antes de qualquer coisa chegar ao navegador. O console do navegador nunca viu essa linha porque essa linha nunca esteve lá.</p>
+        <p><b>2.</b> <b>Duas</b> — uma por pedido. Cada recarga é um pedido novo, e o servidor roda a sua função de novo para montar a resposta. Se em vez de recarregar você navegou pelos links, pode ter visto uma linha só: o Next reaproveita o que já buscou. Ver isso hoje te poupa confusão na aula 04.</p>
+        <p><b>3.</b> O <b>resultado</b>, não a receita. O servidor rodou a sua função, virou HTML e mandou o HTML. O navegador recebeu texto pronto para desenhar — não recebeu o seu <code>console.log</code>, não recebeu o <code>import</code>, não recebeu a lista de vagas em código. Isso tem nome: <b>Server Component</b>, e é o padrão. Repare que você não escreveu nada para conseguir isso. Todo componente já nasce assim.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ============================== LAB 2 ============================== -->
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 2</span><h3>Quebre de propósito</h3><span class="t">~10 min</span></div>
+    <p class="obj">Provocar agora, com calma e com a turma junto, o erro que você ia encontrar sozinha às onze da noite — e aprender a achar a palavra que entrega a causa.</p>
+    <ol>
+      <li>Crie <code>components/BotaoCopiarLink.tsx</code>. <b>Não escreva <code>"use client"</code></b> — é esse o ponto do lab.</li>
+      <li>Escreva o botão abaixo. Ele tem um <code>onClick</code>, e é o <code>onClick</code> que vai quebrar.</li>
+      <li>Importe e use em <code>app/vagas/[id]/page.tsx</code>: <code>&lt;BotaoCopiarLink titulo={vaga.titulo} /&gt;</code>.</li>
+      <li>Abra <code>/vagas/1</code>. <b>Leia o erro inteiro</b>, da primeira à última linha, antes de mexer em qualquer coisa.</li>
+      <li>Ache a <b>palavra</b> que entrega a causa. Ela está na primeira linha.</li>
+      <li><b>Só agora</b> ponha <code>"use client"</code> como primeira linha do arquivo, antes de qualquer <code>import</code>. Recarregue.</li>
+    </ol>
+<pre><span class="cm">// components/BotaoCopiarLink.tsx — a versão que quebra, de propósito</span>
+
+<span class="kw">export default function</span> <span class="fn">BotaoCopiarLink</span>({ titulo }: { titulo: <span class="ty">string</span> }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tagc">button</span>
+      <span class="attr">type</span>=<span class="st">"button"</span>
+      <span class="attr">onClick</span>={() =&gt; {
+        <span class="cm">// navigator e location só existem no navegador.</span>
+        navigator.clipboard.<span class="fn">writeText</span>(location.href);
+        <span class="fn">alert</span>(<span class="st">`Link de “${titulo}” copiado`</span>);
+      }}
+    &gt;
+      🔗 Copiar link
+    &lt;/<span class="tagc">button</span>&gt;
+  );
+}</pre>
+    <p class="tip"><b>Por que <code>alert</code>?</b> Porque neste lab você
+    ainda não tem memória nenhuma dentro do componente. O <code>alert</code> é
+    o aviso pobre que a aula 02 usava. No lab 3 ele sai e o botão passa a mudar
+    o próprio texto — <b>é a mesma tela, com memória</b>.</p>
+
+    <div class="terminal"><span class="err">Error: Event handlers cannot be passed to Client Component props.</span>
+  &lt;button type="button" onClick={function onClick} children=...&gt;
+                       <span class="hl">^^^^^^^^^^^^^^^^^^^^^^^^</span>
+If you need interactivity, consider converting part of this to a Client Component.
+
+<span class="cm">  at BotaoCopiarLink (components/BotaoCopiarLink.tsx)
+  at PaginaDaVaga (app/vagas/[id]/page.tsx)</span></div>
+
+    <p style="color:var(--text-2);font-size:14.5px;margin-top:14px">E a linha
+    que conserta — <b>a primeira do arquivo</b>, sem nada acima dela:</p>
+<pre><span class="st">"use client"</span>;
+<span class="cm">// ↑ Primeira linha do arquivo, antes de qualquer import.</span>
+
+<span class="kw">export default function</span> <span class="fn">BotaoCopiarLink</span>({ titulo }: { titulo: <span class="ty">string</span> }) {</pre>
+
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Qual <b>palavra</b> do erro entrega a causa? (uma palavra, não a frase inteira)</li>
+        <li>O erro apareceu no terminal, no navegador, ou nos dois?</li>
+        <li>A página <code>app/vagas/[id]/page.tsx</code> também precisa da linha? Por quê?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>ver a resposta — depois de tentar</summary>
+      <div class="in">
+        <p><b>1.</b> <code>handlers</code>. "Event handlers cannot be passed" — <b>funções que escutam evento não podem ser passadas</b>. O servidor manda resultado, e uma função não é resultado: não dá para escrever "esta função aqui" dentro de um HTML e mandar pelo cabo. O erro está dizendo, com todas as letras, exatamente o que você fez. Reconhecendo o formato, você lê esse erro em cinco segundos pelo resto do semestre.</p>
+        <p><b>2.</b> Nos <b>dois</b> — no navegador, naquela tela vermelha de desenvolvimento, e no terminal, em texto. <b>Leia o do terminal</b>: ele vem inteiro, com a lista de arquivos embaixo, e é ali que você descobre <i>qual</i> componente causou. A tela vermelha corta o começo com mais frequência do que você gostaria.</p>
+        <p><b>3.</b> <b>Não.</b> A linha marca a <b>folha</b>, não a raiz. A página continua no servidor: ela lê os dados e entrega prontos para o botão. Se você puser <code>"use client"</code> na página, tudo que ela importa desce para o navegador junto — inclusive o que não precisava — e a fronteira que você acabou de desenhar sobe para o topo da casa. O contrário também vale, e é a confusão nº 1 da turma: <b>quem é importado por um componente de cliente já entra junto</b>, e por isso não repete a linha. A linha marca a porta, não cada móvel.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ============================== LAB 3 ============================== -->
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 3</span><h3>O botão que lembra</h3><span class="t">~12 min</span></div>
+    <p class="obj">Ver as duas versões: a que muda a variável e não muda a tela, e a que tem memória. Você tem que ver as duas — a segunda só faz sentido depois da primeira.</p>
+    <ol>
+      <li><b>Primeiro a versão que não funciona.</b> No <code>BotaoCopiarLink</code> (que já tem <code>"use client"</code>), declare <code>let copiado = false;</code> dentro da função.</li>
+      <li>No <code>onClick</code>, escreva <code>copiado = true;</code> e um <code>console.log</code> logo depois. Troque o texto do botão por <code>{copiado ? ... : ...}</code>.</li>
+      <li>Clique. <b>A tela continua igual.</b> Não conserte ainda.</li>
+      <li>Olhe o console do <b>navegador</b> — agora o componente é de cliente, e o log sai lá. O que está escrito?</li>
+      <li><b>Agora a versão com memória.</b> Duas mudanças: o <code>import</code> em cima e a linha do <code>useState</code> no lugar do <code>let</code>. Troque <code>copiado = true</code> por <code>setCopiado(true)</code>.</li>
+      <li>Clique de novo. Cole o link em algum lugar para conferir que ele copiou mesmo.</li>
+    </ol>
+<pre><span class="cm">// versão 1 — a que NÃO funciona (é para rodar assim mesmo)</span>
+<span class="st">"use client"</span>;
+
+<span class="kw">export default function</span> <span class="fn">BotaoCopiarLink</span>({ titulo }: { titulo: <span class="ty">string</span> }) {
+  <span class="kw">let</span> copiado = <span class="kw">false</span>;  <span class="cm">// ← nasce false a cada renderização</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tagc">button</span>
+      <span class="attr">type</span>=<span class="st">"button"</span>
+      <span class="attr">onClick</span>={() =&gt; {
+        navigator.clipboard.<span class="fn">writeText</span>(location.href);
+        copiado = <span class="kw">true</span>;
+        <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[navegador] copiado agora é"</span>, copiado);
+      }}
+    &gt;
+      {copiado ? <span class="st">"✓ Link copiado"</span> : <span class="st">"🔗 Copiar link"</span>}
+    &lt;/<span class="tagc">button</span>&gt;
+  );
+}</pre>
+<pre><span class="cm">// versão 2 — a que funciona. Mudou o quê? Duas linhas.</span>
+<span class="st">"use client"</span>;
+
+<span class="kw">import</span> { <span class="fn">useState</span> } <span class="kw">from</span> <span class="st">"react"</span>;
+
+<span class="kw">export default function</span> <span class="fn">BotaoCopiarLink</span>({ titulo }: { titulo: <span class="ty">string</span> }) {
+  <span class="kw">const</span> [copiado, <span class="fn">setCopiado</span>] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tagc">button</span>
+      <span class="attr">type</span>=<span class="st">"button"</span>
+      <span class="attr">onClick</span>={() =&gt; {
+        <span class="cm">// location e navigator só existem no navegador.</span>
+        navigator.clipboard.<span class="fn">writeText</span>(location.href);
+        <span class="fn">setCopiado</span>(<span class="kw">true</span>);
+      }}
+    &gt;
+      {copiado ? <span class="st">`✓ Link de “${titulo}” copiado`</span> : <span class="st">"🔗 Copiar link"</span>}
+    &lt;/<span class="tagc">button</span>&gt;
+  );
+}</pre>
+    <p class="tip"><b>Um teste que vale ouro:</b> escreva
+    <code>setCopiado(true);</code> e, na linha seguinte,
+    <code>console.log(copiado)</code>. Ele mostra o valor <b>antigo</b>. Não é
+    bug e não é atraso: <code>copiado</code> é a foto daquele render, e o valor
+    novo só chega no render seguinte.</p>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Na versão com <code>let</code>, o <code>console.log</code> mostrou <code>true</code>? E a tela, mudou?</li>
+        <li>O que o <code>setCopiado</code> faz que o <code>copiado = true</code> não faz?</li>
+        <li>Se toda variável nasce do zero a cada renderização, <b>onde</b> o valor fica guardado entre um clique e o outro?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>ver a resposta — depois de tentar</summary>
+      <div class="in">
+        <p><b>1.</b> Mostrou <code>true</code>, e a tela <b>não</b> mudou. Guarde essa cena: a variável mudou de verdade. O seu código estava certo em JavaScript e mesmo assim a tela ficou parada — porque ninguém avisou o React. Ele não fica vigiando as suas variáveis. E tem um segundo estrago: da próxima vez que a função rodar, a linha <code>let copiado = false</code> roda de novo e apaga tudo. <b>É o erro que todo mundo comete uma vez.</b> O caro não é errar; é passar quinze minutos procurando o defeito no lugar errado.</p>
+        <p><b>2.</b> Ele <b>avisa</b>. Repare no que você não fez em momento nenhum: não mexeu no texto do botão, não procurou o elemento na tela, não trocou nada na mão. Você mexeu no <b>dado</b>, e a tela veio atrás. O caminho completo é este: você chama <code>setCopiado</code> → o React guarda o valor novo → o React roda a sua função <b>de novo</b> → o <code>useState</code> devolve o valor guardado → a tela sai diferente. (E não, nada disso precisa de <code>useEffect</code>. <code>useEffect</code> não é hoje.)</p>
+        <p><b>3.</b> <b>Fora da sua função.</b> Quem guarda é o React, do lado de fora, amarrado àquele componente naquela aba. É por isso que a linha do <code>useState</code> não é uma atribuição comum: ela é um <b>pedido de memória</b>. O <code>false</code> lá dentro vale só na primeira vez; da segunda em diante o React ignora e devolve o que ele tem guardado. Recarregue a página e o botão volta para "🔗 Copiar link" — a memória é daquela aba, naquele momento, e mais nada.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ============================== LAB 4 ============================== -->
+  <div class="lab frente4">
+    <div class="lab-head"><span class="n">LAB 4</span><h3>O campo de busca</h3><span class="t">~15 min</span></div>
+    <p class="obj">Escrever o primeiro componente que guarda o que a pessoa digita — e sair da aula com a frente 4 do desafio já começada.</p>
+    <p style="color:var(--text-2);font-size:14.5px;margin-top:12px"><b>Leia
+    antes de começar:</b> este lab <b>é</b> o início da frente 4 do desafio da
+    semana. O que você escrever aqui não vai para o lixo: no desafio esse mesmo
+    arquivo ganha o filtro por área, o componente <code>Filtros.tsx</code> e as
+    contagens. Se a frente 4 é sua, você está adiantando o seu trabalho. Se não
+    é, você está entendendo a peça que a sua colega vai carregar o semestre
+    inteiro.</p>
+    <ol>
+      <li>Crie <code>components/MuralDeVagas.tsx</code> com <code>"use client"</code> na primeira linha.</li>
+      <li><b>Um</b> estado: <code>const [busca, setBusca] = useState("")</code>. Um só. Resista à vontade de criar um segundo.</li>
+      <li>Campo <b>controlado</b>: <code>value={busca}</code> e <code>onChange</code>. Escreva os dois.</li>
+      <li><b>Apague o <code>onChange</code> por dez segundos</b> e tente digitar no campo. Depois devolva. Isso vai cair na pergunta.</li>
+      <li>A lista filtrada é <b>estado derivado</b>: <code>visiveis</code> é uma <code>const</code> calculada, <b>não</b> um <code>useState</code>.</li>
+      <li>Em <code>app/vagas/page.tsx</code>, importe o mural e passe as vagas por prop: <code>&lt;MuralDeVagas vagas={vagas} /&gt;</code>. A página <b>continua no servidor</b>.</li>
+      <li>Digite e apague. Confira o número mudando junto com a lista.</li>
+    </ol>
+<pre><span class="cm">// components/MuralDeVagas.tsx — a versão de hoje: só a busca</span>
+<span class="st">"use client"</span>;
+
+<span class="kw">import</span> { <span class="fn">useState</span> } <span class="kw">from</span> <span class="st">"react"</span>;
+<span class="kw">import</span> <span class="ty">CardDeVaga</span> <span class="kw">from</span> <span class="st">"./CardDeVaga"</span>;
+<span class="kw">import type</span> { <span class="ty">Vaga</span> } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+
+<span class="kw">export default function</span> <span class="fn">MuralDeVagas</span>({ vagas }: { vagas: <span class="ty">Vaga</span>[] }) {
+  <span class="kw">const</span> [busca, <span class="fn">setBusca</span>] = <span class="fn">useState</span>(<span class="st">""</span>);
+
+  <span class="cm">// Estado derivado: recalculado a cada renderização, nunca guardado.</span>
+  <span class="kw">const</span> visiveis = vagas.<span class="fn">filter</span>((vaga) =&gt; {
+    <span class="kw">const</span> termo = busca.<span class="fn">toLowerCase</span>();
+    <span class="kw">return</span> (
+      vaga.titulo.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(termo) ||
+      vaga.empresa.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(termo)
+    );
+  });
+
+  <span class="kw">return</span> (
+    &lt;<span class="tagc">section</span>&gt;
+      &lt;<span class="tagc">input</span>
+        <span class="attr">type</span>=<span class="st">"search"</span>
+        <span class="attr">placeholder</span>=<span class="st">"Buscar por título ou empresa"</span>
+        <span class="attr">value</span>={busca}
+        <span class="attr">onChange</span>={(e) =&gt; <span class="fn">setBusca</span>(e.target.value)}
+      /&gt;
+
+      &lt;<span class="tagc">p</span> <span class="attr">className</span>=<span class="st">"numeros"</span>&gt;
+        &lt;<span class="tagc">strong</span>&gt;{visiveis.length}&lt;/<span class="tagc">strong</span>&gt; de {vagas.length} vagas
+      &lt;/<span class="tagc">p</span>&gt;
+
+      {visiveis.length === 0 ? (
+        &lt;<span class="tagc">p</span>&gt;Nenhuma vaga com esse filtro. Tente outra palavra.&lt;/<span class="tagc">p</span>&gt;
+      ) : (
+        &lt;<span class="tagc">ul</span> <span class="attr">className</span>=<span class="st">"lista"</span>&gt;
+          {visiveis.<span class="fn">map</span>((vaga) =&gt; (
+            &lt;<span class="ty">CardDeVaga</span> <span class="attr">key</span>={vaga.id} <span class="attr">vaga</span>={vaga} /&gt;
+          ))}
+        &lt;/<span class="tagc">ul</span>&gt;
+      )}
+    &lt;/<span class="tagc">section</span>&gt;
+  );
+}</pre>
+    <p class="tip"><b>Ainda não tem o <code>CardDeVaga</code>?</b> Ele é da
+    frente 1 e entra no desafio. Por hoje ponha
+    <code>&lt;li key={vaga.id}&gt;{vaga.titulo} · {vaga.empresa}&lt;/li&gt;</code>
+    no lugar dele. Este lab é sobre o estado, não sobre o card.</p>
+<pre><span class="cm">// app/vagas/page.tsx — continua no servidor. Nenhuma linha "use client" aqui.</span>
+<span class="kw">import</span> { vagas } <span class="kw">from</span> <span class="st">"@/data/vagas"</span>;
+<span class="kw">import</span> <span class="ty">MuralDeVagas</span> <span class="kw">from</span> <span class="st">"@/components/MuralDeVagas"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Vagas</span>() {
+  <span class="cm">// Continua saindo no TERMINAL: a página não virou de cliente.</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"[servidor] montando a listagem"</span>);
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="tagc">h1</span>&gt;Vagas&lt;/<span class="tagc">h1</span>&gt;
+      &lt;<span class="ty">MuralDeVagas</span> <span class="attr">vagas</span>={vagas} /&gt;
+    &lt;/&gt;
+  );
+}</pre>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Sem o <code>onChange</code>, o campo deixou digitar? Por que isso <b>não</b> é bug?</li>
+        <li><code>visiveis</code> não é <code>useState</code>. Se fosse, o que quebraria — e quando?</li>
+        <li>O <code>console.log</code> do lab 1 continua no terminal ou foi para o navegador? Por quê?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>ver a resposta — depois de tentar</summary>
+      <div class="in">
+        <p><b>1.</b> Não deixou, e ficou com cara de campo travado. Não é bug: é a peça funcionando. O <code>value={busca}</code> <b>prende</b> o campo ao estado, e sem <code>onChange</code> nada troca o estado — então o campo mostra sempre a mesma string. Isso se chama <b>campo controlado</b>: o campo é a janela para o dado, nunca o dono do dado. Quem manda é o estado, e o <code>onChange</code> é o único caminho de volta.</p>
+        <p><b>2.</b> Você passaria a ter <b>dois estados que precisam combinar</b>: <code>busca</code> e <code>visiveis</code>. Funciona no primeiro dia. Quebra no dia em que aparecer um segundo jeito de mexer na lista — o filtro por área, no desafio — e alguém atualizar um e esquecer o outro. Aí a tela <b>mente</b>: mostra vagas que não batem com o que está escrito no campo, e o bug é dos difíceis, porque cada pedaço está certo sozinho. A regra da aula: <b>se dá para calcular do que você já tem, não guarde</b>. A conta roda de novo a cada renderização, e ela é barata.</p>
+        <p><b>3.</b> Continua no <b>terminal</b>. A página não virou de cliente — quem tem a linha é o <code>MuralDeVagas</code>. E é a aula inteira em uma linha só: <code>&lt;MuralDeVagas vagas={vagas} /&gt;</code>. A página busca os dados e entrega prontos; o componente de cliente cuida do que muda. Cada um faz o que só ele consegue fazer.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="label">Se travou</div>
+
+  <p style="color:var(--text-2);font-size:15px">O erro provavelmente é um
+  destes sete. Ache a sua linha na tabela antes de chamar — e depois chame, que
+  a gente confere junto.</p>
+
+  <table class="erros">
+    <tr><th>o que você escreve</th><th>o que acontece</th><th>por quê</th></tr>
+    <tr><td><code>curtido = true</code></td><td>a tela não muda</td><td>o React não fica sabendo. Só o <code>setCurtido</code> avisa.</td></tr>
+    <tr><td><code>&lt;input value={busca} /&gt;</code> sem <code>onChange</code></td><td>o campo não deixa digitar</td><td>o valor está preso ao estado, e nada troca o estado</td></tr>
+    <tr><td><code>habilidades.push(nova)</code></td><td>a tela não atualiza</td><td>é a <b>mesma</b> lista. O React compara a lista com ela mesma e não vê diferença.</td></tr>
+    <tr><td><code>setBusca("a"); console.log(busca)</code></td><td>mostra o valor <b>antigo</b></td><td><code>busca</code> é a foto daquele render. O novo valor chega no render seguinte.</td></tr>
+    <tr><td><code>"use client"</code> em <code>page.tsx</code></td><td>tudo desce pro navegador</td><td>a fronteira subiu pra raiz. Marque a folha.</td></tr>
+    <tr><td>dois estados que precisam combinar</td><td>um dia a tela mente</td><td>derive em vez de guardar</td></tr>
+    <tr><td><code>onClick</code> num arquivo sem <code>"use client"</code></td><td>erro citando "Event handlers cannot be passed to Client Component props"</td><td>o servidor não tem quem escute o clique</td></tr>
+  </table>
+
+  <div class="label">Onde isso continua</div>
+
+  <div class="entrega">
+    <h3>🎯 Do lab 4 para o desafio das quatro frentes</h3>
+    <p style="color:var(--text-2);font-size:15px;margin-top:8px">O desafio
+    desta semana é <b>o projeto do semestre</b> — o Leque de Vagas — dividido em
+    quatro frentes, <b>uma por integrante</b>. Cada frente entrega um componente
+    de cliente com estado, e as quatro formas de estado são diferentes de
+    propósito: no fim da semana a equipe inteira viu as quatro.</p>
+    <ul class="frentes">
+      <li><span class="dot" style="background:#F24487"></span><div><b>Frente 1 · Vaga</b> — o contrato da equipe (<code>data/vagas.ts</code>), o card e a página de detalhe. Estado <b>booleano</b>: ver mais / ver menos.</div></li>
+      <li><span class="dot" style="background:#7B4FD0"></span><div><b>Frente 2 · Empresa</b> — quem publica: <code>data/empresas.ts</code> e a página da empresa. Estado que é <b>texto escolhendo</b>: abas Sobre / Vagas.</div></li>
+      <li><span class="dot" style="background:#5fd08a"></span><div><b>Frente 3 · Pessoa e candidatura</b> — o formulário de candidatura. <b>Campo controlado + lista</b>.</div></li>
+      <li><span class="dot" style="background:#E88BB8"></span><div><b>Frente 4 · Busca e números</b> — filtros, busca e as contagens do catálogo. <b>Estado derivado + estado levantado</b>. É o lab 4 crescendo.</div></li>
+    </ul>
+    <p style="color:var(--text-2);font-size:15px;margin-top:14px">Quem faz uma
+    frente aqui tem uma <b>frente irmã</b> no curso de Spring Boot: lá a mesma
+    equipe constrói a API do mesmo Leque de Vagas, com exatamente estas quatro
+    divisões.</p>
+    <p style="color:var(--text-2);font-size:15px;margin-top:12px"><b>A
+    combinação de 30 minutos, antes de qualquer um escrever tela:</b> as frentes
+    2, 3 e 4 dependem do tipo <code>Vaga</code>. A frente 1 sobe
+    <code>data/vagas.ts</code> <b>primeiro, num commit só</b>, e avisa a equipe —
+    assim as outras três programam contra o tipo antes de as telas existirem.
+    Segunda combinação: os <code>empresaSlug</code> das vagas têm que existir em
+    <code>data/empresas.ts</code>. <code>aurora-tech</code> de um lado e
+    <code>auroratech</code> do outro quebra a página da empresa, e ninguém
+    descobre isso sozinho na véspera.</p>
+    <p class="tip" style="margin-top:14px"><b>Prazo:</b> até a aula 04, em
+    <b>02/09</b>, antes do início. E o que ficou de fora hoje tem endereço: a
+    espera de verdade — dados que demoram, com Suspense e streaming — é a
+    <b>aula 04</b>; guardar a candidatura para valer é a <b>aula 05</b>; filtro
+    que sobrevive a compartilhar o link (o que mora na URL) é a <b>aula 06</b>.</p>
+    <p style="color:var(--text-2);font-size:15px;margin-top:12px">Travou no
+    meio? Abra o <a href="/guias/nextjs.html" style="color:var(--pink-light);text-decoration:underline">guia
+    de Next.js</a> — ele tem "useState e estado derivado", "Estado derivado",
+    "Componente controlado" e um dicionário de termos.
+    <b>Consultar não é trapaça.</b></p>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="slides.html">▶ Slides da aula</a>
+    <a class="btn" href="desafio.html">🎯 Desafio 03</a>
+    <a class="btn" href="codigos-desafio.html">🧑‍💻 Código do desafio</a>
+    <a class="btn" href="/cursos/introducao-nextjs/projeto/brief.html">📦 Briefing do projeto</a>
+    <a class="btn" href="/guias/nextjs.html">📖 Guia de Next.js</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Next.js · Aula 03 · Next.js 16 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>
