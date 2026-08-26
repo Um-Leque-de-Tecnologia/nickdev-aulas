@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desafio 03 — A fronteira no Leque de Vagas · Introdução ao Next.js · NickDev</title>
-<meta name="description" content="Desafio da aula 03: dar interatividade ao Leque de Vagas sem levar a página inteira para o navegador — um componente de cliente mínimo, auditoria de cada &quot;use client&quot; do projeto e Suspense num pedaço lento.">
+<title>Desafio 03 — As quatro frentes entram em campo · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="Desafio da aula 03: o Leque de Vagas passa a responder ao clique. Quatro frentes, uma por integrante — cada uma entrega um componente de cliente com uma forma de estado diferente.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
@@ -47,7 +47,9 @@ h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spac
 .goal .ico{font-size:26px;line-height:1}
 .goal h3{font-size:17px;margin-bottom:4px}
 .goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
 .goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
 
 .label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
 .label::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -64,9 +66,7 @@ h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spac
 .step .tip b{color:var(--pink-light);font-weight:500}
 
 pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
-pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
-pre b{color:var(--text);font-weight:500}
-pre .hl{color:#F24487;font-weight:700}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
 .terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
 .terminal .p{color:var(--text-3)}
 .terminal .out{color:#9ee39e}
@@ -85,9 +85,9 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);pad
 .mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
 .mini b{color:var(--text);display:block;margin-bottom:3px}
 
-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
-th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
-th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
 td b{color:var(--text)}
 tr:last-child td{border-bottom:0}
 
@@ -104,12 +104,93 @@ tr:last-child td{border-bottom:0}
 .foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
 @media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
 
-  .audit{border-collapse:collapse;width:100%;margin-top:14px;font-size:14px}
-  .audit th,.audit td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
-  .audit th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);font-weight:500}
-  .audit td{color:var(--text-2)}
-  .audit td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
-  .audit tr:last-child td{border-bottom:0}
+  .defeito{border:1px solid rgba(242,68,135,.35);border-radius:12px;padding:16px 20px;margin-top:14px;
+    background:rgba(242,68,135,.05)}
+  .defeito h4{font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--pink-light);margin:0 0 6px}
+  .defeito p{font-size:14.5px;color:var(--text-2);margin:0}
+  .defeito p + p{margin-top:8px}
+  .criterios{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
+  .criterios th,.criterios td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  .criterios th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);font-weight:500}
+  .criterios td{color:var(--text-2)}
+  .criterios td:first-child{color:var(--text);width:34%}
+  .criterios td code{color:var(--pink-light);font-size:.92em}
+  .criterios tr:last-child td{border-bottom:0}
+  .peso{font-family:var(--mono);font-size:12px;color:var(--text-3);white-space:nowrap}
+
+  .goal.magenta{border-left-color:var(--magenta)}
+
+
+  .parte{border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;
+    padding:22px 24px;margin-top:20px;background:var(--surface)}
+  .parte-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .parte-hd .n{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bg);
+    background:var(--purple);padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .parte-hd h3{font-size:20px;margin:0}
+  .parte-hd .quem{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .parte .obj{font-size:14.5px;color:var(--text-3);margin:8px 0 14px;border-left:2px solid var(--purple);padding-left:12px}
+  .parte.p1{border-left-color:#F24487}.parte.p1 .n{background:#F24487}.parte.p1 .obj{border-left-color:#F24487}
+  .parte.p2{border-left-color:#7B4FD0}.parte.p2 .n{background:#7B4FD0}.parte.p2 .obj{border-left-color:#7B4FD0}
+  .parte.p3{border-left-color:#5fd08a}.parte.p3 .n{background:#5fd08a}.parte.p3 .obj{border-left-color:#5fd08a}
+  .parte.p4{border-left-color:#E88BB8}.parte.p4 .n{background:#E88BB8}.parte.p4 .obj{border-left-color:#E88BB8}
+  .rotas{border-collapse:collapse;width:100%;margin-top:12px;font-size:14px}
+  .rotas th,.rotas td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .rotas th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  .rotas td{color:var(--text-2)}
+  .rotas td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
+  .rotas tr:last-child td{border-bottom:0}
+
+  /* ---- Aula 03: .tip fora do .step ---- */
+  /* No molde do Spring Boot a .tip só existia dentro de .step. Aqui ela aparece
+     também dentro de .parte e solta entre as seções — sem esta regra ela perde a
+     barra lateral que sinaliza "leia isto antes de codar". A cor acompanha a
+     frente, para o olho não se perder entre os quatro blocos. */
+  .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+  .tip b{color:var(--pink-light);font-weight:500}
+  .parte.p2 .tip{border-left-color:#7B4FD0}
+  .parte.p3 .tip{border-left-color:#5fd08a}
+  .parte.p4 .tip{border-left-color:#E88BB8}
+
+  /* ---- Aula 03: listas de entrega dentro de .parte ---- */
+  /* O reset zera o padding de tudo; sem isto os marcadores da lista ficariam
+     cortados na borda esquerda do bloco. */
+  .parte ul,.parte ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  .parte li{margin:5px 0}
+  .parte li b{color:var(--text)}
+
+  /* ---- Aula 03: a caixa de entrega desta aula usa lista não ordenada ---- */
+  .entrega h3{font-size:18px}
+  .entrega ul{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+  .entrega p{color:var(--text-2);font-size:14.5px}
+
+  /* ---- Aula 03: as quatro formas de estado ---- */
+  /* Cada cartão nasce com a cor da sua frente: é o fio que liga o resumo lá em
+     cima ao bloco .parte lá embaixo, sem precisar repetir "frente 3" toda hora. */
+  .mini.f1{border-left:3px solid #F24487}
+  .mini.f2{border-left:3px solid #7B4FD0}
+  .mini.f3{border-left:3px solid #5fd08a}
+  .mini.f4{border-left:3px solid #E88BB8}
+  .mini .forma{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--text-3);margin-top:7px}
+
+  /* ---- Aula 03: listas dentro do .goal (o roteiro e o README) ---- */
+  .goal ul{margin:8px 0 0;padding-left:20px;font-size:14.5px;color:var(--text-2)}
+  .goal li{margin:4px 0}
+  .goal li b{color:var(--text)}
+
+  /* ---- Aula 03: a tabela .rotas no celular ---- */
+  /* No molde do Spring Boot a primeira coluna cabia em nowrap porque os nomes
+     eram curtos. Aqui ela guarda caminhos como components/FormularioDeCandidatura.tsx,
+     que sozinho passa da largura da tela — e como o body tem overflow-x:hidden,
+     a segunda coluna sumia cortada em vez de rolar. No celular deixamos o
+     caminho quebrar. */
+  @media(max-width:560px){
+    .rotas td:first-child{white-space:normal;overflow-wrap:anywhere}
+    .rotas th,.rotas td{padding:8px 6px;font-size:13px}
+    .criterios th,.criterios td{padding:10px 8px}
+  }
 </style>
 </head>
 <body>
@@ -124,210 +205,521 @@ tr:last-child td{border-bottom:0}
     <span class="word">NickDev</span>
   </div>
 
-  <div class="eyebrow">Desafio · Aula 03</div>
-  <h1>A fronteira no <span class="grad">Leque de Vagas</span> 🧭</h1>
+  <div class="eyebrow">Desafio · Aula 03 · a primeira semana das quatro frentes</div>
+  <h1>As quatro frentes <span class="grad">entram em campo</span> ⚡</h1>
   <p class="lead">
-    O projeto já tem rotas, telas de espera e de erro. Agora ele vai ganhar
-    <b>interatividade</b> — sem que a página inteira desça para o navegador
-    junto. Três entregas: um componente de cliente mínimo, uma auditoria de cada
-    <code>"use client"</code> que já existe no projeto, e um pedaço lento que não
-    trava o resto da página.
+    A aula 02 deixou o esqueleto de rotas de pé: o Leque de Vagas tem endereços,
+    e cada endereço mostra alguma coisa. Esta semana o site passa a
+    <b>responder</b> — clique, digitação, escolha, tela que muda sem recarregar.
+    E o trabalho se divide de vez: <b>quatro frentes, uma por pessoa, daqui até
+    dezembro</b>.
   </p>
   <div class="rule"></div>
 
   <div class="goal">
-    <span class="ico">🎯</span>
+    <span class="ico">💼</span>
     <div>
-      <h3>O objetivo</h3>
-      <p>Até aqui todo arquivo do projeto rodava no servidor e ninguém precisou
-      pensar nisso. A partir de hoje isso vira uma <b>decisão consciente</b>: o
-      que fica no servidor, o que desce para o navegador, e por quê.</p>
-      <p>Este desafio é curto de código e longo de justificativa. É de propósito
-      — a parte difícil de Server e Client Components nunca é escrever a linha,
-      é saber <b>onde</b> pôr.</p>
+      <h3>Ainda não leu o briefing?</h3>
+      <p>Leia antes de qualquer coisa: o
+      <a href="/cursos/introducao-nextjs/projeto/brief.html" style="color:var(--pink-light);text-decoration:underline">briefing
+      do Leque de Vagas</a> agora define <b>as quatro frentes</b> — o que cada
+      uma carrega, o que ela entrega em cada aula e onde isso chega em dezembro.</p>
+      <p>Sem essa leitura, este desafio parece uma lista de arquivos. Com ela,
+      vira a sua parte de um projeto que vai crescer por mais quinze aulas.</p>
     </div>
   </div>
 
-  <div class="goal roxo">
-    <span class="ico">👥</span>
+  <div class="label">Quatro pessoas, quatro frentes 👥</div>
+
+  <div class="goal roxo" style="margin-top:0">
+    <span class="ico">🧩</span>
     <div>
-      <h3>Entregável de equipe, no mesmo repositório</h3>
-      <p>Continua no repositório do Leque de Vagas, na mesma branch de trabalho
-      da equipe. Cada pessoa faz pelo menos <b>um commit com autoria própria</b>
-      — o histórico do Git é parte da avaliação.</p>
+      <h3>Cada frente entrega uma forma de estado diferente</h3>
+      <p>Cada integrante assume <b>uma frente</b> e a carrega o semestre inteiro.
+      Nesta semana, toda frente entrega <b>um componente de cliente com
+      <code>useState</code></b> — e as quatro formas de estado são diferentes
+      <b>de propósito</b>.</p>
+      <p>Ninguém aprende quatro jeitos de guardar estado sozinho numa semana.
+      Vocês são quatro: cada pessoa vê um jeito de perto, com as próprias mãos, e
+      conta para as outras na hora de juntar. <b>No fim da semana a equipe
+      inteira viu as quatro.</b></p>
     </div>
   </div>
 
-  <div class="goal">
-    <span class="ico">📖</span>
-    <div>
-      <h3>Travou numa palavra?</h3>
-      <p>Server Component, Client Component, fronteira, prop, serializável,
-      Suspense, streaming — todas estão no
-      <a href="/guias/nextjs.html" style="color:var(--pink-light);text-decoration:underline">guia
-      de Next.js</a>. Consultar não é trapaça: é o que todo mundo que programa
-      faz o dia inteiro.</p>
+  <div class="grid2">
+    <div class="mini f1">
+      <b>Frente 1 · Vaga</b>
+      Um valor que é sim ou não: a descrição está aberta ou fechada.
+      <span class="forma">booleano</span>
+    </div>
+    <div class="mini f2">
+      <b>Frente 2 · Empresa</b>
+      Um texto que escolhe: <code>"sobre"</code> ou <code>"vagas"</code> decide o
+      que aparece na tela.
+      <span class="forma">texto que escolhe</span>
+    </div>
+    <div class="mini f3">
+      <b>Frente 3 · Pessoa e candidatura</b>
+      Campos presos ao estado e uma lista que cresce e encolhe.
+      <span class="forma">campo controlado + lista</span>
+    </div>
+    <div class="mini f4">
+      <b>Frente 4 · Busca e números</b>
+      Dois estados só, e todo o resto calculado a partir deles.
+      <span class="forma">estado derivado + estado levantado</span>
     </div>
   </div>
 
-  <div class="label">Entrega 1 · O componente de cliente</div>
+  <p class="tip" style="margin-top:16px"><b>Estas frentes não são novidade
+  nossa.</b> São as mesmas quatro do curso de Introdução ao Spring Boot, que
+  constrói a <b>API</b> do mesmo Leque de Vagas. Quem faz a frente 1 aqui tem uma
+  frente irmã lá — o mesmo recurso, do outro lado da linha.</p>
 
-  <div class="step">
-    <div class="step-head"><span class="n">01</span><h3>Um botão que copia o link da vaga</h3></div>
-    <p>Na página de uma vaga, um botão <b>Copiar link</b>. A pessoa clica e o
-    endereço da vaga vai para a área de transferência.</p>
-    <ul>
-      <li>O componente vive em <code>components/</code>, num arquivo só dele.</li>
-      <li>Ele recebe o <b>título da vaga</b> por prop e usa esse texto no rótulo
-      ou na confirmação — assim você prova que dado atravessa a fronteira.</li>
-      <li>A página da vaga <b>continua sem</b> <code>"use client"</code>.</li>
-    </ul>
-    <p class="tip"><b>Como confirmar que copiou:</b> cole em qualquer lugar
-    depois de clicar. Se quiser dar retorno visual na tela, pode — mas não é
-    exigido, e não vale usar nada que a aula não ensinou.</p>
-  </div>
-
-  <div class="step">
-    <div class="step-head"><span class="n">02</span><h3>A prova de que a página continua no servidor</h3></div>
-    <p>Depois de o botão funcionar, ponha um <code>console.log</code> na página
-    da vaga e recarregue.</p>
-    <ul>
-      <li>Ele tem que aparecer <b>no terminal</b> do <code>npm run dev</code>.</li>
-      <li>Tire um print desse terminal e guarde — vai para o README.</li>
-    </ul>
-    <p class="tip">Se o log aparecer no console do navegador, alguma coisa
-    empurrou a página para o cliente. Ache o quê antes de seguir.</p>
-  </div>
-
-  <div class="label">Entrega 2 · A auditoria da fronteira</div>
-
-  <div class="goal magenta">
-    <span class="ico">🔍</span>
-    <div>
-      <h3>O projeto já tem três <code>"use client"</code></h3>
-      <p>Vocês escreveram os três na aula 02, sem saber o que a linha fazia.
-      Agora sabem. <b>Justifiquem cada um</b> — e confirmem que nenhum está
-      maior do que precisa.</p>
-    </div>
-  </div>
-
-  <table class="audit">
-    <tr><th>arquivo</th><th>o que responder no README</th></tr>
-    <tr><td>app/vagas/error.tsx</td><td>Por que um arquivo de erro precisa rodar no navegador?</td></tr>
-    <tr><td>components/MenuLink.tsx</td><td>O que ele faz que só é possível no navegador?</td></tr>
-    <tr><td>components/BotaoVoltar.tsx</td><td>Mesma pergunta — e por que não dá para resolver com um <code>&lt;Link&gt;</code> comum?</td></tr>
-    <tr><td>o novo botão de copiar</td><td>Quais das duas razões da aula se aplicam a ele: o clique, a API do navegador, ou as duas?</td></tr>
+  <table>
+    <tr><th>frente aqui, no Next</th><th>frente irmã, no Spring Boot</th></tr>
+    <tr><td><b>1 · Vaga</b> — o contrato de dados, o card, a página de detalhe</td><td>o <code>record Vaga</code>, o repository e as rotas <code>/vagas</code></td></tr>
+    <tr><td><b>2 · Empresa</b> — <code>data/empresas.ts</code> e a página da empresa</td><td><code>/empresas</code> e os mesmos <code>slug</code></td></tr>
+    <tr><td><b>3 · Pessoa e candidatura</b> — o formulário</td><td><code>Pessoa</code> e as rotas <code>/pessoas</code></td></tr>
+    <tr><td><b>4 · Busca e números</b> — filtros e contagens na tela</td><td>os números do catálogo em <code>/estatisticas</code></td></tr>
   </table>
 
-  <div class="step">
-    <div class="step-head"><span class="n">03</span><h3>Procure fronteira grande demais</h3></div>
-    <p>Percorra o projeto e confirme que <b>nenhum</b> <code>"use client"</code>
-    está num arquivo maior do que precisa. Em especial:</p>
-    <ul>
-      <li>Nenhum <code>layout.tsx</code> leva a linha.</li>
-      <li>Nenhum <code>page.tsx</code> leva a linha.</li>
-      <li>Todo arquivo que leva é um componente <b>pequeno</b>, de uma responsabilidade.</li>
-    </ul>
-    <p class="tip">Achou um grande demais? <b>Quebre em dois</b>: a parte que
-    precisa do navegador vira um componente próprio, o resto fica no servidor.
-    Descreva o antes e o depois no README.</p>
-  </div>
+  <p class="tip">Hoje as duas metades ainda vivem separadas: aqui os dados são
+  arquivos em <code>data/</code>, lá é uma API de verdade. Elas se encontram mais
+  para frente no semestre, quando a tela deixar de ler o arquivo e passar a
+  perguntar para a API. Guarde o nome da sua frente: ele vale nos dois cursos.</p>
 
-  <div class="label">Entrega 3 · O pedaço que não trava a página</div>
+  <div class="label">Antes de codar — a combinação de 30 minutos</div>
 
-  <div class="step">
-    <div class="step-head"><span class="n">04</span><h3>Uma seção lenta, dentro de Suspense</h3></div>
-    <p>Na página da vaga, acrescente uma seção <b>Vagas parecidas</b> — outras
-    vagas da mesma área ou da mesma empresa.</p>
-    <ul>
-      <li>O componente dessa seção é <code>async</code> e <b>espera de propósito</b>:
-      dois segundos, com <code>await new Promise(r =&gt; setTimeout(r, 2000))</code>.
-      Isso simula um banco lento, que vocês vão ter de verdade mais pra frente.</li>
-      <li>Envolva ele num <code>&lt;Suspense&gt;</code> com um <code>fallback</code>
-      que diga o que está acontecendo.</li>
-      <li>O <b>título e a descrição da vaga têm que aparecer na hora</b>, sem
-      esperar os dois segundos.</li>
-    </ul>
-    <p class="tip"><b>O teste:</b> recarregue e conte. Se a página inteira ficar
-    branca por dois segundos, o <code>Suspense</code> está no lugar errado — ou
-    a espera está acontecendo fora dele.</p>
-  </div>
-
-  <div class="label">O README da equipe</div>
-
-  <div class="goal roxo">
-    <span class="ico">📝</span>
+  <div class="goal magenta" style="margin-top:0">
+    <span class="ico">🤝</span>
     <div>
-      <h3>Metade da nota está aqui</h3>
-      <p>Acrescente ao README do projeto uma seção
-      <b><code>## A fronteira</code></b> com:</p>
-      <ul>
-        <li>A tabela da auditoria — os quatro arquivos e a justificativa de cada um.</li>
-        <li>O print do terminal mostrando o <code>console.log</code> do servidor.</li>
-        <li>Se vocês quebraram algum componente em dois: o antes e o depois, e por quê.</li>
-        <li>Uma frase respondendo: <b>o que a pessoa que usa o site ganha</b> com a
-        fronteira estar na folha em vez de na raiz?</li>
-      </ul>
+      <h3>As frentes 2, 3 e 4 programam contra o tipo da frente 1</h3>
+      <p>Três das quatro frentes precisam do tipo <code>Vaga</code>: a empresa
+      lista as vagas dela, a candidatura recebe o título da vaga, a busca filtra
+      as vagas. <b>Se cada pessoa esperar a outra ficar pronta, a equipe entrega
+      uma frente por semana em vez de quatro numa semana.</b></p>
+      <p>Sentem juntos por trinta minutos e escrevam <b>estes dois tipos</b>
+      antes de abrir o editor. Com eles combinados, as quatro pessoas escrevem
+      código ao mesmo tempo — mesmo antes de as telas existirem.</p>
     </div>
   </div>
+
+<pre><span class="cm">// 1 · data/vagas.ts — FRENTE 1. Este arquivo sai primeiro, num commit só.</span>
+<span class="kw">export type</span> <span class="ty">Vaga</span> = {
+  id: <span class="ty">string</span>;
+  titulo: <span class="ty">string</span>;
+  empresa: <span class="ty">string</span>;
+  empresaSlug: <span class="ty">string</span>;
+  area: <span class="ty">string</span>;          <span class="cm">// Front-end · Back-end · Dados · Mobile · QA · Design</span>
+  senioridade: <span class="ty">string</span>;   <span class="cm">// Estágio · Júnior · Pleno</span>
+  local: <span class="ty">string</span>;         <span class="cm">// Remoto · Híbrido · Presencial + cidade</span>
+  aceitaIniciante: <span class="kw">boolean</span>;
+  descricao: <span class="ty">string</span>;     <span class="cm">// no mínimo 300 caracteres — o "ver mais" precisa ter o que esconder</span>
+};
+
+<span class="kw">export const</span> vagas: <span class="ty">Vaga</span>[] = [ <span class="cm">/* no mínimo 12 */</span> ];
+
+
+<span class="cm">// 2 · data/empresas.ts — FRENTE 2. O slug daqui é o empresaSlug de lá.</span>
+<span class="kw">export type</span> <span class="ty">Empresa</span> = {
+  slug: <span class="ty">string</span>;
+  nome: <span class="ty">string</span>;
+  sobre: <span class="ty">string</span>;
+  site: <span class="ty">string</span>;
+};
+
+<span class="kw">export const</span> empresas: <span class="ty">Empresa</span>[] = [ <span class="cm">/* no mínimo 5 */</span> ];</pre>
+
+  <p class="tip"><b>A frente 1 sobe <code>data/vagas.ts</code> primeiro, num
+  commit só, e avisa a equipe.</b> Não precisa estar com as doze vagas prontas:
+  precisa ter o tipo e duas ou três vagas de exemplo. A partir desse commit, as
+  outras três importam <code>Vaga</code>, escrevem os componentes delas e já veem
+  alguma coisa na tela.</p>
+
+  <div class="defeito">
+    <h4>A segunda combinação: os slugs</h4>
+    <p>Os <code>empresaSlug</code> que a frente 1 escrever nas vagas <b>têm que
+    existir</b> em <code>data/empresas.ts</code>, da frente 2.
+    <code>aurora-tech</code> de um lado e <code>auroratech</code> do outro faz a
+    página da empresa cair em "não encontrada" — e o erro só aparece na hora de
+    juntar, quando ninguém mais tem tempo.</p>
+    <p>Escrevam a lista de slugs num papel, num arquivo, no grupo. Cinco nomes
+    combinados agora valem duas horas de depuração depois.</p>
+  </div>
+
+  <div class="label">As quatro partes</div>
+
+  <!-- ============================ PARTE 1 ============================ -->
+  <div class="parte p1">
+    <div class="parte-hd"><span class="n">PARTE 1</span><h3>Vaga</h3><span class="quem">frente 1 · booleano</span></div>
+    <p class="obj">O contrato da equipe e a página de detalhe. É a frente que as outras esperam — por isso ela entrega o arquivo de dados antes de tudo.</p>
+    <ul>
+      <li><code>data/vagas.ts</code> ampliado para <b>no mínimo 12 vagas</b>, cada
+      uma com <code>descricao</code> de <b>no mínimo 300 caracteres</b>. Pelo
+      menos 4 áreas, 3 senioridades e uma mistura de
+      <code>aceitaIniciante</code>: com dados uniformes, o filtro da frente 4 não
+      mostra diferença nenhuma e os números ficam sem graça.</li>
+      <li><code>CardDeVaga</code> — o item da lista. <b>Sem estado e sem
+      <code>"use client"</code></b>: ele só desenha o que recebe por prop.</li>
+      <li><code>DescricaoDaVaga</code> — <code>"use client"</code>, com
+      <code>const [aberta, setAberta] = useState(false)</code>. Acima de 180
+      caracteres o texto aparece cortado com um botão <b>ver mais</b>; aberto, o
+      botão vira <b>ver menos</b>. O texto visível é <b>derivado</b>: sai de
+      <code>aberta</code> e do texto, e não de um segundo estado.</li>
+      <li><code>BotaoCopiarLink</code> — é o botão da aula 02, agora com memória.
+      No lugar do <code>alert()</code>, um estado <code>copiado</code> que troca o
+      texto do botão para "✓ Link copiado". <b>Mesma tela, com memória.</b></li>
+      <li><code>app/vagas/[id]/page.tsx</code> continua <b>no servidor</b> e usa
+      os três componentes.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>arquivo</th><th>o que faz</th></tr>
+      <tr><td>data/vagas.ts</td><td>o tipo <code>Vaga</code> e a lista. O contrato da equipe inteira.</td></tr>
+      <tr><td>components/CardDeVaga.tsx</td><td>um item da listagem, com título, empresa, área, senioridade, local e o selo de iniciante. Sem estado.</td></tr>
+      <tr><td>components/DescricaoDaVaga.tsx</td><td><code>"use client"</code> · estado <code>aberta</code> · ver mais / ver menos</td></tr>
+      <tr><td>components/BotaoCopiarLink.tsx</td><td><code>"use client"</code> · estado <code>copiado</code> · usa <code>navigator.clipboard</code>, que só existe no navegador</td></tr>
+      <tr><td>app/vagas/[id]/page.tsx</td><td>servidor · acha a vaga por <code>id</code>, chama <code>notFound()</code> se não achar e monta a página com os três</td></tr>
+    </table>
+    <div class="defeito">
+      <h4>A armadilha da frente 1: marcar a página inteira</h4>
+      <p>O botão precisa de <code>"use client"</code>. A <b>página</b> não. Se a
+      linha for parar no <code>page.tsx</code>, o título, os dados e a descrição
+      descem para o navegador junto — e o <code>console.log</code> da página
+      passa a aparecer <b>também</b> no console do navegador. Repare no
+      "também": a linha não tira a página do servidor, ela <b>acrescenta</b> o
+      navegador. A página continua sendo pré-renderizada no servidor, e por isso
+      o log sai nos dois lugares. Ver o log no console é exatamente o sinal de
+      que a fronteira subiu alto demais.</p>
+      <p><b>Marque a folha, não a raiz.</b> Nesta parte, as folhas são dois
+      arquivos: <code>DescricaoDaVaga.tsx</code> e <code>BotaoCopiarLink.tsx</code>.</p>
+    </div>
+    <p class="tip">A página da vaga também recebe o
+    <code>FormularioDeCandidatura</code>, que é da <b>frente 3</b>. Combine o nome
+    da prop no grupo — é <code>tituloDaVaga</code> — e deixe o import comentado
+    até ela entregar. Assim você não fica travada esperando.</p>
+  </div>
+
+  <!-- ============================ PARTE 2 ============================ -->
+  <div class="parte p2">
+    <div class="parte-hd"><span class="n">PARTE 2</span><h3>Empresa</h3><span class="quem">frente 2 · texto que escolhe</span></div>
+    <p class="obj">Quem publica as vagas. A aba é um estado que guarda texto — e é a forma que mais convida ao erro, porque a tentação é guardar dois booleanos.</p>
+    <ul>
+      <li><code>data/empresas.ts</code> com o tipo <code>Empresa</code> e <b>no
+      mínimo 5 empresas</b>: <code>slug</code>, <code>nome</code>,
+      <code>sobre</code> e <code>site</code>. O <code>sobre</code> precisa ter uns
+      dois parágrafos — uma frase de dez palavras deixa a aba "Sobre" vazia.</li>
+      <li>Os <code>slug</code> daqui batendo com os <code>empresaSlug</code> que a
+      frente 1 usou. É a combinação da seção anterior.</li>
+      <li><code>AbasDaEmpresa</code> — <code>"use client"</code>, com
+      <code>const [aba, setAba] = useState("sobre")</code>. Dois botões: <b>Sobre</b>
+      e <b>Vagas (n)</b>. O botão da aba escolhida fica com a classe
+      <code>ativa</code> — a aparência também é derivada do estado.</li>
+      <li><code>app/empresas/[slug]/page.tsx</code> <b>no servidor</b>: acha a
+      empresa pelo slug, filtra as vagas dela com
+      <code>vagas.filter((v) =&gt; v.empresaSlug === slug)</code> e entrega
+      <code>sobre</code> e <code>vagas</code> por prop.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>arquivo</th><th>o que faz</th></tr>
+      <tr><td>data/empresas.ts</td><td>o tipo <code>Empresa</code> e as cinco empresas, com os slugs combinados</td></tr>
+      <tr><td>components/AbasDaEmpresa.tsx</td><td><code>"use client"</code> · estado <code>aba</code> · troca entre Sobre e Vagas sem recarregar</td></tr>
+      <tr><td>app/empresas/[slug]/page.tsx</td><td>servidor · acha a empresa, filtra as vagas dela e passa as duas coisas por prop</td></tr>
+    </table>
+    <div class="defeito">
+      <h4>A armadilha da frente 2: dois booleanos em vez de um texto</h4>
+      <p>Parece natural criar <code>mostrarSobre</code> e <code>mostrarVagas</code>.
+      Funciona no primeiro clique — e um dia as duas ficam verdadeiras ao mesmo
+      tempo, ou as duas falsas, e a tela mostra as duas abas ou nenhuma.
+      <b>Dois estados que precisam combinar são uma dupla que um dia vai
+      brigar.</b></p>
+      <p>Um estado só, guardando <b>o nome da aba</b>, não tem como mentir: ou
+      vale <code>"sobre"</code>, ou vale <code>"vagas"</code>. O resto da tela
+      pergunta a ele.</p>
+    </div>
+    <p class="tip">A contagem em <b>Vagas (3)</b> sai de
+    <code>vagas.length</code>, a prop que a página mandou — nunca de um
+    <code>useState</code>. Número que dá para contar não se guarda.</p>
+  </div>
+
+  <!-- ============================ PARTE 3 ============================ -->
+  <div class="parte p3">
+    <div class="parte-hd"><span class="n">PARTE 3</span><h3>Pessoa e candidatura</h3><span class="quem">frente 3 · controlado + lista</span></div>
+    <p class="obj">Quem se candidata. É a frente com mais estado na tela — e a que mais precisa de disciplina para não guardar aquilo que dá para calcular.</p>
+    <ul>
+      <li><code>FormularioDeCandidatura</code> com <code>"use client"</code>,
+      recebendo <code>tituloDaVaga</code> por prop.</li>
+      <li><b>Campos controlados:</b> <code>nome</code>, <code>email</code> e
+      <code>rascunho</code>. Todo <code>input</code> com <code>value</code>
+      <b>e</b> <code>onChange</code>, sempre os dois. Sem o
+      <code>onChange</code> o campo não deixa digitar — e isso não é bug: o valor
+      está preso ao estado, e nada troca o estado.</li>
+      <li><b>Lista de habilidades:</b> <code>setHabilidades([...habilidades,
+      nova])</code> — lista <b>nova</b>, nunca <code>push</code>. Remover é
+      <code>filter</code>. Adicionar por botão e pelo Enter, ignorando texto vazio
+      e repetido.</li>
+      <li><b>Validação derivada:</b> <code>emailParece</code> e
+      <code>podeEnviar</code> saem dos campos a cada renderização. Nenhum dos dois
+      é <code>useState</code>. O botão de enviar fica <code>disabled</code>
+      enquanto <code>podeEnviar</code> for falso.</li>
+      <li><b>A tela de sucesso:</b> o estado <code>enviada</code> vira verdadeiro
+      no <code>onSubmit</code> (com <code>e.preventDefault()</code>, senão a
+      página recarrega e leva o estado junto). O mesmo componente devolve outro
+      retorno: o nome de quem se candidatou, o título da vaga e quantas
+      habilidades foram. Mais um botão <b>corrigir alguma coisa</b> que volta ao
+      formulário com tudo ainda preenchido.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>arquivo</th><th>o que faz</th></tr>
+      <tr><td>components/FormularioDeCandidatura.tsx</td><td><code>"use client"</code> · cinco estados (<code>nome</code>, <code>email</code>, <code>rascunho</code>, <code>habilidades</code>, <code>enviada</code>) e duas variáveis derivadas</td></tr>
+      <tr><td>a tela de sucesso</td><td>o mesmo arquivo, outro retorno quando <code>enviada</code> é verdadeiro. Não é uma página nova.</td></tr>
+      <tr><td>app/vagas/[id]/page.tsx</td><td>servidor · a frente 1 monta a página e passa <code>tituloDaVaga={vaga.titulo}</code></td></tr>
+    </table>
+    <div class="defeito">
+      <h4>A candidatura ainda não vai para lugar nenhum</h4>
+      <p>Preencheu, enviou, apareceu a tela de sucesso — e aí você recarrega a
+      página e <b>sumiu tudo</b>. Isso é esperado, e faz parte da entrega dizer
+      isso em voz alta na apresentação.</p>
+      <p>Estado é o que existe naquela aba, naquele momento. Guardar de verdade é
+      <b>Server Action, na aula 05</b>, e <b>banco de dados, na aula 06</b>. Hoje
+      o objetivo é a tela responder — e responder direito.</p>
+    </div>
+    <p class="tip"><b><code>habilidades.push(nova)</code> não atualiza a
+    tela.</b> É a mesma lista de antes; o React compara a lista com ela mesma, não
+    vê diferença nenhuma e não desenha de novo. Espalhe:
+    <code>[...habilidades, nova]</code> cria uma lista nova, e lista nova o React
+    enxerga.</p>
+  </div>
+
+  <!-- ============================ PARTE 4 ============================ -->
+  <div class="parte p4">
+    <div class="parte-hd"><span class="n">PARTE 4</span><h3>Busca e números</h3><span class="quem">frente 4 · derivado + levantado</span></div>
+    <p class="obj">A única frente sem dado próprio: ela mostra o que a frente 1 escreveu. Dois estados na tela inteira — e todo o resto calculado a partir deles.</p>
+    <ul>
+      <li><code>MuralDeVagas</code> com <code>"use client"</code>, recebendo
+      <code>vagas</code> por prop. Dois estados, <b>só</b> estes dois:
+      <code>busca</code> e <code>area</code>.</li>
+      <li><b>Derivados, recalculados a cada renderização:</b> <code>areas</code>
+      (a lista de áreas que existem nos dados, com "Todas" na frente),
+      <code>visiveis</code> (as vagas que passam pela busca <b>e</b> pela área) e
+      <code>aceitamIniciante</code> (quantas das visíveis aceitam quem está
+      começando). Nenhum dos três é <code>useState</code>.</li>
+      <li><b>Os números:</b> "<code>{visiveis.length}</code> de
+      <code>{vagas.length}</code> vagas" e quantas aceitam iniciante, mudando a
+      cada tecla digitada. É o pedaço mais bonito da aula, porque a pessoa vê o
+      número acompanhar o dedo dela.</li>
+      <li>Mensagem quando <code>visiveis.length === 0</code>: nada de lista vazia
+      e silêncio.</li>
+      <li><code>Filtros</code> — o campo de busca e os botões de área.
+      <b>Sem estado próprio e sem <code>"use client"</code></b>. Recebe
+      <code>busca</code>, <code>aoMudarBusca</code>, <code>area</code>,
+      <code>aoMudarArea</code> e <code>areas</code>.</li>
+      <li><code>app/vagas/page.tsx</code> <b>continua no servidor</b>: importa as
+      vagas, mantém o <code>console.log("[servidor] montando a listagem")</code> e
+      entrega <code>&lt;MuralDeVagas vagas={vagas} /&gt;</code>. A página busca os
+      dados; o componente de cliente cuida do que muda.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>arquivo</th><th>o que faz</th></tr>
+      <tr><td>components/MuralDeVagas.tsx</td><td><code>"use client"</code> · guarda <code>busca</code> e <code>area</code>, calcula <code>visiveis</code> e os números, desenha a lista</td></tr>
+      <tr><td>components/Filtros.tsx</td><td>campo e botões controlados. Sem estado, sem a linha — quem o importa já é de cliente.</td></tr>
+      <tr><td>app/vagas/page.tsx</td><td>servidor · lê <code>data/vagas.ts</code> e entrega a lista pronta por prop</td></tr>
+    </table>
+    <div class="defeito">
+      <h4>A armadilha da frente 4: guardar a lista filtrada</h4>
+      <p>A tentação é criar um terceiro estado para <code>visiveis</code> e
+      atualizá-lo "quando a busca mudar". A partir daí, alguém precisa lembrar de
+      atualizar essa lista em todo lugar que mexe na busca ou na área — e é aqui
+      que a turma tenta <code>useEffect</code>, que <b>não é assunto de hoje</b> e
+      não resolve o problema, só o esconde.</p>
+      <p><b>Se dá para calcular do que você já tem, não guarde.</b>
+      <code>visiveis</code> sai de <code>vagas</code>, <code>busca</code> e
+      <code>area</code> — três coisas que você já tem na mão. Calcule na hora, a
+      cada renderização, e a lista nunca vai discordar do número ao lado dela.</p>
+    </div>
+    <p class="tip"><b><code>Filtros</code> não leva <code>"use client"</code>.</b>
+    Ele é importado por <code>MuralDeVagas</code>, que já é de cliente: a linha
+    marca a porta, não cada móvel da casa. E sim,
+    <code>aoMudarBusca={setBusca}</code> passa uma <b>função</b> por prop — entre
+    dois componentes de cliente isso é normal e é assim que se faz. A regra da
+    aula 02, de que função não atravessa a fronteira, valia de <b>servidor para
+    cliente</b>.</p>
+  </div>
+
+  <div class="label">Depois: juntar</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>As quatro frentes na mesma tela</h3></div>
+    <p>Todo mundo trabalha <b>no mesmo repositório</b>, cada pessoa numa branch,
+    e no fim tudo se encontra na <code>main</code>. Juntar não é "e aí a gente
+    junta" na véspera: é um passo com hora marcada, com as quatro pessoas na
+    frente da mesma tela.</p>
+    <p>Depois do merge, testem <b>as quatro interações, uma a uma</b>, nesta
+    ordem:</p>
+    <ol>
+      <li>Abra <code>/vagas</code> e digite <b>dados</b> no campo de busca. A
+      lista encolhe <b>e o número ao lado muda junto</b>, letra por letra. Se o
+      número não acompanhar a lista, tem estado guardado onde devia ter cálculo.</li>
+      <li>Ainda com a busca preenchida, clique numa <b>área</b>. Os dois filtros
+      valem ao mesmo tempo. Agora escreva uma palavra que não existe: a mensagem
+      de lista vazia tem que aparecer.</li>
+      <li>Abra uma vaga e clique em <b>ver mais</b>, depois em <b>ver menos</b>. O
+      texto cresce e encolhe, e a página não recarrega em momento nenhum.</li>
+      <li>Clique em <b>copiar link</b> e cole em qualquer lugar: tem que ser o
+      endereço daquela vaga. O texto do botão muda — e <b>continua mudado</b>,
+      porque agora ele tem memória.</li>
+      <li>Vá para a empresa pelo link da vaga e <b>troque de aba</b>: Sobre →
+      Vagas → Sobre. A contagem da aba bate com o número de vagas daquela empresa?</li>
+      <li>Volte para a vaga. <b>Adicione duas habilidades e remova uma.</b> Tem
+      que sobrar exatamente uma — se sobraram duas, ou se a tela não mudou, olhe
+      se não tem um <code>push</code> ali.</li>
+      <li>Deixe o e-mail sem <code>@</code>: o botão de enviar continua desligado
+      e o aviso aparece. Corrija e envie: a tela de sucesso mostra o
+      <b>título certo da vaga</b> e o número certo de habilidades.</li>
+      <li>Com o <b>terminal do <code>npm run dev</code> visível</b>, recarregue
+      <code>/vagas</code>. O log tem que sair <b>lá</b>, e nunca no console do
+      navegador.</li>
+    </ol>
+
+<div class="terminal"><span class="p">$</span> npm run dev
+
+  <span class="p">▲ Next.js 16</span>
+  <span class="p">- Local:   http://localhost:3000</span>
+
+<span class="out">[servidor] montando a listagem</span>   <span class="cm">← sai AQUI. Se aparecer no navegador,</span>
+                                 <span class="cm">   alguém marcou a página com "use client".</span></div>
+
+    <p class="tip">Achou divergência? <b>Isso é a integração funcionando.</b>
+    Slug que não bate, prop com nome trocado, número que discorda da lista — é
+    para pegar exatamente esse tipo de coisa que este passo tem nome próprio e
+    hora marcada.</p>
+  </div>
+
+  <div class="label">O README da equipe 📖</div>
+
+  <div class="goal roxo" style="margin-top:0">
+    <span class="ico">📖</span>
+    <div>
+      <h3>Uma seção nova: <code>## O estado do projeto</code></h3>
+      <p>O README da equipe já diz quem é quem desde a entrega 0. Acrescente uma
+      seção com <b>três coisas</b>:</p>
+      <ul>
+        <li><b>Quem assumiu cada frente</b> — nome e frente, numa tabela.</li>
+        <li><b>Uma linha por componente de cliente</b>, dizendo por que
+        <i>aquele</i> arquivo precisa de <code>"use client"</code>. "Porque usa
+        React" não é resposta; "porque tem <code>onClick</code> e guarda se o
+        texto está aberto" é.</li>
+        <li><b>Uma frase</b> respondendo: que dado vocês decidiram <b>NÃO</b>
+        guardar em estado, e por quê.</li>
+      </ul>
+      <p>A terceira é a que a correção lê com mais atenção. "Não guardamos a
+      lista filtrada porque ela sai da busca, da área e da lista de vagas" diz
+      mais sobre o que vocês entenderam do que qualquer parágrafo sobre React.</p>
+    </div>
+  </div>
+
+<pre><span class="cm">## O estado do projeto</span>
+
+| frente | quem | componente de cliente |
+|---|---|---|
+| 1 · Vaga | Ana | `DescricaoDaVaga`, `BotaoCopiarLink` |
+| 2 · Empresa | Bruno | `AbasDaEmpresa` |
+| 3 · Pessoa e candidatura | Carla | `FormularioDeCandidatura` |
+| 4 · Busca e números | Diego | `MuralDeVagas` |
+
+<span class="cm">### Por que cada um é de cliente</span>
+
+- `DescricaoDaVaga` — tem `onClick` e precisa lembrar se o texto está aberto.
+- `BotaoCopiarLink` — tem `onClick` e usa `navigator.clipboard`, que só
+  existe no navegador; no servidor essa palavra não existe.
+- `AbasDaEmpresa` — tem `onClick` e guarda qual aba a pessoa escolheu.
+- `FormularioDeCandidatura` — campos controlados: cada tecla muda o estado.
+- `MuralDeVagas` — guarda a busca e a área escolhida.
+  `Filtros` NÃO leva a linha: quem o importa já é de cliente.
+
+Nenhum `page.tsx` e nenhum `layout.tsx` do projeto leva `"use client"`.
+Prova: o log `[servidor] montando a listagem` sai no terminal do
+`npm run dev` — print em `docs/servidor.png`.
+
+<span class="cm">### O que decidimos NÃO guardar em estado</span>
+
+A lista filtrada e os números do topo. Os dois saem de `busca`, `area` e da
+lista de vagas — se virassem estado, um dia a tela mostraria um número e uma
+lista que não combinam. Pela mesma razão, `emailParece` e `podeEnviar` são
+calculados a cada renderização, e não guardados.</pre>
 
   <div class="label">Requisitos mínimos</div>
 
   <ul class="check">
-    <li>O botão de copiar funciona e vive num arquivo próprio, com <code>"use client"</code>.</li>
-    <li>Ele recebe pelo menos <b>uma prop</b> vinda da página.</li>
-    <li>A página da vaga <b>não</b> tem <code>"use client"</code>, e o <code>console.log</code> dela sai no terminal.</li>
-    <li>Nenhum <code>layout.tsx</code> nem <code>page.tsx</code> do projeto tem <code>"use client"</code>.</li>
-    <li>A seção lenta está dentro de <code>&lt;Suspense&gt;</code> e o resto da página não espera por ela.</li>
-    <li>O README tem a seção <code>## A fronteira</code> completa.</li>
-    <li><code>npm run build</code> passa sem erro.</li>
-  </ul>
-
-  <div class="label">Extras, pra quem quiser ir além ✨</div>
-
-  <ul class="check extra">
-    <li>Um segundo <code>&lt;Suspense&gt;</code> na listagem, para um bloco de estatísticas lento.</li>
-    <li>Um <code>fallback</code> que imita o formato do conteúdo real (esqueleto cinza) em vez de um texto.</li>
-    <li>Medir no painel <em>Network</em> o JavaScript baixado antes e depois de encolher a fronteira, e pôr os dois números no README.</li>
+    <li>As <b>quatro frentes</b> entregues, e o Git mostrando <b>quem fez cada uma</b>.</li>
+    <li><b>Um componente de cliente com <code>useState</code> por frente</b>, no mínimo — cada um com a sua forma de estado.</li>
+    <li><code>data/vagas.ts</code> com <b>12 vagas ou mais</b>, descrição longa, 4 áreas, 3 senioridades e mistura de <code>aceitaIniciante</code>.</li>
+    <li><code>data/empresas.ts</code> com <b>5 empresas ou mais</b>, e todo <code>empresaSlug</code> das vagas existindo lá.</li>
+    <li><code>/vagas</code> filtrando e contando; a página da vaga com ver mais, copiar link e o formulário; a página da empresa com as abas.</li>
+    <li>Todo campo de estado <b>controlado</b>: <code>value</code> e <code>onChange</code>, sempre os dois.</li>
+    <li><code>"use client"</code> <b>só nas folhas</b>, e como <b>primeira linha</b> do arquivo, antes dos imports.</li>
+    <li>README com a seção <code>## O estado do projeto</code>, com as três partes pedidas.</li>
   </ul>
 
   <div class="label">O que NÃO pode 🚫</div>
 
   <ul class="check no">
-    <li><code>"use client"</code> em <code>layout.tsx</code> ou em <code>page.tsx</code>. É o erro que este desafio existe para evitar.</li>
-    <li>Passar <b>função</b> como prop para um componente de cliente. Não atravessa — e o erro vai te dizer isso.</li>
-    <li>Usar <code>useState</code>, <code>useEffect</code> ou qualquer hook. <b>Não foi ensinado</b>, não é necessário aqui, e não conta ponto.</li>
-    <li>Buscar dados de API externa. Isso é a aula 04 — aqui a lentidão é simulada de propósito.</li>
-    <li>Instalar biblioteca nova.</li>
+    <li><b><code>"use client"</code> em <code>page.tsx</code> ou <code>layout.tsx</code>.</b>
+    A fronteira sobe para a raiz e leva a árvore inteira junto — inclusive o que
+    já vinha pronto e não precisava de JavaScript nenhum.</li>
+    <li><b>Alterar o estado direto, sem a função <code>set</code>.</b>
+    <code>aberta = true</code> muda a variável e não avisa ninguém. Só o
+    <code>setAberta</code> avisa o React, e é o React que redesenha a tela.</li>
+    <li><b><code>push</code> numa lista de estado.</b> É a mesma lista; o React
+    compara com ela mesma e não vê diferença. Espalhe:
+    <code>[...habilidades, nova]</code>.</li>
+    <li><b>Guardar em estado o que dá para calcular.</b> Lista filtrada,
+    contagem, "o e-mail está válido": tudo isso se deriva. Dois estados que
+    precisam combinar são uma dupla que um dia vai brigar.</li>
+    <li><b><code>useEffect</code>.</b> Não foi ensinado, e nada neste desafio
+    precisa dele. Se apareceu, veio de código copiado sem leitura — tire.</li>
+    <li><b>Biblioteca nova.</b> Nada de gerenciador de estado, de formulário ou de
+    máscara. <code>useState</code> e o que já está no projeto.</li>
+    <li><b>Buscar dados de API externa.</b> Nada de <code>fetch</code>,
+    <code>axios</code> ou endpoint. Os dados são os arquivos de
+    <code>data/</code> — pedir dado para fora, e esperar por ele, é a aula 04.</li>
+    <li><b>Uma pessoa fazer duas frentes.</b> Se alguém travou, a equipe ajuda —
+    mas o commit é de quem fez.</li>
   </ul>
 
   <div class="label">Como isso é avaliado</div>
 
-  <table class="audit">
-    <tr><th>critério</th><th>o que se espera</th><th>peso</th></tr>
-    <tr><td>A fronteira certa</td><td>Componente de cliente pequeno, num arquivo próprio; página e layout intocados.</td><td>30%</td></tr>
-    <tr><td>A auditoria</td><td>Os quatro arquivos justificados, com o motivo certo em cada um.</td><td>30%</td></tr>
-    <tr><td>Suspense</td><td>O pedaço lento não segura o resto da página.</td><td>20%</td></tr>
-    <tr><td>README</td><td>Seção completa, com o print e a frase sobre o ganho de quem usa.</td><td>20%</td></tr>
+  <table class="criterios">
+    <tr><th>critério</th><th>o que se espera</th><th class="peso">peso</th></tr>
+    <tr><td>As quatro frentes entregues</td><td>Cada uma com o seu componente de cliente funcionando, na forma de estado que lhe coube.</td><td class="peso">25%</td></tr>
+    <tr><td>Estado bem escolhido</td><td>Derivado em vez de guardado, lista com espalhamento, campos controlados. É o coração da aula.</td><td class="peso">25%</td></tr>
+    <tr><td>A fronteira no lugar certo</td><td><code>"use client"</code> só nas folhas; nenhuma página e nenhum layout de cliente; o log saindo no terminal.</td><td class="peso">20%</td></tr>
+    <tr><td>O projeto integrado</td><td>Slugs batendo, props com os nomes combinados, as quatro interações funcionando na mesma tela.</td><td class="peso">15%</td></tr>
+    <tr><td>Trabalho de equipe e README</td><td>Commits das quatro pessoas e a seção <code>## O estado do projeto</code> respondendo às três perguntas.</td><td class="peso">15%</td></tr>
   </table>
 
   <div class="entrega">
     <h3>📦 Como entregar</h3>
     <ul>
-      <li>Link do repositório da equipe, com o projeto rodando.</li>
-      <li>README atualizado com a seção <code>## A fronteira</code>.</li>
-      <li>Pelo menos um commit por pessoa da equipe.</li>
+      <li>Link do repositório da equipe no GitHub.</li>
+      <li>README com a seção <code>## O estado do projeto</code> e como rodar.</li>
+      <li><b>Pelo menos um commit por pessoa</b> — o histórico é a evidência de
+      que as quatro frentes existiram de verdade.</li>
       <li>Prazo: <b>até a aula 04 (02/09)</b>, antes do início.</li>
     </ul>
-    <p style="margin-top:12px">Travou? Traga na aula 04 <b>com o erro na tela</b>.
-    Print do stack trace vale mais que descrição do problema.</p>
+    <p style="margin-top:12px">Travou? Traga na aula 04 <b>com o erro na
+    tela</b>. Print da mensagem vermelha vale mais que descrição do problema — e
+    consultar o <a href="/guias/nextjs.html" style="color:var(--pink-light);text-decoration:underline">guia
+    de Next.js</a> no meio do caminho não é trapaça, é o que a gente faz na vida
+    real.</p>
   </div>
 
   <div class="cta-row">
     <a class="btn primary" href="codigos-desafio.html">🧩 Código do desafio</a>
-    <a class="btn" href="modelo-resposta.html">🧑‍💻 Modelo de resposta</a>
-    <a class="btn" href="slides.html">▶ Slides da aula</a>
-    <a class="btn" href="/guias/nextjs.html">📘 Guia de Next.js</a>
+    <a class="btn" href="modelo-resposta.html">👀 Prévia da resposta</a>
+    <a class="btn" href="/cursos/introducao-nextjs/projeto/brief.html">💼 Briefing do projeto</a>
+    <a class="btn" href="exercicios.html">🧪 Exercícios da aula</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+    <a class="btn" href="/guias/nextjs.html">📖 Guia de Next.js</a>
   </div>
 
   <div class="foot">
