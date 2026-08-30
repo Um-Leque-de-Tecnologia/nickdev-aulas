@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 04 — Livro encapsulado · NickDev</title>
+<meta name="description" content="Desafio da aula 04: encapsule a classe Livro com private, getters/setters validados, this, construtores sobrecarregados, membro static e constante final.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{
+  position:fixed; top:16px; left:18px; z-index:100; display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--mono); font-size:12.5px; color:var(--text-2);
+  background:rgba(16,13,27,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  border:1px solid var(--line-strong); padding:7px 13px; border-radius:100px; transition:.2s;
+}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:860px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:60ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{
+  display:flex;gap:16px;align-items:flex-start;
+  background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);
+  border-radius:14px;padding:22px 24px;margin-top:38px;
+}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 20px}
+
+.step{
+  position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:24px 26px 24px 30px;margin-bottom:16px;
+}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.step .n{
+  font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);
+  border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step h3{font-size:19px;font-weight:600}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step p + p{margin-top:8px}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:10px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{
+  background:#0b0913;border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;margin-top:14px;overflow-x:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;
+}
+pre .kw{color:#F24487}
+pre .ty{color:#7B4FD0}
+pre .st{color:#A98CE0}
+pre .fn{color:#E88BB8}
+pre .cm{color:#6f6a83}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+code{font-family:var(--mono);font-size:.92em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start;
+}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;
+  padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s;
+}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+
+@media(max-width:560px){
+  .goal{flex-direction:column;gap:10px}
+  .step{padding:22px 20px}
+}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true">
+  <span class="glow magenta"></span>
+  <span class="glow purple"></span>
+</div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Desafio · Aula 04</div>
+  <h1>Livro <span class="grad">encapsulado</span> 🔒</h1>
+  <p class="lead">
+    Pegue a classe <code>Livro</code> que você criou na aula 03 e feche ela por dentro:
+    atributos <b>privados</b>, getters e setters que <b>validam</b>, o <code>this</code>
+    resolvendo nomes repetidos, dois construtores (um chamando o outro) e um
+    contador que sobrevive entre objetos.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🎯</span>
+    <div>
+      <h3>O objetivo</h3>
+      <p>Provar que você sabe transformar uma classe "aberta" numa classe
+      encapsulada de verdade — sem perder nenhum comportamento, só ganhando
+      proteção. São seis coisas:</p>
+      <ol style="margin-top:8px">
+        <li>Todos os atributos de <b>Livro</b> viram <code>private</code></li>
+        <li>Um getter por atributo (<code>get...</code>/<code>is...</code>) e setters <b>com validação</b></li>
+        <li>Uso correto de <code>this</code> nos setters e no construtor</li>
+        <li>Dois construtores, o menor chamando o maior com <code>this(...)</code></li>
+        <li>Um método <b>sobrecarregado</b> (mesmo nome, parâmetros diferentes)</li>
+        <li>Um contador <code>static</code> de livros criados + uma constante <code>static final</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="goal">
+    <span class="ico">📖</span>
+    <div>
+      <h3>Travou numa palavra?</h3>
+      <p>Encapsulamento, getter, setter, this, sobrecarga, static, final — todo
+      esse vocabulário está no
+      <a href="/guias/java.html#encapsulamento" style="color:var(--pink-light);text-decoration:underline">guia
+      de Java, na seção desta aula</a>, em português simples e com exemplos.</p>
+    </div>
+  </div>
+
+  <div class="label">Passo a passo</div>
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-head"><span class="n">01</span><h3>Feche os atributos</h3></div>
+    <p>Troque todos os atributos de <code>Livro</code> (título, autor, preço,
+    emprestado...) para <code>private</code>. Tente compilar seu código
+    antigo — ele deve <b>quebrar</b> em todo lugar que acessava um atributo
+    direto (ex.: <code>livro.preco = 10</code>). É esperado: é exatamente
+    isso que vamos consertar nos próximos passos.</p>
+    <pre><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="kw">private</span> <span class="ty">String</span> titulo;
+  <span class="kw">private</span> <span class="ty">String</span> autor;
+  <span class="kw">private</span> <span class="kw">double</span> preco;
+  <span class="kw">private</span> <span class="kw">boolean</span> emprestado;
+}</pre>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-head"><span class="n">02</span><h3>Getters e setters validados</h3></div>
+    <p>Escreva um getter pra cada atributo. Nos setters, <b>recuse</b> valores
+    inválidos lançando <code>IllegalArgumentException</code> — pelo menos
+    em <code>setPreco</code> (não aceita negativo) e <code>setTitulo</code>
+    (não aceita vazio):</p>
+    <pre><span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+  <span class="kw">if</span> (preco &lt; <span class="st">0</span>) {
+    <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+  }
+  <span class="kw">this</span>.preco = preco;
+}</pre>
+    <p class="tip"><b>Repare no <code>this.preco</code>:</b> o parâmetro e o
+    atributo têm o mesmo nome de propósito — é o cenário exato em que
+    <code>this</code> deixa de ser opcional.</p>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-head"><span class="n">03</span><h3>Dois construtores, um chamando o outro</h3></div>
+    <p>Mantenha o construtor com os três parâmetros (título, autor, preço) e
+    crie um <b>segundo</b>, só com título e autor, que chama o primeiro
+    passando um preço padrão via <code>this(...)</code>:</p>
+    <pre><span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="kw">this</span>.titulo = titulo;
+  <span class="kw">this</span>.autor = autor;
+  <span class="fn">setPreco</span>(preco);   <span class="cm">// reaproveita a validação</span>
+  <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+  totalDeLivros++;
+}
+
+<span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+  <span class="kw">this</span>(titulo, autor, PRECO_MINIMO);   <span class="cm">// tem que ser a 1ª linha</span>
+}</pre>
+    <p class="tip"><b>Por que reaproveitar com <code>setPreco</code>?</b> Se
+    você repetir a validação em cada construtor, algum dia alguém muda a
+    regra num lugar e esquece do outro. Chamando o setter, a regra mora num
+    lugar só.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-head"><span class="n">04</span><h3>Um método sobrecarregado</h3></div>
+    <p>Escreva <code>calcularDesconto(double percentual)</code> e uma versão
+    sem parâmetro que aplica um desconto padrão chamando a primeira:</p>
+    <pre><span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>(<span class="kw">double</span> percentual) {
+  <span class="kw">return</span> preco - (preco * percentual / <span class="st">100</span>);
+}
+
+<span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>() {
+  <span class="kw">return</span> <span class="fn">calcularDesconto</span>(<span class="st">10</span>);  <span class="cm">// 10% padrão</span>
+}</pre>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-head"><span class="n">05</span><h3>Contador static + constante final</h3></div>
+    <p>Some um atributo <code>static</code> que conta quantos <code>Livro</code>
+    já foram criados (incremente dentro dos construtores) e uma constante
+    <code>static final</code> pro preço mínimo:</p>
+    <pre><span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="st">0</span>;
+<span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="st">0.0</span>;
+
+<span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() {
+  <span class="kw">return</span> totalDeLivros;
+}</pre>
+  </div>
+
+  <!-- 6 -->
+  <div class="step">
+    <div class="step-head"><span class="n">06</span><h3>Teste tudo numa classe TesteLivro</h3></div>
+    <p>Crie <code>TesteLivro.java</code> com <code>main</code>: instancie pelo
+    menos dois livros (usando os dois construtores diferentes), chame o
+    método sobrecarregado dos dois jeitos, imprima o total com
+    <code>Livro.getTotalDeLivros()</code> e tente um <code>setPreco(-10)</code>
+    dentro de um <code>try/catch</code> pra ver a exceção sendo barrada:</p>
+    <div class="terminal"><span class="p">$</span> java TesteLivro
+<span class="out">Duna — R$ 89.9 — total de livros: 1
+1984 — R$ 0.0 — total de livros: 2
+Desconto padrão de Duna: R$ 80.91
+Tentativa de preço negativo bloqueada: Preço não pode ser negativo</span></div>
+    <p class="tip"><b>Ainda não é <code>try/catch</code> "de verdade":</b>
+    tratamento de exceções completo é assunto da <b>aula 09</b>. Por
+    enquanto, um <code>try { ... } catch (IllegalArgumentException e) {
+    System.out.println(e.getMessage()); }</code> simples já mostra que a
+    validação está funcionando.</p>
+  </div>
+
+  <div class="label">Requisitos mínimos</div>
+  <ul class="check">
+    <li>Todos os atributos de <code>Livro</code> são <code>private</code></li>
+    <li>Um getter por atributo, e setters que validam (pelo menos preço e título)</li>
+    <li><code>this</code> usado corretamente nos setters e no construtor</li>
+    <li>Dois construtores, o mais curto chamando o mais longo com <code>this(...)</code></li>
+    <li>Um método sobrecarregado (dois <code>calcularDesconto</code> com parâmetros diferentes)</li>
+    <li>Um contador <code>static</code> de objetos criados + uma constante <code>static final</code></li>
+    <li><code>TesteLivro.java</code> com <code>main</code> demonstrando tudo isso rodando</li>
+  </ul>
+
+  <div class="label">Desafios extras (pra quem quer brilhar ✨)</div>
+  <ul class="check extra">
+    <li>Adicione validação também em <code>setTitulo</code> (não aceitar título vazio) e em <code>setAutor</code></li>
+    <li>Crie um terceiro construtor sobrecarregado (ex.: recebendo também a quantidade de exemplares)</li>
+    <li>Adicione um método <code>emprestar(int dias)</code> sobrecarregado ao lado de <code>emprestar()</code> (sem parâmetro), guardando o prazo</li>
+    <li>Pesquise a diferença entre <code>private</code> e <code>protected</code> — qual dos dois você usaria se, na aula 06, criasse uma classe <code>LivroDigital extends Livro</code>?</li>
+  </ul>
+
+  <div class="label">Materiais de apoio</div>
+  <p class="lead" style="margin-top:0">Revise encapsulamento, getters/setters,
+  <code>this</code>, sobrecarga, <code>static</code> e <code>final</code> no
+  guia. Trave? Espie o <b>código do desafio</b> — mas tente antes. 💜</p>
+  <div class="cta-row">
+    <a class="btn primary" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver modelo de resposta</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="/guias/java.html#encapsulamento">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Desafio 04 · Orientação a Objetos com Java · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

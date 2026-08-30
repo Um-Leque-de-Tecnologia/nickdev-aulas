@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de resposta — Livro.java · Aula 04 · NickDev</title>
+<meta name="description" content="Modelo de resposta completo do desafio da aula 04: a classe Livro encapsulada e a classe TesteLivro, com a saída real do terminal.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
+  --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{
+  position:fixed; top:16px; left:18px; z-index:100; display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--mono); font-size:12.5px; color:var(--text-2);
+  background:rgba(16,13,27,.72); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  border:1px solid var(--line-strong); padding:7px 13px; border-radius:100px; transition:.2s;
+}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 64px}
+
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:62ch;margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 20px}
+
+.panes{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start;margin-top:8px}
+@media(max-width:820px){.panes{grid-template-columns:1fr}}
+.pane{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface)}
+.panehd{font-family:var(--mono);font-size:12px;color:var(--text-3);padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.panehd .dot{width:9px;height:9px;border-radius:50%}
+.panehd .dot.r{background:#ff5f56}.panehd .dot.y{background:#ffbd2e}.panehd .dot.g{background:#27c93f}
+.panehd b{color:var(--text);font-weight:500}
+
+pre{background:#0b0913;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#d8d3e6;margin:0}
+.kw{color:#F24487}
+.ty{color:#7B4FD0}
+.st{color:#A98CE0}
+.fn{color:#E88BB8}
+.cm{color:#6f6a83}
+
+.term{background:#0b0913;padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto}
+.term .p{color:var(--text-3)}
+.term .cmdline{color:var(--text)}
+.term .out{color:#9ee39e}
+
+.recap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+@media(max-width:700px){.recap{grid-template-columns:1fr}}
+.recap .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.recap .card h3{font-size:15px;margin-bottom:6px;color:var(--pink-light)}
+.recap .card p{font-size:13.5px;color:var(--text-2)}
+
+.check{list-style:none;display:grid;gap:10px;margin-top:8px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Modelo de resposta · Aula 04</div>
+  <h1>Livro.java <span class="grad">encapsulado</span> 🔒✅</h1>
+  <p class="lead">
+    A classe <code>Livro</code> com atributos <code>private</code>, getters e
+    setters validados, dois construtores (um chamando o outro com
+    <code>this(...)</code>), um método sobrecarregado, um contador
+    <code>static</code> e uma constante <code>final</code> — mais a classe
+    de teste e a saída real do terminal.
+  </p>
+  <div class="rule"></div>
+
+  <div class="label">Código &amp; saída</div>
+  <div class="panes">
+    <div class="pane">
+      <div class="panehd"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><b style="margin-left:6px">Livro.java</b></div>
+      <pre><span class="cm">// desafio da aula 04 · orientação a objetos com java</span>
+<span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="kw">private</span> <span class="ty">String</span> titulo;
+  <span class="kw">private</span> <span class="ty">String</span> autor;
+  <span class="kw">private</span> <span class="kw">double</span> preco;
+  <span class="kw">private</span> <span class="kw">boolean</span> emprestado;
+
+  <span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="st">0</span>;
+  <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="st">0.0</span>;
+
+  <span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+    <span class="fn">setTitulo</span>(titulo);
+    <span class="kw">this</span>.autor = autor;
+    <span class="fn">setPreco</span>(preco);
+    <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+    totalDeLivros++;
+  }
+
+  <span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+    <span class="kw">this</span>(titulo, autor, PRECO_MINIMO);
+  }
+
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getAutor</span>() { <span class="kw">return</span> autor; }
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getPreco</span>() { <span class="kw">return</span> preco; }
+  <span class="kw">public</span> <span class="kw">boolean</span> <span class="fn">isEmprestado</span>() { <span class="kw">return</span> emprestado; }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">setTitulo</span>(<span class="ty">String</span> titulo) {
+    <span class="kw">if</span> (titulo == <span class="kw">null</span> || titulo.<span class="fn">isBlank</span>()) {
+      <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Título não pode ser vazio"</span>);
+    }
+    <span class="kw">this</span>.titulo = titulo;
+  }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+    <span class="kw">if</span> (preco &lt; PRECO_MINIMO) {
+      <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+    }
+    <span class="kw">this</span>.preco = preco;
+  }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">emprestar</span>() { emprestado = <span class="kw">true</span>; }
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">devolver</span>() { emprestado = <span class="kw">false</span>; }
+
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>(<span class="kw">double</span> percentual) {
+    <span class="kw">return</span> preco - (preco * percentual / <span class="st">100</span>);
+  }
+
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>() {
+    <span class="kw">return</span> <span class="fn">calcularDesconto</span>(<span class="st">10</span>);
+  }
+
+  <span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() { <span class="kw">return</span> totalDeLivros; }
+}</pre>
+    </div>
+    <div class="pane">
+      <div class="panehd"><span class="dot" style="background:#27c93f"></span><b>TesteLivro.java + terminal</b></div>
+      <pre><span class="kw">public class</span> <span class="ty">TesteLivro</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Herbert"</span>, <span class="st">89.90</span>);
+    <span class="ty">Livro</span> orwell = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"1984"</span>, <span class="st">"Orwell"</span>);
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(duna.<span class="fn">getTitulo</span>() + <span class="st">" — R$ "</span> + duna.<span class="fn">getPreco</span>()
+      + <span class="st">" — total: "</span> + <span class="ty">Livro</span>.<span class="fn">getTotalDeLivros</span>());
+    <span class="ty">System</span>.out.<span class="fn">println</span>(orwell.<span class="fn">getTitulo</span>() + <span class="st">" — R$ "</span> + orwell.<span class="fn">getPreco</span>()
+      + <span class="st">" — total: "</span> + <span class="ty">Livro</span>.<span class="fn">getTotalDeLivros</span>());
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Desconto padrão: R$ "</span> + duna.<span class="fn">calcularDesconto</span>());
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Desconto 25%: R$ "</span> + duna.<span class="fn">calcularDesconto</span>(<span class="st">25</span>));
+
+    <span class="kw">try</span> {
+      duna.<span class="fn">setPreco</span>(-<span class="st">10</span>);
+    } <span class="kw">catch</span> (<span class="ty">IllegalArgumentException</span> e) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Bloqueado: "</span> + e.<span class="fn">getMessage</span>());
+    }
+  }
+}</pre>
+      <div class="term" style="border-top:1px solid var(--line)">
+<span class="p">$</span> <span class="cmdline">javac Livro.java TesteLivro.java</span>
+<span class="p">$</span> <span class="cmdline">java TesteLivro</span>
+<span class="out">Duna — R$ 89.9 — total: 1
+1984 — R$ 0.0 — total: 2
+Desconto padrão: R$ 80.91
+Desconto 25%: R$ 67.425
+Bloqueado: Preço não pode ser negativo</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">Por que essa solução funciona</div>
+  <div class="recap">
+    <div class="card"><h3>Atributos fechados</h3><p>Todo estado é <code>private</code>. A única forma de ler ou mudar é passando pelos métodos — e eles decidem o que aceitar.</p></div>
+    <div class="card"><h3><code>this</code> sem ambiguidade</h3><p>Parâmetro e atributo com o mesmo nome deixam de ser um problema: <code>this.preco</code> é sempre o atributo do objeto atual.</p></div>
+    <div class="card"><h3>Um construtor chama o outro</h3><p><code>this(titulo, autor, PRECO_MINIMO)</code> evita repetir a mesma inicialização em dois lugares.</p></div>
+    <div class="card"><h3>Sobrecarga real</h3><p><code>calcularDesconto()</code> e <code>calcularDesconto(double)</code> coexistem — o Java escolhe pelos parâmetros passados na chamada.</p></div>
+    <div class="card"><h3><code>static</code> é da classe</h3><p><code>totalDeLivros</code> é uma cópia só, somada em todo construtor — por isso chega a 2 mesmo com dois objetos diferentes.</p></div>
+    <div class="card"><h3><code>final</code> nunca muda</h3><p><code>PRECO_MINIMO</code> é constante: o compilador barra qualquer tentativa de reatribuí-la depois de criada.</p></div>
+  </div>
+
+  <div class="label">Checklist batido</div>
+  <ul class="check">
+    <li>Todos os atributos de <code>Livro</code> são <code>private</code></li>
+    <li>Getters pra todos, setters com validação em <code>titulo</code> e <code>preco</code></li>
+    <li><code>this</code> usado nos setters e no construtor</li>
+    <li>Dois construtores, o de 2 parâmetros chamando o de 3 com <code>this(...)</code></li>
+    <li><code>calcularDesconto</code> sobrecarregado (com e sem parâmetro)</li>
+    <li>Contador <code>static</code> + constante <code>static final</code></li>
+    <li><code>TesteLivro.java</code> rodando e mostrando o comportamento completo</li>
+  </ul>
+
+  <div class="label">Continue por aqui</div>
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Rever o desafio</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código comentado, passo a passo</a>
+    <a class="btn" href="/guias/java.html#encapsulamento">📘 Guia</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">Modelo de resposta · Aula 04 · Orientação a Objetos com Java · NickDev 💜</div>
+
+</div>
+
+</body>
+</html>

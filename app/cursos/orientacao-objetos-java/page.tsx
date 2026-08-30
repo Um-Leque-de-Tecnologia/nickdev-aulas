@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
+const AULA_04 = "/cursos/orientacao-objetos-java/aula-04-encapsulamento";
 const PROJETO = "/cursos/orientacao-objetos-java/projeto";
 
 export default function OrientacaoObjetosJava() {
@@ -115,7 +116,7 @@ export default function OrientacaoObjetosJava() {
           </div>
         </div>
 
-        <div className="lesson soon">
+        <div className="lesson">
           <div className="idx">04</div>
           <div className="body">
             <h3>Encapsulamento e construtores</h3>
@@ -125,7 +126,20 @@ export default function OrientacaoObjetosJava() {
               sobrecarga, membros <span className="mono">static</span> e{" "}
               <span className="mono">final</span>.
             </p>
-            <span className="soon-tag">em breve</span>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_04}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_04}/desafio.html`}>
+                🎯 Desafio
+              </a>
+              <a className="mat" href={`${AULA_04}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_04}/modelo-resposta.html`}>
+                🧑‍💻 Modelo de resposta
+              </a>
+            </div>
           </div>
         </div>
 

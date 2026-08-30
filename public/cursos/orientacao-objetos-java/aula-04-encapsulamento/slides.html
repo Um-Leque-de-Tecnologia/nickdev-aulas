@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encapsulamento e construtores · NickDev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E;
+    --canvas-2:#100D1B;
+    --paper:#f6f4ef;
+    --ink:#F3F0FA;
+    --muted:#8B84A0;
+    --tag:#7B4FD0;       /* estrutura / tags */
+    --str:#A98CE0;       /* strings / sucesso */
+    --key:#F24487;       /* palavras-chave / destaque */
+    --attr:#E88BB8;      /* atributos / parada */
+    --green:#5fd08a;     /* acerto / caminho bom */
+    --line:rgba(255,255,255,.09);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --serif:'Newsreader',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--body);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* deck */
+  .deck{position:fixed;inset:0}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(26px,5.2vw,64px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6.6vw,82px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(26px,4.4vw,52px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(19px,2.4vw,27px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;color:var(--ink);max-width:60ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.9em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:820px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(14px,1.5vw,17px)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.ok h3{color:var(--green)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.no h3{color:var(--key)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+
+  ul.clean{list-style:none;max-width:64ch}
+  ul.clean li{position:relative;padding-left:26px;margin:12px 0;font-size:clamp(15px,1.7vw,20px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  /* nav */
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;
+    font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;
+    border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+
+  /* agenda */
+  .agenda{display:flex;flex-direction:column;gap:2px;max-width:940px;width:100%}
+  .row{display:grid;grid-template-columns:120px 1fr auto;gap:18px;align-items:center;padding:12px 16px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:14px}
+  .row .d{font-size:clamp(14px,1.6vw,18px)}
+  .row .tag{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.55}.row.brk .t{color:var(--muted)}
+
+  /* código */
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(12.5px,1.4vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:760px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .termline{font-family:var(--mono);font-size:clamp(12.5px,1.4vw,15px);color:#9ee39e}
+  .termline .p{color:var(--muted)}
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:760px;white-space:pre;overflow-x:auto}
+
+  .steps{counter-reset:s;max-width:760px;width:100%}
+  .steps .st{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:34px;height:34px;min-width:34px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:15px}
+  .steps .st .body h3{font-size:clamp(16px,1.9vw,21px);margin-bottom:2px}
+  .steps .st .body p{font-size:clamp(13px,1.5vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:13px;color:var(--attr);border-left:2px solid var(--attr);padding-left:14px;margin-top:22px;max-width:60ch;line-height:1.5}
+
+  .big-emoji{font-size:clamp(40px,7vw,72px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  /* cofre (encapsulamento) */
+  .safe{display:flex;align-items:center;justify-content:center;gap:0;width:100%;max-width:760px}
+  .safe .box{background:var(--canvas-2);border:1px solid var(--line);border-radius:18px;padding:30px 34px;text-align:center;position:relative}
+  .safe .box .lock{font-size:34px;margin-bottom:8px}
+  .safe .box b{display:block;font-family:var(--disp);font-size:clamp(15px,1.8vw,20px)}
+  .safe .box span{font-size:13px;color:var(--muted)}
+
+  /* responsividade */
+  .slide{justify-content:safe center}
+  h1,h2,.tagtitle{overflow-wrap:break-word}
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:64px 1fr;gap:10px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center) > *{margin-inline:auto;width:100%;max-width:960px}
+</style>
+<style>
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .deck{z-index:2}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 CAPA -->
+  <section class="slide active center">
+    <div class="eyebrow"><span class="b">curso</span> · aula 04 · orientação a objetos com java</div>
+    <div class="tagtitle"><span class="br">&lt;</span><span class="nm">encapsulamento</span><span class="br">&gt;</span></div>
+    <h1 style="margin:24px 0 14px">Encapsulamento <span class="grad">e construtores.</span></h1>
+    <p class="lead" style="max-width:56ch">Hoje: private/public/protected, getters e setters, <span class="code-inline">this</span>, construtores (com sobrecarga) e membros <span class="code-inline">static</span>/<span class="code-inline">final</span>.</p>
+  </section>
+
+  <!-- 2 RECAP -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>lembrando da aula 03</div>
+    <h2>O <span class="grad">Livro</span> que vocês construíram</h2>
+    <p>Uma classe com atributos e um construtor — abstração e instanciação já funcionando:</p>
+    <div class="code" style="margin-top:18px"><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="ty">String</span> autor;
+  <span class="kw">double</span> preco;
+  <span class="kw">boolean</span> emprestado;
+
+  <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+    titulo = titulo;   <span class="cm">// hmm...</span>
+    autor = autor;
+    preco = preco;
+    emprestado = <span class="kw">false</span>;
+  }
+}</div>
+    <p class="note">Repare no comentário — já tem um bug escondido aí. A gente conserta ele daqui a pouco com <span class="code-inline">this</span>.</p>
+  </section>
+
+  <!-- 3 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">o problema de hoje</span> · atributos abertos</div>
+    <h2>Todo mundo pode mexer em <span class="key">tudo</span></h2>
+    <p>Como <span class="code-inline">titulo</span>, <span class="code-inline">autor</span>, <span class="code-inline">preco</span> e <span class="code-inline">emprestado</span> não têm nenhuma proteção, qualquer código de fora acessa e altera direto:</p>
+    <div class="code" style="margin-top:18px"><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Herbert"</span>, <span class="st">89.90</span>);
+
+duna.preco = <span class="key">-50</span>;         <span class="cm">// preço negativo?! nada impede</span>
+duna.emprestado = <span class="kw">true</span>;  <span class="cm">// "emprestado" sem passar pelo método emprestar()</span>
+duna.titulo = <span class="st">""</span>;         <span class="cm">// título vazio também passa</span></div>
+    <p class="note">O objeto não tem como se defender. Qualquer parte do sistema pode deixá-lo num estado que não devia existir.</p>
+  </section>
+
+  <!-- 4 A IDEIA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">a solução</span> · encapsulamento</div>
+    <h2>Esconder por dentro, controlar por fora</h2>
+    <div class="grid2">
+      <div class="card no"><h3>Painel elétrico do carro</h3><p>Ninguém deveria enfiar a mão nos fios direto. É perigoso e fácil de quebrar algo.</p></div>
+      <div class="card ok"><h3>Volante, pedal, botão</h3><p>Você usa <strong>controles</strong> que o carro expõe. Por trás, ele decide como executar aquilo com segurança.</p></div>
+    </div>
+    <p class="note"><strong>Encapsulamento</strong> é isso em código: os atributos ficam escondidos (<span class="code-inline">private</span>) e o objeto expõe só os "controles" — métodos — que garantem que o estado interno nunca fica inválido.</p>
+  </section>
+
+  <!-- 5 MODIFICADORES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">modificadores de acesso</span> · quem pode ver o quê</div>
+    <h2>public, private, protected</h2>
+    <div class="grid3">
+      <div class="card no"><h3 class="key">private</h3><p>Só a <strong>própria classe</strong> enxerga. É o padrão pra atributos.</p></div>
+      <div class="card"><h3 class="tagc">protected</h3><p>A classe e suas <strong>subclasses</strong> (herança — aula 06). Por enquanto, guarde o nome.</p></div>
+      <div class="card ok"><h3 class="str">public</h3><p><strong>Qualquer código</strong> enxerga. É o padrão pra métodos que formam o "controle remoto" da classe.</p></div>
+    </div>
+    <p class="note">Regra prática desta aula: <strong>atributos privados, métodos públicos</strong>.</p>
+  </section>
+
+  <!-- 6 PRIVATE NOS ATRIBUTOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">passo 1</span> · fechando os atributos</div>
+    <h2>Livro com atributos <span class="key">private</span></h2>
+    <div class="code"><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="kw">private</span> <span class="ty">String</span> titulo;
+  <span class="kw">private</span> <span class="ty">String</span> autor;
+  <span class="kw">private</span> <span class="kw">double</span> preco;
+  <span class="kw">private</span> <span class="kw">boolean</span> emprestado;
+  <span class="cm">// ... construtor e métodos aqui</span>
+}</div>
+    <div class="code" style="margin-top:14px"><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Herbert"</span>, <span class="st">89.90</span>);
+duna.preco = <span class="key">-50</span>;  <span class="cm">// erro de compilação: preco has private access</span></div>
+    <p class="note">Ótimo — agora ninguém de fora acessa direto. Só que também <strong>ninguém consegue ler</strong> o título ou o preço. Precisamos abrir uma porta controlada.</p>
+  </section>
+
+  <!-- 7 GETTERS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">passo 2</span> · abrindo uma porta pra leitura</div>
+    <h2><span class="grad">Getters</span>: método pra ler</h2>
+    <p>Um método público que devolve o valor de um atributo privado. Convenção: <span class="code-inline">get</span> + nome do atributo (ou <span class="code-inline">is</span> pra <span class="code-inline">boolean</span>):</p>
+    <div class="code" style="margin-top:18px"><span class="kw">public</span> <span class="ty">String</span> <span class="fn">getTitulo</span>() {
+  <span class="kw">return</span> titulo;
+}
+
+<span class="kw">public</span> <span class="kw">double</span> <span class="fn">getPreco</span>() {
+  <span class="kw">return</span> preco;
+}
+
+<span class="kw">public</span> <span class="kw">boolean</span> <span class="fn">isEmprestado</span>() {
+  <span class="kw">return</span> emprestado;
+}</div>
+    <p class="note">Uso: <span class="code-inline">duna.getTitulo()</span> — lê o valor sem nunca tocar direto no atributo.</p>
+  </section>
+
+  <!-- 8 SETTERS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">passo 3</span> · abrindo uma porta pra escrita, <span class="key">com regra</span></div>
+    <h2><span class="grad">Setters</span>: método pra escrever</h2>
+    <p>Convenção: <span class="code-inline">set</span> + nome do atributo. A vantagem sobre um atributo público: dá pra <strong>validar</strong> antes de aceitar o valor.</p>
+    <div class="code" style="margin-top:18px"><span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+  <span class="kw">if</span> (preco &lt; <span class="key">0</span>) {
+    <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+  }
+  <span class="cm">// this.preco: o da esquerda; preco: o parâmetro. já já a gente explica.</span>
+  <span class="kw">this</span>.preco = preco;
+}</div>
+    <p class="note">Agora <span class="code-inline">duna.setPreco(-50)</span> não corrompe o objeto — ele reclama antes.</p>
+  </section>
+
+  <!-- 9 THIS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">a palavra-chave</span> · this</div>
+    <h2>Resolvendo o nome duplicado</h2>
+    <p>No setter, o parâmetro se chama <span class="code-inline">preco</span> — igualzinho ao atributo. Sem ajuda, o Java entende os dois como a <strong>mesma variável</strong>, o parâmetro, e o atributo nunca é atualizado:</p>
+    <div class="grid2" style="margin-top:14px">
+      <div class="card no"><h3>Sem this</h3><pre style="font-family:var(--mono);font-size:13px;color:var(--ink);white-space:pre-wrap">void setPreco(double preco) {
+  preco = preco; // fala consigo mesmo,
+}                // o atributo não muda</pre></div>
+      <div class="card ok"><h3>Com this</h3><pre style="font-family:var(--mono);font-size:13px;color:var(--ink);white-space:pre-wrap">void setPreco(double preco) {
+  this.preco = preco; // atributo
+}                      // = parâmetro</pre></div>
+    </div>
+    <p class="note"><span class="code-inline">this</span> é uma referência ao <strong>próprio objeto</strong> que está executando o método. <span class="code-inline">this.preco</span> é sempre o atributo; <span class="code-inline">preco</span> sozinho, dentro do método, é o parâmetro.</p>
+  </section>
+
+  <!-- 10 THIS NO CONSTRUTOR ANTIGO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">voltando ao slide 2</span> · o bug do construtor</div>
+    <h2>Consertando com <span class="grad">this</span></h2>
+    <div class="code"><span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="kw">this</span>.titulo = titulo;   <span class="cm">// this.titulo (atributo) = titulo (parâmetro)</span>
+  <span class="kw">this</span>.autor = autor;
+  <span class="fn">setPreco</span>(preco);       <span class="cm">// reaproveita a validação do setter!</span>
+  <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+}</div>
+    <p class="note">Chamar <span class="code-inline">setPreco(preco)</span> dentro do construtor, em vez de atribuir direto, garante que a <strong>mesma regra</strong> vale tanto na criação quanto em qualquer troca de preço depois.</p>
+  </section>
+
+  <!-- 11 CONSTRUTORES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">construtores</span> · a receita de como nascer</div>
+    <h2>O construtor <span class="grad">padrão</span></h2>
+    <p>Se você não escrever <strong>nenhum</strong> construtor, o Java cria um vazio, sem parâmetros, de graça:</p>
+    <div class="code" style="margin-top:18px"><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="kw">private</span> <span class="ty">String</span> titulo;
+  <span class="cm">// nenhum construtor escrito...</span>
+}
+
+<span class="cm">// ...então isto compila, usando o construtor padrão implícito:</span>
+<span class="ty">Livro</span> l = <span class="kw">new</span> <span class="ty">Livro</span>();</div>
+    <p class="note">Assim que você escreve <strong>qualquer</strong> construtor próprio, o padrão implícito desaparece — se ainda quiser um sem parâmetros, precisa escrevê-lo você mesma(o).</p>
+  </section>
+
+  <!-- 12 SOBRECARGA DE CONSTRUTORES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sobrecarga de construtores</span> · vários jeitos de nascer</div>
+    <h2>Dois construtores, <span class="grad">mesma classe</span></h2>
+    <p>Às vezes você ainda não sabe o preço na hora de cadastrar. Em vez de obrigar todo mundo a passar <span class="code-inline">0.0</span> na mão, oferecemos um segundo construtor:</p>
+    <div class="code" style="margin-top:18px"><span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="kw">this</span>.titulo = titulo;
+  <span class="kw">this</span>.autor = autor;
+  <span class="fn">setPreco</span>(preco);
+  <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+}
+
+<span class="cm">// sobrecarga: mesmo nome (Livro), lista de parâmetros diferente</span>
+<span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+  <span class="kw">this</span>(titulo, autor, <span class="key">0.0</span>);  <span class="cm">// this(...) chama o outro construtor</span>
+}</div>
+    <p class="note"><strong>Sobrecarga</strong> (overload) = mesmo nome de método/construtor, mas <strong>parâmetros diferentes</strong> (quantidade ou tipo). O Java escolhe qual usar pela lista de argumentos que você passa.</p>
+  </section>
+
+  <!-- 13 THIS() ENCADEANDO -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">// </span>this(...) em detalhe</div>
+    <h1 style="max-width:26ch">Um construtor pode <span class="grad">chamar</span> outro</h1>
+    <p class="lead" style="margin-top:20px;max-width:56ch"><span class="code-inline">this(titulo, autor, 0.0)</span> tem que ser a <strong>primeira linha</strong> do construtor. Evita repetir a mesma lógica de inicialização em dois lugares.</p>
+  </section>
+
+  <!-- 14 SOBRECARGA DE MÉTODOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sobrecarga de métodos</span> · a mesma ideia, em métodos comuns</div>
+    <h2>calcularDesconto <span class="grad">de dois jeitos</span></h2>
+    <div class="code"><span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>(<span class="kw">double</span> percentual) {
+  <span class="kw">return</span> preco - (preco * percentual / <span class="key">100</span>);
+}
+
+<span class="cm">// sobrecarga: sem parâmetro, usa um desconto padrão</span>
+<span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>() {
+  <span class="kw">return</span> <span class="fn">calcularDesconto</span>(<span class="key">10</span>);  <span class="cm">// 10% padrão</span>
+}</div>
+    <p class="note"><span class="code-inline">duna.calcularDesconto()</span> e <span class="code-inline">duna.calcularDesconto(25)</span> chamam métodos <strong>diferentes</strong> — o Java decide qual pelos parâmetros.</p>
+  </section>
+
+  <!-- 15 STATIC -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">membros static</span> · pertence à classe, não ao objeto</div>
+    <h2>Um contador <span class="grad">compartilhado</span></h2>
+    <p>Todo atributo comum é <strong>por objeto</strong> — cada <span class="code-inline">Livro</span> tem seu próprio <span class="code-inline">titulo</span>. Um atributo <span class="code-inline">static</span> existe <strong>uma vez só</strong>, compartilhado por todos os objetos da classe:</p>
+    <div class="code" style="margin-top:18px"><span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="key">0</span>;  <span class="cm">// uma cópia só, da classe</span>
+
+<span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="cm">// ...</span>
+  totalDeLivros++;  <span class="cm">// todo Livro criado soma no mesmo contador</span>
+}
+
+<span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() {
+  <span class="kw">return</span> totalDeLivros;
+}</div>
+    <p class="note">Método <span class="code-inline">static</span> também: chama-se pela <strong>classe</strong>, sem precisar de objeto — <span class="code-inline">Livro.getTotalDeLivros()</span>.</p>
+  </section>
+
+  <!-- 16 STATIC: O MAIN -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">// </span>lembra da aula 01?</div>
+    <h1 style="max-width:24ch">Por isso o <span class="key mono" style="font-size:.85em">main</span> é <span class="grad">static</span></h1>
+    <p class="lead" style="margin-top:20px;max-width:58ch">A JVM chama <span class="code-inline">main</span> antes de qualquer objeto existir. Sem <span class="code-inline">static</span>, precisaria de um objeto pra chamar o método — e não existe nenhum ainda.</p>
+  </section>
+
+  <!-- 17 FINAL -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">constantes</span> · final</div>
+    <h2>Valor que <span class="grad">nunca muda</span></h2>
+    <p><span class="code-inline">final</span> numa variável trava o valor depois da primeira atribuição. Combinado com <span class="code-inline">static</span>, vira uma <strong>constante da classe</strong> — convenção: nome todo em maiúsculas:</p>
+    <div class="code" style="margin-top:18px"><span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="key">0.0</span>;
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+  <span class="kw">if</span> (preco &lt; PRECO_MINIMO) {
+    <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+  }
+  <span class="kw">this</span>.preco = preco;
+}
+
+PRECO_MINIMO = <span class="key">5.0</span>;  <span class="cm">// erro de compilação: cannot assign a value to final variable</span></div>
+    <p class="note">Uma constante nomeada é mais clara que um número solto no meio do código (o famoso "número mágico") — e o compilador impede qualquer tentativa de mudá-la depois.</p>
+  </section>
+
+  <!-- 18 RECAP: TUDO JUNTO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">recap</span> · o Livro encapsulado, por inteiro</div>
+    <h2>Tudo <span class="grad">junto</span></h2>
+    <div class="code" style="max-height:56vh;overflow-y:auto"><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="kw">private</span> <span class="ty">String</span> titulo;
+  <span class="kw">private</span> <span class="ty">String</span> autor;
+  <span class="kw">private</span> <span class="kw">double</span> preco;
+  <span class="kw">private</span> <span class="kw">boolean</span> emprestado;
+
+  <span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="key">0</span>;
+  <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="key">0.0</span>;
+
+  <span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+    <span class="kw">this</span>.titulo = titulo;
+    <span class="kw">this</span>.autor = autor;
+    <span class="fn">setPreco</span>(preco);
+    <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+    totalDeLivros++;
+  }
+
+  <span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+    <span class="kw">this</span>(titulo, autor, PRECO_MINIMO);
+  }
+
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getPreco</span>() { <span class="kw">return</span> preco; }
+  <span class="kw">public</span> <span class="kw">boolean</span> <span class="fn">isEmprestado</span>() { <span class="kw">return</span> emprestado; }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+    <span class="kw">if</span> (preco &lt; PRECO_MINIMO) <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+    <span class="kw">this</span>.preco = preco;
+  }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">emprestar</span>() { emprestado = <span class="kw">true</span>; }
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">devolver</span>() { emprestado = <span class="kw">false</span>; }
+
+  <span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() { <span class="kw">return</span> totalDeLivros; }
+}</div>
+  </section>
+
+  <!-- 19 DESAFIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">desafio</span> · sua vez</div>
+    <div class="grid2" style="align-items:center">
+      <div class="stack">
+        <h2 style="margin-bottom:8px">Encapsule <span class="grad">a sua classe</span></h2>
+        <ul class="clean">
+          <li>Atributos <span class="code-inline">private</span>, getters e setters com validação</li>
+          <li>Dois construtores, um chamando o outro com <span class="code-inline">this(...)</span></li>
+          <li>Um método sobrecarregado</li>
+          <li>Um contador <span class="code-inline">static</span> + uma constante <span class="code-inline">final</span></li>
+        </ul>
+      </div>
+      <div class="card"><h3 class="str">Por quê?</h3><p>Encapsulamento é a base dos outros três pilares de OO — sem ele, herança e polimorfismo (aulas 06 e 07) ficam bem mais frágeis.</p></div>
+    </div>
+    <p class="note">Instruções completas, checklist e modelo de resposta na página da aula.</p>
+  </section>
+
+  <!-- 20 FIM -->
+  <section class="slide center">
+    <div class="safe" style="margin-bottom:18px"><div class="box"><div class="lock">🔒</div><b>private</b><span>dentro protegido, fora seguro</span></div></div>
+    <h1>Encapsulado. <span class="grad">Bora praticar.</span></h1>
+    <p class="lead" style="margin-top:18px">Na próxima aula: associação, agregação, composição, <span class="code-inline">ArrayList</span> — e a formação das equipes do projeto.</p>
+    <p class="mono" style="margin-top:18px;color:var(--muted)">NickDev · Orientação a Objetos com Java · aula 04</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> ou <kbd>espaço</kbd> pra navegar</div>
+<div class="nav">
+  <span id="counter">01 / 20</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

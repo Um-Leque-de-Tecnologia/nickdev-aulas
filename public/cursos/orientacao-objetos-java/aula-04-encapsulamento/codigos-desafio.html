@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio · Aula 04 · NickDev</title>
+<meta name="description" content="Esqueleto e solução comentada do desafio da aula 04: a classe Livro encapsulada, com getters/setters, this, construtores sobrecarregados, static e final.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#100D1B; --surface-2:#161122;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1240px;margin:0 auto;gap:0}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .nd-brand .word{font-weight:700;font-size:16px}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:16px 0 6px}
+  aside nav a{display:block;padding:7px 12px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+  aside nav a.star{color:var(--pink-light)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px;max-width:62ch}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .tipbox{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0;font-size:14.5px;color:var(--text-2)}
+  .tipbox b{color:var(--purple-light)}
+  .tipbox.star{border-color:var(--magenta)}
+  .tipbox.star b{color:var(--pink-light)}
+
+  .part{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .part:first-of-type{border-top:0;padding-top:0}
+  .part .big{color:var(--pink-light)}
+
+  .sol{margin-top:28px;scroll-margin-top:18px}
+  .sol h3{font-size:19px;font-weight:600}
+  .sol .desc{color:var(--text-3);font-size:14.5px;margin:6px 0 0}
+
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.75;color:#d8d3e6}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);font-size:14px;background:var(--grad);color:#fff;font-weight:600;padding:12px 22px;border-radius:100px}
+
+  .filetree{font-family:var(--mono);font-size:13.5px;color:var(--text-2);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0;line-height:1.9}
+  .filetree b{color:var(--text)}
+  .filetree .dim{color:var(--text-3)}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/orientacao-objetos-java">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Preparação</div>
+    <a href="#estrutura">Estrutura do projeto</a>
+    <div class="grp">Esqueleto</div>
+    <a href="#esqueleto">Livro.java (esqueleto)</a>
+    <div class="grp">Solução comentada</div>
+    <a href="#atributos">1 · Atributos private</a>
+    <a href="#gettersetters" class="star">★ Getters e setters validados</a>
+    <a href="#construtores">3 · Construtores + this(...)</a>
+    <a href="#sobrecarga">4 · Método sobrecarregado</a>
+    <a href="#static-final">5 · static + final</a>
+    <a href="#solucao">Livro.java completo</a>
+    <div class="grp">Testando</div>
+    <a href="#teste">TesteLivro.java</a>
+    <a href="#erros">Erros comuns</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 04 · gabarito</div>
+  <h1>Código do <span class="g">desafio</span></h1>
+  <p class="lead">O esqueleto e a solução comentada da classe <code>Livro</code> encapsulada, pedaço por pedaço — getters e setters validados, <code>this</code>, construtores sobrecarregados, <code>static</code> e <code>final</code> — mais a classe de teste e os erros mais comuns.</p>
+  <div class="rule"></div>
+
+  <div class="tipbox"><b>Combinado 🤝</b> Escreva sua versão sozinho(a) primeiro. Use isto pra conferir, entender os porquês e destravar se algo der erro.</div>
+
+  <div class="part"><span class="big">📁</span> Preparação</div>
+
+  <div class="sol" id="estrutura">
+    <h3>Estrutura do projeto</h3>
+    <p class="desc">Continuando o mesmo projeto do IntelliJ das aulas anteriores, dentro de <code>src/</code>:</p>
+    <div class="filetree">orientacao-objetos-java<span class="dim">/</span>
+├── .idea<span class="dim">/</span>
+├── src<span class="dim">/</span>
+│   ├── SobreMim.java     <span class="dim">← aula 01</span>
+│   └── <b>Livro.java</b>          <span class="dim">← aula 03, agora encapsulada</span>
+│   └── <b>TesteLivro.java</b>     <span class="dim">← nova, testa o Livro</span>
+├── out<span class="dim">/</span>
+└── orientacao-objetos-java.iml</div>
+  </div>
+
+  <div class="part"><span class="big">🧩</span> Esqueleto</div>
+
+  <div class="sol" id="esqueleto">
+    <h3>Livro.java — ponto de partida</h3>
+    <p class="desc">Parta da versão "aberta" da aula 03 e vá fechando um pedaço de cada vez.</p>
+    <pre><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="cm">// TODO: private String titulo, autor</span>
+  <span class="cm">// TODO: private double preco</span>
+  <span class="cm">// TODO: private boolean emprestado</span>
+
+  <span class="cm">// TODO: private static int totalDeLivros = 0</span>
+  <span class="cm">// TODO: public static final double PRECO_MINIMO = 0.0</span>
+
+  <span class="cm">// TODO: construtor com 3 parâmetros</span>
+  <span class="cm">// TODO: construtor sobrecarregado com 2 parâmetros, chamando o de cima com this(...)</span>
+
+  <span class="cm">// TODO: getters e setters</span>
+  <span class="cm">// TODO: emprestar(), devolver()</span>
+  <span class="cm">// TODO: calcularDesconto(double) e calcularDesconto() sobrecarregados</span>
+  <span class="cm">// TODO: getTotalDeLivros() static</span>
+}</pre>
+  </div>
+
+  <div class="part"><span class="big">✅</span> Solução comentada</div>
+
+  <div class="sol" id="atributos">
+    <h3>1 · Atributos private</h3>
+    <p class="desc">Primeiro passo: fechar tudo. Depois disso o código antigo que acessava <code>livro.preco</code> direto vai parar de compilar — é esperado.</p>
+    <pre><span class="kw">private</span> <span class="ty">String</span> titulo;
+<span class="kw">private</span> <span class="ty">String</span> autor;
+<span class="kw">private</span> <span class="kw">double</span> preco;
+<span class="kw">private</span> <span class="kw">boolean</span> emprestado;</pre>
+  </div>
+
+  <div class="sol" id="gettersetters">
+    <h3>2 · Getters e setters validados ★</h3>
+    <p class="desc">O ponto-chave do desafio: setters que <b>recusam</b> valores inválidos, e o <code>this</code> distinguindo o atributo do parâmetro de mesmo nome.</p>
+    <pre><span class="kw">public</span> <span class="ty">String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+<span class="kw">public</span> <span class="ty">String</span> <span class="fn">getAutor</span>() { <span class="kw">return</span> autor; }
+<span class="kw">public</span> <span class="kw">double</span> <span class="fn">getPreco</span>() { <span class="kw">return</span> preco; }
+<span class="kw">public</span> <span class="kw">boolean</span> <span class="fn">isEmprestado</span>() { <span class="kw">return</span> emprestado; }
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">setTitulo</span>(<span class="ty">String</span> titulo) {
+  <span class="kw">if</span> (titulo == <span class="kw">null</span> || titulo.<span class="fn">isBlank</span>()) {
+    <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Título não pode ser vazio"</span>);
+  }
+  <span class="kw">this</span>.titulo = titulo;
+}
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+  <span class="kw">if</span> (preco &lt; PRECO_MINIMO) {
+    <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+  }
+  <span class="kw">this</span>.preco = preco;
+}</pre>
+    <p class="desc">Repare: sem <code>this</code>, a linha <code>preco = preco</code> dentro de <code>setPreco</code> falaria com o próprio parâmetro — o atributo nunca mudaria. <code>this.preco</code> deixa explícito "o atributo <b>deste</b> objeto".</p>
+  </div>
+
+  <div class="sol" id="construtores">
+    <h3>3 · Construtores + this(...)</h3>
+    <p class="desc">O construtor mais completo faz o trabalho de verdade — inclusive chamando os próprios setters, pra não duplicar a validação. O mais curto só repassa um valor padrão.</p>
+    <pre><span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="fn">setTitulo</span>(titulo);
+  <span class="kw">this</span>.autor = autor;
+  <span class="fn">setPreco</span>(preco);
+  <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+  totalDeLivros++;
+}
+
+<span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+  <span class="kw">this</span>(titulo, autor, PRECO_MINIMO);
+}</pre>
+    <div class="tipbox star"><b>Regra do <code>this(...)</code>:</b> só pode aparecer na <b>primeira linha</b> do construtor, e um construtor não pode chamar <code>this(...)</code> mais de uma vez.</div>
+  </div>
+
+  <div class="sol" id="sobrecarga">
+    <h3>4 · Método sobrecarregado</h3>
+    <p class="desc">Dois métodos com o mesmo nome, mas <b>assinaturas diferentes</b> (o número/tipo dos parâmetros muda). O Java escolhe qual chamar pelos argumentos que você passa — isso não tem nada a ver com o <code>if</code>.</p>
+    <pre><span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>(<span class="kw">double</span> percentual) {
+  <span class="kw">return</span> preco - (preco * percentual / <span class="st">100</span>);
+}
+
+<span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>() {
+  <span class="kw">return</span> <span class="fn">calcularDesconto</span>(<span class="st">10</span>);
+}</pre>
+  </div>
+
+  <div class="sol" id="static-final">
+    <h3>5 · static + final</h3>
+    <p class="desc"><code>totalDeLivros</code> é <b>uma única cópia</b>, compartilhada por todos os objetos <code>Livro</code> — por isso ela mora fora de qualquer construtor, e o construtor só faz <code>totalDeLivros++</code>. <code>PRECO_MINIMO</code> é <code>static</code> (uma cópia, da classe) <b>e</b> <code>final</code> (nunca muda depois de definida).</p>
+    <pre><span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="st">0</span>;
+<span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="st">0.0</span>;
+
+<span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() {
+  <span class="kw">return</span> totalDeLivros;
+}</pre>
+    <p class="desc">Chama-se pela classe, sem precisar de nenhum objeto: <code>Livro.getTotalDeLivros()</code>.</p>
+  </div>
+
+  <div class="sol" id="solucao">
+    <h3>6 · Livro.java completo</h3>
+    <pre><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="kw">private</span> <span class="ty">String</span> titulo;
+  <span class="kw">private</span> <span class="ty">String</span> autor;
+  <span class="kw">private</span> <span class="kw">double</span> preco;
+  <span class="kw">private</span> <span class="kw">boolean</span> emprestado;
+
+  <span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="st">0</span>;
+  <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="st">0.0</span>;
+
+  <span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+    <span class="fn">setTitulo</span>(titulo);
+    <span class="kw">this</span>.autor = autor;
+    <span class="fn">setPreco</span>(preco);
+    <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+    totalDeLivros++;
+  }
+
+  <span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+    <span class="kw">this</span>(titulo, autor, PRECO_MINIMO);
+  }
+
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+  <span class="kw">public</span> <span class="ty">String</span> <span class="fn">getAutor</span>() { <span class="kw">return</span> autor; }
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getPreco</span>() { <span class="kw">return</span> preco; }
+  <span class="kw">public</span> <span class="kw">boolean</span> <span class="fn">isEmprestado</span>() { <span class="kw">return</span> emprestado; }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">setTitulo</span>(<span class="ty">String</span> titulo) {
+    <span class="kw">if</span> (titulo == <span class="kw">null</span> || titulo.<span class="fn">isBlank</span>()) {
+      <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Título não pode ser vazio"</span>);
+    }
+    <span class="kw">this</span>.titulo = titulo;
+  }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+    <span class="kw">if</span> (preco &lt; PRECO_MINIMO) {
+      <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+    }
+    <span class="kw">this</span>.preco = preco;
+  }
+
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">emprestar</span>() { emprestado = <span class="kw">true</span>; }
+  <span class="kw">public</span> <span class="kw">void</span> <span class="fn">devolver</span>() { emprestado = <span class="kw">false</span>; }
+
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>(<span class="kw">double</span> percentual) {
+    <span class="kw">return</span> preco - (preco * percentual / <span class="st">100</span>);
+  }
+
+  <span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>() {
+    <span class="kw">return</span> <span class="fn">calcularDesconto</span>(<span class="st">10</span>);
+  }
+
+  <span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() { <span class="kw">return</span> totalDeLivros; }
+}</pre>
+  </div>
+
+  <div class="part"><span class="big">🧪</span> Testando</div>
+
+  <div class="sol" id="teste">
+    <h3>7 · TesteLivro.java</h3>
+    <p class="desc">Uma classe separada, só com <code>main</code>, pra provar que tudo funciona de fora:</p>
+    <pre><span class="kw">public class</span> <span class="ty">TesteLivro</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+    <span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"Duna"</span>, <span class="st">"Herbert"</span>, <span class="st">89.90</span>);
+    <span class="ty">Livro</span> orwell = <span class="kw">new</span> <span class="ty">Livro</span>(<span class="st">"1984"</span>, <span class="st">"Orwell"</span>);  <span class="cm">// construtor sobrecarregado</span>
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(duna.<span class="fn">getTitulo</span>() + <span class="st">" — R$ "</span> + duna.<span class="fn">getPreco</span>() + <span class="st">" — total de livros: "</span> + <span class="ty">Livro</span>.<span class="fn">getTotalDeLivros</span>());
+    <span class="ty">System</span>.out.<span class="fn">println</span>(orwell.<span class="fn">getTitulo</span>() + <span class="st">" — R$ "</span> + orwell.<span class="fn">getPreco</span>() + <span class="st">" — total de livros: "</span> + <span class="ty">Livro</span>.<span class="fn">getTotalDeLivros</span>());
+
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Desconto padrão de Duna: R$ "</span> + duna.<span class="fn">calcularDesconto</span>());
+    <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Desconto de 25% de Duna: R$ "</span> + duna.<span class="fn">calcularDesconto</span>(<span class="st">25</span>));
+
+    <span class="kw">try</span> {
+      duna.<span class="fn">setPreco</span>(-<span class="st">10</span>);
+    } <span class="kw">catch</span> (<span class="ty">IllegalArgumentException</span> e) {
+      <span class="ty">System</span>.out.<span class="fn">println</span>(<span class="st">"Tentativa de preço negativo bloqueada: "</span> + e.<span class="fn">getMessage</span>());
+    }
+  }
+}</pre>
+    <div class="terminal"><span class="p">$</span> javac Livro.java TesteLivro.java
+<span class="p">$</span> java TesteLivro
+<span class="out">Duna — R$ 89.9 — total de livros: 1
+1984 — R$ 0.0 — total de livros: 2
+Desconto padrão de Duna: R$ 80.91
+Desconto de 25% de Duna: R$ 67.425
+Tentativa de preço negativo bloqueada: Preço não pode ser negativo</span></div>
+  </div>
+
+  <div class="sol" id="erros">
+    <h3>8 · Erros comuns</h3>
+    <pre><span class="cm">error: preco has private access in Livro</span></pre>
+    <p class="desc">Algum código de fora (inclusive um teste antigo) ainda tenta acessar <code>livro.preco</code> direto. Troque pelo getter/setter correspondente.</p>
+    <pre><span class="cm">error: constructor Livro in class Livro cannot be applied to given types</span></pre>
+    <p class="desc">Você chamou <code>new Livro(...)</code> com uma combinação de parâmetros que não bate com <b>nenhum</b> dos construtores sobrecarregados. Confira quantos e quais argumentos cada um espera.</p>
+    <pre><span class="cm">error: call to this must be first statement in constructor</span></pre>
+    <p class="desc"><code>this(...)</code> só pode ser a <b>primeira linha</b> do construtor — nem um comentário antes tudo bem, mas nenhuma outra instrução.</p>
+    <pre><span class="cm">error: cannot assign a value to final variable PRECO_MINIMO</span></pre>
+    <p class="desc">Alguma linha tentou reatribuir a constante depois de criada. Constantes <code>final</code> recebem valor <b>uma vez só</b>.</p>
+  </div>
+
+  <div class="tipbox" style="margin-top:40px">Quer ver a versão final, com a saída completa no terminal? 👇</div>
+  <a class="cta" href="modelo-resposta.html" target="_blank">🧑‍💻 Ver o modelo de resposta</a>
+</main>
+</div>
+</body>
+</html>

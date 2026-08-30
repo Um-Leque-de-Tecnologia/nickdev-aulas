@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Java · Guias · NickDev</title>
-<meta name="description" content="Guia de Java: o paradigma orientado a objetos, JDK, JRE e JVM, bytecode, como instalar o ambiente com JDK 21 e IntelliJ, e o primeiro programa compilado e rodado pelo terminal.">
+<meta name="description" content="Guia de Java: o paradigma orientado a objetos, JDK, JRE e JVM, bytecode, o primeiro programa, e encapsulamento — modificadores de acesso, getters/setters, this, construtores sobrecarregados, static e final.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -219,6 +219,13 @@
     <div class="grp">Primeiro programa</div>
     <a href="#hello-world">Hello, World!</a>
     <a href="#compilar-rodar">Compilar e rodar</a>
+    <div class="grp">Encapsulamento (aula 04)</div>
+    <a href="#encapsulamento">Por que encapsular</a>
+    <a href="#modificadores">public, private, protected</a>
+    <a href="#getters-setters">Getters e setters</a>
+    <a href="#this">A palavra-chave this</a>
+    <a href="#construtores">Construtores e sobrecarga</a>
+    <a href="#static-final">static e final</a>
     <div class="grp">Na prática</div>
     <a href="#proximos-passos">Próximos passos</a>
   </nav>
@@ -564,11 +571,130 @@ duna.<span class="fn">emprestar</span>();</pre>
     <p style="margin-top:22px">Pronto pra praticar? Encara o desafio 👇</p>
   </section>
 
+  <div class="divisor">Encapsulamento (aula 04)</div>
+
+<section id="encapsulamento">
+    <h2>Por que encapsular</h2>
+    <p>Retoma o <code>Livro</code> das seções anteriores — mas agora com atributos <b>abertos</b>, do jeito que ele saiu da aula 03:</p>
+    <pre><span class="kw">public class</span> <span class="ty">Livro</span> {
+  <span class="ty">String</span> titulo;
+  <span class="kw">double</span> preco;
+  <span class="kw">boolean</span> emprestado;
+}</pre>
+    <p>Sem nenhuma proteção, qualquer parte do programa acessa e altera os atributos direto:</p>
+    <pre><span class="ty">Livro</span> duna = <span class="kw">new</span> <span class="ty">Livro</span>();
+duna.preco = <span class="kw">-50</span>;         <span class="cm">// preço negativo? nada impede</span>
+duna.emprestado = <span class="kw">true</span>;  <span class="cm">// muda o estado sem passar por nenhuma regra</span></pre>
+    <p>O objeto não tem como se defender. <b>Encapsulamento</b> é o princípio de esconder os detalhes internos de uma classe e expor só o necessário, através de métodos que controlam o acesso.</p>
+    <div class="tip"><b>Uma analogia:</b> você não enfia a mão nos fios do painel elétrico de um carro. Você usa o volante, o pedal, os botões — controles que o carro expõe, que por trás decidem como executar aquilo com segurança. É essa a diferença entre um atributo público e um método público.</div>
+  </section>
+
+<section id="modificadores">
+    <h2>Modificadores de acesso: public, private, protected</h2>
+    <p>Controlam <b>quem enxerga</b> um atributo, método ou construtor:</p>
+    <table>
+      <thead><tr><th>Modificador</th><th>Quem enxerga</th><th>Uso comum</th></tr></thead>
+      <tbody>
+        <tr><td><code>private</code></td><td>Só a própria classe</td><td>Atributos — é o padrão desta aula</td></tr>
+        <tr><td><code>protected</code></td><td>A classe e suas subclasses</td><td>Guarde o nome pra herança, aula 06</td></tr>
+        <tr><td><code>public</code></td><td>Qualquer código</td><td>Métodos que formam o "controle remoto" da classe</td></tr>
+      </tbody>
+    </table>
+    <div class="tip star"><b>Regra prática desta aula:</b> atributos <code>private</code>, métodos <code>public</code>.</div>
+  </section>
+
+<section id="getters-setters">
+    <h2>Getters e setters</h2>
+    <p>Com os atributos fechados em <code>private</code>, você precisa de métodos públicos pra ler e escrever neles.</p>
+    <h3>Getter: método pra ler</h3>
+    <p>Convenção: <code>get</code> + nome do atributo (ou <code>is</code> pra <code>boolean</code>):</p>
+    <pre><span class="kw">public</span> <span class="ty">String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+<span class="kw">public</span> <span class="kw">boolean</span> <span class="fn">isEmprestado</span>() { <span class="kw">return</span> emprestado; }</pre>
+    <h3>Setter: método pra escrever, com regra</h3>
+    <p>Convenção: <code>set</code> + nome do atributo. A vantagem sobre um atributo público é poder <b>validar</b> antes de aceitar:</p>
+    <pre><span class="kw">public</span> <span class="kw">void</span> <span class="fn">setPreco</span>(<span class="kw">double</span> preco) {
+  <span class="kw">if</span> (preco &lt; <span class="st">0</span>) {
+    <span class="kw">throw new</span> <span class="ty">IllegalArgumentException</span>(<span class="st">"Preço não pode ser negativo"</span>);
+  }
+  <span class="kw">this</span>.preco = preco;
+}</pre>
+    <p>Agora <code>duna.setPreco(-50)</code> não corrompe o objeto — ele reclama antes de aceitar.</p>
+  </section>
+
+<section id="this">
+    <h2>A palavra-chave this</h2>
+    <p>No setter acima, o parâmetro se chama <code>preco</code> — igual ao atributo. Sem ajuda, o Java entende os dois como a <b>mesma variável</b> (o parâmetro), e o atributo nunca seria atualizado:</p>
+    <div class="duo">
+      <div class="box no"><h4>Sem this</h4><pre>void setPreco(double preco) {
+  preco = preco; // fala consigo mesmo
+}                // o atributo não muda</pre></div>
+      <div class="box ok"><h4>Com this</h4><pre>void setPreco(double preco) {
+  this.preco = preco; // atributo
+}                      // = parâmetro</pre></div>
+    </div>
+    <p><code>this</code> é uma referência ao <b>próprio objeto</b> que está executando o método. <code>this.preco</code> é sempre o atributo; <code>preco</code> sozinho, dentro do método, é o parâmetro. É a mesma ideia do <code>self</code> em Python — só que em Java ele é implícito, não precisa declarar como primeiro parâmetro.</p>
+    <div class="tip"><b>Nem sempre é obrigatório.</b> Se o parâmetro tivesse outro nome (ex.: <code>novoPreco</code>), <code>this</code> não seria necessário — mas usar sempre deixa explícito que você está falando do atributo do objeto, e é comum escrever assim por clareza.</div>
+  </section>
+
+<section id="construtores">
+    <h2>Construtores e sobrecarga</h2>
+    <h3>O construtor padrão</h3>
+    <p>Se você não escrever <b>nenhum</b> construtor, o Java cria um vazio, sem parâmetros, de graça. Assim que você escreve qualquer construtor próprio, esse padrão implícito desaparece.</p>
+    <h3>this(...): um construtor chamando o outro</h3>
+    <p>Às vezes você ainda não sabe o preço na hora de cadastrar um livro. Em vez de duplicar a inicialização, um segundo construtor chama o primeiro:</p>
+    <pre><span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="kw">this</span>.titulo = titulo;
+  <span class="kw">this</span>.autor = autor;
+  <span class="fn">setPreco</span>(preco);
+  <span class="kw">this</span>.emprestado = <span class="kw">false</span>;
+}
+
+<span class="cm">// sobrecarga: mesmo nome (Livro), lista de parâmetros diferente</span>
+<span class="kw">public</span> <span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor) {
+  <span class="kw">this</span>(titulo, autor, <span class="st">0.0</span>);   <span class="cm">// tem que ser a 1ª linha do construtor</span>
+}</pre>
+    <p><b>Sobrecarga</b> (overload) é ter <b>mais de um</b> método ou construtor com o <b>mesmo nome</b>, desde que a <b>lista de parâmetros</b> seja diferente (em quantidade ou em tipo). O Java decide qual usar pelos argumentos que você passa na chamada.</p>
+    <h3>Sobrecarga também funciona em métodos comuns</h3>
+    <pre><span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>(<span class="kw">double</span> percentual) {
+  <span class="kw">return</span> preco - (preco * percentual / <span class="st">100</span>);
+}
+
+<span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularDesconto</span>() {
+  <span class="kw">return</span> <span class="fn">calcularDesconto</span>(<span class="st">10</span>);  <span class="cm">// 10% padrão</span>
+}</pre>
+    <div class="tip warn"><b>Sobrecarga não é a mesma coisa que sobrescrita.</b> Sobrecarga (<i>overload</i>) acontece na <b>mesma classe</b>, com parâmetros diferentes — assunto de hoje. Sobrescrita (<i>override</i>) acontece numa <b>subclasse</b>, redefinindo um método herdado — assunto da aula 06.</div>
+  </section>
+
+<section id="static-final">
+    <h2>static e final</h2>
+    <h3>static: pertence à classe, não ao objeto</h3>
+    <p>Todo atributo comum é <b>por objeto</b> — cada <code>Livro</code> tem seu próprio <code>titulo</code>. Um atributo <code>static</code> existe <b>uma vez só</b>, compartilhado por todos os objetos da classe:</p>
+    <pre><span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> totalDeLivros = <span class="st">0</span>;  <span class="cm">// uma cópia só, da classe</span>
+
+<span class="ty">Livro</span>(<span class="ty">String</span> titulo, <span class="ty">String</span> autor, <span class="kw">double</span> preco) {
+  <span class="cm">// ...</span>
+  totalDeLivros++;  <span class="cm">// todo Livro criado soma no mesmo contador</span>
+}
+
+<span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> <span class="fn">getTotalDeLivros</span>() {
+  <span class="kw">return</span> totalDeLivros;
+}</pre>
+    <p>Um método <code>static</code> também pertence à classe — chama-se sem precisar de nenhum objeto: <code>Livro.getTotalDeLivros()</code>.</p>
+    <div class="tip star"><b>Por isso o <code>main</code> é static.</b> Lembra da aula 01, <code>public static void main(String[] args)</code>? A JVM chama <code>main</code> <b>antes</b> de qualquer objeto existir. Sem <code>static</code>, precisaria de um objeto pra chamar o método — e ainda não existe nenhum.</div>
+    <h3>final: valor que nunca muda</h3>
+    <p><code>final</code> numa variável trava o valor depois da primeira atribuição. Combinado com <code>static</code>, vira uma <b>constante da classe</b> — convenção: nome todo em maiúsculas:</p>
+    <pre><span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">double</span> PRECO_MINIMO = <span class="st">0.0</span>;
+
+PRECO_MINIMO = <span class="st">5.0</span>;  <span class="cm">// erro de compilação: cannot assign a value to final variable</span></pre>
+    <p>Uma constante nomeada é mais clara que um número solto no meio do código (o "número mágico"), e o compilador impede qualquer tentativa de alterá-la depois.</p>
+    <div class="tip"><b>Guarde o nome pra mais tarde.</b> <code>final</code> também existe em classes e métodos, impedindo herança e sobrescrita — isso é assunto da aula 06.</div>
+  </section>
+
   <div class="divisor">Na prática</div>
 
 <section id="proximos-passos">
     <h2>Próximos passos</h2>
-    <p>Na <b>aula 02</b> a gente segue direto pro coração da linguagem: tipos primitivos, variáveis, operadores, casting, condicionais, repetição, arrays e entrada de dados com <code>Scanner</code>. Chegue com o ambiente já funcionando!</p>
+    <p>Na <b>aula 05</b> os objetos passam a se relacionar entre si: associação, agregação e composição, coleções de objetos com <code>ArrayList</code> — e a formação das equipes do projeto da disciplina.</p>
   </section>
 
   <div class="foot">
