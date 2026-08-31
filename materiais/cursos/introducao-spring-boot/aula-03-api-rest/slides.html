@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API REST: recursos, verbos e status · Aula 03 · NickDev</title>
+<meta name="description" content="Aula 03 de Introdução ao Spring Boot: recursos, verbos HTTP, códigos de status e idempotência. ResponseEntity, @RequestBody, @RequestParam e o cabeçalho Location. Quatro exercícios práticos.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-spring-boot">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 03</span> · 25 de agosto · introdução ao spring boot</div>
+    <div class="tagtitle"><span class="br">2</span><span class="nm">01</span></div>
+    <h1 style="margin:24px 0 14px">A sua API está <span class="grad">mentindo</span></h1>
+    <p class="lead" style="max-width:56ch">Ela responde <strong>200 OK</strong> para uma vaga que não existe. Hoje você aprende os três nomes que consertam isso: <strong>recurso</strong>, <strong>verbo</strong> e <strong>status</strong>.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">aula de mão na massa · <strong>4 exercícios</strong> · deixe o projeto da aula 02 aberto</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema de hoje</div>
+    <h2>Peça uma coisa que não existe</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">o que você fez na aula 02</div>
+<pre class="code" style="font-size:12.5px"><span class="cm">GET /vagas/nao-existe-isso</span>
+
+<span class="grn">200 OK</span>
+[]</pre>
+        <p class="note" style="margin-top:14px">Devolveu <b>lista vazia</b>, com status de sucesso.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">?</span><span class="tx">Quem chamou não consegue distinguir <b>“essa vaga não existe”</b> de <b>“existe, e está tudo certo”</b>.</span></div>
+        <div class="r"><span class="num">?</span><span class="tx">O front do Leque de Vagas mostraria uma <b>tela em branco</b> em vez de “vaga não encontrada”.</span></div>
+        <div class="r"><span class="num">?</span><span class="tx">E o erro fica <b>invisível</b>: monitoramento nenhum acusa um 200.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Não foi descuido.</strong> A aula 02 mandou fazer assim de propósito — a gente ainda não tinha como responder outra coisa. Hoje tem.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o vocabulário</div>
+    <h2>Recurso, verbo e <span class="grad">status</span></h2>
+    <p class="lead">Uma requisição HTTP diz três coisas. Cada uma tem um lugar certo.</p>
+    <div class="grid3">
+      <div class="card">
+        <div class="ico">📍</div>
+        <h3>O recurso é a URL</h3>
+        <p>E é <b>substantivo</b>, no plural. <span class="code-inline">/vagas</span>, <span class="code-inline">/empresas</span>.</p>
+        <p class="note" style="margin-top:10px">Nunca verbo: <span class="code-inline">/criarVaga</span> está errado — quem diz a ação é o método.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔤</div>
+        <h3>O verbo é o método</h3>
+        <p><span class="code-inline">GET</span> lê, <span class="code-inline">POST</span> cria, <span class="code-inline">PUT</span> troca, <span class="code-inline">DELETE</span> apaga.</p>
+        <p class="note" style="margin-top:10px">A mesma URL faz quatro coisas diferentes, dependendo do verbo.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🚦</div>
+        <h3>O status é a resposta</h3>
+        <p>Um número de três dígitos que diz <b>o que aconteceu</b>.</p>
+        <p class="note" style="margin-top:10px"><span class="grn">2xx</span> deu certo · <span class="mono">4xx</span> quem pediu errou · <span class="mono">5xx</span> o servidor quebrou</p>
+      </div>
+    </div>
+    <div class="duo" style="margin-top:20px">
+      <div>
+        <div class="filetab">os cinco status de hoje</div>
+        <div class="regras">
+          <div class="r"><span class="num">200</span><span class="tx"><b>OK</b> — li e estou te entregando.</span></div>
+          <div class="r"><span class="num">201</span><span class="tx"><b>Created</b> — criei. E digo onde ficou.</span></div>
+          <div class="r"><span class="num">204</span><span class="tx"><b>No Content</b> — fiz, e não tenho nada pra devolver.</span></div>
+          <div class="r"><span class="num">404</span><span class="tx"><b>Not Found</b> — isso que você pediu não existe.</span></div>
+          <div class="r"><span class="num">400</span><span class="tx"><b>Bad Request</b> — o que você mandou está malformado.</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="filetab">a mesma URL, quatro sentidos</div>
+<pre class="code" style="font-size:12.5px"><span class="grn">GET</span>    /vagas        <span class="cm">// me dá todas</span>
+<span class="grn">POST</span>   /vagas        <span class="cm">// crie mais uma</span>
+
+<span class="grn">GET</span>    /vagas/42     <span class="cm">// me dá a 42</span>
+<span class="grn">PUT</span>    /vagas/42     <span class="cm">// troque a 42</span>
+<span class="grn">DELETE</span> /vagas/42     <span class="cm">// apague a 42</span></pre>
+        <p class="note" style="margin-top:14px">Só existem <b>duas</b> URLs aqui. O resto é verbo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">Ouça o que a sua API responde</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Antes de consertar, veja o problema com os próprios olhos. E de quebra ganhe a ferramenta que você vai usar o semestre inteiro.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie um arquivo <span class="mono">api.http</span> na raiz do projeto</h3><p>O IntelliJ e o VS Code (com a extensão <span class="code-inline">REST Client</span>) executam esse arquivo direto, sem instalar Insomnia nem Postman. E ele vai <b>versionado no Git</b> — quem clonar o projeto recebe as requisições junto.</p></div></div>
+      <div class="st"><div class="body"><h3>Escreva as três chamadas</h3><p>Uma por bloco, separadas por <span class="code-inline">###</span>. Clique em <b>Send Request</b> acima de cada uma.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="cm">### todas as vagas</span>
+GET http://localhost:8080/vagas
+
+<span class="cm">### uma que existe</span>
+GET http://localhost:8080/vagas/1
+
+<span class="cm">### uma que NÃO existe</span>
+GET http://localhost:8080/vagas/nao-existe</pre></div></div>
+      <div class="st"><div class="body"><h3>Anote o status das três</h3><p>Olhe o número no topo da resposta, não o corpo. As três devolvem <b>200</b>?</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>A terceira chamada devolveu <strong>200</strong> com corpo vazio? Então você reproduziu a mentira. É isso que os próximos três labs consertam.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>quem decide o status</div>
+    <span class="passo">PASSO 1 DE 4</span>
+    <h2>ResponseEntity</h2>
+    <p class="lead">Até agora o seu controller devolvia o objeto, e o Spring carimbava <span class="code-inline">200</span> sozinho. <b>ResponseEntity</b> é você tomando essa decisão de volta.</p>
+    <div class="grid2">
+      <div>
+        <div class="filetab">VagaService.java</div>
+<pre class="code" style="font-size:12.5px"><span class="cm">// devolve Optional: "pode ser que não tenha"</span>
+<span class="kw">public</span> <span class="ty">Optional</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">buscarPorId</span>(<span class="ty">String</span> id) {
+    <span class="kw">return</span> repository.<span class="fn">todas</span>().<span class="fn">stream</span>()
+        .<span class="fn">filter</span>(v -&gt; v.<span class="fn">id</span>().<span class="fn">equals</span>(id))
+        .<span class="fn">findFirst</span>();
+}</pre>
+        <div class="filetab" style="margin-top:16px">VagaController.java</div>
+<pre class="code" style="font-size:12.5px"><span class="an">@GetMapping</span>(<span class="st">"/{id}"</span>)
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">porId</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id) {
+    <span class="kw">return</span> service.<span class="fn">buscarPorId</span>(id)
+        .<span class="fn">map</span>(<span class="ty">ResponseEntity</span>::<span class="fn">ok</span>)
+        .<span class="fn">orElse</span>(<span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>());
+}</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O <b>service</b> devolve <span class="mono">Optional</span> — ele sabe se achou, mas <b>não sabe o que é um 404</b>. Status é assunto de HTTP, e o service não conhece HTTP.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O <b>controller</b> traduz: achou vira <span class="mono">ok</span>, não achou vira <span class="mono">notFound</span>. É exatamente o trabalho dele — <b>falar HTTP</b>.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><span class="mono">.build()</span> fecha uma resposta <b>sem corpo</b>. Um 404 não precisa devolver nada além do número.</span></div>
+      </div>
+    </div>
+    <p class="note">Repare que <strong>nenhum <span class="mono">if</span></strong> apareceu. <span class="mono">Optional</span> + <span class="mono">map</span> + <span class="mono">orElse</span> diz a mesma coisa e não deixa você esquecer o caso do “não achou”.</p>
+  </section>
+
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Faça a sua API dizer 404</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Mude o service para devolver <span class="mono">Optional</span></h3><p>No seu <span class="code-inline">buscarPorId</span>, troque o tipo de retorno e termine o stream com <span class="code-inline">.findFirst()</span> em vez de <span class="code-inline">.toList()</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Importe o <span class="mono">ResponseEntity</span></h3><p><span class="code-inline">org.springframework.http.ResponseEntity</span>. É do Spring, não do Java.</p></div></div>
+      <div class="st"><div class="body"><h3>Traduza no controller</h3><p>Troque o tipo de retorno para <span class="code-inline">ResponseEntity&lt;Coisa&gt;</span> e use o <span class="code-inline">.map(...).orElse(...)</span> do slide anterior.</p></div></div>
+      <div class="st"><div class="body"><h3>Rode o <span class="mono">api.http</span> de novo</h3><p>As três chamadas do lab 1. A terceira precisa virar <b>404</b> — e a segunda continuar <b>200</b>.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>O id que existe devolve <strong>200</strong> com o objeto, e o que não existe devolve <strong>404</strong> com corpo vazio? Sua API parou de mentir.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>criar</div>
+    <span class="passo">PASSO 2 DE 4</span>
+    <h2>POST: o corpo vem na requisição</h2>
+    <p class="lead">Até agora tudo que a sua API recebia vinha na URL. Para criar, o dado é grande demais pra caber lá — e vem no <b>corpo</b>.</p>
+    <div class="grid2">
+      <div>
+        <div class="filetab">VagaController.java</div>
+<pre class="code" style="font-size:12.5px"><span class="an">@PostMapping</span>
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">criar</span>(<span class="an">@RequestBody</span> <span class="ty">Vaga</span> nova) {
+    <span class="ty">Vaga</span> salva = service.<span class="fn">criar</span>(nova);
+
+    <span class="ty">URI</span> onde = <span class="ty">URI</span>.<span class="fn">create</span>(<span class="st">"/vagas/"</span> + salva.<span class="fn">id</span>());
+    <span class="kw">return</span> <span class="ty">ResponseEntity</span>.<span class="fn">created</span>(onde).<span class="fn">body</span>(salva);
+}</pre>
+        <div class="filetab" style="margin-top:16px">api.http</div>
+<pre class="code" style="font-size:12.5px"><span class="cm">### criar uma vaga</span>
+POST http://localhost:8080/vagas
+Content-Type: application/json
+
+{
+  <span class="st">"titulo"</span>: <span class="st">"Pessoa Desenvolvedora Java"</span>,
+  <span class="st">"area"</span>: <span class="st">"Back-end"</span>,
+  <span class="st">"senioridade"</span>: <span class="st">"Júnior"</span>
+}</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b><span class="mono">@RequestBody</span></b> diz ao Spring: pegue o JSON que veio e transforme neste objeto. Ele faz sozinho, casando pelos <b>nomes dos campos</b>.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O status é <b>201</b>, não 200. Existe um status que significa exatamente “criei uma coisa nova” — use ele.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><span class="mono">.created(uri)</span> devolve 201 <b>e</b> põe o cabeçalho <span class="mono">Location</span> com o endereço do que nasceu. Quem chamou não precisa adivinhar onde a coisa ficou.</span></div>
+      </div>
+    </div>
+    <p class="note">O <span class="mono">Location</span> é a parte que quase todo mundo esquece. Ele é o que diferencia <strong>“criei”</strong> de <strong>“criei, e está bem ali”</strong>.</p>
+  </section>
+
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Crie pelo POST</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Deixe o repository aceitar mais um</h3><p>Sua lista hoje é <span class="code-inline">List.of(...)</span>, que é <b>imutável</b> — não dá pra adicionar. Troque por <span class="code-inline">new ArrayList&lt;&gt;(List.of(...))</span> e crie um método <span class="code-inline">salvar(Coisa c)</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>No service, gere o id</h3><p>Quem chama o POST não manda id — quem decide o id é a API. Use <span class="code-inline">UUID.randomUUID().toString()</span> e monte a coisa nova com ele.</p></div></div>
+      <div class="st"><div class="body"><h3>No controller, <span class="mono">@PostMapping</span> e 201</h3><p>Com <span class="code-inline">@RequestBody</span> no parâmetro e <span class="code-inline">ResponseEntity.created(...)</span> no retorno.</p></div></div>
+      <div class="st"><div class="body"><h3>Teste e confira o cabeçalho</h3><p>Mande o POST pelo <span class="code-inline">api.http</span>. Depois procure <b>Location</b> na resposta, copie o endereço e chame ele com GET.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>O POST devolveu <strong>201</strong> com <strong>Location</strong>, e o GET naquele endereço achou o que você acabou de criar? O ciclo fechou.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>trocar e apagar</div>
+    <span class="passo">PASSO 3 DE 4</span>
+    <h2>PUT, DELETE e uma palavra difícil</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">VagaController.java</div>
+<pre class="code" style="font-size:12.5px"><span class="an">@PutMapping</span>(<span class="st">"/{id}"</span>)
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">trocar</span>(
+        <span class="an">@PathVariable</span> <span class="ty">String</span> id,
+        <span class="an">@RequestBody</span> <span class="ty">Vaga</span> nova) {
+    <span class="kw">return</span> service.<span class="fn">trocar</span>(id, nova)
+        .<span class="fn">map</span>(<span class="ty">ResponseEntity</span>::<span class="fn">ok</span>)
+        .<span class="fn">orElse</span>(<span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>());
+}
+
+<span class="an">@DeleteMapping</span>(<span class="st">"/{id}"</span>)
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Void</span>&gt; <span class="fn">apagar</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id) {
+    <span class="kw">if</span> (!service.<span class="fn">apagar</span>(id)) {
+        <span class="kw">return</span> <span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>();
+    }
+    <span class="kw">return</span> <span class="ty">ResponseEntity</span>.<span class="fn">noContent</span>().<span class="fn">build</span>();
+}</pre>
+      </div>
+      <div>
+        <div class="card">
+          <div class="ico">🔁</div>
+          <h3>Idempotente</h3>
+          <p>Quer dizer: <b>chamar uma vez ou dez vezes dá no mesmo</b>.</p>
+          <p style="margin-top:10px"><span class="code-inline">PUT</span> e <span class="code-inline">DELETE</span> são. <span class="code-inline">POST</span> <b>não é</b>.</p>
+        </div>
+        <div class="regras" style="margin-top:16px">
+          <div class="r"><span class="num">!</span><span class="tx">Mandar o mesmo <b>POST</b> três vezes cria <b>três vagas</b>. Por isso o botão de “enviar” some depois do clique nos sites bem-feitos.</span></div>
+          <div class="r"><span class="num">✓</span><span class="tx">Mandar o mesmo <b>PUT</b> três vezes deixa a vaga <b>do mesmo jeito</b> nas três. É seguro repetir quando a internet cai no meio.</span></div>
+          <div class="r"><span class="num">204</span><span class="tx"><b>No Content</b> no DELETE: apaguei, e não sobrou nada pra te mostrar. Devolver o objeto apagado seria estranho.</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Aqui o <span class="mono">if</span> aparece porque apagar devolve <span class="mono">boolean</span>, não <span class="mono">Optional</span> — não há objeto para embrulhar. Está certo assim.</p>
+  </section>
+
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 4</span>
+      <h2 style="margin:0">Complete o CRUD</h2>
+      <span class="t">~20 min</span>
+    </div>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>No repository: <span class="mono">trocar</span> e <span class="mono">remover</span></h3><p>Ache o índice pelo id. Para trocar, <span class="code-inline">lista.set(i, nova)</span>. Para remover, <span class="code-inline">lista.removeIf(c -&gt; c.id().equals(id))</span>, que já devolve <span class="code-inline">boolean</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>No service, preserve o id</h3><p>O corpo do PUT não traz id — ele veio na URL. Monte a coisa nova com o <b>id do caminho</b> e os campos do corpo. Se deixar o id do corpo passar, ele vem <span class="code-inline">null</span> e você perde o registro.</p></div></div>
+      <div class="st"><div class="body"><h3>No controller: <span class="mono">@PutMapping</span> e <span class="mono">@DeleteMapping</span></h3><p>Os dois com <span class="code-inline">"/{id}"</span>. PUT devolve 200 ou 404; DELETE devolve 204 ou 404.</p></div></div>
+      <div class="st"><div class="body"><h3>Prove a idempotência</h3><p>Mande o <b>mesmo DELETE duas vezes</b>. A primeira dá 204, a segunda dá 404 — e a lista fica igual nas duas. Depois mande o mesmo PUT duas vezes e confira que o resultado não muda.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Você tem <strong>GET, POST, PUT e DELETE</strong> funcionando, cada um com o seu status? Então a sua API virou um CRUD de verdade.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>filtrar</div>
+    <span class="passo">PASSO 4 DE 4</span>
+    <h2><span class="mono">@RequestParam</span>: a busca</h2>
+    <p class="lead">Filtro não é recurso. <span class="code-inline">/vagas/Back-end</span> estaria dizendo que “Back-end” é o <b>id</b> de uma vaga — e não é.</p>
+    <div class="grid2">
+      <div>
+        <div class="filetab">VagaController.java</div>
+<pre class="code" style="font-size:12.5px"><span class="an">@GetMapping</span>(<span class="st">"/busca"</span>)
+<span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">buscar</span>(
+        <span class="an">@RequestParam</span>(required = <span class="kw">false</span>) <span class="ty">String</span> area,
+        <span class="an">@RequestParam</span>(required = <span class="kw">false</span>) <span class="ty">String</span> senioridade) {
+    <span class="kw">return</span> service.<span class="fn">buscar</span>(area, senioridade);
+}</pre>
+<pre class="code" style="font-size:12.5px;margin-top:14px"><span class="cm">### os dois filtros</span>
+GET /vagas/busca?area=Back-end&amp;senioridade=Júnior
+
+<span class="cm">### só um — o outro fica null</span>
+GET /vagas/busca?area=Dados
+
+<span class="cm">### nenhum: devolve tudo</span>
+GET /vagas/busca</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O que vem depois do <b><span class="mono">?</span></b> é <b>parâmetro de consulta</b>: filtro, ordenação, página. O caminho identifica <b>o quê</b>; a consulta refina <b>quais</b>.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><span class="mono">required = false</span> deixa o filtro opcional. Sem isso, faltar um parâmetro vira <b>400</b>.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Busca que não acha nada devolve <b>200 com lista vazia</b> — e agora isso está <b>certo</b>: você procurou, e o resultado é zero. Diferente de pedir um id que não existe.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><span class="mono">/vagas/busca</span> e <span class="mono">/vagas/{id}</span> convivem: o Spring escolhe pela <b>especificidade</b>, e caminho literal ganha de variável. <b>A ordem em que você declara não importa</b> — em Express importaria.</span></div>
+      </div>
+    </div>
+    <p class="note">Essa é a diferença que fecha o dia: <strong>lista vazia é resposta</strong>, <strong>coisa inexistente é 404</strong>. O mesmo corpo, sentidos opostos.</p>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>fechando</div>
+    <h2>O que fica de hoje</h2>
+    <div class="grid2">
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">A <b>URL é substantivo</b>, o <b>verbo é a ação</b>. <span class="mono">/criarVaga</span> nunca mais.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Status é contrato.</b> 200, 201, 204, 404 — cada um diz uma coisa que o corpo da resposta não diz.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">O <b>service devolve <span class="mono">Optional</span></b>; quem traduz para HTTP é o controller. Camada nenhuma invade a outra.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><b>201 leva <span class="mono">Location</span></b>. Criar sem dizer onde ficou é meio trabalho.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx"><b>PUT e DELETE são idempotentes</b>, POST não. Repetir os dois primeiros é seguro.</span></div>
+        <div class="r"><span class="num">6</span><span class="tx">Filtro vai em <b><span class="mono">@RequestParam</span></b>, depois do <span class="mono">?</span>. Nunca vira caminho.</span></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="ico">🎯</div>
+          <h3>O desafio</h3>
+          <p>A segunda evolução do <b>Leque de Vagas</b>. Quatro partes, uma por frente — e todas elas mexem em status.</p>
+          <p style="margin-top:10px">A frente 1 ganha o CRUD completo; a frente 4 ganha a busca. As frentes 2 e 3 consertam a mesma mentira que a de vocês contava.</p>
+          <p class="note" style="margin-top:12px">Antes de codar: a equipe precisa combinar <b>o formato do corpo do POST</b>. É a combinação de 30 minutos desta aula.</p>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="ico">📮</div>
+          <h3>Leve o <span class="mono">api.http</span> junto</h3>
+          <p>Ele entra no repositório da equipe, versionado. Na aula 12, quando chegar o Swagger, você vai ver que é a mesma ideia — só que gerada sozinha.</p>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:18px">Na <strong>aula 04</strong>: por que mandar a entidade inteira no <span class="mono">@RequestBody</span> é perigoso, e o que são <strong>DTOs</strong>.</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 12</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

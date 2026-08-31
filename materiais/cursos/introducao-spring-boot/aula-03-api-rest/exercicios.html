@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercícios da aula 03 — API REST: recursos, verbos e status · Introdução ao Spring Boot · NickDev</title>
+<meta name="description" content="Os quatro laboratórios da aula 03: testar a API com arquivo .http, responder 404 com ResponseEntity, criar com POST e Location, completar o CRUD e provar idempotência.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+  --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
+.goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+
+  /* ---- Aula 02: folha de exercicio ----------------------------------- */
+  /* O gabarito fica dobrado. Aberto por padrao, o aluno le a resposta
+     antes de tentar — e o exercicio vira leitura. */
+  details.gab{border:1px solid var(--line);border-radius:10px;margin-top:14px;background:var(--surface-2)}
+  details.gab summary{cursor:pointer;padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--pink-light);
+    list-style:none;user-select:none}
+  details.gab summary::-webkit-details-marker{display:none}
+  details.gab summary::before{content:'▸ ';color:var(--magenta)}
+  details.gab[open] summary::before{content:'▾ '}
+  details.gab summary:hover{color:var(--text)}
+  details.gab summary:focus-visible{outline:2px solid var(--magenta);outline-offset:-2px;border-radius:10px}
+  details.gab .in{padding:2px 18px 18px;border-top:1px solid var(--line)}
+  details.gab .in p{font-size:14.5px;color:var(--text-2);margin-top:12px}
+  details.gab .in p b{color:var(--text)}
+
+  .lab{border:1px solid var(--line);border-left:4px solid var(--verde,#5fd08a);border-radius:14px;
+    padding:24px 26px;margin-top:22px;background:var(--surface)}
+  .lab-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .lab-head .n{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--bg);
+    background:#5fd08a;padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .lab-head h3{font-size:21px;margin:0}
+  .lab-head .t{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .lab .obj{font-size:15px;color:var(--text-3);margin:6px 0 16px;border-left:2px solid #5fd08a;padding-left:12px}
+  .lab ol{margin:12px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  .lab ol li{margin:7px 0}
+  .lab ol li b{color:var(--text)}
+  .perg{border:1px solid rgba(95,208,138,.4);background:rgba(95,208,138,.06);border-radius:10px;
+    padding:14px 18px;margin-top:16px}
+  .perg b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;margin-bottom:8px}
+  .perg ol{margin:0;padding-left:20px;color:var(--text);font-size:14.5px}
+
+  table.erros{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
+  table.erros th,table.erros td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.erros th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);font-weight:500}
+  table.erros td{color:var(--text-2)}
+  table.erros td code{color:var(--pink-light);font-size:.92em}
+  table.erros tr:last-child td{border-bottom:0}
+
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-spring-boot">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="https://aulas.umlequedetecnologia.com.br/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Exercícios em aula · Aula 03</div>
+  <h1>Faça a sua API <span class="grad">dizer a verdade</span> 🚦</h1>
+  <p class="lead">
+    Você vai pegar as três classes da aula 02 e ensiná-las a responder o
+    <b>status certo</b> — e a aceitar os verbos que faltavam. Quatro labs, no
+    seu projetinho pessoal.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🧭</span>
+    <div>
+      <h3>A ordem importa de novo</h3>
+      <p>Lab 1 só olha. Lab 2 conserta a leitura. Lab 3 ensina a criar. Lab 4
+      fecha com trocar e apagar. Cada um depende do anterior — <b>não pule</b>.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">📮</span>
+    <div>
+      <h3>A ferramenta de hoje é um arquivo de texto</h3>
+      <p>Nada de instalar Insomnia ou Postman. Um arquivo <code>api.http</code> na
+      raiz do projeto, executado pelo IntelliJ ou pelo VS Code com a extensão
+      <b>REST Client</b>, faz o mesmo — e <b>vai versionado no Git</b>, o que
+      Insomnia nenhum faz de graça.</p>
+      <p style="margin-top:8px">Quem clonar o seu projeto recebe as requisições
+      junto com o código. É assim que time de verdade compartilha chamada de API
+      antes de existir documentação.</p>
+    </div>
+  </div>
+
+  <div class="label">Os quatro labs</div>
+
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 1</span><h3>Ouça o que a sua API responde</h3><span class="t">~10 min</span></div>
+    <p class="obj">Antes de consertar, ver o defeito com os próprios olhos — e ganhar a ferramenta do semestre.</p>
+    <ol>
+      <li>Crie <code>api.http</code> na <b>raiz</b> do projeto, ao lado do <code>pom.xml</code>.</li>
+      <li>Escreva as três chamadas abaixo, separadas por <code>###</code>.</li>
+      <li>Rode a aplicação e clique em <b>Send Request</b> acima de cada uma.</li>
+      <li>Anote o <b>status</b> das três — o número no topo da resposta, não o corpo.</li>
+    </ol>
+<pre><span class="cm">### todos os itens</span>
+GET http://localhost:8080/receitas
+
+<span class="cm">### um que existe</span>
+GET http://localhost:8080/receitas/1
+
+<span class="cm">### um que NÃO existe</span>
+GET http://localhost:8080/receitas/nao-existe</pre>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Qual o status da terceira chamada?</li>
+        <li>O corpo dela veio vazio. Quem está do outro lado consegue saber <b>por quê</b>?</li>
+        <li>Se essa API alimentasse uma tela, o que a pessoa veria?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>conferir depois de responder</summary>
+      <div class="in">
+        <p><b>1.</b> <code>200 OK</code> — o mesmo status da chamada que deu certo. É esse o problema.</p>
+        <p><b>2.</b> Não. <b>200 com corpo vazio</b> é ambíguo: pode ser “não existe” ou “existe e está vazio”. O cliente teria que adivinhar, e adivinhação vira bug.</p>
+        <p><b>3.</b> Uma tela em branco, sem mensagem — porque para o front <b>deu certo</b>. O erro fica invisível até para o monitoramento, que não acusa 200.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 2</span><h3>Faça a sua API dizer 404</h3><span class="t">~15 min</span></div>
+    <p class="obj">Devolver o status certo quando o item não existe — sem pôr regra de HTTP dentro do service.</p>
+    <ol>
+      <li>No <b>service</b>, mude <code>buscarPorId</code> para devolver <code>Optional&lt;Coisa&gt;</code>: termine o stream com <code>.findFirst()</code> em vez de <code>.toList()</code>.</li>
+      <li>No <b>controller</b>, importe <code>org.springframework.http.ResponseEntity</code>.</li>
+      <li>Troque o retorno do método para <code>ResponseEntity&lt;Coisa&gt;</code> e traduza o <code>Optional</code>.</li>
+      <li>Rode o <code>api.http</code> de novo: a terceira chamada precisa virar <b>404</b>, e a segunda continuar <b>200</b>.</li>
+    </ol>
+<pre><span class="cm">// no service — ele sabe se achou, mas não sabe o que é um 404</span>
+<span class="kw">public</span> <span class="ty">Optional</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">buscarPorId</span>(<span class="ty">String</span> id) {
+    <span class="kw">return</span> repository.<span class="fn">todas</span>().<span class="fn">stream</span>()
+        .<span class="fn">filter</span>(r -&gt; r.<span class="fn">id</span>().<span class="fn">equals</span>(id))
+        .<span class="fn">findFirst</span>();
+}
+
+<span class="cm">// no controller — aqui, sim, se fala HTTP</span>
+<span class="an">@GetMapping</span>(<span class="st">"/{id}"</span>)
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">porId</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id) {
+    <span class="kw">return</span> service.<span class="fn">buscarPorId</span>(id)
+        .<span class="fn">map</span>(<span class="ty">ResponseEntity</span>::<span class="fn">ok</span>)
+        .<span class="fn">orElse</span>(<span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>());
+}</pre>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Por que o <b>service</b> devolve <code>Optional</code> em vez de já devolver o 404?</li>
+        <li>O que <code>.build()</code> faz, e por que ele aparece no <code>notFound</code> mas não no <code>ok</code>?</li>
+        <li>Não apareceu nenhum <code>if</code>. Onde foi parar a decisão?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>conferir depois de responder</summary>
+      <div class="in">
+        <p><b>1.</b> Porque <b>status é assunto de HTTP</b>, e o service não conhece HTTP. Se ele devolvesse 404, você não conseguiria reusá-lo numa tarefa agendada, num teste ou numa tela de terminal — todos lugares onde “404” não quer dizer nada.</p>
+        <p><b>2.</b> <code>.build()</code> fecha uma resposta <b>sem corpo</b>. O <code>ok(objeto)</code> já recebeu o corpo e se fecha sozinho; o <code>notFound()</code> não tem corpo nenhum para receber, então precisa ser fechado à mão.</p>
+        <p><b>3.</b> Para dentro do <code>Optional</code>. <code>map</code> só roda se houver valor, <code>orElse</code> só roda se não houver — é um <code>if</code> que o compilador <b>não deixa você esquecer</b>. Com <code>if</code> escrito à mão, esquecer o caso do “não achou” é o bug mais comum que existe.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 3</span><h3>Crie pelo POST</h3><span class="t">~15 min</span></div>
+    <p class="obj">Receber dado no corpo da requisição, gerar o id e responder 201 dizendo onde a coisa nasceu.</p>
+    <ol>
+      <li>No <b>repository</b>: sua lista é <code>List.of(...)</code>, que é <b>imutável</b>. Troque por <code>new ArrayList&lt;&gt;(List.of(...))</code> e crie <code>salvar(Coisa c)</code>.</li>
+      <li>No <b>service</b>: gere o id com <code>UUID.randomUUID().toString()</code> e monte a coisa nova com ele. <b>O id nunca vem do cliente.</b></li>
+      <li>No <b>controller</b>: <code>@PostMapping</code>, parâmetro com <code>@RequestBody</code>, retorno com <code>ResponseEntity.created(...)</code>.</li>
+      <li>Teste, ache o cabeçalho <b>Location</b> na resposta, copie o endereço e chame ele com GET.</li>
+    </ol>
+<pre><span class="an">@PostMapping</span>
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Receita</span>&gt; <span class="fn">criar</span>(<span class="an">@RequestBody</span> <span class="ty">Receita</span> nova) {
+    <span class="ty">Receita</span> salva = service.<span class="fn">criar</span>(nova);
+    <span class="ty">URI</span> onde = <span class="ty">URI</span>.<span class="fn">create</span>(<span class="st">"/receitas/"</span> + salva.<span class="fn">id</span>());
+    <span class="kw">return</span> <span class="ty">ResponseEntity</span>.<span class="fn">created</span>(onde).<span class="fn">body</span>(salva);
+}</pre>
+<pre><span class="cm">### no api.http — repare no Content-Type</span>
+POST http://localhost:8080/receitas
+Content-Type: application/json
+
+{ <span class="st">"titulo"</span>: <span class="st">"Cuscuz"</span>, <span class="st">"minutos"</span>: <span class="st">10</span> }</pre>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>O que acontece se você esquecer a linha <code>Content-Type: application/json</code>?</li>
+        <li>Por que o id é gerado no service, e não recebido do cliente?</li>
+        <li>Para que serve o <code>Location</code>, se o objeto criado já veio no corpo?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>conferir depois de responder</summary>
+      <div class="in">
+        <p><b>1.</b> O Spring devolve <b>415 Unsupported Media Type</b>. Sem o cabeçalho ele não sabe que o corpo é JSON, e o <code>@RequestBody</code> não tem como escolher o conversor.</p>
+        <p><b>2.</b> Porque o id <b>identifica</b>, e quem responde pela identidade é quem guarda. Se o cliente escolhesse, dois clientes escolheriam o mesmo — e um sobrescreveria o outro sem ninguém perceber.</p>
+        <p><b>3.</b> Para quem só precisa do <b>endereço</b> não ter que vasculhar o corpo atrás do id e montar a URL na mão. E porque nem toda API devolve o objeto no 201 — algumas devolvem só o <code>Location</code>, e quem consome precisa funcionar nos dois casos.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 4</span><h3>Complete o CRUD e prove a idempotência</h3><span class="t">~20 min</span></div>
+    <p class="obj">Os dois verbos que faltam — e um experimento que mostra por que eles são diferentes do POST.</p>
+    <ol>
+      <li>No <b>repository</b>: <code>trocar(String id, Coisa nova)</code> com <code>lista.set(i, nova)</code>, e <code>remover(String id)</code> com <code>lista.removeIf(...)</code>, que já devolve <code>boolean</code>.</li>
+      <li>No <b>service</b>: no <code>trocar</code>, monte a coisa nova com o <b>id que veio da URL</b>, não o do corpo.</li>
+      <li>No <b>controller</b>: <code>@PutMapping("/{id}")</code> devolvendo 200 ou 404, e <code>@DeleteMapping("/{id}")</code> devolvendo <b>204</b> ou 404.</li>
+      <li>O experimento: mande o <b>mesmo DELETE duas vezes</b>, e depois o <b>mesmo PUT duas vezes</b>. Anote os quatro status.</li>
+    </ol>
+<pre><span class="an">@DeleteMapping</span>(<span class="st">"/{id}"</span>)
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Void</span>&gt; <span class="fn">apagar</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id) {
+    <span class="kw">return</span> service.<span class="fn">apagar</span>(id)
+        ? <span class="ty">ResponseEntity</span>.<span class="fn">noContent</span>().<span class="fn">build</span>()
+        : <span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>();
+}</pre>
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>O DELETE repetido deu <b>204</b> e depois <b>404</b>. Isso quebra a idempotência?</li>
+        <li>Por que o DELETE devolve <b>204</b> e não 200 com o objeto apagado?</li>
+        <li>Se a internet cair depois de você mandar um POST, dá para repetir com segurança? E um PUT?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>conferir depois de responder</summary>
+      <div class="in">
+        <p><b>1.</b> Não. Idempotência é sobre o <b>estado do servidor</b>, não sobre a resposta: depois de uma ou de dez chamadas, aquele item não existe. As respostas diferem; o resultado, não.</p>
+        <p><b>2.</b> Porque não sobrou nada para mostrar. Devolver o objeto que você acabou de apagar sugere que ele ainda está lá — <b>204 No Content</b> diz exatamente o que aconteceu: fiz, e não tenho corpo para você.</p>
+        <p><b>3.</b> POST, <b>não</b>: repetir cria um segundo item. PUT, <b>sim</b>: o estado final é o mesmo. É por isso que sistemas de pagamento gastam tanto esforço tornando a cobrança idempotente — cair a rede no meio não pode virar cobrança dobrada.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="entrega">
+    <h3>📦 Entrega de hoje — atividade 2</h3>
+    <p>No fim da aula, suba o link do repositório do <b>seu projetinho</b> contendo:</p>
+    <ul>
+      <li>O <code>api.http</code> versionado, com as chamadas dos quatro labs.</li>
+      <li><code>GET /coisas/{id}</code> respondendo <b>200 ou 404</b>.</li>
+      <li><code>POST</code> respondendo <b>201</b> com <code>Location</code>.</li>
+      <li><code>PUT</code> e <code>DELETE</code> funcionando, com <b>204</b> no delete.</li>
+      <li>Um <code>RESPOSTAS.md</code> na raiz, com as suas respostas às perguntas dos quatro labs.</li>
+    </ul>
+    <p class="tip" style="margin-top:14px"><b>Isto não é o projeto.</b> Os quatro labs são treino individual, no seu projetinho da aula 01. O <b>projeto da disciplina</b> — o Leque de Vagas, em equipe — está no <a href="desafio.html" style="color:var(--pink-light);text-decoration:underline">desafio desta aula</a>, e ele tem quatro partes, uma por integrante.</p>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Desafio da aula</a>
+    <a class="btn" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+    <a class="btn" href="../../guias/spring-boot/spring-boot.html">📘 Guia de Spring Boot</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Spring Boot · Aula 03 · Spring Boot 4.1 · Java 21 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>

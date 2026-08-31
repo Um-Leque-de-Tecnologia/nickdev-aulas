@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leque de Vagas — a API respondendo com status · Prévia do desafio 03</title>
+<meta name="description" content="Prévia do desafio 03 de Introdução ao Spring Boot: as rotas do Leque de Vagas respondendo com 200, 201, 204 e 404, com cabeçalho Location e a busca por parâmetro.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#1B1632; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;
+    -webkit-font-smoothing:antialiased;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:2px;border-radius:6px}
+
+  .topo{display:flex;align-items:center;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .topo .marca{font-weight:700}
+  .topo .base{font-family:var(--mono);font-size:12.5px;color:var(--text-3);
+    border:1px solid var(--line);padding:5px 12px;border-radius:100px}
+  .topo .nota{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text-3)}
+
+  .painel{display:grid;grid-template-columns:300px 1fr;max-width:1180px;margin:0 auto;gap:0;min-height:70vh}
+  @media(max-width:860px){.painel{grid-template-columns:1fr}}
+
+  aside{border-right:1px solid var(--line);padding:22px 16px}
+  @media(max-width:860px){aside{border-right:0;border-bottom:1px solid var(--line)}}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--text-3);margin:16px 0 6px}
+  .rota{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;
+    border:1px solid transparent;border-radius:9px;padding:8px 10px;cursor:pointer;
+    font-family:var(--mono);font-size:12.5px;color:var(--text-2);transition:.15s;margin-bottom:2px}
+  .rota:hover{background:var(--surface);color:var(--text)}
+  .rota.on{background:var(--surface);border-color:var(--purple);color:var(--text)}
+  .verbo{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--bg);
+    background:var(--green);padding:2px 6px;border-radius:5px}
+
+  main{padding:26px 28px}
+  .barra{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .barra .url{font-family:var(--mono);font-size:15px}
+  .status{font-family:var(--mono);font-size:12px;color:var(--green);
+    border:1px solid rgba(95,208,138,.4);padding:3px 10px;border-radius:100px}
+  .quem{font-family:var(--mono);font-size:12px;color:var(--text-3);margin-bottom:14px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+    font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;color:#d8d3e6;
+    white-space:pre;max-height:60vh}
+  .k{color:var(--pink-light)}
+  .s{color:var(--purple-light)}
+  .n{color:var(--green)}
+  .b{color:var(--magenta)}
+
+  .rodape{border-top:1px solid var(--line);margin-top:8px;padding:18px 22px;
+    font-family:var(--mono);font-size:12.5px;color:var(--text-3);text-align:center}
+  .rodape a{color:var(--pink-light)}
+
+  .status.erro{color:var(--magenta);border-color:rgba(242,68,135,.45)}
+  .status.vazio{color:var(--text-3);border-color:var(--line)}
+  .verbo.post{background:var(--purple-light)}
+  .verbo.put{background:var(--pink-light)}
+  .verbo.del{background:var(--magenta);color:#fff}
+  .cab{font-family:var(--mono);font-size:12.5px;color:var(--text-2);
+    border:1px solid var(--line);border-left:3px solid var(--purple);
+    border-radius:8px;padding:9px 12px;margin-bottom:12px}
+  .cab b{color:var(--pink-light)}
+  .sem{font-family:var(--mono);font-size:13px;color:var(--text-3);
+    background:var(--code-bg);border:1px dashed var(--line);border-radius:12px;
+    padding:18px 20px}
+  .porque{font-size:13.5px;color:var(--text-2);border-top:1px solid var(--line);
+    margin-top:16px;padding-top:14px}
+  .porque b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <span class="marca">💼 Leque de Vagas</span>
+  <span class="base">http://localhost:8080</span>
+  <span class="nota">prévia da resposta · desafio 03</span>
+</div>
+
+<div class="painel">
+  <aside>
+    <div class="grp">Frente 1 · Vaga</div>
+    <div id="g1"></div>
+    <div class="grp">Frente 2 · Empresa</div>
+    <div id="g2"></div>
+    <div class="grp">Frente 3 · Pessoa</div>
+    <div id="g3"></div>
+    <div class="grp">Frente 4 · Busca</div>
+    <div id="g4"></div>
+  </aside>
+
+  <main>
+    <div class="barra">
+      <span class="verbo" id="verbo">GET</span>
+      <span class="url" id="url"></span>
+      <span class="status" id="status">200 OK</span>
+    </div>
+    <p class="quem" id="quem"></p>
+    <div id="cab"></div>
+    <div id="corpo"></div>
+    <p class="porque" id="porque"></p>
+  </main>
+</div>
+
+<div class="rodape">
+  Dezesseis chamadas, quatro status, um cabeçalho — a API da aula 02 aprendendo a dizer a verdade.<br>
+  <a href="desafio.html">← voltar ao desafio</a>
+</div>
+
+<script>
+const ROTAS = [
+  {
+    "metodo": "GET",
+    "caminho": "/vagas/1",
+    "status": "200 OK",
+    "corpo": {
+      "id": "1",
+      "titulo": "Pessoa Desenvolvedora Front-end Júnior",
+      "descricao": "Telas do produto em React e Next.js, pareando com gente mais experiente.",
+      "area": "Front-end",
+      "senioridade": "Júnior",
+      "local": "Remoto",
+      "aceitaIniciante": true,
+      "empresaSlug": "aurora-tech"
+    },
+    "porque": "O caminho feliz, igual ao da aula 02. O que mudou está invisível aqui: agora o controller <b>escolheu</b> o 200, em vez de o Spring carimbar sozinho."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/vagas/nao-existe",
+    "status": "404 Not Found",
+    "corpo": null,
+    "porque": "<b>O conserto da aula 02.</b> Antes isto devolvia 200 com lista vazia, e quem chamava não sabia se a vaga não existia ou se estava tudo certo. Agora o número já diz."
+  },
+  {
+    "metodo": "POST",
+    "caminho": "/vagas",
+    "status": "201 Created",
+    "cabecalho": "Location: /vagas/9c1f4e2a-7b30-4d55-9f1a-2e8c6b0d3a71",
+    "corpo": {
+      "id": "9c1f4e2a-7b30-4d55-9f1a-2e8c6b0d3a71",
+      "titulo": "Pessoa Desenvolvedora Java Pleno",
+      "descricao": "Serviços de cobrança em Spring Boot, com fila e observabilidade.",
+      "area": "Back-end",
+      "senioridade": "Pleno",
+      "local": "Remoto",
+      "aceitaIniciante": false,
+      "empresaSlug": "tucano-systems"
+    },
+    "porque": "O corpo enviado <b>não tinha id</b> — quem inventa o id é a API. E o <b>Location</b> diz onde a vaga nasceu, para quem criou não precisar adivinhar o endereço."
+  },
+  {
+    "metodo": "PUT",
+    "caminho": "/vagas/1",
+    "status": "200 OK",
+    "corpo": {
+      "id": "1",
+      "titulo": "Pessoa Desenvolvedora Front-end Pleno",
+      "descricao": "Telas do produto em React e Next.js, pareando com gente mais experiente.",
+      "area": "Front-end",
+      "senioridade": "Pleno",
+      "local": "Remoto",
+      "aceitaIniciante": false,
+      "empresaSlug": "aurora-tech"
+    },
+    "porque": "O id veio da <b>URL</b>, não do corpo. Mandar este mesmo PUT dez vezes deixa a vaga exatamente assim nas dez — é isso que <b>idempotente</b> quer dizer."
+  },
+  {
+    "metodo": "DELETE",
+    "caminho": "/vagas/12",
+    "status": "204 No Content",
+    "corpo": null,
+    "porque": "Apagou, e não sobrou nada para mostrar. Devolver o objeto recém-apagado seria estranho — por isso <b>204</b>, e não 200."
+  },
+  {
+    "metodo": "DELETE",
+    "caminho": "/vagas/12",
+    "status": "404 Not Found",
+    "corpo": null,
+    "rotulo": "/vagas/12 · de novo",
+    "porque": "A segunda chamada acha 404, e <b>isso não quebra a idempotência</b>: idempotente é sobre o estado do servidor, não sobre a resposta. Depois de uma ou de dez chamadas, a vaga 12 não existe."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/empresas/aurora-tech",
+    "status": "200 OK",
+    "corpo": {
+      "id": "1",
+      "nome": "Aurora Tech",
+      "slug": "aurora-tech",
+      "site": "aurora.tech",
+      "descricao": "Produto de gestão para clínicas. Time pequeno, remoto desde 2020."
+    },
+    "porque": "Aqui o identificador é o <b>slug</b>, não um número. Para o HTTP dá no mesmo: é o que estiver no lugar do <span class='k'>{...}</span>."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/empresas/nao-existe",
+    "status": "404 Not Found",
+    "corpo": null,
+    "porque": "A mesma correção da frente 1, no recurso da frente 2. Toda rota que busca <b>uma</b> coisa precisa saber dizer que ela não existe."
+  },
+  {
+    "metodo": "POST",
+    "caminho": "/empresas",
+    "status": "201 Created",
+    "cabecalho": "Location: /empresas/farol-tech",
+    "corpo": {
+      "id": "6",
+      "nome": "Farol Tech",
+      "slug": "farol-tech",
+      "site": "farol.tech",
+      "descricao": "Software para portos e terminais."
+    },
+    "porque": "Compare com o POST da frente 1: lá o <b>Location</b> aponta para um id que a API inventou; aqui aponta para um slug que <b>o cliente escolheu</b>. Mesmo status, responsabilidade diferente."
+  },
+  {
+    "metodo": "POST",
+    "caminho": "/pessoas",
+    "status": "201 Created",
+    "cabecalho": "Location: /pessoas/2f7d",
+    "corpo": {
+      "id": "2f7d",
+      "nome": "Helena Costa",
+      "email": "helena@exemplo.com",
+      "area": "Back-end",
+      "senioridade": "Júnior"
+    },
+    "porque": "Mandar este POST de novo cria uma <b>segunda</b> Helena, com outro id. POST <b>não</b> é idempotente — é por isso que sites bem-feitos desabilitam o botão depois do clique."
+  },
+  {
+    "metodo": "PUT",
+    "caminho": "/pessoas/1",
+    "status": "200 OK",
+    "corpo": {
+      "id": "1",
+      "nome": "Ana Nogueira",
+      "email": "ana@exemplo.com",
+      "area": "Dados",
+      "senioridade": "Pleno"
+    },
+    "porque": "Ana mudou de área e de senioridade. Repetir esta chamada não muda mais nada — o estado já é o pedido."
+  },
+  {
+    "metodo": "DELETE",
+    "caminho": "/pessoas/6",
+    "status": "204 No Content",
+    "corpo": null,
+    "porque": "Sem corpo, como manda o 204. O <span class='k'>idempotencia.http</span> da frente 3 é o que registra esta sequência inteira, com o status de cada chamada anotado."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/vagas/busca?area=Dados",
+    "status": "200 OK",
+    "corpo": [
+      {
+        "id": "8",
+        "titulo": "Analista de Dados Júnior",
+        "descricao": "SQL, planilhas e construção de painéis para clientes do varejo.",
+        "area": "Dados",
+        "senioridade": "Júnior",
+        "local": "Híbrido · Recife",
+        "aceitaIniciante": true,
+        "empresaSlug": "nuvem-rosa"
+      },
+      {
+        "id": "9",
+        "titulo": "Estágio em Dados",
+        "descricao": "Limpeza de base e primeiros painéis, com acompanhamento semanal.",
+        "area": "Dados",
+        "senioridade": "Estágio",
+        "local": "Remoto",
+        "aceitaIniciante": true,
+        "empresaSlug": "nuvem-rosa"
+      },
+      {
+        "id": "10",
+        "titulo": "Pessoa Engenheira de Dados Pleno",
+        "descricao": "Pipelines de rastreamento de carga, em Python e SQL.",
+        "area": "Dados",
+        "senioridade": "Pleno",
+        "local": "Remoto",
+        "aceitaIniciante": false,
+        "empresaSlug": "tucano-systems"
+      }
+    ],
+    "porque": "Três vagas de Dados. O filtro foi depois do <b>?</b>, em <span class='k'>@RequestParam</span> — <span class='k'>/vagas/Dados</span> estaria dizendo que “Dados” é o id de uma vaga."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/vagas/busca?area=Dados&senioridade=Júnior",
+    "status": "200 OK",
+    "corpo": [
+      {
+        "id": "8",
+        "titulo": "Analista de Dados Júnior",
+        "descricao": "SQL, planilhas e construção de painéis para clientes do varejo.",
+        "area": "Dados",
+        "senioridade": "Júnior",
+        "local": "Híbrido · Recife",
+        "aceitaIniciante": true,
+        "empresaSlug": "nuvem-rosa"
+      }
+    ],
+    "porque": "Os dois filtros combinam. Cada parâmetro é <b>opcional</b>: faltar um não é erro, é um filtro a menos."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/vagas/busca?area=Computação Quântica",
+    "status": "200 OK",
+    "corpo": [],
+    "porque": "<b>Lista vazia, e 200 está certo aqui.</b> Você procurou e o resultado é zero — diferente de pedir uma vaga que não existe, que é 404. Mesmo corpo, sentidos opostos: é a distinção que fecha a aula."
+  },
+  {
+    "metodo": "GET",
+    "caminho": "/estatisticas",
+    "status": "200 OK",
+    "corpo": {
+      "totalDeVagas": 12,
+      "aceitamIniciante": 7,
+      "porArea": {
+        "Front-end": 4,
+        "Back-end": 3,
+        "Dados": 3,
+        "Mobile": 2
+      },
+      "porSenioridade": {
+        "Júnior": 6,
+        "Estágio": 2,
+        "Pleno": 4
+      }
+    },
+    "porque": "A entrega da aula 02, intacta. Evoluir a API <b>não pode</b> quebrar o que já funcionava — e conferir isso faz parte de juntar as quatro partes."
+  }
+];
+
+const GRUPO = { "/vagas/busca": "g4", "/estatisticas": "g4", "/vagas": "g1", "/empresas": "g2", "/pessoas": "g3" };
+const DONO = {
+  g1: "Frente 1 · Vaga — o CRUD completo",
+  g2: "Frente 2 · Empresa — o identificador vem de quem cria",
+  g3: "Frente 3 · Pessoa — e a prova da idempotência",
+  g4: "Frente 4 · Busca — filtro em parâmetro, não em caminho",
+};
+
+// Colore o JSON sem depender de biblioteca: chave, texto, número, booleano.
+function pinta(valor) {
+  const bruto = JSON.stringify(valor, null, 2);
+  return bruto
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"([^"]+)":/g, '<span class="k">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="s">"$1"</span>')
+    .replace(/: (-?\d+(?:\.\d+)?)/g, ': <span class="n">$1</span>')
+    .replace(/: (true|false)/g, ': <span class="b">$1</span>');
+}
+
+// A ordem importa: "/vagas/busca" precisa ser testado antes de "/vagas".
+function grupoDe(caminho) {
+  for (const p of Object.keys(GRUPO)) if (caminho.startsWith(p)) return GRUPO[p];
+  return "g1";
+}
+
+function classeDoVerbo(m) {
+  return m === "POST" ? "post" : m === "PUT" ? "put" : m === "DELETE" ? "del" : "";
+}
+
+function mostrar(i) {
+  const r = ROTAS[i];
+  const verbo = document.getElementById("verbo");
+  verbo.textContent = r.metodo;
+  verbo.className = "verbo " + classeDoVerbo(r.metodo);
+
+  document.getElementById("url").textContent = r.caminho;
+
+  const status = document.getElementById("status");
+  status.textContent = r.status;
+  status.className = "status" + (r.status.startsWith("4") ? " erro" : r.status.startsWith("204") ? " vazio" : "");
+
+  document.getElementById("quem").textContent = DONO[grupoDe(r.caminho)];
+  document.getElementById("cab").innerHTML = r.cabecalho
+    ? '<div class="cab"><b>' + r.cabecalho.split(":")[0] + ':</b>' + r.cabecalho.slice(r.cabecalho.indexOf(":") + 1) + "</div>"
+    : "";
+
+  // 204 e 404 não têm corpo, e mostrar "null" seria mentira: a resposta vem
+  // vazia mesmo. É metade do que a aula 03 ensina.
+  document.getElementById("corpo").innerHTML = r.corpo === null
+    ? '<div class="sem">(sem corpo — a resposta é só o status)</div>'
+    : "<pre>" + pinta(r.corpo) + "</pre>";
+
+  document.getElementById("porque").innerHTML = r.porque;
+  document.querySelectorAll(".rota").forEach((b, x) => b.classList.toggle("on", x === i));
+}
+
+ROTAS.forEach((r, i) => {
+  const b = document.createElement("button");
+  b.className = "rota";
+  b.type = "button";
+  b.innerHTML = '<span class="verbo ' + classeDoVerbo(r.metodo) + '">' + r.metodo + "</span>" + (r.rotulo || r.caminho);
+  b.addEventListener("click", () => mostrar(i));
+  document.getElementById(grupoDe(r.caminho)).appendChild(b);
+});
+
+mostrar(0);
+</script>
+
+</body>
+</html>

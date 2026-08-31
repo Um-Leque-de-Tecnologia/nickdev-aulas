@@ -162,6 +162,35 @@ async function token() {
 }
 
 const sha = (buf) => crypto.createHash("sha256").update(buf).digest("hex");
+
+/** Desfaz a ofuscação de e-mail que o Cloudflare aplica na RESPOSTA.
+ *
+ *  O recurso "Email Address Obfuscation" reescreve todo e-mail do HTML em
+ *  trânsito, trocando `ana@exemplo.com` por uma âncora `/cdn-cgi/l/...` e
+ *  injetando um script para desembrulhá-la no navegador. O arquivo guardado no
+ *  MinIO continua intacto — quem muda é o que sai pela borda.
+ *
+ *  Sem desfazer isso aqui, todo material com e-mail dentro (hoje 11 arquivos,
+ *  20 trechos) diverge do disco para sempre, e a ferramenta o reenvia em toda
+ *  execução sem nunca convergir.
+ *
+ *  A reversão é exata: `data-cfemail` é o e-mail em hex, com XOR do primeiro
+ *  byte. Mas ela só limpa o DIFF — o conteúdo que o aluno lê continua alterado,
+ *  e num exemplo de código isso é um defeito de verdade. O conserto é desligar
+ *  Email Address Obfuscation para o host do CDN, no painel do Cloudflare. */
+function semOfuscacaoDeEmail(buf) {
+  const t = buf.toString("utf8");
+  if (!t.includes("__cf_email__")) return buf;
+  return Buffer.from(
+    t.replace(/<a href="\/cdn-cgi\/l\/email-protection"[^>]*data-cfemail="([0-9a-f]+)"[^>]*>[\s\S]*?<\/a>/gi,
+        (_, hex) => {
+          const b = hex.match(/../g).map((h) => parseInt(h, 16));
+          return b.slice(1).map((x) => String.fromCharCode(x ^ b[0])).join("");
+        })
+      .replace(/<script[^>]*\/cdn-cgi\/scripts\/[^"]*email-decode[^>]*><\/script>/gi, ""),
+    "utf8",
+  );
+}
 const kb = (n) => `${String(Math.round(n / 1024)).padStart(4)}KB`;
 
 /** O enum de `kind` da API — slides, guia, desafio, codigos, modelo, roteiro,
@@ -303,7 +332,18 @@ const NOME_DO_GUIA = {
 };
 
 /** Título legível a partir do slug, para quando a aula precisar ser criada. */
+/* Título de verdade das aulas, quando o slug não dá um bom nome sozinho.
+ *
+ * Derivar do slug produz coisas como "Beans E Injecao" — que foi o que as duas
+ * primeiras aulas ganharam, e não há PATCH de aula na API para consertá-las.
+ * Aula nova entra aqui ANTES de ser criada; depois não dá mais. */
+const TITULO_DA_AULA = {
+  "introducao-spring-boot/aula-03-api-rest": "API REST: recursos, verbos e status",
+};
+
 function tituloDe(slug, curso) {
+  const escrito = TITULO_DA_AULA[`${curso}/${slug}`];
+  if (escrito) return escrito;
   if (curso === CURSO_GUIAS.slug) return `Guia de ${NOME_DO_GUIA[slug] ?? slug}`;
   if (slug === "projeto") return "Projeto do curso";
   const resto = slug.replace(/^aula-\d+-/, "").replace(/-/g, " ");
@@ -384,7 +424,7 @@ for (const [curso, aulas] of disco) {
       } else {
         try {
           const remotoBuf = Buffer.from(await (await fetch(asset.url)).arrayBuffer());
-          iguais = sha(localBuf) === sha(remotoBuf);
+          iguais = sha(localBuf) === sha(semOfuscacaoDeEmail(remotoBuf));
         } catch { /* sem rede para o CDN: trata como diferente e reenvia */ }
       }
 
@@ -528,7 +568,7 @@ async function subirTodos(fila, largura = 5) {
             const url = asset.url || (await api(`/v1/lessons/${e.aulaId}/assets/${asset.id}/url`)).url;
             const r = await fetch(url, { cache: "no-store" });
             if (!r.ok) throw new Error(`CDN respondeu ${r.status}`);
-            ok = sha(Buffer.from(await r.arrayBuffer())) === sha(local) ? "hash confere" : "HASH DIFERENTE";
+            ok = sha(semOfuscacaoDeEmail(Buffer.from(await r.arrayBuffer()))) === sha(local) ? "hash confere" : "HASH DIFERENTE";
           } catch (err) {
             // A resposta do POST nem sempre traz `locked`; o 403 aqui é a
             // mesma informação chegando pelo outro caminho.

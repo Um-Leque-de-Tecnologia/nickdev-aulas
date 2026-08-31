@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio 03 — Uma API que não mente · Introdução ao Spring Boot · NickDev</title>
+<meta name="description" content="Desafio da aula 03: a segunda evolução do Leque de Vagas. Quatro partes, uma por integrante — status corretos, CRUD completo, idempotência e busca por parâmetro.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+  --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
+.goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+
+  .defeito{border:1px solid rgba(242,68,135,.35);border-radius:12px;padding:16px 20px;margin-top:14px;
+    background:rgba(242,68,135,.05)}
+  .defeito h4{font-family:'Space Grotesk',sans-serif;font-size:16px;color:var(--pink-light);margin:0 0 6px}
+  .defeito p{font-size:14.5px;color:var(--text-2);margin:0}
+  .defeito p + p{margin-top:8px}
+  .criterios{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
+  .criterios th,.criterios td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  .criterios th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);font-weight:500}
+  .criterios td{color:var(--text-2)}
+  .criterios td:first-child{color:var(--text);width:34%}
+  .criterios td code{color:var(--pink-light);font-size:.92em}
+  .criterios tr:last-child td{border-bottom:0}
+  .peso{font-family:var(--mono);font-size:12px;color:var(--text-3);white-space:nowrap}
+
+  .goal.magenta{border-left-color:var(--magenta)}
+
+
+  .parte{border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;
+    padding:22px 24px;margin-top:20px;background:var(--surface)}
+  .parte-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .parte-hd .n{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bg);
+    background:var(--purple);padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .parte-hd h3{font-size:20px;margin:0}
+  .parte-hd .quem{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .parte .obj{font-size:14.5px;color:var(--text-3);margin:8px 0 14px;border-left:2px solid var(--purple);padding-left:12px}
+  .parte.p1{border-left-color:#F24487}.parte.p1 .n{background:#F24487}.parte.p1 .obj{border-left-color:#F24487}
+  .parte.p2{border-left-color:#7B4FD0}.parte.p2 .n{background:#7B4FD0}.parte.p2 .obj{border-left-color:#7B4FD0}
+  .parte.p3{border-left-color:#5fd08a}.parte.p3 .n{background:#5fd08a}.parte.p3 .obj{border-left-color:#5fd08a}
+  .parte.p4{border-left-color:#E88BB8}.parte.p4 .n{background:#E88BB8}.parte.p4 .obj{border-left-color:#E88BB8}
+  .rotas{border-collapse:collapse;width:100%;margin-top:12px;font-size:14px}
+  .rotas th,.rotas td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .rotas th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  .rotas td{color:var(--text-2)}
+  .rotas td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
+  .rotas tr:last-child td{border-bottom:0}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-spring-boot">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="https://aulas.umlequedetecnologia.com.br/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Desafio · Aula 03 · segunda entrega do projeto</div>
+  <h1>Uma API que <span class="grad">não mente</span> 🚦</h1>
+  <p class="lead">
+    Na aula 02 vocês montaram o esqueleto, e ele ficou com um defeito
+    combinado: <b>pedir uma coisa que não existe devolvia 200</b>. Agora a API
+    aprende a responder a verdade — e ganha os verbos que faltavam.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">💼</span>
+    <div>
+      <h3>Ainda não leu o briefing?</h3>
+      <p>O <a href="../projeto/brief.html" style="color:var(--pink-light);text-decoration:underline">briefing
+      do Leque de Vagas</a> explica o projeto inteiro, as quatro frentes e onde
+      isso chega em dezembro. Este desafio é o segundo passo dele.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">🔀</span>
+    <div>
+      <h3>Agora as quatro partes são diferentes</h3>
+      <p>Na aula 02 as quatro tinham a mesma forma, de propósito: todo mundo
+      precisava escrever o padrão com as próprias mãos. <b>Isso acabou.</b>
+      Cada frente ganha um problema próprio a partir de hoje — e cada uma
+      aprende uma coisa que as outras não vão aprender sozinhas.</p>
+      <p style="margin-top:10px">Por isso, na entrega, <b>cada pessoa explica a
+      sua</b>. Não dá mais para copiar a do lado e trocar o nome.</p>
+    </div>
+  </div>
+
+  <div class="label">Antes de codar — a combinação de 30 minutos</div>
+
+  <div class="goal verde">
+    <span class="ico">🤝</span>
+    <div>
+      <h3>Duas decisões, e nenhuma delas é código</h3>
+      <p>São as mesmas duas perguntas que qualquer equipe responde ao abrir um
+      endpoint de escrita. Respondam <b>juntos</b>, escrevam no README, e só
+      então abram a IDE.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">1</span><h3>Quais campos o cliente manda no POST — e quais ele não manda</h3></div>
+    <p>O corpo do POST <b>não é o mesmo objeto</b> que a API devolve. Quem cria
+    uma vaga não escolhe o <code>id</code> dela, e provavelmente não escolhe a
+    data de publicação: quem decide isso é a API.</p>
+<pre class="terminal"><span class="cm">// o que o cliente MANDA                    o que a API DEVOLVE</span>
+{                                         {
+  <span class="st">"titulo"</span>: <span class="st">"Dev Java Júnior"</span>,           <span class="st">"id"</span>: <span class="st">"a3f1…"</span>,        <span class="cm">// ← a API gerou</span>
+  <span class="st">"area"</span>: <span class="st">"Back-end"</span>,                   <span class="st">"titulo"</span>: <span class="st">"Dev Java Júnior"</span>,
+  <span class="st">"senioridade"</span>: <span class="st">"Júnior"</span>,               <span class="st">"area"</span>: <span class="st">"Back-end"</span>,
+  <span class="st">"empresaSlug"</span>: <span class="st">"aurora-tech"</span>            <span class="st">"senioridade"</span>: <span class="st">"Júnior"</span>,
+}                                           <span class="st">"empresaSlug"</span>: <span class="st">"aurora-tech"</span>
+                                          }</pre>
+    <p class="tip"><b>Nesta aula vocês vão usar o mesmo <code>record</code>
+    nos dois lados</b>, aceitando que o <code>id</code> vem <code>null</code> no
+    corpo e é ignorado. Funciona, e é o suficiente hoje. Guardem o incômodo:
+    <b>a aula 04 tem nome para ele — DTO</b>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">2</span><h3>Quem encosta no <code>VagaController</code></h3></div>
+    <p>A parte 4 precisa de uma rota que começa com <code>/vagas</code>, e o
+    <code>VagaController</code> é da parte 1. Duas pessoas no mesmo arquivo, na
+    mesma semana, é conflito de merge na certa.</p>
+    <p style="margin-top:10px">A saída é a parte 4 criar <b>o próprio
+    controller</b>, mapeado no mesmo caminho base. Spring permite: o que não
+    pode é duas rotas <b>idênticas</b>, e <code>/vagas/busca</code> não é
+    <code>/vagas/{id}</code>.</p>
+    <p class="tip"><b>Combinem também o que a busca recebe.</b> A parte 4 vai
+    chamar o <code>VagaRepository</code> da parte 1 — como já fazia na aula 02
+    para as estatísticas. Se a parte 1 mudar a assinatura de
+    <code>todas()</code>, avisa antes.</p>
+  </div>
+
+  <div class="label">As quatro partes</div>
+
+  <div class="parte p1">
+    <div class="parte-hd"><span class="n">PARTE 1</span><h3>Vaga — o CRUD completo</h3><span class="quem">frente 1</span></div>
+    <p class="obj">A parte mais longa, e a referência das outras. Você implementa os quatro verbos com os quatro status.</p>
+    <ul>
+      <li>No <code>VagaRepository</code>: troque <code>List.of(...)</code> por
+      <code>new ArrayList&lt;&gt;(List.of(...))</code> — a lista de hoje é imutável e
+      não aceita escrita. Acrescente <code>salvar</code>, <code>trocar</code> e <code>remover</code>.</li>
+      <li>No <code>VagaService</code>: <code>buscarPorId</code> passa a devolver
+      <code>Optional&lt;Vaga&gt;</code>. O <code>id</code> é gerado aqui, com
+      <code>UUID.randomUUID().toString()</code> — nunca vem do cliente.</li>
+      <li>No <code>VagaController</code>: os quatro mapeamentos, todos devolvendo
+      <code>ResponseEntity</code>.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>status</th><th>quando</th></tr>
+      <tr><td>GET /vagas/{id}</td><td>200 · 404</td><td>404 se o id não existe — <b>o conserto da aula 02</b></td></tr>
+      <tr><td>POST /vagas</td><td>201</td><td>com cabeçalho <code>Location</code> apontando para a vaga criada</td></tr>
+      <tr><td>PUT /vagas/{id}</td><td>200 · 404</td><td>404 se o id não existe</td></tr>
+      <tr><td>DELETE /vagas/{id}</td><td>204 · 404</td><td>204 sem corpo nenhum</td></tr>
+    </table>
+    <p class="tip"><b>A armadilha do PUT:</b> o corpo não traz <code>id</code> —
+    ele veio na URL. Monte a vaga nova com o <b>id do caminho</b> e os campos do
+    corpo. Se deixar o <code>id</code> do corpo passar, ele chega
+    <code>null</code> e você perde o registro em vez de trocá-lo.</p>
+  </div>
+
+  <div class="parte p2">
+    <div class="parte-hd"><span class="n">PARTE 2</span><h3>Empresa — quando o id é escolhido por quem cria</h3><span class="quem">frente 2</span></div>
+    <p class="obj">Sua parte tem uma diferença que a parte 1 não tem: o identificador da empresa é o <code>slug</code>, e ele vem de fora.</p>
+    <ul>
+      <li><code>GET /empresas/{slug}</code> passa a devolver <b>404</b> quando não existe, com <code>Optional</code> no service.</li>
+      <li><code>POST /empresas</code> cria e devolve <b>201</b> com <code>Location</code>.</li>
+      <li><code>DELETE /empresas/{slug}</code> devolve <b>204</b> ou <b>404</b>.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>status</th><th>quando</th></tr>
+      <tr><td>GET /empresas/{slug}</td><td>200 · 404</td><td>404 se o slug não existe</td></tr>
+      <tr><td>POST /empresas</td><td>201</td><td>Location montado com o <b>slug que veio no corpo</b></td></tr>
+      <tr><td>DELETE /empresas/{slug}</td><td>204 · 404</td><td>—</td></tr>
+    </table>
+    <p class="tip"><b>Repare na diferença e escreva sobre ela no README.</b> Na
+    parte 1 o <code>Location</code> aponta para um id que a API acabou de
+    inventar. Na sua, ele aponta para um slug que <b>o cliente escolheu</b>. As
+    duas coisas são 201, mas a responsabilidade sobre o endereço mudou de lado —
+    e isso é uma decisão de projeto de API, não um detalhe.</p>
+  </div>
+
+  <div class="parte p3">
+    <div class="parte-hd"><span class="n">PARTE 3</span><h3>Pessoa — e a prova de que PUT e DELETE são idempotentes</h3><span class="quem">frente 3</span></div>
+    <p class="obj">Você implementa o CRUD de Pessoa <b>e</b> produz a evidência de uma propriedade que a aula só falou por cima.</p>
+    <ul>
+      <li><code>GET /pessoas/{id}</code> com <b>404</b>, <code>POST /pessoas</code> com <b>201</b>,
+      <code>PUT /pessoas/{id}</code> e <code>DELETE /pessoas/{id}</code>.</li>
+      <li>Um arquivo <code>idempotencia.http</code> na raiz do repositório, versionado,
+      com as chamadas repetidas e <b>o status de cada uma anotado em comentário</b>.</li>
+    </ul>
+<pre class="terminal"><span class="cm">### 1 · cria — repetir CRIA DE NOVO, então POST não é idempotente</span>
+POST http://localhost:8080/pessoas
+Content-Type: application/json
+
+{ <span class="st">"nome"</span>: <span class="st">"Ana"</span>, <span class="st">"email"</span>: <span class="st">"ana@exemplo.com"</span> }
+<span class="cm">// 1ª vez: 201 · 2ª vez: 201 e agora existem DUAS Anas</span>
+
+<span class="cm">### 2 · troca — repetir dá no mesmo</span>
+PUT http://localhost:8080/pessoas/{{id}}
+<span class="cm">// 1ª vez: 200 · 2ª vez: 200, e o registro está idêntico</span>
+
+<span class="cm">### 3 · apaga — repetir não apaga "mais"</span>
+DELETE http://localhost:8080/pessoas/{{id}}
+<span class="cm">// 1ª vez: 204 · 2ª vez: 404, e a lista continua igual</span></pre>
+    <p class="tip"><b>O 404 na segunda chamada não quebra a idempotência.</b>
+    Idempotente é sobre o <b>estado do servidor</b>, não sobre a resposta: depois
+    de uma ou de dez chamadas, aquela pessoa não existe. É essa frase que você
+    precisa saber defender na apresentação.</p>
+  </div>
+
+  <div class="parte p4">
+    <div class="parte-hd"><span class="n">PARTE 4</span><h3>Busca — filtrar sem inventar recurso</h3><span class="quem">frente 4</span></div>
+    <p class="obj">Sua frente estreia o <code>@RequestParam</code>. E, como não tem recurso próprio, estreia também o controller que convive com o de outra pessoa.</p>
+    <ul>
+      <li>Um <code>BuscaController</code> <b>seu</b>, com <code>@RestController</code> — não mexa no
+      <code>VagaController</code> da parte 1.</li>
+      <li>Um <code>BuscaService</code>, recebendo o <code>VagaRepository</code> por construtor.</li>
+      <li>Os três filtros <b>opcionais</b> e combináveis. Sem nenhum, devolve tudo.</li>
+      <li>O <code>GET /estatisticas</code> da aula 02 continua funcionando — não o quebre.</li>
+    </ul>
+    <table class="rotas">
+      <tr><th>rota</th><th>status</th><th>quando</th></tr>
+      <tr><td>GET /vagas/busca?area=Dados</td><td>200</td><td>as vagas de Dados</td></tr>
+      <tr><td>GET /vagas/busca?area=Dados&amp;senioridade=Júnior</td><td>200</td><td>os dois filtros juntos</td></tr>
+      <tr><td>GET /vagas/busca?aceitaIniciante=true</td><td>200</td><td>só as que aceitam iniciante</td></tr>
+      <tr><td>GET /vagas/busca</td><td>200</td><td>sem filtro: a lista inteira</td></tr>
+    </table>
+    <p class="tip"><b>Busca que não acha nada devolve 200 com lista vazia</b>, e
+    isso está certo — você procurou, e o resultado é zero. É o oposto do
+    <code>/vagas/{id}</code>, onde lista vazia era mentira. Saber explicar essa
+    diferença é a sua parte da aula.</p>
+  </div>
+
+  <div class="label">Depois: juntar</div>
+
+  <div class="step">
+    <div class="step-head"><span class="n">5</span><h3>As quatro partes na mesma <code>main</code></h3></div>
+    <ul>
+      <li>Cada pessoa na sua branch, uma Pull Request por frente.</li>
+      <li>Suba a aplicação e rode o <code>api.http</code> inteiro, de cima a baixo.</li>
+      <li>Confira os <b>status</b>, não só os corpos: é neles que está a entrega de hoje.</li>
+      <li>Chame <code>GET /vagas/busca</code> e <code>GET /vagas/{id}</code> na mesma execução —
+      se o Spring reclamar de rota ambígua, as duas ficaram idênticas em algum ponto.</li>
+    </ul>
+    <p class="tip">Depois de juntar, <b>crie uma vaga pelo POST e busque por ela
+    no filtro da parte 4</b>. Se ela aparecer, as quatro partes estão de fato
+    falando com o mesmo repositório — e não cada uma com a sua cópia.</p>
+  </div>
+
+  <div class="entrega">
+    <h3>📦 Como entregar</h3>
+    <ul>
+      <li>Link do repositório da equipe no GitHub, com o <code>api.http</code> versionado.</li>
+      <li>README atualizado: <b>o que cada frente aprendeu de diferente nesta aula</b>.</li>
+      <li>A tabela de status de cada frente, para consulta rápida de quem for usar a API.</li>
+      <li><b>Pelo menos um commit por pessoa</b> — o histórico é a evidência.</li>
+      <li>Prazo: <b>até a aula 04 (01/09)</b>, antes do início.</li>
+    </ul>
+    <p style="margin-top:12px">Travou? Traga na aula 04 <b>com o erro na tela</b>.
+    Print do stack trace vale mais que descrição do problema.</p>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="codigos-desafio.html">🧩 Código do desafio</a>
+    <a class="btn" href="modelo-resposta.html">✅ Modelo de resposta</a>
+    <a class="btn" href="../projeto/brief.html">💼 Briefing do projeto</a>
+    <a class="btn" href="exercicios.html">🧪 Exercícios da aula</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Spring Boot · Aula 03 · Spring Boot 4.1 · Java 21 · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio 03 — Uma API que não mente · Introdução ao Spring Boot · NickDev</title>
+<meta name="description" content="O desafio 03 resolvido: ResponseEntity com 200, 201, 204 e 404, cabeçalho Location, PUT e DELETE idempotentes e busca com @RequestParam.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  p code, li code, td code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .glow{position:absolute;border-radius:50%}
+  .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:250px 1fr;max-width:1280px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:26px 18px;display:flex;flex-direction:column;gap:3px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:12px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:8px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 10px;border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--text-2);transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:42px clamp(20px,3.4vw,52px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(28px,4.6vw,44px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.6vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  .aviso{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--purple);border-radius:14px;padding:18px 20px;margin-top:30px}
+  .aviso .ico{font-size:22px;line-height:1}
+  .aviso h3{font-size:16px;margin-bottom:3px}
+  .aviso p{color:var(--text-2);font-size:14.5px}
+  .aviso p + p{margin-top:7px}
+  .aviso.magenta{border-left-color:var(--magenta)}
+
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:54px 0 6px;display:flex;align-items:center;gap:12px;scroll-margin-top:20px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  section{margin-top:34px;scroll-margin-top:20px}
+  section > h2{font-family:var(--mono);font-size:18px;font-weight:500;display:flex;align-items:center;gap:11px}
+  section > h2::before{content:"";width:8px;height:20px;background:var(--grad);border-radius:3px;flex:none}
+  section > p{color:var(--text-2);margin:9px 0 0;font-size:15px}
+  section > p b{color:var(--text)}
+  h3{font-size:16px;margin:24px 0 4px}
+  ul,ol{margin:9px 0 0 4px;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  li{margin:4px 0}
+  li b{color:var(--text)}
+
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:14px}
+  pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:14px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;white-space:pre;max-width:1000px}
+  .file + pre{border-radius:0 12px 12px 12px;margin-top:-1px}
+  .cm{color:#6f6a83}.kw{color:#F24487}.ty{color:#7B4FD0}.st{color:#A98CE0}.fn{color:#E88BB8}.an{color:#5fd08a}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:14px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto;max-width:1000px}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin-top:14px;font-size:14.5px;color:var(--text-2);max-width:1000px}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+
+  table{border-collapse:collapse;width:100%;max-width:1000px;margin-top:14px;font-size:14px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td b{color:var(--text)}
+  tr:last-child td{border-bottom:0}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4);max-width:900px}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+
+  .antes{border-left:3px solid #F24487;padding-left:14px;margin:14px 0}
+  .antes .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#F24487;display:block;margin-bottom:6px}
+  .depois{border-left:3px solid #5fd08a;padding-left:14px;margin:14px 0}
+  .depois .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;display:block;margin-bottom:6px}
+
+  .antes{border-left:3px solid #F24487;padding-left:14px;margin:14px 0}
+  .antes .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#F24487;display:block;margin-bottom:6px}
+  .depois{border-left:3px solid #5fd08a;padding-left:14px;margin:14px 0}
+  .depois .rot{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;display:block;margin-bottom:6px}
+
+  .parte{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--bg);padding:4px 11px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .parte.p1{background:#F24487}.parte.p2{background:#7B4FD0}
+  .parte.p3{background:#5fd08a}.parte.p4{background:#E88BB8}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-spring-boot">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de codar</div>
+    <a href="#combinacao">A combinação</a>
+    <a href="#convivencia">Dois controllers, um caminho</a>
+    <div class="grp">Parte 1 · Vaga</div>
+    <a href="#vaga-repo">VagaRepository ⭐</a>
+    <a href="#vaga-service">VagaService</a>
+    <a href="#vaga-controller">VagaController ⭐</a>
+    <div class="grp">Parte 2 · Empresa</div>
+    <a href="#empresa">O que muda</a>
+    <div class="grp">Parte 3 · Pessoa</div>
+    <a href="#pessoa">O que muda</a>
+    <a href="#idempotencia">idempotencia.http</a>
+    <div class="grp">Parte 4 · Busca</div>
+    <a href="#busca">BuscaService e BuscaController ⭐</a>
+    <div class="grp">Verificando</div>
+    <a href="#http">api.http completo</a>
+    <a href="#correcao">O que a correção procura</a>
+    <a href="#erros">Se der errado</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Aula 03 · código do desafio</div>
+  <h1>Os quatro status, <span class="g">parte por parte</span></h1>
+  <p class="lead">
+    O desafio resolvido. A <b>parte 1</b> está comentada linha por linha porque
+    é a referência das outras; as partes 2 e 3 mostram só <b>o que muda</b>, e a
+    parte 4 volta a vir inteira porque estreia <code>@RequestParam</code>.
+  </p>
+  <div class="rule"></div>
+
+  <div class="aviso">
+    <span class="ico">🧭</span>
+    <div>
+      <h3>Tente antes de abrir isto</h3>
+      <p>Esta é a referência de quando travar, não o ponto de partida. Nesta aula
+      especialmente: o que está sendo aprendido é <b>qual status usar quando</b>,
+      e isso não se aprende lendo — se aprende decidindo e errando.</p>
+    </div>
+  </div>
+
+  <div class="divisor" id="combinacao">A combinação, antes de qualquer código</div>
+
+  <section>
+    <p>O corpo do POST <b>não é</b> o objeto que a API devolve. Nesta aula vocês
+    ainda usam o mesmo <code>record</code> nos dois lados — aceitando que o
+    <code>id</code> chega <code>null</code> e é ignorado. Funciona, e é o
+    suficiente hoje.</p>
+    <div class="file">o que entra e o que sai</div>
+<pre><span class="cm">// o cliente MANDA (sem id — quem inventa o id é a API)</span>
+{ <span class="st">"titulo"</span>: <span class="st">"Dev Java Júnior"</span>, <span class="st">"area"</span>: <span class="st">"Back-end"</span>,
+  <span class="st">"senioridade"</span>: <span class="st">"Júnior"</span>, <span class="st">"empresaSlug"</span>: <span class="st">"aurora-tech"</span> }
+
+<span class="cm">// a API DEVOLVE, com 201 e o cabeçalho Location</span>
+{ <span class="st">"id"</span>: <span class="st">"9c1f4e2a-…"</span>, <span class="st">"titulo"</span>: <span class="st">"Dev Java Júnior"</span>, … }</pre>
+    <p style="margin-top:12px">Guardem o incômodo de mandar um <code>record</code> com
+    campo que não se usa: <b>a aula 04 tem nome para ele — DTO</b>.</p>
+  </section>
+
+  <div class="divisor" id="convivencia">Dois controllers no mesmo caminho</div>
+
+  <section>
+    <p>A parte 4 precisa de <code>/vagas/busca</code>, e o <code>VagaController</code>
+    é da parte 1. Duas pessoas no mesmo arquivo, na mesma semana, é conflito de
+    merge na certa — então a parte 4 cria <b>o próprio controller</b>.</p>
+    <p style="margin-top:10px">O Spring aceita. O que ele recusa são duas rotas
+    <b>idênticas</b>, e <code>/vagas/busca</code> não é <code>/vagas/{id}</code>.
+    E não há ambiguidade: o Spring escolhe por <b>especificidade</b>, e caminho
+    literal ganha de variável — <b>a ordem em que você declara não importa</b>,
+    ao contrário do que acontece em Express.</p>
+  </section>
+
+  <div class="divisor" id="vaga-repo">Parte 1 · VagaRepository</div>
+
+  <section>
+    <div class="file">VagaRepository.java</div>
+<pre><span class="an">@Repository</span>
+<span class="kw">public class</span> <span class="ty">VagaRepository</span> {
+
+    <span class="cm">// List.of(...) é IMUTÁVEL — não aceita add nem set. Envolver num</span>
+    <span class="cm">// ArrayList é o que torna o repository escrevível.</span>
+    <span class="kw">private final</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; vagas = <span class="kw">new</span> <span class="ty">ArrayList</span>&lt;&gt;(<span class="ty">List</span>.<span class="fn">of</span>(
+        <span class="kw">new</span> <span class="ty">Vaga</span>(<span class="st">"1"</span>, <span class="st">"Pessoa Desenvolvedora Front-end Júnior"</span>, …),
+        <span class="cm">// … as 12 vagas da aula 02</span>
+    ));
+
+    <span class="cm">// copyOf protege a lista interna: quem recebe não consegue</span>
+    <span class="cm">// alterá-la por fora, e a única porta de escrita continua aqui.</span>
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">todas</span>() {
+        <span class="kw">return</span> <span class="ty">List</span>.<span class="fn">copyOf</span>(vagas);
+    }
+
+    <span class="kw">public</span> <span class="ty">Optional</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">porId</span>(<span class="ty">String</span> id) {
+        <span class="kw">return</span> vagas.<span class="fn">stream</span>().<span class="fn">filter</span>(v -&gt; v.<span class="fn">id</span>().<span class="fn">equals</span>(id)).<span class="fn">findFirst</span>();
+    }
+
+    <span class="kw">public</span> <span class="ty">Vaga</span> <span class="fn">salvar</span>(<span class="ty">Vaga</span> nova) {
+        vagas.<span class="fn">add</span>(nova);
+        <span class="kw">return</span> nova;
+    }
+
+    <span class="cm">// Devolve Optional: vazio quer dizer "esse id não existe aqui",</span>
+    <span class="cm">// que é o que o controller precisa para escolher o 404.</span>
+    <span class="kw">public</span> <span class="ty">Optional</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">trocar</span>(<span class="ty">String</span> id, <span class="ty">Vaga</span> nova) {
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="st">0</span>; i &lt; vagas.<span class="fn">size</span>(); i++) {
+            <span class="kw">if</span> (vagas.<span class="fn">get</span>(i).<span class="fn">id</span>().<span class="fn">equals</span>(id)) {
+                vagas.<span class="fn">set</span>(i, nova);
+                <span class="kw">return</span> <span class="ty">Optional</span>.<span class="fn">of</span>(nova);
+            }
+        }
+        <span class="kw">return</span> <span class="ty">Optional</span>.<span class="fn">empty</span>();
+    }
+
+    <span class="cm">// removeIf já devolve true/false: apagou ou não achou.</span>
+    <span class="kw">public boolean</span> <span class="fn">remover</span>(<span class="ty">String</span> id) {
+        <span class="kw">return</span> vagas.<span class="fn">removeIf</span>(v -&gt; v.<span class="fn">id</span>().<span class="fn">equals</span>(id));
+    }
+}</pre>
+  </section>
+
+  <div class="divisor" id="vaga-service">Parte 1 · VagaService</div>
+
+  <section>
+    <div class="file">VagaService.java</div>
+<pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="ty">VagaService</span> {
+
+    <span class="kw">private final</span> <span class="ty">VagaRepository</span> repository;
+
+    <span class="kw">public</span> <span class="ty">VagaService</span>(<span class="ty">VagaRepository</span> repository) {
+        <span class="kw">this</span>.repository = repository;
+    }
+
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">listar</span>() {
+        <span class="kw">return</span> repository.<span class="fn">todas</span>();
+    }
+
+    <span class="cm">// Nenhum ResponseEntity por aqui: o service não conhece HTTP.</span>
+    <span class="kw">public</span> <span class="ty">Optional</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">buscarPorId</span>(<span class="ty">String</span> id) {
+        <span class="kw">return</span> repository.<span class="fn">porId</span>(id);
+    }
+
+    <span class="cm">// O id nasce AQUI. Se viesse do cliente, dois clientes poderiam</span>
+    <span class="cm">// escolher o mesmo e um sobrescreveria o outro em silêncio.</span>
+    <span class="kw">public</span> <span class="ty">Vaga</span> <span class="fn">criar</span>(<span class="ty">Vaga</span> nova) {
+        <span class="ty">Vaga</span> comId = <span class="kw">new</span> <span class="ty">Vaga</span>(
+            <span class="ty">UUID</span>.<span class="fn">randomUUID</span>().<span class="fn">toString</span>(),
+            nova.<span class="fn">titulo</span>(), nova.<span class="fn">descricao</span>(), nova.<span class="fn">area</span>(),
+            nova.<span class="fn">senioridade</span>(), nova.<span class="fn">local</span>(),
+            nova.<span class="fn">aceitaIniciante</span>(), nova.<span class="fn">empresaSlug</span>());
+        <span class="kw">return</span> repository.<span class="fn">salvar</span>(comId);
+    }
+
+    <span class="cm">// A ARMADILHA: o id vem da URL, não do corpo. Usar nova.id() aqui</span>
+    <span class="cm">// gravaria null no lugar do id e você perderia o registro.</span>
+    <span class="kw">public</span> <span class="ty">Optional</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">trocar</span>(<span class="ty">String</span> id, <span class="ty">Vaga</span> nova) {
+        <span class="ty">Vaga</span> comId = <span class="kw">new</span> <span class="ty">Vaga</span>(
+            id,
+            nova.<span class="fn">titulo</span>(), nova.<span class="fn">descricao</span>(), nova.<span class="fn">area</span>(),
+            nova.<span class="fn">senioridade</span>(), nova.<span class="fn">local</span>(),
+            nova.<span class="fn">aceitaIniciante</span>(), nova.<span class="fn">empresaSlug</span>());
+        <span class="kw">return</span> repository.<span class="fn">trocar</span>(id, comId);
+    }
+
+    <span class="kw">public boolean</span> <span class="fn">apagar</span>(<span class="ty">String</span> id) {
+        <span class="kw">return</span> repository.<span class="fn">remover</span>(id);
+    }
+}</pre>
+  </section>
+
+  <div class="divisor" id="vaga-controller">Parte 1 · VagaController</div>
+
+  <section>
+    <p>É aqui, e só aqui, que se fala HTTP.</p>
+    <div class="file">VagaController.java</div>
+<pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/vagas"</span>)
+<span class="kw">public class</span> <span class="ty">VagaController</span> {
+
+    <span class="kw">private final</span> <span class="ty">VagaService</span> service;
+
+    <span class="kw">public</span> <span class="ty">VagaController</span>(<span class="ty">VagaService</span> service) {
+        <span class="kw">this</span>.service = service;
+    }
+
+    <span class="cm">// Lista sempre existe, mesmo vazia — 200 direto, sem ResponseEntity.</span>
+    <span class="an">@GetMapping</span>
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">listar</span>() {
+        <span class="kw">return</span> service.<span class="fn">listar</span>();
+    }
+
+    <span class="cm">// map roda se achou, orElse se não achou. O if está aí dentro —</span>
+    <span class="cm">// e o compilador não deixa você esquecer o segundo caso.</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/{id}"</span>)
+    <span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">porId</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id) {
+        <span class="kw">return</span> service.<span class="fn">buscarPorId</span>(id)
+            .<span class="fn">map</span>(<span class="ty">ResponseEntity</span>::<span class="fn">ok</span>)
+            .<span class="fn">orElse</span>(<span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>());
+    }
+
+    <span class="cm">// 201 + Location: criei, e está bem ali.</span>
+    <span class="an">@PostMapping</span>
+    <span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">criar</span>(<span class="an">@RequestBody</span> <span class="ty">Vaga</span> nova) {
+        <span class="ty">Vaga</span> salva = service.<span class="fn">criar</span>(nova);
+        <span class="ty">URI</span> onde = <span class="ty">URI</span>.<span class="fn">create</span>(<span class="st">"/vagas/"</span> + salva.<span class="fn">id</span>());
+        <span class="kw">return</span> <span class="ty">ResponseEntity</span>.<span class="fn">created</span>(onde).<span class="fn">body</span>(salva);
+    }
+
+    <span class="an">@PutMapping</span>(<span class="st">"/{id}"</span>)
+    <span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">trocar</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id,
+                                       <span class="an">@RequestBody</span> <span class="ty">Vaga</span> nova) {
+        <span class="kw">return</span> service.<span class="fn">trocar</span>(id, nova)
+            .<span class="fn">map</span>(<span class="ty">ResponseEntity</span>::<span class="fn">ok</span>)
+            .<span class="fn">orElse</span>(<span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>());
+    }
+
+    <span class="cm">// ResponseEntity&lt;Void&gt;: não há corpo nenhum para tipar.</span>
+    <span class="an">@DeleteMapping</span>(<span class="st">"/{id}"</span>)
+    <span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Void</span>&gt; <span class="fn">apagar</span>(<span class="an">@PathVariable</span> <span class="ty">String</span> id) {
+        <span class="kw">return</span> service.<span class="fn">apagar</span>(id)
+            ? <span class="ty">ResponseEntity</span>.<span class="fn">noContent</span>().<span class="fn">build</span>()
+            : <span class="ty">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>();
+    }
+}</pre>
+  </section>
+
+  <div class="divisor" id="empresa">Parte 2 · Empresa — o que muda</div>
+
+  <section>
+    <p>A estrutura é idêntica à da parte 1. <b>Uma coisa é diferente</b>, e é
+    ela que a frente 2 explica na apresentação: o identificador não é gerado
+    pela API — vem no corpo, escolhido por quem cria.</p>
+    <div class="file">EmpresaController.java · só o POST</div>
+<pre><span class="an">@PostMapping</span>
+<span class="kw">public</span> <span class="ty">ResponseEntity</span>&lt;<span class="ty">Empresa</span>&gt; <span class="fn">criar</span>(<span class="an">@RequestBody</span> <span class="ty">Empresa</span> nova) {
+    <span class="ty">Empresa</span> salva = service.<span class="fn">criar</span>(nova);
+
+    <span class="cm">// Na parte 1 o Location aponta para um id que a API inventou.</span>
+    <span class="cm">// Aqui aponta para o slug que O CLIENTE escolheu. Mesmo 201,</span>
+    <span class="cm">// responsabilidade sobre o endereço em lados opostos.</span>
+    <span class="ty">URI</span> onde = <span class="ty">URI</span>.<span class="fn">create</span>(<span class="st">"/empresas/"</span> + salva.<span class="fn">slug</span>());
+    <span class="kw">return</span> <span class="ty">ResponseEntity</span>.<span class="fn">created</span>(onde).<span class="fn">body</span>(salva);
+}</pre>
+    <p style="margin-top:12px">O <code>GET /empresas/{slug}</code> e o
+    <code>DELETE /empresas/{slug}</code> seguem a parte 1 letra por letra —
+    troque <code>id</code> por <code>slug</code> e <code>Vaga</code> por
+    <code>Empresa</code>.</p>
+  </section>
+
+  <div class="divisor" id="pessoa">Parte 3 · Pessoa — o que muda</div>
+
+  <section>
+    <p>O código é o da parte 1, com <code>Pessoa</code> no lugar de
+    <code>Vaga</code>. A entrega diferente da frente 3 não é código: é a
+    <b>evidência</b> de que PUT e DELETE são idempotentes e POST não é.</p>
+  </section>
+
+  <div class="divisor" id="idempotencia">Parte 3 · idempotencia.http</div>
+
+  <section>
+    <div class="file">idempotencia.http · versionado na raiz do repositório</div>
+<pre><span class="cm">### 1 · POST duas vezes — NÃO é idempotente</span>
+POST http://localhost:8080/pessoas
+Content-Type: application/json
+
+{ <span class="st">"nome"</span>: <span class="st">"Ana"</span>, <span class="st">"email"</span>: <span class="st">"ana@exemplo.com"</span> }
+
+<span class="cm">// 1ª: 201 Created · id a1b2</span>
+<span class="cm">// 2ª: 201 Created · id c3d4  ← existem DUAS Anas agora</span>
+
+<span class="cm">### 2 · PUT duas vezes — é idempotente</span>
+PUT http://localhost:8080/pessoas/a1b2
+Content-Type: application/json
+
+{ <span class="st">"nome"</span>: <span class="st">"Ana Nogueira"</span>, <span class="st">"email"</span>: <span class="st">"ana@exemplo.com"</span> }
+
+<span class="cm">// 1ª: 200 OK · 2ª: 200 OK, e o registro está IDÊNTICO</span>
+
+<span class="cm">### 3 · DELETE duas vezes — é idempotente</span>
+DELETE http://localhost:8080/pessoas/a1b2
+
+<span class="cm">// 1ª: 204 No Content · 2ª: 404 Not Found</span>
+<span class="cm">// As respostas diferem; o ESTADO não — a pessoa não existe nas duas.</span>
+<span class="cm">// Idempotência é sobre o servidor, não sobre o que ele responde.</span></pre>
+  </section>
+
+  <div class="divisor" id="busca">Parte 4 · BuscaService e BuscaController</div>
+
+  <section>
+    <div class="file">BuscaService.java</div>
+<pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="ty">BuscaService</span> {
+
+    <span class="cm">// O repository da parte 1, não o service dela — igual à aula 02.</span>
+    <span class="kw">private final</span> <span class="ty">VagaRepository</span> repository;
+
+    <span class="kw">public</span> <span class="ty">BuscaService</span>(<span class="ty">VagaRepository</span> repository) {
+        <span class="kw">this</span>.repository = repository;
+    }
+
+    <span class="cm">// Boolean, e não boolean: só o objeto pode ser null, e null é</span>
+    <span class="cm">// exatamente como "o filtro não foi enviado" chega aqui.</span>
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">buscar</span>(<span class="ty">String</span> area, <span class="ty">String</span> senioridade,
+                             <span class="ty">Boolean</span> aceitaIniciante) {
+        <span class="kw">return</span> repository.<span class="fn">todas</span>().<span class="fn">stream</span>()
+            .<span class="fn">filter</span>(v -&gt; area == <span class="kw">null</span>
+                      || v.<span class="fn">area</span>().<span class="fn">equalsIgnoreCase</span>(area))
+            .<span class="fn">filter</span>(v -&gt; senioridade == <span class="kw">null</span>
+                      || v.<span class="fn">senioridade</span>().<span class="fn">equalsIgnoreCase</span>(senioridade))
+            .<span class="fn">filter</span>(v -&gt; aceitaIniciante == <span class="kw">null</span>
+                      || v.<span class="fn">aceitaIniciante</span>() == aceitaIniciante)
+            .<span class="fn">toList</span>();
+    }
+}</pre>
+    <div class="file" style="margin-top:18px">BuscaController.java</div>
+<pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/vagas"</span>)   <span class="cm">// mesmo caminho base do VagaController</span>
+<span class="kw">public class</span> <span class="ty">BuscaController</span> {
+
+    <span class="kw">private final</span> <span class="ty">BuscaService</span> service;
+
+    <span class="kw">public</span> <span class="ty">BuscaController</span>(<span class="ty">BuscaService</span> service) {
+        <span class="kw">this</span>.service = service;
+    }
+
+    <span class="cm">// Busca sem resultado devolve 200 com lista vazia — e isso está</span>
+    <span class="cm">// CERTO. Você procurou, o resultado é zero. Diferente de pedir</span>
+    <span class="cm">// um id que não existe, que é 404.</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/busca"</span>)
+    <span class="kw">public</span> <span class="ty">List</span>&lt;<span class="ty">Vaga</span>&gt; <span class="fn">buscar</span>(
+            <span class="an">@RequestParam</span>(required = <span class="kw">false</span>) <span class="ty">String</span> area,
+            <span class="an">@RequestParam</span>(required = <span class="kw">false</span>) <span class="ty">String</span> senioridade,
+            <span class="an">@RequestParam</span>(required = <span class="kw">false</span>) <span class="ty">Boolean</span> aceitaIniciante) {
+        <span class="kw">return</span> service.<span class="fn">buscar</span>(area, senioridade, aceitaIniciante);
+    }
+}</pre>
+    <p style="margin-top:12px">Sem <code>required = false</code>, faltar um
+    parâmetro vira <b>400 Bad Request</b> — e a busca só funcionaria com os três
+    filtros preenchidos, o que não é busca.</p>
+  </section>
+
+  <div class="divisor" id="http">api.http completo</div>
+
+  <section>
+    <div class="file">api.http · versionado na raiz do repositório</div>
+<pre><span class="cm">### lista — 200</span>
+GET http://localhost:8080/vagas
+
+<span class="cm">### uma que existe — 200</span>
+GET http://localhost:8080/vagas/1
+
+<span class="cm">### uma que NÃO existe — 404  ← o conserto da aula 02</span>
+GET http://localhost:8080/vagas/nao-existe
+
+<span class="cm">### criar — 201 + Location</span>
+POST http://localhost:8080/vagas
+Content-Type: application/json
+
+{ <span class="st">"titulo"</span>: <span class="st">"Dev Java Pleno"</span>, <span class="st">"area"</span>: <span class="st">"Back-end"</span>,
+  <span class="st">"senioridade"</span>: <span class="st">"Pleno"</span>, <span class="st">"local"</span>: <span class="st">"Remoto"</span>,
+  <span class="st">"aceitaIniciante"</span>: <span class="kw">false</span>, <span class="st">"empresaSlug"</span>: <span class="st">"tucano-systems"</span> }
+
+<span class="cm">### trocar — 200</span>
+PUT http://localhost:8080/vagas/1
+Content-Type: application/json
+
+{ <span class="st">"titulo"</span>: <span class="st">"Front-end Pleno"</span>, <span class="st">"area"</span>: <span class="st">"Front-end"</span>,
+  <span class="st">"senioridade"</span>: <span class="st">"Pleno"</span>, <span class="st">"local"</span>: <span class="st">"Remoto"</span>,
+  <span class="st">"aceitaIniciante"</span>: <span class="kw">false</span>, <span class="st">"empresaSlug"</span>: <span class="st">"aurora-tech"</span> }
+
+<span class="cm">### apagar — 204, e 404 na segunda vez</span>
+DELETE http://localhost:8080/vagas/12
+
+<span class="cm">### busca com um filtro — 200</span>
+GET http://localhost:8080/vagas/busca?area=Dados
+
+<span class="cm">### busca com dois — 200</span>
+GET http://localhost:8080/vagas/busca?area=Dados&amp;senioridade=Júnior
+
+<span class="cm">### busca sem resultado — 200 com [] , e isso está certo</span>
+GET http://localhost:8080/vagas/busca?area=Quântica
+
+<span class="cm">### a entrega da aula 02 continua de pé — 200</span>
+GET http://localhost:8080/estatisticas</pre>
+  </section>
+
+  <div class="divisor" id="correcao">O que a correção procura</div>
+
+  <section>
+    <ul>
+      <li><b>404 em todo GET de item.</b> Nas três frentes que têm recurso, não só na 1.</li>
+      <li><b>201 com <code>Location</code>.</b> 201 sem Location conta metade.</li>
+      <li><b>204 no DELETE</b>, sem corpo. 200 com o objeto apagado está errado.</li>
+      <li><b>Nenhum <code>ResponseEntity</code> no service.</b> Status é do controller; achar ou não achar é do service.</li>
+      <li><b>O id do PUT vem da URL.</b> Se o corpo mandar id e ele for usado, o registro se perde.</li>
+      <li><b><code>required = false</code></b> nos três filtros da parte 4.</li>
+      <li><b><code>GET /estatisticas</code> ainda funcionando.</b> Evoluir não pode quebrar o que já existia.</li>
+      <li><b>Um commit por pessoa</b>, e o README dizendo o que cada frente aprendeu de diferente.</li>
+    </ul>
+  </section>
+
+  <div class="divisor" id="erros">Se der errado</div>
+
+  <section>
+    <p class="warn"><b><code>415 Unsupported Media Type</code> no POST</b><br>
+    Faltou a linha <code>Content-Type: application/json</code> no
+    <code>api.http</code>. Sem ela o Spring não sabe que o corpo é JSON, e o
+    <code>@RequestBody</code> não tem conversor para escolher.</p>
+
+    <p class="warn" style="margin-top:14px"><b><code>UnsupportedOperationException</code> no POST</b><br>
+    A lista ainda é <code>List.of(...)</code>, que é imutável. Envolva num
+    <code>new ArrayList&lt;&gt;(List.of(...))</code>.</p>
+
+    <p class="warn" style="margin-top:14px"><b>O PUT gravou <code>null</code> no id</b><br>
+    Você usou <code>nova.id()</code> em vez do id do <code>@PathVariable</code>.
+    O corpo do PUT não traz id — ele veio na URL.</p>
+
+    <p class="warn" style="margin-top:14px"><b><code>Ambiguous mapping</code> ao subir</b><br>
+    Duas rotas <b>idênticas</b> em controllers diferentes.
+    <code>/vagas/busca</code> e <code>/vagas/{id}</code> podem conviver; duas
+    <code>/vagas/busca</code>, não.</p>
+
+    <p class="warn" style="margin-top:14px"><b>O DELETE devolve 200 em vez de 204</b><br>
+    Você usou <code>ResponseEntity.ok()</code>. O correto é
+    <code>noContent()</code> — e o tipo do método é
+    <code>ResponseEntity&lt;Void&gt;</code>, não <code>&lt;Vaga&gt;</code>.</p>
+  </section>
+
+  <div style="margin-top:44px">
+    <a class="cta primary" href="desafio.html">🎯 Voltar ao desafio</a>
+    <a class="cta" href="modelo-resposta.html">👁️ Prévia da resposta</a>
+    <a class="cta" href="exercicios.html">🧪 Exercícios da aula</a>
+    <a class="cta" href="../projeto/brief.html">💼 Briefing do projeto</a>
+  </div>
+
+  <div class="foot">
+    Introdução ao Spring Boot · Aula 03 · Spring Boot 4.1 · Java 21 · NickDev
+  </div>
+</main>
+</div>
+
+</body>
+</html>
