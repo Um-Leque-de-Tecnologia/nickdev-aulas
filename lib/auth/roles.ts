@@ -10,7 +10,14 @@
 import { COURSES, exclusiveFirst, type Course } from "@/lib/cursos";
 import type { Session } from "@/lib/auth/session";
 
-export const ADMIN_ROLE = "admin";
+/**
+ * O mesmo nome que a API exige nas rotas `/v1/admin/*`.
+ *
+ * Eram dois: aqui pedia-se `admin` e lá `aulas-admin`, então a pessoa podia ser
+ * administradora de um lado e não do outro sem nada avisar. Um nome só, no
+ * realm, e os dois lados concordam por construção.
+ */
+export const ADMIN_ROLE = "aulas-admin";
 
 /**
  * Roles que o Keycloak dá de graça para todo mundo. Elas não dizem nada sobre

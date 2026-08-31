@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { baseUrl, readConfig } from "@/lib/auth/config";
-import { exchangeCodeForTokens, verifyIdToken } from "@/lib/auth/keycloak";
+import {
+  claimsDoAccessToken,
+  exchangeCodeForTokens,
+  verifyIdToken,
+} from "@/lib/auth/keycloak";
 import { rolesFromClaims } from "@/lib/auth/roles";
 import {
   clearTokensCookies,
@@ -87,6 +91,27 @@ type FailureReason =
  */
 const CONTROL_CHARACTERS = /[\u0000-\u001F\u007F]/;
 
+/**
+ * As roles desta pessoa, lidas do ACCESS token — não do id_token, que não as
+ * carrega. Ver `claimsDoAccessToken` para o porquê.
+ *
+ * Falhar aqui não derruba o login: sem roles a pessoa entra como aluno comum,
+ * que é o lado seguro para errar. Mas o motivo vai para o log, porque
+ * `roles: []` silencioso foi justamente o defeito que morou aqui — e ele é
+ * invisível na tela, já que tudo funciona, só que nada de admin aparece.
+ */
+async function rolesDoLogin(accessToken: string): Promise<string[]> {
+  try {
+    return rolesFromClaims(await claimsDoAccessToken(accessToken), readConfig().clientId);
+  } catch (cause) {
+    console.warn(
+      "[entrar] não deu para ler as roles do access token; a sessão entra sem nenhuma:",
+      cause instanceof Error ? cause.message : cause
+    );
+    return [];
+  }
+}
+
 function safeReturnPath(raw: string | null): string {
   if (!raw) return DEFAULT_RETURN_PATH;
   if (CONTROL_CHARACTERS.test(raw)) return DEFAULT_RETURN_PATH;
@@ -170,7 +195,7 @@ export async function GET(req: NextRequest) {
       sub,
       name: claimText(claims, "name") || claimText(claims, "preferred_username"),
       email: claimText(claims, "email"),
-      roles: rolesFromClaims(claims, readConfig().clientId),
+      roles: await rolesDoLogin(tokens.access_token),
       expiresAt: now + maxAge,
     };
 

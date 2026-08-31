@@ -217,6 +217,37 @@ export async function loginUrl(p: {
   return url.toString();
 }
 
+/**
+ * O `client_secret` no corpo — quando existe.
+ *
+ * O realm `aulas` atende este app pelo `aulas-web`, que é client PÚBLICO
+ * porque também serve um front via keycloak-js, e client confidencial não
+ * funciona no navegador. Sem secret, mandar o campo vazio é pior que não
+ * mandar: o Keycloak responde `invalid_client` em vez de tratar o pedido como
+ * de um client público.
+ *
+ * O que se perde sem ele, dito sem eufemismo: o Keycloak deixa de autenticar o
+ * APP na troca do código. Quem continua protegendo o fluxo é o PKCE — o
+ * `code_challenge` sai daqui em toda ida ao Keycloak (S256, logo abaixo), e o
+ * `code_verifier` correspondente nunca sai deste servidor. Um código
+ * interceptado não vira token sem ele, e é por isso que este fluxo segue de pé
+ * num client público.
+ *
+ * O que isto NÃO cobre, e por isso está no pedido de configuração do realm: se
+ * o client aceitar troca de código SEM `code_challenge`, um atacante que
+ * intercepte o código pula o PKCE inteiro simplesmente não mandando o campo.
+ * Quem fecha essa porta é o realm — Advanced Settings → "Proof Key for Code
+ * Exchange Code Challenge Method" = S256 —, não este arquivo. Enquanto isso
+ * não estiver marcado no `aulas-web`, o login funciona e a proteção é parcial.
+ */
+function withClientAuth(
+  body: URLSearchParams,
+  clientSecret: string | undefined
+): URLSearchParams {
+  if (clientSecret) body.set("client_secret", clientSecret);
+  return body;
+}
+
 export async function exchangeCodeForTokens(p: {
   code: string;
   verifier: string;
@@ -225,14 +256,16 @@ export async function exchangeCodeForTokens(p: {
   const { clientId, clientSecret } = readConfig();
   const { token_endpoint } = await discover();
 
-  const body = new URLSearchParams({
-    grant_type: "authorization_code",
-    code: p.code,
-    redirect_uri: p.redirectUri,
-    code_verifier: p.verifier,
-    client_id: clientId,
-    client_secret: clientSecret,
-  });
+  const body = withClientAuth(
+    new URLSearchParams({
+      grant_type: "authorization_code",
+      code: p.code,
+      redirect_uri: p.redirectUri,
+      code_verifier: p.verifier,
+      client_id: clientId,
+    }),
+    clientSecret
+  );
 
   const response = await fetch(token_endpoint, {
     method: "POST",
@@ -276,12 +309,14 @@ export async function refreshAccessToken(
   const { clientId, clientSecret } = readConfig();
   const { token_endpoint } = await discover();
 
-  const body = new URLSearchParams({
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-    client_id: clientId,
-    client_secret: clientSecret,
-  });
+  const body = withClientAuth(
+    new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+    }),
+    clientSecret
+  );
 
   const response = await fetch(token_endpoint, {
     method: "POST",
@@ -319,6 +354,33 @@ export async function refreshAccessToken(
     refresh_expires_in: optionalNumber(data, "refresh_expires_in"),
     id_token: optionalText(data, "id_token"),
   };
+}
+
+/**
+ * Os claims do ACCESS token — que é onde as roles moram.
+ *
+ * O id_token não as carrega. O Keycloak põe `realm_access` e `resource_access`
+ * no access token; o id_token leva identidade (`sub`, `name`, `email`, `nonce`)
+ * e mais nada. Ler as roles de lá fazia `session.roles` sair vazio para todo
+ * mundo, sempre — e com isso `isAdmin()` era falso para qualquer pessoa e
+ * qualquer regra baseada em role recusava todo mundo, em silêncio.
+ *
+ * Assinatura e emissor são conferidos. A audiência NÃO, e é de propósito: este
+ * token é destinado à API (`aud: leque-aulas-api`), não a este app. Passar
+ * `audience: clientId` aqui faria a verificação falhar sempre — que é
+ * exatamente o oposto do que se quer checar.
+ *
+ * Vale para o token do login. Depois de uma renovação as roles do access token
+ * são as atuais, mas a sessão continua com as do login: quem ganha uma role
+ * nova precisa sair e entrar, e o painel já diz isso na tela.
+ */
+export async function claimsDoAccessToken(
+  accessToken: string
+): Promise<Record<string, unknown>> {
+  const { issuer } = readConfig();
+  const { jwks_uri } = await discover();
+  const { payload } = await jwtVerify(accessToken, jwksFor(jwks_uri), { issuer });
+  return payload;
 }
 
 export async function verifyIdToken(
