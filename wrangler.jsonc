@@ -1,9 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Nome do Worker no Cloudflare. Precisa bater com o Worker que já existe
-  // na conta (nickdeve-aulas, com "e"), senão o binding WORKER_SELF_REFERENCE
-  // aponta pra um Worker inexistente e o deploy falha (erro 10143).
-  "name": "nickdeve-aulas",
+  // O Worker que serve aulas.umlequedetecnologia.com.br é `nickdev-aulas`,
+  // SEM "e" no meio. O nome aqui dizia `nickdeve-aulas`, e o comentário
+  // afirmava que era esse o Worker existente — não era.
+  //
+  // Um "e" a mais custou caro. Existem os DOIS Workers na conta, então nada
+  // falhava com "não encontrado": os comandos simplesmente acertavam o Worker
+  // errado, em silêncio. O `wrangler secret put SESSION_SECRET` foi para o
+  // fantasma, e o /entrar em produção ficou devolvendo 500 com o segredo
+  // "definido" — em outro lugar. Quem foi olhar o log com `wrangler tail`
+  // escutou o fantasma também, e não viu requisição nenhuma.
+  //
+  // O account_id está fixo pelo mesmo motivo: o token enxerga duas contas
+  // (esta e a Dev@rodolfodebonis), e sem ele o wrangler escolhia a outra e
+  // respondia `Authentication error [code: 10000]` — que parece problema de
+  // login, e é só conta errada.
+  "name": "nickdev-aulas",
+  "account_id": "4f52e79301cc9d1085fe892e18082cb1",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-25",
   "compatibility_flags": ["nodejs_compat"],
