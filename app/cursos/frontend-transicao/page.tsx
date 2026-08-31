@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import { materialDaAula } from "@/lib/cdn";
 
 export const metadata: Metadata = {
   title: "Frontend — Transição de Carreira · NickDev",
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
     "Curso de frontend para transição de carreira: HTML, CSS, JavaScript, design, React e Next.js — do primeiro site ao projeto publicado.",
 };
 
-const AULA_01 = "/cursos/frontend-transicao/aula-01-abertura";
-const AULA_02 = "/cursos/frontend-transicao/aula-02-javascript";
-const AULA_03 = "/cursos/frontend-transicao/aula-03-design-codigo";
-const AULA_04 = "/cursos/frontend-transicao/aula-04-nextjs";
+const AULA_01 = materialDaAula("frontend-transicao", "aula-01-abertura");
+const AULA_02 = materialDaAula("frontend-transicao", "aula-02-javascript");
+const AULA_03 = materialDaAula("frontend-transicao", "aula-03-design-codigo");
+const AULA_04 = materialDaAula("frontend-transicao", "aula-04-nextjs");
 const REPO_PROJETO = "https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas";
 
 export default function FrontendTransicao() {

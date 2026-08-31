@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import { materialDaAula } from "@/lib/cdn";
 
 export const metadata: Metadata = {
   title: "Frontend Avançado · NickDev",
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
     "Curso de frontend avançado em 16 aulas de 4 horas: revisão de HTML, CSS, JavaScript e TypeScript, Angular 22 com signals e zoneless, e Next.js com App Router — construindo o mesmo projeto duas vezes.",
 };
 
-const AULA_01 = "/cursos/frontend-avancado/aula-01-html-css";
-const AULA_02 = "/cursos/frontend-avancado/aula-02-javascript-typescript";
-const PROJETO = "/cursos/frontend-avancado/projeto";
+const AULA_01 = materialDaAula("frontend-avancado", "aula-01-html-css");
+const AULA_02 = materialDaAula("frontend-avancado", "aula-02-javascript-typescript");
+const PROJETO = materialDaAula("frontend-avancado", "projeto");
 
 type Material = {
   href: string;

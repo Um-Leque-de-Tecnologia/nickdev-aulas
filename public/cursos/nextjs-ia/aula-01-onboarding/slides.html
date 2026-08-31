@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primeiro dia no time · Aula 01 · Next.js + IA · NickDev</title>
+<meta name="description" content="Aula 01 do curso Next.js + IA: onboarding no LequePlay. Subir o produto com USAR_MOCK, ler a pasta app como mapa, descobrir onde o código roda, escrever o primeiro &quot;use client&quot; do projeto e fechar a semana com um ticket entregue por Pull Request.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  /* overflow:hidden, e nao auto: slide nao rola. Se o conteudo nao couber na
+     janela, quem resolve e o auto-ajuste no fim do arquivo — ele encolhe o
+     slide inteiro (--z) ate caber. Rolagem escondia conteudo atras da borda
+     numa projecao, e ninguem no fundo da sala rola a tela do professor. */
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(22px,4.6vh,64px) clamp(28px,6vw,90px);overflow:hidden;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+  .card.hi{border-color:rgba(169,140,224,.5)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:9px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  /* ---- Blocos de codigo: nunca rolam -----------------------------------
+     pre-wrap no lugar de pre, e nenhum overflow:auto. Linha comprida quebra
+     e continua abaixo; nada fica escondido atras da borda direita, que era
+     o jeito mais facil de projetar um comando pela metade. */
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.65;color:#d8d3e6;width:100%;max-width:880px;
+    white-space:pre-wrap;overflow-wrap:break-word;tab-size:2}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:#7B9FE0}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:880px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.75;white-space:pre-wrap;overflow-wrap:break-word}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+  .terminal .err{color:var(--key)}
+  .terminal .path{color:var(--attr)}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:86px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:960px;font-size:clamp(12.5px,1.45vw,17px)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:720px;
+    white-space:pre-wrap;overflow-wrap:break-word}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+  .tree .hl{color:var(--key);font-weight:700}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:820px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:16px;max-width:72ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo.
+
+     Pelo mesmo motivo, nao use o SHORTHAND `margin` inline num filho direto:
+     `margin:16px 0 18px` tambem escreve margin-left e margin-right como 0 e
+     mata o `margin-inline:auto` daqui. O elemento encosta na esquerda
+     enquanto os irmaos seguem centralizados, e o slide parece quebrado sem
+     que nada no CSS tenha mudado. Use as longhands — margin-top e
+     margin-bottom — que nao tocam no eixo horizontal. */
+
+  /* ---- Slides de lab --------------------------------------------------- */
+  /* O lab precisa se distinguir do slide de conceito a distancia: quem esta
+     no fundo da sala tem que saber, sem ler, que agora e a vez dele digitar.
+     Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:16px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a linha estar no lugar certo. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+
+/* ---- Aula 01: o bloco gerado pelo next dev --------------------------- */
+  /* O AGENTS.md e o unico texto em ingles da aula, e ele NAO foi escrito
+     pelo time: quem escreve e re-escreve e o proprio `next dev`. Se ele
+     aparecer com a mesma cara de um bloco de codigo do projeto, a turma le
+     como "mais um arquivo nosso" e o argumento inteiro cai. Entao ele ganha
+     borda roxa e fundo proprio: e uma citacao, nao um trecho do repositorio. */
+  .citacao{background:var(--canvas-2);border:1px solid var(--line);border-left:3px solid var(--tag);
+    border-radius:0 14px 14px 0;padding:18px 24px;width:100%;max-width:880px;
+    font-family:var(--mono);font-size:clamp(11.5px,1.25vw,15px);line-height:1.7;color:#d8d3e6;
+    white-space:pre-wrap;overflow-wrap:break-word}
+  .citacao .cm{color:#6f6a83}
+  .citacao b{color:#fff}
+  .citacao .st{color:var(--str)}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/nextjs-ia">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 01</span> · sprint 0 · onboarding · next.js + ia</div>
+    <div class="tagtitle"><span class="nm">git clone</span> <span class="br">lequeplay-web</span></div>
+    <h1 style="margin:24px 0 14px">Primeiro dia no <span class="grad">time</span></h1>
+    <p class="lead" style="max-width:56ch">Você entrou. O produto já existe, a API já roda e o backlog já tem cartão com o seu nome. Hoje você abre o repositório de alguém e sai dele com código seu em produção.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted);max-width:78ch">o contrato do curso · <strong>subir o produto</strong> · <strong>o tour do repositório</strong> (lab 1) · a pasta <span class="mono">app</span> como mapa · <strong>onde o código roda</strong> · <strong>o primeiro <span class="mono">"use client"</span> do projeto</strong> (lab 2) · o fluxo até o deploy · o ticket da semana</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">2h30 corridas · <strong>2 labs</strong> · deixe o <span class="mono">lequeplay-web</span> aberto no editor · use <kbd>←</kbd> <kbd>→</kbd> pra navegar</p>
+  </section>
+
+  <!-- 2 · O CONTRATO DO CURSO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o combinado</div>
+    <h2>O contrato deste curso</h2>
+    <p class="lead">Isto não é uma sequência de exercícios. É uma simulação de emprego, e ela tem regras.</p>
+    <div class="grid3" style="margin-top:24px">
+      <div class="card hi"><h3 class="str">Você é o front</h3><p>Você cuida do que a pessoa vê. O <span class="mono">lequeplay-web</span> é seu território — e ele <strong>não é dono dos dados</strong>.</p></div>
+      <div class="card ok"><h3 class="grn">O backend existe</h3><p>Quem guarda o catálogo, as contas e as avaliações é a API. O combinado com ela está escrito em <span class="mono">docs/api-contrato.md</span>.</p></div>
+      <div class="card"><h3 class="attr">A IA em dois papéis</h3><p>Ela é a <strong>sua ferramenta</strong> — e, nas últimas sprints, vira <strong>feature do produto</strong>. Hoje só o primeiro papel.</p></div>
+    </div>
+    <h3 style="margin-top:32px">O vocabulário muda a partir de hoje</h3>
+    <div class="tags">
+      <span class="pill on">sprint</span><span class="pill on">ticket</span><span class="pill on">PR</span>
+      <span class="pill on">code review</span><span class="pill on">deploy</span><span class="pill on">backlog</span>
+      <span class="pill on">onboarding</span>
+    </div>
+    <p style="margin-top:16px">O trabalho da semana não é um "desafio": é um <strong>ticket</strong>. Você pega um cartão do backlog, resolve numa branch e entrega por <strong>Pull Request</strong>. Quem revisa lê a sua justificativa antes de ler o seu código.</p>
+    <p class="note">Uma regra que vale as oito sprints, e está escrita no <span class="mono">README.md</span> do produto: <strong>você é responsável pelo que entrega</strong>. Código que você não sabe explicar não vai para o PR. Não é moral — é que na revisão, e na entrevista, quem responde é você.</p>
+  </section>
+
+  <!-- 3 · A TESE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a tese da aula</div>
+    <h2>Você não conhece Next.js. Ótimo.</h2>
+    <p class="lead" style="margin-bottom:20px">Dá para gastar três aulas de fundamento antes de tocar no produto. Seria outro curso — e ele já existe aqui no site. A saída é outra: mudar o que <em>saber Next</em> significa neste curso.</p>
+    <div class="ask" style="border-color:rgba(123,79,208,.5);background:rgba(123,79,208,.1)">
+      <b style="color:var(--tag)">a frase que sustenta as oito aulas</b>
+      <p style="font-size:clamp(16px,2vw,23px);line-height:1.45">Ninguém precisa saber <strong>construir</strong> um app Next do zero. Precisa saber <strong>navegar e alterar</strong> um que já existe.</p>
+    </div>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card no"><h3 class="key">O que não vai acontecer</h3><p>Você não vai escrever um Next do zero hoje. Nem amanhã. Ninguém no seu futuro emprego vai te pedir isso na primeira semana.</p></div>
+      <div class="card ok"><h3 class="grn">O que vai acontecer</h3><p>Você vai abrir um repositório que outra pessoa escreveu, achar o arquivo certo, entender por que ele é do jeito que é, e mudá-lo sem quebrar o resto.</p></div>
+    </div>
+    <p style="margin-top:22px">É o primeiro dia de qualquer pessoa júnior num emprego de verdade. A diferença é que hoje você tem uma ferramenta que a geração anterior não tinha: <strong>um copiloto que lê o repositório inteiro em segundos</strong>. É ela que torna esse primeiro dia sobrevivível.</p>
+    <p class="note">E ela erra. Erra com a mesma voz confiante de quando acerta. <strong>Conferir cada afirmação</strong> é a habilidade que este curso treina — começando no lab 1, daqui a pouco.</p>
+  </section>
+
+  <!-- 4 · SUBIR O PRODUTO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 1 · o produto na sua tela</div>
+    <h2>Suba o LequePlay</h2>
+    <p class="lead" style="margin-bottom:18px">Quatro comandos. Você precisa do <strong>Node 20.9+</strong>. Se travar em algum, levante a mão agora — ninguém segue para o lab 1 com o servidor fora do ar.</p>
+    <div class="terminal"><span class="p">$</span> npm install
+<span class="p">$</span> cp .env.example .env.local
+<span class="p">$</span> npm run dev
+
+  <span class="out">▲ Next.js 16.3.2 (Turbopack)</span>
+  <span class="out">- Local:   http://localhost:3000</span>
+<span class="cm"># deixe esta janela aberta. ela é personagem da aula.</span></div>
+    <div class="grid2" style="margin-top:22px">
+      <div>
+        <div class="filetab">📄 .env.local</div>
+<pre class="code">API_URL=http://localhost:8080
+USAR_MOCK=<span class="st">true</span></pre>
+        <p class="muted" style="font-size:14px;margin-top:8px">Duas linhas, copiadas do <span class="mono">.env.example</span>. Hoje elas são receita: o <em>porquê</em> das variáveis de ambiente é a aula 02, onde elas passam a ter consequência.</p>
+      </div>
+      <div class="card ok"><h3 class="grn"><span class="mono">USAR_MOCK=true</span> vale ouro hoje</h3><p>Com essa linha, o front serve os 8 títulos de <span class="mono">data/midias.json</span> e <strong>roda sem a API</strong>. Backend fora do ar não trava a sua tela.</p><p style="margin-top:10px">E quando a API subir? Muda o <span class="mono">.env</span>, não o código. <strong>Nenhuma tela muda</strong> — quem troca a fonte é o <span class="mono">lib/api.ts</span>.</p></div>
+    </div>
+    <p class="note">Abra <span class="mono">http://localhost:3000</span>. Você deve ver a home com quatro capas em destaque, e o link <strong>Catálogo</strong> no cabeçalho. Essa é a tela que a gente vai desmontar pelo resto da aula.</p>
+  </section>
+
+  <!-- 5 · LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">O tour do repositório</h2>
+      <span class="t">~20 min</span>
+    </div>
+    <p class="muted" style="margin-bottom:8px">O Copilot Chat lê o repositório inteiro em segundos. Ele vai te dar um tour — e <strong>toda afirmação dele passa pelo arquivo</strong> antes de virar verdade.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Abra o Copilot Chat com a pasta do projeto aberta</h3><p>Peça o tour: <em>"Explique a estrutura deste repositório: o que faz cada pasta e por onde passa o acesso à API."</em></p></div></div>
+      <div class="st"><div class="body"><h3>Anote <strong>três afirmações</strong> dele — só as que dá para conferir</h3><p>"É bonito" não dá. "O arquivo X exporta a função Y" dá. Escreva as três antes de abrir qualquer arquivo.</p></div></div>
+      <div class="st"><div class="body"><h3>Confira uma por uma, abrindo o arquivo</h3><p>Comece por <span class="code-inline">lib/api.ts</span>: quais funções ele exporta, e o que cada uma devolve quando não acha nada? Depois <span class="code-inline">components/card-midia.tsx</span>: qual é o nome do componente?</p></div></div>
+      <div class="st"><div class="body"><h3>Faça uma pergunta cuja resposta está no dado</h3><p>Peça a ele: quantos títulos tem <span class="code-inline">data/midias.json</span>, qual está <strong>sem nota</strong> e qual está <strong>sem capa</strong>? Confira no arquivo, um por um.</p></div></div>
+      <div class="st"><div class="body"><h3>Leia <span class="mono">.github/copilot-instructions.md</span> até o fim</h3><p>Esse arquivo foi escrito <strong>pelo time</strong>, é versionado e muda por PR. É ele que molda o que o Copilot te sugere neste repositório.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>responda no chat</b>
+      <p><strong>Qual afirmação não bateu com o arquivo?</strong> Copie a frase dele e a linha do código que a desmente. E diga: dava para perceber, só pelo <em>tom</em> dele, que aquela era a frase frágil?</p>
+    </div>
+  </section>
+
+  <!-- 6 · A PASTA app -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 2 · o mapa</div>
+    <h2>A pasta <span class="mono">app</span> é o mapa do site</h2>
+    <p class="lead" style="margin-bottom:18px">Não vou te ensinar o roteador do Next hoje. Vou te ensinar uma coisa só, que resolve 90% do primeiro mês: <strong>o endereço na barra é o caminho da pasta</strong>.</p>
+    <div class="tree"><b>app/</b>
+  <b>layout.tsx</b>              <span class="cm">a moldura: cabeçalho, rodapé, "pular para o conteúdo"</span>
+  <b>page.tsx</b>                <span class="cm">a home</span>
+  <b>midias/</b>
+    <b>page.tsx</b>              <span class="cm">o catálogo: form de busca + grade de cards</span>
+    <b>[slug]/page.tsx</b>       <span class="cm">a página de um título</span>
+<b>components/card-midia.tsx</b>
+<b>lib/api.ts</b>                <span class="hl">⭐ TODO acesso à API passa por aqui</span>
+<b>lib/tipos.ts</b>              <span class="cm">Midia = Filme | Serie | Podcast</span>
+<b>data/midias.json</b>          <span class="cm">8 títulos, servidos quando USAR_MOCK=true</span>
+<b>docs/api-contrato.md</b>      <span class="cm">o contrato com o backend</span></div>
+    <table style="margin-top:26px">
+      <tr><th>o endereço aberto</th><th>o arquivo que desenha a tela</th></tr>
+      <tr><td><code>/</code></td><td><code>app/page.tsx</code></td></tr>
+      <tr><td><code>/midias</code></td><td><code>app/midias/page.tsx</code></td></tr>
+      <tr><td><code>/midias/protocolo-aberto</code></td><td><code>app/midias/[slug]/page.tsx</code></td></tr>
+    </table>
+  </section>
+
+  <!-- 7 · DUAS REGRAS DO MAPA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 2 · o mapa · as duas regras</div>
+    <h2>Duas regras que o mapa impõe</h2>
+    <div class="grid2">
+      <div class="card hi"><h3 class="str">O nome <span class="mono">page.tsx</span> não é escolha</h3><p>É o que faz a pasta virar endereço. Um arquivo chamado <span class="mono">catalogo.tsx</span> dentro de <span class="mono">app/midias/</span> não vira rota nenhuma.</p></div>
+      <div class="card"><h3 class="attr">Colchete = pedaço que muda</h3><p><span class="mono">[slug]</span> atende <em>qualquer</em> título. Isso tem nome, regras e uma aula inteira — <strong>aula 03</strong>. Hoje guarde só o colchete.</p></div>
+    </div>
+    <p class="note"><strong>Faça isso agora, com o professor:</strong> abra <span class="mono">/midias/protocolo-aberto</span> no navegador e ache, no editor, o arquivo que desenhou aquilo. É a habilidade número um do seu primeiro mês em qualquer time de front.</p>
+  </section>
+
+  <!-- 8 · ONDE O CODIGO RODA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · uma pergunta simples</div>
+    <h2>Onde o seu código roda?</h2>
+    <p class="lead" style="margin-bottom:14px">Você põe um <span class="code-inline">console.log</span> dentro da home do LequePlay. <strong>Onde ele aparece?</strong></p>
+    <div class="filetab">📄 app/page.tsx</div>
+<pre class="code"><span class="kw">import</span> { CardMidia } <span class="kw">from</span> <span class="st">"@/components/card-midia"</span>;
+<span class="kw">import</span> { listarMidias } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+
+<span class="kw">export default async function</span> <span class="fn">Home</span>() {
+  <span class="ty">console</span>.<span class="fn">log</span>(<span class="st">"[quem me executou?] a Home rodou"</span>);
+
+  <span class="kw">const</span> { itens } = <span class="kw">await</span> <span class="fn">listarMidias</span>();
+  <span class="kw">const</span> destaques = itens.<span class="fn">slice</span>(<span class="st">0</span>, <span class="st">4</span>);
+  <span class="cm">// ...</span>
+}</pre>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card no"><h3 class="key">No console do navegador</h3><p><kbd>F12</kbd> → aba Console. É onde quase todo mundo procura primeiro. <strong>Não está lá.</strong></p></div>
+      <div class="card ok"><h3 class="grn">No terminal do <span class="mono">npm run dev</span></h3><p>Naquela janela que ficou aberta atrás do editor. É ali que ele aparece — e isso não é curiosidade, é a aula.</p></div>
+    </div>
+    <p style="margin-top:18px">Repare no <span class="code-inline">await listarMidias()</span> logo abaixo. Buscar os dados do catálogo aconteceu <strong>antes</strong> de qualquer coisa chegar ao navegador. Ninguém ficou olhando um esqueleto vazio esperando dado carregar: quando o HTML saiu daqui, os oito títulos já estavam dentro dele.</p>
+    <p class="note">O comentário que já está nesse arquivo, escrito por quem veio antes de você, diz a mesma coisa em duas linhas: <em>"este <span class="mono">await</span> roda no servidor, e o navegador recebe o HTML já pronto. Nenhuma credencial da API chega ao cliente."</em></p>
+  </section>
+
+  <!-- 9 · O RESULTADO, NAO A RECEITA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · e isso tem nome</div>
+    <h2>O navegador recebe o resultado, não a receita</h2>
+    <div class="flow" style="margin-top:8px">
+      <div class="node"><div class="ico">🖥️</div><b>O servidor monta</b><span>roda a sua função,<br>chama a API,<br>escreve o HTML</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📦</div><b>Manda o HTML</b><span>texto pronto,<br>com os títulos dentro,<br>sem o seu código junto</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📱</div><b>O navegador desenha</b><span>só pinta<br>o que chegou</span></div>
+    </div>
+    <div class="grid3" style="margin-top:24px">
+      <div class="card"><h3 class="grn">Chega mais rápido</h3><p>A pessoa vê o catálogo sem esperar o celular dela baixar e executar JavaScript.</p></div>
+      <div class="card"><h3 class="attr">Segredo não vaza</h3><p>A <span class="mono">API_URL</span> e, um dia, o token do usuário ficam no servidor. O navegador nunca os recebe.</p></div>
+      <div class="card"><h3 class="tagc">Isso é o padrão</h3><p>Você não fez nada para isso acontecer. <strong>É o normal</strong> — e no LequePlay é o normal em todo arquivo, sem exceção.</p></div>
+    </div>
+  </section>
+
+  <!-- 10 · SERVER COMPONENTS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · e isso tem nome</div>
+    <h2>Esses arquivos têm nome: <span class="grad">Server Components</span></h2>
+    <p class="lead" style="margin-bottom:18px">E o "sem exceção" do slide anterior não é força de expressão. Rode você mesmo, na raiz do projeto:</p>
+    <div class="terminal"><span class="p">$</span> grep -rn "use client" app components lib
+<span class="p">$</span>
+<span class="cm"># nenhum resultado. nem um.</span></div>
+    <p class="note"><strong>Não existe um único <span class="mono">"use client"</span> no LequePlay hoje.</strong> Todo componente deste produto roda no servidor. Guarde isso: daqui a pouco <em>você</em> vai escrever o primeiro — e ele vai para o repositório de verdade.</p>
+  </section>
+
+  <!-- 11 · O DIA EM QUE NAO BASTA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · o limite</div>
+    <h2>O dia em que isso não basta: o clique</h2>
+    <p class="lead" style="margin-bottom:16px">O ticket chegou. Na página de um título, um botão <strong>Copiar link</strong>: a pessoa clica e o endereço vai para a área de transferência dela — para mandar no grupo do trabalho.</p>
+    <p style="margin-bottom:18px">Você pede ao Copilot. Ele responde em dois segundos, com a segurança de sempre:</p>
+    <div class="filetab">📄 components/botao-copiar-link.tsx · o que o Copilot vai te dar</div>
+<pre class="code"><span class="kw">export function</span> <span class="fn">BotaoCopiarLink</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;button</span>
+      <span class="attr">type</span>=<span class="st">"button"</span>
+      <span class="attr">onClick</span>={() =&gt; <span class="ty">navigator</span>.clipboard.<span class="fn">writeText</span>(<span class="ty">location</span>.href)}
+    <span class="tagc">&gt;</span>
+      🔗 Copiar link
+    <span class="tagc">&lt;/button&gt;</span>
+  );
+}</pre>
+    <p class="note">Aceite como veio. Não corrija nada ainda — o próximo slide é a leitura desse arquivo, palavra por palavra.</p>
+  </section>
+
+  <!-- 12 · TRES PALAVRAS DO NAVEGADOR -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · o limite · por que não funciona</div>
+    <h2>Três palavras que só existem no navegador</h2>
+    <p class="lead" style="margin-bottom:6px">Elas estão num arquivo que hoje roda no servidor. Uma por uma:</p>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card no"><h3 class="key"><span class="mono">onClick</span></h3><p>O clique acontece no dedo da pessoa, <strong>depois</strong> que a página já está na tela. A essa altura o servidor terminou o trabalho e foi embora.</p></div>
+      <div class="card no"><h3 class="key"><span class="mono">navigator</span></h3><p>Área de transferência é coisa de navegador. No servidor essa palavra não existe.</p></div>
+      <div class="card no"><h3 class="key"><span class="mono">location</span></h3><p>O endereço da barra também só existe do lado de lá.</p></div>
+    </div>
+    <p style="margin-top:22px"><strong>Isso não vai funcionar</strong> — e não é a sintaxe que está errada, é o lugar. E é exatamente por isso que o próximo slide é um lab.</p>
+    <p class="note">A regra já estava escrita no <span class="mono">.github/copilot-instructions.md</span> do time: <em>"Server Component é o padrão. Só use <span class="mono">"use client"</span> quando houver estado, efeito, evento de usuário ou API de navegador."</em> O Copilot leu esse arquivo. E mesmo assim vai te entregar o botão sem a linha.</p>
+  </section>
+
+  <!-- 13 · LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">O primeiro <span class="mono">"use client"</span> do projeto</h2>
+      <span class="t">~20 min</span>
+    </div>
+    <p class="muted" style="margin-bottom:8px">Não corrija o Copilot. <strong>Deixe quebrar.</strong> O erro é o material da aula, e a gente vai ler ele junto, em voz alta.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Peça o botão ao Copilot — e <strong>não</strong> mencione <span class="mono">"use client"</span></h3><p><em>"Crie um botão que copia o link da página atual para a área de transferência."</em> Aceite a resposta como ela veio.</p></div></div>
+      <div class="st"><div class="body"><h3>Salve em <span class="mono">components/botao-copiar-link.tsx</span></h3><p>Arquivo em <span class="code-inline">kebab-case</span>, componente em <span class="code-inline">PascalCase</span> — é a convenção do repositório, e o <span class="mono">card-midia.tsx</span> é o exemplo ao lado.</p></div></div>
+      <div class="st"><div class="body"><h3>Use ele na página do título</h3><p>Importe e ponha o <span class="code-inline">&lt;BotaoCopiarLink /&gt;</span> num lugar visível de <span class="code-inline">app/midias/[slug]/page.tsx</span>. Abra <span class="mono">/midias/protocolo-aberto</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Leia o erro <em>inteiro</em>, antes de tocar em qualquer coisa</h3><p>De cima até a última linha. Ele diz o que falta, em qual linha, e o que fazer. Traduza para o português, em voz alta, com quem está do seu lado.</p></div></div>
+      <div class="st"><div class="body"><h3>Só agora escreva a primeira linha do arquivo</h3><p><span class="code-inline">"use client";</span> — com aspas e ponto e vírgula, antes de qualquer <span class="mono">import</span>. Recarregue, clique, e cole em algum lugar para confirmar que copiou mesmo.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>responda</b>
+      <p><strong>O Copilot avisou que faltava a linha?</strong> E qual palavra do erro entregou a causa? Copie ela no chat. Guarde a resposta: ela vai para o campo <em>"o que a IA sugeriu e eu recusei"</em> do seu PR.</p>
+    </div>
+  </section>
+
+  <!-- 14 · E ESSA A LINHA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · a fronteira</div>
+    <h2>É essa a linha</h2>
+    <p class="lead" style="margin-bottom:16px">O erro que você acabou de ver, e que vai reencontrar umas trinta vezes este semestre:</p>
+    <div class="terminal"><span class="err">Error: Event handlers cannot be passed to Client Component props.</span>
+  <span class="path">&lt;button type="button" onClick={function onClick}&gt;</span>
+                                <span class="err">^^^^^^^^^^^^^^^^^^</span>
+<span class="cm">If you need interactivity, consider converting part of this to a Client Component.</span></div>
+    <p style="margin-top:16px;margin-bottom:18px"><strong>Em português:</strong> "você me deu uma função para escutar o clique, e eu não tenho quem escute". O servidor montou o HTML e foi embora. Ninguém ficou no navegador para ouvir o dedo da pessoa.</p>
+    <div class="filetab">📄 components/botao-copiar-link.tsx · primeira linha</div>
+<pre class="code"><span class="st">"use client"</span>;</pre>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx"><b>Primeira linha do arquivo</b>, antes de qualquer <span class="mono">import</span>. Com aspas e ponto e vírgula: não é comentário, é uma instrução para o Next.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Ela <b>não tira o arquivo do servidor</b> — ela <b>acrescenta o navegador</b>. O HTML continua vindo pronto; o que muda é que agora o código também viaja junto, para o clique ter quem o escute.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx"><b>Marque a folha, não a raiz.</b> Tudo que estiver dentro de um componente de cliente viaja com ele.</span></div>
+    </div>
+  </section>
+
+  <!-- 15 · A FOLHA, NAO A RAIZ -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 3 · a fronteira · onde marcar</div>
+    <h2>Por que a folha, e não a raiz</h2>
+    <p class="lead" style="margin-bottom:16px">A tentação é pôr a linha na página e resolver de uma vez. Olhe o que a página faz antes de fazer isso:</p>
+    <div class="tree"><b>app/midias/[slug]/page.tsx</b>       <span class="cm">servidor · faz await buscarMidia(slug)</span>
+└─ <b>components/botao-copiar-link.tsx</b>  <span class="hl">"use client" ← a fronteira corta aqui</span></div>
+    <div class="grid2" style="margin-top:22px">
+      <div class="card no"><h3 class="key">A linha no <span class="mono">page.tsx</span></h3><p>A página inteira desce para o navegador. O <span class="mono">await buscarMidia(slug)</span> perde o lugar onde rodava, e a chamada à API — com a <span class="mono">API_URL</span> junto — passa a ser problema do cliente.</p></div>
+      <div class="card ok"><h3 class="grn">A linha no botão</h3><p>Só o botão viaja. A página continua buscando o dado no servidor, mandando HTML pronto, e o <span class="code-inline">console.log</span> dela continua saindo no terminal.</p></div>
+    </div>
+    <p class="note">Um arquivo com essa linha é um <strong>Client Component</strong>. Sem ela, é um <strong>Server Component</strong> — que é o padrão. Você nunca escreve <span class="mono">"use server"</span> para isso: o servidor já é o normal. E o <span class="mono">grep</span> que a gente rodou agora acha exatamente <strong>um</strong> resultado: o seu.</p>
+  </section>
+
+  <!-- 16 · O COPILOTO ERRA, E O AGENTS.md AVISAVA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">⭐ </span>bloco 3 · a lição que vale as oito aulas</div>
+    <h2>Ele errou com a mesma voz de quando acerta</h2>
+    <p class="lead" style="margin-bottom:18px">O Copilot não te enganou por má-fé. Ele te deu o Next que viu no treino — e esse Next mudou. A parte boa: <strong>o aviso já estava no repositório antes de você chegar.</strong></p>
+    <div class="citacao"><span class="cm">&lt;!-- BEGIN:nextjs-agent-rules --&gt;</span>
+
+<b># This is NOT the Next.js you know</b>
+
+This version has breaking changes — APIs, conventions, and file structure
+may all differ from <span class="st">your training data</span>. Read the relevant guide in
+<span class="st">`node_modules/next/dist/docs/`</span> ... before writing any code.
+Heed deprecation notices.</div>
+    <p style="margin-top:16px">Isso é o <span class="code-inline">AGENTS.md</span>, na raiz do <span class="mono">lequeplay-web</span>. Abra agora. E repare em quem o escreveu: <strong>ninguém do time</strong>. O bloco é escrito e re-adicionado pelo próprio <span class="mono">next dev</span> — dá para conferir em <span class="mono">node_modules/next/dist/server/lib/generate-agent-files.js</span>, como o próprio arquivo diz.</p>
+    <p style="margin-top:14px"><strong>Leia de novo o que isso significa:</strong> o framework escreve, sozinho, um recado para os modelos de IA avisando que eles estão desatualizados sobre ele.</p>
+  </section>
+
+  <!-- 17 · O MESMO ERRO, NA OUTRA PONTA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">⭐ </span>bloco 3 · a mesma lição, outro arquivo</div>
+    <h2>O mesmo erro, na outra ponta do arquivo</h2>
+    <p class="lead" style="margin-bottom:18px">Não é só o <span class="mono">"use client"</span>. A assinatura da página mudou no Next 16, e o modelo aprendeu a antiga:</p>
+    <div class="duo">
+      <div>
+        <span class="verdict no">o que o modelo viu no treino</span>
+<pre class="code"><span class="kw">export default function</span> <span class="fn">Pagina</span>({ params }) {
+  <span class="kw">const</span> midia = <span class="fn">buscarMidia</span>(params.slug);
+  <span class="cm">// ...</span>
+}</pre>
+        <p class="muted" style="font-size:14px;margin-top:8px">Funcionava. Hoje <span class="mono">params.slug</span> vem <span class="mono">undefined</span>, e o erro que aparece não fala em <span class="mono">params</span> coisa nenhuma.</p>
+      </div>
+      <div>
+        <span class="verdict yes">o que o repositório faz</span>
+<pre class="code"><span class="kw">export default async function</span> <span class="fn">PaginaDaMidia</span>({
+  params,
+}: <span class="ty">PageProps</span>&lt;<span class="st">"/midias/[slug]"</span>&gt;) {
+  <span class="kw">const</span> { slug } = <span class="kw">await</span> params;
+  <span class="kw">const</span> midia = <span class="kw">await</span> <span class="fn">buscarMidia</span>(slug);
+}</pre>
+        <p class="muted" style="font-size:14px;margin-top:8px"><span class="mono">params</span> e <span class="mono">searchParams</span> são <strong>Promise</strong> no Next 16. Precisam de <span class="mono">await</span>. Está assim no arquivo de verdade, agora.</p>
+      </div>
+    </div>
+    <p class="note"><strong>A regra da casa, do <span class="mono">README.md</span>:</strong> quando a sugestão divergir da doc da versão instalada, <strong>a doc local ganha</strong>. Dois arquivos te protegem disso — o <span class="mono">AGENTS.md</span>, que o Next escreve, e o <span class="mono">.github/copilot-instructions.md</span>, que o time escreve e muda por PR.</p>
+  </section>
+
+  <!-- 18 · O FLUXO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 4 · como se entrega aqui</div>
+    <h2>Do seu editor até produção</h2>
+    <p class="lead" style="margin-bottom:18px">Nada vai direto para a <span class="mono">main</span>. Todo ticket faz este caminho — o seu de hoje inclusive.</p>
+    <div class="flow">
+      <div class="node"><div class="ico">🌿</div><b>Branch</b><span><span class="mono">feat/</span> ou <span class="mono">fix/</span><br>nome curto</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📬</div><b>Pull Request</b><span>o template já traz<br>as perguntas da revisão</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🤖</div><b>Copilot Code Review</b><span>roda sozinho e comenta<br>antes de qualquer humano</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🚀</div><b>Merge e deploy</b><span>e aí, sim,<br>está em produção</span></div>
+    </div>
+    <div class="terminal" style="margin-top:22px"><span class="p">$</span> git switch -c feat/botao-copiar-link
+<span class="cm"># … código …</span>
+<span class="p">$</span> npm run build     <span class="cm"># tem que passar ANTES do push</span>
+<span class="p">$</span> git push -u origin feat/botao-copiar-link</div>
+  </section>
+
+  <!-- 19 · O QUE A REVISAO LE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>bloco 4 · como se entrega aqui · a revisão</div>
+    <h2>O que a revisão lê primeiro</h2>
+    <div class="grid2">
+      <div class="card hi"><h3 class="str">O campo que a revisão lê primeiro</h3><p>O template de PR tem uma seção chamada <strong>"a decisão que eu tomei"</strong>. Não é enfeite: é onde você escreve <em>por que este componente é client e a página continuou server</em>.</p><p style="margin-top:10px">Código sem justificativa passa. Justificativa é o que faz você crescer — e é a pergunta que você vai ouvir numa entrevista.</p></div>
+      <div class="card"><h3 class="attr">O revisor robô erra também</h3><p>O Copilot Code Review é um <strong>primeiro leitor rápido</strong>. Ele acha coisa boa e ele fala bobagem. <strong>Você decide o que aceitar</strong> — e responde o comentário dizendo por quê.</p><p style="margin-top:10px">O template tem um campo para isso: <em>"o que a IA sugeriu e eu recusei"</em>. Saber recusar é metade da habilidade.</p></div>
+    </div>
+    <p class="note">O checklist do PR é curto e é levado a sério: roda sem erro no console · <span class="mono">npm run build</span> passa · navegação por teclado continua funcionando, com foco visível · sem <span class="mono">any</span> e sem <span class="mono">!</span> para calar o compilador · <strong>se usei o Copilot, revisei linha a linha e sei explicar o que ficou</strong>.</p>
+  </section>
+
+  <!-- 20 · O TICKET DA SEMANA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">🎫 </span>o trabalho da semana</div>
+    <h2>O seu primeiro ticket</h2>
+    <p class="lead" style="margin-bottom:14px">O botão do lab 2 funciona na sua máquina. Isso não é uma entrega — é um rascunho. O ticket é transformá-lo em <strong>código que atravessa o code review</strong> e chega em produção.</p>
+    <div class="grid3">
+      <div class="card ok"><h3 class="grn">O que entra</h3><p>O <span class="mono">BotaoCopiarLink</span> acabado na página do título: rótulo claro, retorno visível para quem clicou, e <span class="mono">"use client"</span> só onde ele precisa estar.</p></div>
+      <div class="card hi"><h3 class="str">Onde não entra</h3><p>A <span class="code-inline">app/midias/[slug]/page.tsx</span> continua <strong>sem</strong> a linha. Se ela apareceu lá, o ticket voltou.</p></div>
+      <div class="card"><h3 class="attr">O que você defende</h3><p>No campo <em>"a decisão que eu tomei"</em>: por que a fronteira ficou na folha, e o que o Copilot sugeriu que você recusou.</p></div>
+    </div>
+    <h3 style="margin-top:20px">Como fechar</h3>
+    <ul class="clean">
+      <li>Branch <span class="mono">feat/</span> · <span class="mono">npm run build</span> passando · push · PR aberto com o <strong>template preenchido</strong>, seção por seção — inclusive o <span class="mono">Fecha #</span> lá em cima.</li>
+      <li>O Copilot Code Review vai comentar. <strong>Responda cada comentário</strong> — aceitando ou recusando com um motivo. Silêncio não fecha revisão.</li>
+      <li>Teste com o teclado antes de pedir revisão: <kbd>Tab</kbd> até o botão, <kbd>Enter</kbd>, foco visível. Está no checklist, e é onde este PR mais costuma cair.</li>
+      <li>Entrega <strong>antes da aula 02</strong>. Chegar com o PR aberto é o começo da próxima aula, não a lição de casa dela.</li>
+    </ul>
+    <p class="note">Os critérios de aceite, os casos de borda e o gabarito comentado estão no <a href="https://trello.com/b/Ceu4uGVp/lequeplay" target="_blank" rel="noopener noreferrer" style="color:var(--attr);text-decoration:underline">ticket da semana</a> e nos <a href="codigos-ticket.html" style="color:var(--attr);text-decoration:underline">códigos comentados</a>. Leia o ticket inteiro <strong>antes</strong> de abrir o editor — inclusive a parte que diz o que <em>não</em> fazer.</p>
+  </section>
+
+  <!-- 21 · FECHAMENTO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>antes de ir</div>
+    <h2>O que fica de hoje</h2>
+    <ul class="clean">
+      <li><strong>Você não precisa saber construir, precisa saber navegar.</strong> Abrir o repositório de outra pessoa, achar o arquivo e mudá-lo sem quebrar o resto é a habilidade do primeiro mês.</li>
+      <li><strong>A pasta <span class="mono">app</span> é o mapa.</strong> O endereço na barra é o caminho da pasta, e <span class="mono">page.tsx</span> é o arquivo que desenha.</li>
+      <li><strong>Servidor é o padrão.</strong> Todo componente roda lá, a menos que você diga o contrário — e <span class="mono">"use client"</span> não tira do servidor, acrescenta o navegador.</li>
+      <li><strong>A linha vai na folha, não na raiz.</strong> Hoje o LequePlay tem exatamente um Client Component: o que você escreveu.</li>
+      <li><strong>O copiloto afirma com a mesma segurança quando erra.</strong> Confira no arquivo, e quando a sugestão divergir da doc da versão instalada, a doc local ganha.</li>
+    </ul>
+  </section>
+
+  <!-- 22 · O QUE FICOU PARA DEPOIS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>antes de ir · o que vem depois</div>
+    <h2>O que ficou de propósito para depois</h2>
+    <div class="grid3">
+      <div class="card"><h3 class="attr">Por que <span class="mono">.env</span></h3><p>Hoje foi receita. O <em>porquê</em> das variáveis de ambiente chega na <strong>aula 02</strong>, junto com o BFF, onde elas têm consequência.</p></div>
+      <div class="card"><h3 class="attr">Rota dinâmica e layout</h3><p>O que o <span class="mono">[slug]</span> faz de verdade, layout aninhado e route group: <strong>aula 03</strong>.</p></div>
+      <div class="card"><h3 class="attr">A busca que não busca</h3><p>O <span class="mono">&lt;form role="search"&gt;</span> do catálogo recarrega a página e só acha título exato. Fazer ela entender intenção é ticket de uma sprint lá na frente.</p></div>
+    </div>
+    <p class="note">Antes da aula 02: o <a href="exercicios.html" style="color:var(--attr);text-decoration:underline">roteiro dos dois labs</a> fica publicado com o gabarito dobrado — refaça o lab 1 sozinho se ele passou rápido demais. O <a href="../../guias/nextjs/nextjs.html" style="color:var(--attr);text-decoration:underline">guia de Next.js</a> continua aberto o semestre inteiro: consultar não é trapaça. E leia <span class="mono">docs/api-contrato.md</span> até a seção <em>Endpoints públicos</em> — na próxima sprint ele deixa de ser leitura e vira trabalho.</p>
+    <p class="note">Travou no ticket? Traga na aula 02 <strong>com o erro na tela</strong> e com o que você já tentou. "Não funcionou" não é um relato de bug.</p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 22</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    caber(slides[i]);
+  }
+
+  /* Rede de seguranca do "slide nao rola": o deck e escrito para caber em
+     16:9 (1920x1080), mas ninguem controla a janela de quem abre. Numa tela
+     mais baixa, em vez de cortar ou rolar, o slide inteiro encolhe ate caber.
+     zoom (nao transform:scale) porque zoom reflui o texto: a quebra de linha
+     se refaz no tamanho novo, em vez de virar uma foto reduzida do layout. */
+  function caber(s){
+    const filhos=[...s.children];
+    const zoom=v=>filhos.forEach(f=>f.style.zoom=v);
+    zoom('');
+    if(!s.classList.contains('active'))return;
+    if(s.scrollHeight-s.clientHeight<=1)return;
+    // o zoom vai nos filhos, nao no .slide: o slide e inset:0 e encolheria a
+    // propria moldura, jogando tudo para um canto.
+    let z=s.clientHeight/s.scrollHeight;
+    for(let p=0;p<8&&z>.5;p++){
+      zoom(z);
+      if(s.scrollHeight-s.clientHeight<=1)return;
+      z-=.025;
+    }
+    zoom(Math.max(.5,z));
+  }
+  let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>caber(slides[i]),120);});
+  // as fontes do Google chegam depois do primeiro show(): com overflow:hidden,
+  // um texto que cresce depois ficaria cortado sem barra de rolagem para revelar.
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>caber(slides[i]));
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

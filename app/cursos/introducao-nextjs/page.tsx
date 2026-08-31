@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import { materialDaAula } from "@/lib/cdn";
 
 export const metadata: Metadata = {
   title: "Introdução ao Next.js · NickDev",
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
     "Curso de Next.js do zero, sem pré-requisito de React: componentes, App Router, Server Components, data fetching, Server Actions, autenticação, performance, testes e deploy com CI/CD.",
 };
 
-const AULA_01 = "/cursos/introducao-nextjs/aula-01-abertura-fundamentos";
-const AULA_02 = "/cursos/introducao-nextjs/aula-02-roteamento-app-router";
-const AULA_03 = "/cursos/introducao-nextjs/aula-03-server-client";
-const PROJETO = "/cursos/introducao-nextjs/projeto";
+const AULA_01 = materialDaAula("introducao-nextjs", "aula-01-abertura-fundamentos");
+const AULA_02 = materialDaAula("introducao-nextjs", "aula-02-roteamento-app-router");
+const AULA_03 = materialDaAula("introducao-nextjs", "aula-03-server-client");
+const PROJETO = materialDaAula("introducao-nextjs", "projeto");
 
 type Aula = {
   n: string;

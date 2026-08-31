@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import { materialDaAula } from "@/lib/cdn";
 
 export const metadata: Metadata = {
   title: "Orientação a Objetos com Java · NickDev",
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     "Curso de Orientação a Objetos com Java: do ecossistema Java e do primeiro programa aos quatro pilares de OO, coleções, exceções, generics, lambdas, persistência e arquitetura em camadas.",
 };
 
-const AULA_01 = "/cursos/orientacao-objetos-java/aula-01-primeiros-passos";
-const PROJETO = "/cursos/orientacao-objetos-java/projeto";
+const AULA_01 = materialDaAula("orientacao-objetos-java", "aula-01-primeiros-passos");
+const PROJETO = materialDaAula("orientacao-objetos-java", "projeto");
 
 export default function OrientacaoObjetosJava() {
   return (

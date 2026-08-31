@@ -3,10 +3,15 @@
  *
  * Antes eles moravam dentro da pasta de cada aula, um por aula, com o mesmo
  * assunto escrito em três lugares diferentes. Agora existe um guia canônico
- * por tecnologia, servido de `public/guias/`, e os cursos apontam para eles.
+ * por tecnologia, e os cursos apontam para eles.
+ *
+ * O arquivo não é mais servido de `public/`: os guias são um curso da Leque de
+ * Aulas API, com uma aula por tecnologia, entregues pelo CDN — ver `lib/cdn`.
  *
  * Esta é a única lista — a home e os badges das páginas de curso leem daqui.
  */
+
+import { CDN } from "@/lib/cdn";
 
 export type Guia = {
   slug: string;
@@ -63,7 +68,7 @@ export const GUIAS: Guia[] = [
 
 /** Onde o guia é servido. São arquivos estáticos, não rotas do app. */
 export function hrefDoGuia(slug: string): string {
-  return `/guias/${slug}.html`;
+  return `${CDN}/guias/${slug}/${slug}.html`;
 }
 
 /**

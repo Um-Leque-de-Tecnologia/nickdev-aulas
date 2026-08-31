@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercícios da aula 01 — Onboarding no LequePlay · Next.js + IA · NickDev</title>
+<meta name="description" content="Os dois labs da aula 01: fazer o Copilot Chat explicar o lequeplay-web e conferir cada afirmação no arquivo, e escrever o primeiro &quot;use client&quot; do projeto depois de ler o erro inteiro.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+  --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:22px 24px;margin-top:36px}
+.goal .ico{font-size:26px;line-height:1}
+.goal h3{font-size:17px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:15px}
+.goal p + p{margin-top:8px}
+.goal.roxo{border-left-color:var(--purple)}
+.goal.verde{border-left-color:var(--green)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:50px 0 18px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.step .n{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--purple-light);border:1px solid rgba(169,140,224,.5);width:40px;height:40px;min-width:40px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.step h3{font-size:19px;font-weight:600;flex:1;min-width:180px}
+.step p{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.step ul,.step ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+.step li{margin:4px 0}
+.step li b{color:var(--text)}
+.step .tip{font-size:13.5px;color:var(--text-3);margin-top:12px;border-left:2px solid var(--magenta);padding-left:12px}
+.step .tip b{color:var(--pink-light);font-weight:500}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B4FD0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}pre .an{color:#5fd08a}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-top:13px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+.check{list-style:none;display:grid;gap:10px}
+.check li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text-2);display:flex;gap:12px;align-items:flex-start}
+.check li::before{content:"✔";color:var(--magenta);font-weight:700}
+.check.extra li::before{content:"★";color:var(--purple-light)}
+.check.no li::before{content:"✕";color:var(--text-4)}
+.check b{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.mini b{color:var(--text);display:block;margin-bottom:3px}
+
+table{border-collapse:collapse;width:100%;margin-top:13px;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2)}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.entrega{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-top:16px}
+.entrega ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);font-size:15px}
+.entrega li{margin:6px 0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px rgba(231,57,130,.6);color:#fff}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+@media(max-width:560px){.goal{flex-direction:column;gap:10px}.step{padding:22px 20px}}
+
+  /* ---- Folha de exercicio: o lab e o gabarito dobrado ------------------ */
+  /* Herdado do molde da aula 02 de Spring Boot. O gabarito fica dobrado:
+     aberto por padrao, a pessoa le a resposta antes de tentar — e o lab vira
+     leitura. */
+  details.gab{border:1px solid var(--line);border-radius:10px;margin-top:14px;background:var(--surface-2)}
+  details.gab summary{cursor:pointer;padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--pink-light);
+    list-style:none;user-select:none}
+  details.gab summary::-webkit-details-marker{display:none}
+  details.gab summary::before{content:'▸ ';color:var(--magenta)}
+  details.gab[open] summary::before{content:'▾ '}
+  details.gab summary:hover{color:var(--text)}
+  details.gab summary:focus-visible{outline:2px solid var(--magenta);outline-offset:-2px;border-radius:10px}
+  details.gab .in{padding:2px 18px 18px;border-top:1px solid var(--line)}
+  details.gab .in p{font-size:14.5px;color:var(--text-2);margin-top:12px}
+  details.gab .in p b{color:var(--text)}
+
+  .lab{border:1px solid var(--line);border-left:4px solid #5fd08a;border-radius:14px;
+    padding:24px 26px;margin-top:22px;background:var(--surface)}
+  .lab-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .lab-head .n{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--bg);
+    background:#5fd08a;padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .lab-head h3{font-size:21px;margin:0}
+  .lab-head .t{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .lab .obj{font-size:15px;color:var(--text-3);margin:6px 0 16px;border-left:2px solid #5fd08a;padding-left:12px}
+  .lab ol,.lab ul{margin:12px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  .lab ol li,.lab ul li{margin:7px 0}
+  .lab ol li b,.lab ul li b{color:var(--text)}
+  .perg{border:1px solid rgba(95,208,138,.4);background:rgba(95,208,138,.06);border-radius:10px;
+    padding:14px 18px;margin-top:16px}
+  .perg b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:#5fd08a;margin-bottom:8px}
+  .perg ol{margin:0;padding-left:20px;color:var(--text);font-size:14.5px}
+
+  table.erros{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}
+  table.erros th,table.erros td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.erros th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);font-weight:500}
+  table.erros td{color:var(--text-2)}
+  table.erros td code{color:var(--pink-light);font-size:.92em}
+  table.erros tr:last-child td{border-bottom:0}
+
+  /* ---- Aula 01: JSX dentro do <pre> ----------------------------------- */
+  /* O molde do Spring Boot so precisava de kw/ty/st/fn/cm/an, porque Java nao
+     tem tag. Aqui tem. As duas cores sao as mesmas do deck desta serie
+     (--tag e --attr no slides.html), para o codigo do slide e o da folha
+     sairem iguais na retina de quem alterna entre os dois. */
+  pre .tagc{color:#7B4FD0}
+  pre .attr{color:#E88BB8}
+
+  /* ---- Aula 01: o erro no bloco de terminal --------------------------- */
+  /* O lab 2 vive de um erro real, e o erro precisa parecer um erro: a linha
+     que o Next grita, e o trecho de codigo que ele cita logo abaixo. Sem isto
+     tudo sairia na cor de saida normal, e a linha que importa se perderia no
+     meio. */
+  .terminal .err{color:#F24487}
+  .terminal .path{color:#E88BB8}
+
+  /* ---- Aula 01: .tip e paragrafo soltos dentro do .lab ---------------- */
+  /* No molde a .tip so existia dentro de .step. Aqui ela aparece dentro do
+     .lab — e o lab 2 tem um paragrafo de prosa (a traducao do erro) que nao e
+     item de lista nem objetivo. */
+  .tip{font-size:13.5px;color:var(--text-3);margin-top:14px;border-left:2px solid var(--magenta);padding-left:12px}
+  .tip b{color:var(--pink-light);font-weight:500}
+  .lab p{color:var(--text-2);font-size:15px;margin-top:14px}
+  .lab h4{font-size:16px;font-weight:600;color:var(--text);margin-top:22px}
+
+  /* ---- Aula 01: listas dentro do .goal -------------------------------- */
+  /* O reset zera o padding de tudo; sem isto os marcadores da checagem de
+     ambiente ficariam cortados na borda do bloco. */
+  .goal ul{margin:8px 0 0;padding-left:20px;font-size:14.5px;color:var(--text-2)}
+  .goal li{margin:4px 0}
+  .goal li b{color:var(--text)}
+
+  /* ---- Aula 01: as tabelas no celular --------------------------------- */
+  /* A primeira coluna guarda caminhos como app/midias/[slug]/page.tsx, que
+     sozinho passa da largura da tela — e como o body tem overflow-x:hidden, a
+     segunda coluna sumiria cortada em vez de rolar. */
+  @media(max-width:560px){
+    td:first-child{overflow-wrap:anywhere}
+    th,td{padding:9px 7px;font-size:13px}
+    table.erros th,table.erros td{padding:10px 8px}
+    .lab{padding:22px 20px}
+  }
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/nextjs-ia">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Exercícios em aula · Aula 01</div>
+  <h1>O primeiro dia <span class="grad">no time</span> 🧭</h1>
+  <p class="lead">
+    Dois labs. No primeiro, você faz o Copilot explicar um repositório que
+    nunca viu — e confere frase por frase, no arquivo. No segundo, você escreve
+    o <b>primeiro <code>"use client"</code> do LequePlay</b>, depois de ler o
+    erro que a falta dele provoca.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">✅</span>
+    <div>
+      <h3>Antes de começar</h3>
+      <ul>
+        <li><b>Node 20.9+</b> instalado: <code>node -v</code> responde 20.9 ou mais.</li>
+        <li>O <b><code>lequeplay-web</code> clonado</b> e aberto no seu editor.</li>
+        <li><b><code>npm run dev</code> sobe</b> sem erro no terminal.</li>
+        <li><b><code>http://localhost:3000</code> abre</b> o LequePlay no navegador.</li>
+      </ul>
+      <p style="margin-top:10px">Se alguma falhar, resolva agora. Os dois labs
+      dependem das quatro, e ninguém pega ticket com o ambiente pela metade.</p>
+    </div>
+  </div>
+
+  <div class="goal roxo">
+    <span class="ico">🧠</span>
+    <div>
+      <h3>A habilidade do dia</h3>
+      <p>Ninguém aqui precisa saber <b>construir</b> um app Next do zero.
+      Precisa saber <b>navegar e alterar</b> um que já existe. É o primeiro dia
+      de qualquer pessoa júnior num emprego de verdade — e a IA é a ferramenta
+      que torna esse primeiro dia sobrevivível.</p>
+      <p>O copiloto acelera o tour. E ele <b>afirma com a mesma segurança
+      quando acerta e quando erra</b>. Por isso o lab 1 não termina na resposta
+      dele: termina no arquivo aberto na sua frente.</p>
+    </div>
+  </div>
+
+  <div class="label">Os labs</div>
+
+  <!-- ============================== LAB 1 ============================== -->
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 1</span><h3>O tour do repositório</h3><span class="t">~20 min</span></div>
+    <p class="obj">Fazer o Copilot explicar o <code>lequeplay-web</code> — e conferir cada afirmação abrindo o arquivo citado.</p>
+    <ol>
+      <li><b>Suba o produto.</b> Cinco comandos, na ordem abaixo.</li>
+      <li><b>Pergunte ao Copilot Chat</b>, com a pasta do projeto aberta, nestas
+      palavras: <i>"o que este projeto faz e como os arquivos se organizam?"</i></li>
+      <li><b>Numere a resposta.</b> Cole num rascunho e quebre em afirmações —
+      uma linha cada. Você vai conferir uma por uma.</li>
+      <li><b>Abra o arquivo</b> que cada afirmação cita. Marque a linha com
+      <b>confere</b>, <b>não confere</b> ou <b>não tinha como saber</b>.</li>
+      <li>Use a tabela abaixo. São cinco conferências que sempre rendem.</li>
+    </ol>
+<div class="terminal"><span class="p">$</span> git clone https://github.com/Um-Leque-de-Tecnologia/lequeplay-web
+<span class="p">$</span> cd lequeplay-web
+<span class="p">$</span> npm install
+<span class="p">$</span> cp .env.example .env.local
+<span class="p">$</span> npm run dev
+
+  <span class="p">▲ Next.js 16.3.2 (Turbopack)</span>
+  <span class="p">- Local:   http://localhost:3000</span>
+
+<span class="out">✓ Ready</span>   <span class="cm">← o catálogo abre sem a API no ar, porque USAR_MOCK=true</span></div>
+
+    <table>
+      <tr><th>o que ele costuma afirmar</th><th>onde você confere</th></tr>
+      <tr><td>"o acesso à API fica centralizado"</td><td><code>lib/api.ts</code>. Rode <code>grep -rn "fetch(" app components lib</code> — quantos arquivos aparecem?</td></tr>
+      <tr><td>"os dados vêm da API em <code>API_URL</code>"</td><td>Seu <code>.env.local</code>. Com <code>USAR_MOCK=true</code>, quem serve é <code>data/midias.json</code>.</td></tr>
+      <tr><td>algo sobre <code>params</code> ou <code>searchParams</code></td><td><code>app/midias/[slug]/page.tsx</code> e <code>app/midias/page.tsx</code>. Procure o <code>await</code>.</td></tr>
+      <tr><td>"a configuração do Tailwind fica em…"</td><td>A raiz do projeto. Existe um <code>tailwind.config.js</code> ali?</td></tr>
+      <tr><td>"os componentes reutilizáveis ficam em <code>components/</code>"</td><td><code>components/</code>. Quantos arquivos tem hoje?</td></tr>
+    </table>
+
+    <p class="tip"><b>Guarde a resposta inteira.</b> Ela volta no lab 2. Repare
+    no tom: ele descreve o que não conferiu com a mesma calma com que descreve
+    o que conferiu.</p>
+
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Alguma afirmação cita <b>arquivo ou pasta que não existe</b> na árvore? Qual?</li>
+        <li>Ele falou de <code>params</code> ou <code>searchParams</code>? Disse que dá para ler direto, <b>sem <code>await</code></b>?</li>
+        <li>Qual afirmação ele <b>não tinha como saber</b> — porque depende de arquivo que não está no Git?</li>
+        <li>Das afirmações que você numerou, <b>quantas</b> você conferiu abrindo o arquivo?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>conferir depois de responder</summary>
+      <div class="in">
+        <p><b>1.</b> Os três clássicos: <code>pages/</code> no lugar de <code>app/</code>, uma pasta <code>src/</code>, e um arquivo de configuração inventado. A árvore real é <code>app/</code>, <code>components/</code>, <code>lib/</code>, <code>data/</code>, <code>docs/</code> — sem <code>pages/</code> e sem <code>src/</code>. Não existe <code>tailwind.config.js</code>: no Tailwind v4 a configuração mora no CSS, e aqui está no <code>@import "tailwindcss"</code> de <code>app/globals.css</code>. O arquivo de config do Next existe, mas é <code>next.config.ts</code> — e o que tem dentro dele é a raiz do Turbopack, não o que ele descreveu.</p>
+        <p><b>2.</b> Esse é o erro mais caro do dia. No <b>Next 16, <code>params</code> e <code>searchParams</code> são Promise</b> e precisam de <code>await</code>. Está escrito e comentado em <code>app/midias/page.tsx</code> e em <code>app/midias/[slug]/page.tsx</code>. Um modelo treinado no Next 14 diz que são objetos comuns, com toda a calma do mundo.</p>
+        <p><b>3.</b> O <code>.env.local</code>. O <code>.gitignore</code> ignora <code>.env*</code> — só o <code>.env.example</code> é versionado. Ele não tem como saber que o seu está com <code>USAR_MOCK=true</code>, que é justamente o que faz o front rodar sem a API. Se ele afirmou de onde vêm os dados, ele adivinhou.</p>
+        <p><b>4.</b> Se a resposta for "nenhuma", o lab não aconteceu. A habilidade não é <i>receber</i> a explicação: é <b>conferi-la</b>. E o repositório já avisava — o <code>AGENTS.md</code> da raiz, que o próprio <code>next dev</code> escreve (não o time), diz em inglês que <i>esta não é a Next.js que você conhece</i> e manda ler a doc da versão instalada, em <code>node_modules/next/dist/docs/</code>. O framework avisa os modelos de que eles estão desatualizados.</p>
+        <p><b>Extra.</b> As convenções que ele deveria seguir aqui estão em <code>.github/copilot-instructions.md</code>: versionado, escrito pelo time, e muda por PR como qualquer outro código.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ============================== LAB 2 ============================== -->
+  <div class="lab">
+    <div class="lab-head"><span class="n">LAB 2</span><h3>O primeiro <code>"use client"</code> do projeto</h3><span class="t">~20 min</span></div>
+    <p class="obj">Escrever o primeiro componente de cliente do LequePlay — e chegar até ele pelo erro, não pela resposta pronta.</p>
+
+    <p class="tip"><b>A ordem é o exercício.</b> Peça, rode, leia o erro
+    inteiro, e só então ponha a linha. Se você já sabe qual é a linha, melhor
+    ainda: segure. O erro é o conteúdo do lab.</p>
+
+    <ol>
+      <li><b>Peça ao Copilot Chat</b>, sem adiantar nada: <i>"crie
+      <code>components/botao-copiar-link.tsx</code>: um botão que copia o
+      endereço da página atual para a área de transferência"</i>. Não escreva
+      "use client" no pedido.</li>
+      <li><b>Salve o que ele deu</b>, do jeito que ele deu. Sem corrigir.</li>
+      <li><b>Use na página do título</b>: importe e ponha o componente em
+      <code>app/midias/[slug]/page.tsx</code>, logo abaixo do <code>&lt;h1&gt;</code>.</li>
+      <li>Abra <code>http://localhost:3000/midias/a-ultima-linha</code>.</li>
+      <li><b>O erro aparece.</b> Leia inteiro, em voz alta, antes de tocar em qualquer coisa.</li>
+      <li>Agora sim: a linha, no topo do componente. Recarregue e clique.</li>
+    </ol>
+
+<pre><span class="cm">// components/botao-copiar-link.tsx — o que ele costuma entregar</span>
+<span class="kw">export function</span> <span class="fn">BotaoCopiarLink</span>() {
+  <span class="kw">return</span> (
+    <span class="tagc">&lt;button</span>
+      <span class="attr">type</span>=<span class="st">"button"</span>
+      <span class="attr">onClick</span>={() =&gt; <span class="ty">navigator</span>.clipboard.<span class="fn">writeText</span>(<span class="ty">location</span>.href)}
+      <span class="attr">className</span>=<span class="st">"rounded-md border border-white/15 px-3 py-2 text-sm"</span>
+    <span class="tagc">&gt;</span>
+      🔗 Copiar link
+    <span class="tagc">&lt;/button&gt;</span>
+  );
+}</pre>
+
+<pre><span class="cm">// app/midias/[slug]/page.tsx — duas linhas, nada mais</span>
+<span class="kw">import</span> { <span class="ty">BotaoCopiarLink</span> } <span class="kw">from</span> <span class="st">"@/components/botao-copiar-link"</span>;
+
+<span class="cm">// … dentro do return, logo abaixo do &lt;h1&gt; com o titulo:</span>
+<span class="tagc">&lt;</span><span class="ty">BotaoCopiarLink</span> <span class="tagc">/&gt;</span></pre>
+
+    <h4>O erro, inteiro</h4>
+<div class="terminal"><span class="err">Error: Event handlers cannot be passed to Client Component props.</span>
+  <span class="path">&lt;button type="button" onClick={function onClick} className=... children=...&gt;</span>
+                                <span class="err">^^^^^^^^^^^^^^^^^^</span>
+<span class="cm">If you need interactivity, consider converting part of this to a Client Component.</span></div>
+
+    <p><b>Em português simples:</b> "você me deu uma função para escutar o
+    clique, e eu não tenho quem escute". O clique acontece no dedo da pessoa,
+    depois que a página já está na tela — e a essa altura o servidor terminou o
+    trabalho e foi embora. <code>navigator</code> e <code>location</code>
+    também só existem lá, no navegador dela.</p>
+
+    <h4>É essa a linha</h4>
+<pre><span class="cm">// components/botao-copiar-link.tsx — primeira linha do arquivo</span>
+<span class="st">"use client"</span>;</pre>
+    <ul>
+      <li><b>Primeira linha</b>, antes dos <code>import</code>. Com aspas e
+      ponto e vírgula: não é comentário, é uma instrução para o Next.</li>
+      <li>Ela <b>não tira o arquivo do servidor</b> — ela <b>acrescenta o
+      navegador</b>. O HTML continua vindo pronto; o que muda é que o código
+      viaja junto, para o clique ter quem o escute.</li>
+      <li><b>Marque a folha, não a raiz.</b> <code>app/midias/[slug]/page.tsx</code>
+      continua Server Component: é lá que roda o <code>await buscarMidia(slug)</code>,
+      e esse acesso à API não desce para o navegador.</li>
+    </ul>
+
+    <p class="tip"><b>Confira que é o primeiro mesmo.</b> Rode
+    <code>grep -rn "use client" app components lib</code> antes e depois. Antes
+    do seu commit, o repositório inteiro devolve zero linhas.</p>
+
+    <div class="perg">
+      <b>responda</b>
+      <ol>
+        <li>Em que arquivo a linha entrou? Por que <b>não</b> em <code>app/midias/[slug]/page.tsx</code>?</li>
+        <li>O Copilot avisou que faltava a linha, <b>sem você perguntar</b>?</li>
+        <li>Traduza o erro com as suas palavras, em <b>uma frase</b>.</li>
+        <li><code>navigator.clipboard</code> — por que ele não existe no servidor?</li>
+      </ol>
+    </div>
+    <details class="gab">
+      <summary>conferir depois de responder</summary>
+      <div class="in">
+        <p><b>1.</b> Em <code>components/botao-copiar-link.tsx</code>. A linha marca uma <b>fronteira</b>, e tudo que está dentro de um componente de cliente viaja com ele. Se ela fosse para o <code>page.tsx</code>, a página inteira desceria para o navegador — junto com o <code>await buscarMidia(slug)</code>, que é o acesso à API. O botão é uma folha: marque a folha.</p>
+        <p><b>2.</b> Quase nunca avisa. E as convenções do time mandam avisar: <code>.github/copilot-instructions.md</code> diz que, ao sugerir <code>"use client"</code>, ele deve explicar na mesma resposta por que é necessário. Guarde a cena — <b>o mesmo tom de confiança</b> apareceu quando ele acertou o resto do tour, no lab 1. O tom não distingue acerto de erro. Você distingue, abrindo o arquivo e rodando.</p>
+        <p><b>3.</b> Vale qualquer frase com esse sentido: "eu recebi uma função para o clique, e ninguém no HTML pronto sabe executá-la". Se você conseguiu escrever a frase, você entendeu a fronteira — e é isso que a revisão vai te perguntar no PR.</p>
+        <p><b>4.</b> Porque <code>navigator</code> e <code>location</code> são objetos <b>do navegador</b>. No servidor não existe janela, nem área de transferência, nem pessoa clicando. Um arquivo que precisa deles precisa rodar lá. Server Component é o padrão do projeto; <code>"use client"</code> é a exceção, e toda exceção vem com um motivo escrito.</p>
+        <p><b>Extra.</b> O <code>AGENTS.md</code> da raiz já avisava que isso ia acontecer — e ele não foi escrito pelo time, foi gerado pelo próprio <code>next dev</code>.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="label">Se travar</div>
+
+  <table class="erros">
+    <tr><th>o que aparece</th><th>o que costuma ser</th></tr>
+    <tr><td><code>Event handlers cannot be passed to Client Component props</code></td><td>É o erro do lab 2, e ele é esperado. Se continua depois da linha: ela não é a <b>primeira</b> do arquivo, ou entrou no arquivo errado.</td></tr>
+    <tr><td><code>This React hook only works in a client component</code></td><td>Mesma causa, outra porta: o componente usa <code>useState</code> ou <code>useEffect</code> e ainda é Server Component.</td></tr>
+    <tr><td><code>params should be awaited before using its properties</code></td><td><code>params</code> e <code>searchParams</code> são <b>Promise</b> no Next 16. Falta o <code>await</code>. Compare com <code>app/midias/page.tsx</code>, que já faz certo.</td></tr>
+    <tr><td><code>API_URL não está configurada. Veja o .env.example</code></td><td>O <code>.env.local</code> não foi criado, ou está com <code>USAR_MOCK=false</code>. Rode <code>cp .env.example .env.local</code> e suba o <code>npm run dev</code> de novo.</td></tr>
+    <tr><td><code>Module not found: Can't resolve '@/components/botao-copiar-link'</code></td><td>Nome do arquivo. Arquivos aqui são <code>kebab-case</code>, componentes são <code>PascalCase</code>. Confira letra por letra.</td></tr>
+    <tr><td><code>404</code> em <code>/midias/alguma-coisa</code></td><td>O slug não existe. Os oito slugs válidos estão em <code>data/midias.json</code> — por exemplo <code>a-ultima-linha</code>.</td></tr>
+    <tr><td>O <code>.env.local</code> mudou e a tela não</td><td>Variável de ambiente é lida quando o servidor sobe. Pare o <code>npm run dev</code> e suba outra vez.</td></tr>
+  </table>
+
+  <div class="goal verde">
+    <span class="ico">🎫</span>
+    <div>
+      <h3>Daqui sai o ticket da semana</h3>
+      <p>Os dois labs são treino, direto no <code>lequeplay-web</code>. O
+      <b>ticket</b> pega o botão que você acabou de escrever e leva até o Pull
+      Request: branch, <code>npm run build</code> passando, descrição
+      preenchida e o Copilot Code Review comentando antes de qualquer humano.</p>
+      <p>O que a revisão lê primeiro é <b>"a decisão que eu tomei"</b> — está
+      no <code>.github/pull_request_template.md</code>. Depois de hoje, você
+      tem uma decisão para escrever ali: por que a linha entrou no componente,
+      e não na página.</p>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="slides.html">▶ Slides da aula</a>
+    <a class="btn" href="https://trello.com/b/Ceu4uGVp/lequeplay" target="_blank" rel="noopener noreferrer">🎫 Ticket da semana</a>
+    <a class="btn" href="codigos-ticket.html">💻 Código do ticket</a>
+    <a class="btn" href="https://github.com/Um-Leque-de-Tecnologia/lequeplay-web" target="_blank" rel="noreferrer">📦 lequeplay-web no GitHub</a>
+  </div>
+
+  <div class="foot">
+    Next.js + IA · Aula 01 · Next 16 · React 19 · LequePlay · NickDev
+  </div>
+
+</div>
+
+</body>
+</html>

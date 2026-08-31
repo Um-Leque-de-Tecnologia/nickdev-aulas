@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import { materialDaAula } from "@/lib/cdn";
 
 export const metadata: Metadata = {
   title: "Introdução ao Spring Boot · NickDev",
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
     "Curso de introdução ao Spring Boot: injeção de dependência, API REST, Spring Data JPA, validação, segurança com JWT, testes, observabilidade, Docker e deploy.",
 };
 
-const AULA_01 = "/cursos/introducao-spring-boot/aula-01-primeira-api";
-const AULA_02 = "/cursos/introducao-spring-boot/aula-02-beans-e-injecao";
-const PROJETO = "/cursos/introducao-spring-boot/projeto";
+const AULA_01 = materialDaAula("introducao-spring-boot", "aula-01-primeira-api");
+const AULA_02 = materialDaAula("introducao-spring-boot", "aula-02-beans-e-injecao");
+const PROJETO = materialDaAula("introducao-spring-boot", "projeto");
 
 export default function JavaSpringBoot() {
   return (
