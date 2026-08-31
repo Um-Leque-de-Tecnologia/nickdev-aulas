@@ -215,16 +215,39 @@ npm run dev
 > o Keycloak — com o terminal dizendo que leu a configuração. Use o mesmo
 > `SESSION_SECRET` nos dois arquivos, senão trocar de comando desloga você.
 
-**Produção:** nada disso vai para o `wrangler.jsonc` — ele é versionado. Cada
-valor vira um secret do Worker:
+**Produção:** o que não é segredo mora no `wrangler.jsonc`, em `vars`, e sobe
+junto com o deploy — `KEYCLOAK_ISSUER`, `KEYCLOAK_CLIENT_ID` e `APP_URL`. As
+três aparecem na barra de endereço durante o login, então guardá-las como
+secret não escondia nada; só as tornava manuais.
+
+E manual foi o problema: elas nunca foram definidas no Worker, e o `/entrar` em
+produção mandou todo mundo para a tela de erro por meses, sem nunca chegar ao
+Keycloak — enquanto local funcionava, lendo o `.dev.vars`. Versionadas, não há
+como um deploy novo sair sem elas.
+
+Sobra **um** secret de verdade:
 
 ```bash
-npx wrangler secret put KEYCLOAK_ISSUER
-npx wrangler secret put KEYCLOAK_CLIENT_ID
-npx wrangler secret put KEYCLOAK_CLIENT_SECRET   # só em client confidencial
 npx wrangler secret put SESSION_SECRET
-npx wrangler secret put APP_URL          # só se você quiser fixar a URL
 ```
+
+Ele deriva a chave que cifra os cookies. Trocá-lo invalida todas as sessões de
+uma vez: o proxy trata cookie que não abre como sessão zumbi e expulsa. Escolha
+um e não mexa.
+
+O `KEYCLOAK_CLIENT_SECRET` fica fora dos dois lugares enquanto o client for
+público — é o caso do `aulas-web`, que usa PKCE. Num client confidencial, ele
+entra como secret, nunca em `vars`:
+
+```bash
+npx wrangler secret put KEYCLOAK_CLIENT_SECRET   # só em client confidencial
+```
+
+> O `APP_URL` decide o `redirect_uri` que vai ao Keycloak. Ele precisa estar
+> **exatamente** nos *Valid redirect URIs* do client — para produção,
+> `https://aulas.umlequedetecnologia.com.br/entrar/retorno`. Se só houver
+> `localhost` lá, o login falha com "Invalid parameter: redirect_uri" já na
+> tela do Keycloak.
 
 Faltou alguma das obrigatórias? O app falha na hora, com o nome da variável no
 erro. É de propósito: auth que falha calada é pior do que site que não sobe. A

@@ -10,5 +10,33 @@
   "assets": {
     "binding": "ASSETS",
     "directory": ".open-next/assets"
+  },
+
+  // A configuração do login que NÃO é segredo, versionada de propósito.
+  //
+  // As três aparecem na barra de endereço do navegador durante o login: o
+  // issuer e o client_id vão na query da tela do Keycloak, e o APP_URL é o
+  // próprio domínio. Guardá-las como `wrangler secret put` não escondia nada —
+  // só as tornava invisíveis e manuais.
+  //
+  // E manual foi o problema. Elas nunca foram definidas no Worker, e o app se
+  // comportou exatamente como está escrito para se comportar: `/entrar` viu
+  // `isKeycloakConfigured()` falso e mandou todo mundo para a tela de erro, sem
+  // nunca chegar ao Keycloak. Local funcionava, porque lá elas vêm do
+  // `.dev.vars`. Aqui elas sobem junto com o deploy e não há como esquecer.
+  //
+  // SESSION_SECRET continua FORA daqui, e é a única que segue sendo secret:
+  //   npx wrangler secret put SESSION_SECRET
+  // Ela deriva a chave que cifra os cookies de sessão. Trocá-la invalida todas
+  // as sessões de uma vez — o proxy trata cookie que não abre como sessão
+  // zumbi e expulsa. Escolha uma e não mexa.
+  //
+  // KEYCLOAK_CLIENT_SECRET também fica fora, por outro motivo: o `aulas-web` é
+  // um client público (PKCE), e mandar `client_secret=""` faria o Keycloak
+  // recusar com `invalid_client` no fim do login.
+  "vars": {
+    "KEYCLOAK_ISSUER": "https://auth.rodolfodebonis.com.br/realms/aulas",
+    "KEYCLOAK_CLIENT_ID": "aulas-web",
+    "APP_URL": "https://aulas.umlequedetecnologia.com.br"
   }
 }
