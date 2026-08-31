@@ -71,19 +71,36 @@ de **role do client**, não de banco: não existe banco aqui.
 
 ### 1. O client no Keycloak
 
-No seu realm (ex.: `nickdev`), crie um client e configure assim:
+O realm é o **`aulas`**, em `https://auth.rodolfodebonis.com.br`, e o client é o
+**`aulas-web`** — o mesmo que um front via `keycloak-js` usa. Por isso ele é
+**público**: client confidencial não funciona no navegador, e o secret que o
+`keycloak-js` não pode ter também não existe para este site.
 
 | Campo | Valor |
 | --- | --- |
-| Client ID | `nickdev-aulas` — o mesmo de `KEYCLOAK_CLIENT_ID` |
-| Client authentication | **On** (client confidencial: tem `client_secret`) |
+| Client ID | `aulas-web` — o mesmo de `KEYCLOAK_CLIENT_ID` |
+| Client authentication | **Off** (client público: não tem `client_secret`) |
 | Standard flow | **ligado** — é o Authorization Code que o site usa |
 | Direct access grants | **desligado** |
-| Valid redirect URIs | `http://localhost:3000/entrar/retorno` e `https://aulas.seudominio.com.br/entrar/retorno` |
-| Valid post logout redirect URIs | `http://localhost:3000/` e `https://aulas.seudominio.com.br/` |
-| Web origins | `http://localhost:3000` e `https://aulas.seudominio.com.br` |
+| PKCE Code Challenge Method | **`S256`** (Advanced Settings) — obrigatório, ver abaixo |
+| Valid redirect URIs | `http://localhost:3000/entrar/retorno` e `https://aulas.umlequedetecnologia.com.br/entrar/retorno` |
+| Valid post logout redirect URIs | `http://localhost:3000/` e `https://aulas.umlequedetecnologia.com.br/` |
+| Web origins | não precisa para este site — o navegador nunca fala com o Keycloak por XHR aqui; a troca do código acontece no servidor |
 
-O `client_secret` aparece depois de salvar, na aba **Credentials**.
+> ⚠️ **Em client público, o `S256` no Advanced Settings não é detalhe.** Sem
+> `client_secret`, quem impede que um código de autorização interceptado vire
+> token é o PKCE: o site manda `code_challenge` na ida e guarda o
+> `code_verifier` num cookie `httpOnly` que nunca sai do servidor. Mas se o
+> client aceitar troca de código **sem** `code_challenge`, o atacante simplesmente
+> não manda o campo e pula a proteção inteira. Quem fecha essa porta é o realm,
+> não o código — marcar `S256` ali obriga todo mundo a jogar com PKCE.
+
+**Se um dia este site ganhar um client confidencial só dele** (recomendado, e é
+o modelo para o qual o código foi escrito), basta criar o client com
+`Client authentication` **On**, pôr o segredo da aba *Credentials* em
+`KEYCLOAK_CLIENT_SECRET` e trocar o `KEYCLOAK_CLIENT_ID`. Nada de código muda:
+`lib/auth/keycloak.ts` manda o `client_secret` quando a variável existe e trata
+a ausência dela como client público.
 
 **Por que `Direct access grants` fica desligado:** esse é o fluxo em que a
 aplicação recebe usuário e senha e repassa para o Keycloak. Aqui a senha só é
@@ -96,27 +113,75 @@ contra as contas do realm.
 > volta, e leva um `Invalid parameter: redirect_uri` na tela do Keycloak — não
 > na sua, o que faz o erro parecer um bug do site.
 
+> ⚠️ **E casa com a PORTA.** O `redirect_uri` sai da origem do request, então
+> rodar o dev em outra porta manda um URI que ninguém cadastrou — e o Keycloak
+> responde exatamente o mesmo `Parâmetro inválido: redirect_uri`, como se
+> faltasse configuração. É a pegadinha mais fácil de cair aqui, porque o
+> `next dev` **desliza de porta em silêncio** quando a 3000 está ocupada por
+> outro projeto: ele avisa `using available port 3001 instead` numa linha do
+> terminal e segue.
+>
+> Por isso o script é `next dev -p 3000`, e não `next dev`: com a porta
+> explícita ele falha na hora com `EADDRINUSE`, que aponta para o problema de
+> verdade. Se a 3000 estiver ocupada, libere-a — não suba em outra porta
+> esperando que o login funcione.
+>
+> Vale para o `npm run preview` também: o workerd sobe em `8787`, que não está
+> cadastrado. Login pelo preview exige cadastrar `http://localhost:8787/entrar/retorno`
+> no client.
+
+### 1.1. Como a pessoa ganha conta: sem autocadastro
+
+Não existe "criar conta" neste produto. Quem entra é quem foi colocado no realm:
+o admin cadastra o **e-mail** da pessoa em *Users*, e ela recebe um e-mail para
+**definir a própria senha** (*Credentials* → *Reset actions* → `Update Password`,
+ou o *Email* → `Update password`). O site nunca vê senha, e não tem tela de
+cadastro — nenhum arquivo em `app/` ou `components/` linka para o registro do
+Keycloak.
+
+> ⚠️ **Isso depende de uma chave no realm, e hoje ela está do lado errado.** A
+> tela de login do `aulas` está mostrando um link **"Criar conta"**
+> (`id="kc-registration"` no HTML dela), o que significa *Realm settings* →
+> *Login* → **User registration** ligado. Com ele ligado, qualquer pessoa com o
+> endereço da tela de login cria conta sozinha.
+>
+> Não é buraco de acesso: conta nova vem sem role nenhuma, e `lib/auth/roles.ts`
+> só libera curso restrito para quem tem a role — quem se cadastrar sozinho vê o
+> painel com os cursos públicos, que já eram públicos. Mas contradiz o modelo
+> acima e enche o realm de contas que ninguém convidou. **Desligar
+> `User registration`** deixa a tela só com usuário, senha e "esqueci minha
+> senha" — que é o que este produto precisa.
+
 ### 2. Roles: quem entra em quê
 
-As permissões são **client roles** do client `nickdev-aulas` (aba *Roles*):
+As permissões são **client roles** do client `aulas-web` (aba *Roles*) — as
+mesmas que o `KEYCLOAK_CLIENT_ID` aponta, porque o app lê
+`resource_access["aulas-web"].roles`. Role criada em outro client não chega aqui.
 
 | Role | Quem recebe | O que abre |
 | --- | --- | --- |
-| `admin` | você | `/admin`, e enxerga todos os cursos restritos |
-| `curso-<slug>` | quem foi liberado | o curso daquele `slug` |
+| `admin` | você | `/admin` |
 
-Hoje existe uma role de curso só: **`curso-nextjs-ia`**. Curso público não tem
-role — aparece para todo mundo, logado ou não.
+**É só essa.** Curso pago não é liberado pessoa a pessoa: **quem tem sessão vê
+todos**. A regra está em `canSee()`, em `lib/auth/roles.ts`, e a rota que entrega
+o material aplica a mesma coisa do outro lado — ao receber 403 da API, ela
+matricula a sessão e pede de novo, porque o endpoint de matrícula aceita
+qualquer sessão válida.
 
-**Liberar acesso a alguém** é atribuir a role no console do Keycloak: *Users* →
-a pessoa → *Role mapping* → *Assign role* → filtre por *clients* →
-`curso-nextjs-ia`. Não tem tela no site para isso, e o `/admin` diz o mesmo.
+Curso público aparece para todo mundo, logado ou não; curso pago aparece para
+quem entrou. Não existe estado intermediário, e **não há nada para atribuir no
+console** — se você atribuir `curso-nextjs-ia` a alguém, não muda nada, nem para
+mais nem para menos. O campo `role` segue no catálogo como gancho para o dia em
+que voltar a existir curso liberado por matrícula individual; hoje ninguém o lê.
 
-A sessão carrega as roles do momento em que foi criada. Quem já estava logado
-enxerga o curso novo no próximo login — ou depois de sair e entrar de novo.
+> 🔒 **Isso move a tranca do curso pago para o cadastro.** Antes, conta nova sem
+> role não abria material pago; agora **ter conta é ter acesso**. Enquanto
+> *Realm settings → Login → **User registration*** estiver ligado no realm,
+> qualquer pessoa cria conta e abre o curso pago de graça. Desligar o autocadastro
+> não é arrumação de tela — é a única tranca que sobrou. Ver a seção 1.1.
 
-Curso restrito novo segue a regra `curso-` + o `slug` da pasta em `app/cursos/`:
-crie a role com esse nome e registre o curso em `lib/cursos.ts`.
+Curso restrito novo é uma entrada em `lib/cursos.ts` com `access: "restricted"`.
+Nada mais: ele sai da vitrine pública sozinho e aparece no painel de quem entrou.
 
 ### 3. Variáveis de ambiente
 
@@ -124,17 +189,31 @@ crie a role com esse nome e registre o curso em `lib/cursos.ts`.
 | --- | --- |
 | `KEYCLOAK_ISSUER` | base do realm; dela sai o `.well-known/openid-configuration` |
 | `KEYCLOAK_CLIENT_ID` | `client_id` e chave das roles em `resource_access` |
-| `KEYCLOAK_CLIENT_SECRET` | autentica o site no token endpoint |
+| `KEYCLOAK_CLIENT_SECRET` | **opcional** — só existe em client confidencial. Hoje o `aulas-web` é público e ela fica de fora |
 | `SESSION_SECRET` | 32+ bytes aleatórios; deriva a chave que cifra o cookie |
 | `APP_URL` | opcional; sem ela, a URL de retorno vem da origem do request |
 
-**Local:** copie o exemplo, preencha e rode. O `.dev.vars` está no `.gitignore`,
-e serve tanto para o `dev` quanto para o `preview` (workerd local).
+**Local: dois arquivos, e não é redundância.** Quem lê cada um é um runtime
+diferente, e os dois estão no `.gitignore`:
+
+| arquivo | quem lê |
+| --- | --- |
+| `.env.local` | `npm run dev` — `next dev`, runtime Node, `process.env` nativo do Next |
+| `.dev.vars` | `npm run preview` — `wrangler dev`, runtime workerd |
 
 ```bash
-cp .dev.vars.example .dev.vars
+cp .dev.vars.example .dev.vars   # preencha
+cp .dev.vars .env.local          # as mesmas variáveis, para o next dev
 npm run dev
 ```
+
+> ⚠️ **O `next dev` NÃO lê o `.dev.vars`.** Ele até anuncia
+> `Using secrets defined in .dev.vars` no terminal — isso é o Miniflare, e
+> aquelas variáveis ficam no `env` do Worker, não no `process.env` que os Route
+> Handlers do dev server leem. Sem `.env.local`, o `KEYCLOAK_ISSUER` chega
+> vazio, o atalho de login de mentira volta a valer e o `/entrar` nunca sai para
+> o Keycloak — com o terminal dizendo que leu a configuração. Use o mesmo
+> `SESSION_SECRET` nos dois arquivos, senão trocar de comando desloga você.
 
 **Produção:** nada disso vai para o `wrangler.jsonc` — ele é versionado. Cada
 valor vira um secret do Worker:
@@ -142,13 +221,15 @@ valor vira um secret do Worker:
 ```bash
 npx wrangler secret put KEYCLOAK_ISSUER
 npx wrangler secret put KEYCLOAK_CLIENT_ID
-npx wrangler secret put KEYCLOAK_CLIENT_SECRET
+npx wrangler secret put KEYCLOAK_CLIENT_SECRET   # só em client confidencial
 npx wrangler secret put SESSION_SECRET
 npx wrangler secret put APP_URL          # só se você quiser fixar a URL
 ```
 
-Faltou alguma? O app falha na hora, com o nome da variável no erro. É de
-propósito: auth que falha calada é pior do que site que não sobe.
+Faltou alguma das obrigatórias? O app falha na hora, com o nome da variável no
+erro. É de propósito: auth que falha calada é pior do que site que não sobe. A
+exceção é o `KEYCLOAK_CLIENT_SECRET`, que é opcional — ausente, o site se
+apresenta como client público.
 
 > ⚠️ **Trocar o `SESSION_SECRET` desloga todo mundo.** A sessão vive inteira
 > dentro do cookie cifrado; com chave nova, os cookies antigos não decifram
@@ -164,7 +245,7 @@ coisas são verdade ao mesmo tempo:
 1. `NODE_ENV` é `development` — o `next build` sempre produz `production`;
 2. `KEYCLOAK_ISSUER` está ausente ou vazia.
 
-Ou seja: `npm run dev` sem `.dev.vars` nenhum já entra. Nem o `SESSION_SECRET`
+Ou seja: `npm run dev` sem `.env.local` nenhum já entra. Nem o `SESSION_SECRET`
 precisa existir — em `development` o cookie é cifrado com uma chave fixa de
 desenvolvimento.
 

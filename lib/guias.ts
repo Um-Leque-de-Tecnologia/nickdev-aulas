@@ -72,6 +72,26 @@ export function hrefDoGuia(slug: string): string {
 }
 
 /**
+ * O endereço do guia dentro da área logada.
+ *
+ * Mesmo par que `privateCourseHref` em lib/cursos.ts, e pelo mesmo motivo: o
+ * guia no CDN é uma página inteira, com marca e navegação próprias, e mandar
+ * quem está logado para lá tirava a pessoa do app. O botão de voltar do guia
+ * aponta para a home pública — de dentro da área logada, ele levava para fora
+ * e não havia caminho de volta que não fosse o botão do navegador.
+ *
+ * Aqui o guia vem embutido na coluna de conteúdo, com a sidebar do app
+ * continuando na tela e um "voltar" que leva ao painel.
+ */
+export function privateGuideHref(slug: string): string {
+  return `/painel/guias/${slug}`;
+}
+
+export function guiaBySlug(slug: string): Guia | undefined {
+  return GUIAS.find((g) => g.slug === slug);
+}
+
+/**
  * Os guias das tecnologias que um curso usa, na ordem em que foram pedidos.
  * Erra alto se o slug não existe — badge apontando para o vazio é pior do
  * que build quebrado.

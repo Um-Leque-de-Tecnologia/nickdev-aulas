@@ -85,8 +85,19 @@ export async function GET(req: NextRequest) {
   //   nada. O layout da área logada a recusa, e devolvê-la para o /painel aqui
   //   deixaria os dois se empurrando até o navegador desistir por redirects
   //   demais. Ignorá-la faz o login de verdade sobrescrever o cookie velho.
+  /* `?renovar=1` pula o atalho abaixo, e existe por um caso que o atalho nao
+   * resolve: a pessoa TEM sessao valida e o que morreu foi a credencial de API.
+   * Sem isto, o atalho devolveria ela para o mesmo lugar com o mesmo problema —
+   * e, se o destino for a rota que exige credencial, os dois se empurrariam ate
+   * o navegador desistir por redirects demais.
+   *
+   * Quem manda esse parametro e a tela do material, no botao de recuperar
+   * acesso. A volta ao Keycloak e barata quando a sessao SSO esta viva: ele
+   * devolve o codigo na hora, sem pedir senha. */
+  const renovar = req.nextUrl.searchParams.get("renovar") === "1";
+
   const session = await readSession();
-  if (session && !isDevLoginEnabled() && !session.dev) {
+  if (session && !renovar && !isDevLoginEnabled() && !session.dev) {
     // Respeita o `?de=`. Mandar todo mundo para o /painel descartava o destino
     // justamente de quem mais precisa dele: quem clicou num link protegido e
     // chegou aqui só porque o access token tinha vencido. A pessoa perdia o

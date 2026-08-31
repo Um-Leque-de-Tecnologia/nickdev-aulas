@@ -59,6 +59,9 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   --pad-x: clamp(20px, 5vw, 64px);
+  /* O respiro vertical do `.wrap`. Virou token porque a tela de guia precisa
+     DEVOLVER esse mesmo valor por dentro do documento — ver `.guia-doc`. */
+  --wrap-pad-y: clamp(28px, 5vw, 64px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -98,7 +101,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* layout ------------------------------------------------------------------- */
-.wrap { max-width: 1100px; margin: 0 auto; padding: clamp(28px, 5vw, 64px) var(--pad-x); position: relative; z-index: 1; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: var(--wrap-pad-y) var(--pad-x); position: relative; z-index: 1; }
 
 /* topo --------------------------------------------------------------------- */
 /* Em tela estreita o cabeçalho quebra em duas linhas — marca em cima, navegação
@@ -253,8 +256,14 @@ a.guia:hover { transform: translateY(-3px); border-color: var(--purple); }
 .faixa__titulo .e { font-size: 18px; }
 .faixa__desc { margin: 5px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--text-2); }
 
-/* 2 colunas: divisória vertical entre as duplas, horizontal entre as linhas */
-@media (min-width: 40rem) {
+/* 2 colunas: divisória vertical entre as duplas, horizontal entre as linhas.
+   O teto de 64rem NÃO é enfeite. Sem ele estas regras continuavam valendo no
+   layout de 4 colunas, e lá `:nth-child(odd)` — especificidade (0,2,1) — ganha
+   do `.faixa > li` de baixo, que é (0,1,1): media query não soma
+   especificidade, então quem decide é o seletor, não a ordem dos blocos. O
+   3º item ficava com `padding-left: 0` e `border-left: 1px` ao mesmo tempo, com
+   o texto colado na divisória, e o 2º perdia o `padding-right`. */
+@media (min-width: 40rem) and (max-width: 63.999rem) {
   .faixa { grid-template-columns: repeat(2, 1fr); }
   .faixa > li { padding-inline: 22px; }
   .faixa > li:nth-child(odd) { padding-left: 0; }
@@ -269,7 +278,10 @@ a.guia:hover { transform: translateY(-3px); border-color: var(--purple); }
   .faixa > li { padding: 0 20px; border-left: 1px solid var(--line); }
   .faixa > li:first-child { padding-left: 0; border-left: 0; }
   .faixa > li:last-child { padding-right: 0; }
-  .faixa > li:nth-child(n + 3) { margin-top: 0; padding-top: 0; border-top: 0; }
+  /* A divisória horizontal da versão de uma coluna precisa sair aqui: com o
+     bloco de 2 colunas fechado no teto, quem sobra valendo é o `li + li` de
+     lá em cima, e ele desenha borda entre todos os itens. */
+  .faixa > li + li { margin-top: 0; padding-top: 0; border-top: 0; }
 }
 
 /* Fileira de ações no topo de um curso: aulas gravadas, grupo da turma. */
@@ -519,7 +531,30 @@ html { overflow-x: clip; }
   max-height: 100dvh;
   overflow-y: auto;
   padding-block: clamp(16px, 3vw, 28px);
+
+  /* A barra de rolagem da sidebar é desenhada, e não herdada do sistema.
+     Com dez itens de navegação ela rola em tela baixa, e a barra cinza padrão
+     do Windows aparecia larga, clara e encostada no trilho magenta dos itens —
+     o elemento mais chamativo de uma coluna que é toda de apoio.
+
+     Firefox entende as duas linhas abaixo; Chrome e Safari precisam dos
+     pseudo-elementos, então o mesmo desenho existe duas vezes. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
 }
+.app-sidebar::-webkit-scrollbar { width: 10px; }
+.app-sidebar::-webkit-scrollbar-track { background: transparent; }
+.app-sidebar::-webkit-scrollbar-thumb {
+  /* A borda transparente com `background-clip: padding-box` é o que afina o
+     polegar sem afinar a área de clique: ele desenha 4px e continua pegando os
+     10px da barra, que é o mínimo confortável para o mouse. */
+  background: rgba(255, 255, 255, 0.16);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+.app-sidebar:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.26); background-clip: padding-box; }
+.app-sidebar::-webkit-scrollbar-thumb:hover { background: var(--pink-light); background-clip: padding-box; }
 
 @media (max-width: 900px) {
   /* Em coluna única a sidebar vira a faixa do topo. Grudar ali não ajuda a
@@ -620,14 +655,30 @@ html { overflow-x: clip; }
   font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--text-4); padding-left: 13px;
 }
-.app-guides__list { display: flex; flex-direction: column; gap: 1px; }
+.app-guides__list { display: flex; flex-direction: column; gap: 2px; }
+
+/* Guia é item de navegação como qualquer outro, e agora se parece com um.
+   Antes este bloco tinha fonte sans (o resto da sidebar é mono), --text-3 em
+   vez de --text-2, padding menor e raio nos quatro cantos, sem o trilho da
+   esquerda: dois menus com duas gramáticas visuais, um em cima do outro, na
+   mesma coluna. Herdar de .app-nav__link deixa a diferença onde ela é real —
+   o emoji e o rótulo — em vez de na moldura. */
 .app-guides__link {
   display: flex; align-items: center; gap: 8px;
-  font-size: 13.5px; color: var(--text-3);
-  padding: 6px 13px; border-radius: 8px;
-  transition: color 0.18s ease, background-color 0.18s ease;
+  font-family: var(--font-mono); font-size: 13.5px; color: var(--text-2);
+  padding: 9px 13px; border-radius: 0 10px 10px 0;
+  border-left: 2px solid transparent;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
 }
 .app-guides__link:hover { color: var(--pink-light); background: rgba(255, 255, 255, 0.045); }
+/* Mesmo estado aceso do .app-nav__link: desde que o guia abre dentro da área
+   logada, ele TEM rota, e "qual guia estou lendo" passou a ser uma pergunta
+   com resposta. */
+.app-guides__link.is-active {
+  color: var(--pink-light);
+  background: rgba(242, 68, 135, 0.11);
+  border-left-color: var(--magenta);
+}
 
 @media (max-width: 900px) {
   /* Em coluna única a lateral já virou faixa. Os guias acompanham: rolam na
@@ -654,3 +705,193 @@ html { overflow-x: clip; }
   margin-inline: calc(50% - 50vw);
   padding-inline: var(--pad-x);
 }
+
+/* guia embutido na área logada ---------------------------------------------- */
+/* O guia deixou de morar num <iframe>. O CSS dele agora chega junto com a
+   página, reescrito por lib/guia-inline.ts para não sair de `.guia-doc` — sem isso
+   os 24 seletores de elemento nu dele (`body`, `a`, `h1`, `main`, `aside`)
+   repintariam o app inteiro.
+
+   A tela fica em três faixas: a sidebar do app à esquerda, o texto no meio e o
+   índice do guia preso à direita. As regras abaixo precisam de DOIS nomes de
+   classe (`.guia-doc .guia__indice`, e não só `.guia__indice`) porque competem com
+   as do próprio guia: `.guia-doc aside` vale (0,1,1) e ganharia de uma classe
+   sozinha. Duas classes valem (0,2,0) e passam na frente. */
+
+.guia-doc { --guia-indice: 264px; }
+
+/* O texto ocupa a largura toda do vão, sem medida de leitura e sem centralizar.
+   Havia um `max-width: 82ch; margin-inline: auto` aqui — a medida clássica de
+   linha legível — e ele saiu por pedido: o guia é material de consulta lido ao
+   lado do editor, com tabela e bloco de código largos, e a coluna estreita
+   deixava sobra dos dois lados justamente onde a tabela precisava do espaço.
+   Se um dia o texto corrido voltar a incomodar em tela larga, o lugar de
+   devolver a medida é aqui — não no HTML do guia. */
+.guia-doc .guia__texto {
+  max-width: none;
+  min-width: 0;
+  /* Padding sim, margin nunca — e a diferenca importa porque o documento tem
+     fundo proprio. Padding mantem o fundo atras do respiro, e o texto respira
+     DENTRO do painel; margin empurraria o painel inteiro e abriria um vao
+     mostrando o fundo da pagina, que e o que faz o guia parecer um card solto.
+
+     Os valores substituem o `main{padding:44px clamp(22px,4vw,60px) 90px}` do
+     CSS do guia, escopado como `.guia-doc main`: la ele era o respiro da pagina
+     inteira e somava com o da coluna do app, dando 44px de vao no topo e ate
+     60px de sobra de cada lado. Aqui e menos da metade nas laterais, o topo e
+     enxuto e o rodape fica inteiro — o fim de um texto longo precisa de chao.
+
+     Duas classes (0,2,0) ganham de `.guia-doc main` (0,1,1), que e por que esta
+     regra vence sem `!important`. */
+  margin: 0;
+  padding: calc(var(--wrap-pad-y) + clamp(16px, 1.6vw, 24px))
+           clamp(18px, 2vw, 28px)
+           clamp(40px, 6vw, 90px);
+}
+
+/* Nada acima do guia: a coluna começa no documento.
+   O primeiro filho do texto chega com a margem de topo que ele tinha no
+   documento original, onde havia cabeçalho antes dele. Aqui não há, e aquela
+   margem virava um vão no topo da tela. */
+.guia-doc { margin-top: 0; }
+.guia-doc .guia__texto > :first-child { margin-top: 0; }
+
+/* Preso à tela inteira, e não à coluna de conteúdo — foi o pedido. `fixed`
+   resolve isso sozinho: ele ancora na janela, não no pai. Só funciona porque
+   nenhum ancestral do app tem `transform`, `filter` ou `contain`, que criariam
+   um bloco de contenção e prenderiam o índice na coluna. */
+.guia-doc .guia__indice {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 5;
+  width: var(--guia-indice);
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: clamp(20px, 3vw, 30px) clamp(16px, 2vw, 22px);
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  /* O índice é uma lista longa; sem isto ele herda o corpo do texto do guia e
+     cada item ocupa o dobro da largura. */
+  font-size: 14px;
+}
+.guia-doc .guia__indice-titulo {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+/* O vão à direita, reservado na coluna de conteúdo do app.
+   Fica no `:has()` para o layout da área logada continuar genérico: só a
+   página que tem um `.guia-doc` dentro paga o recuo, e nenhuma outra precisa saber
+   que o índice existe. */
+/* Só a COLUNA DE CONTEÚDO sobe até o topo da página — a sidebar não se mexe.
+
+   A tentativa anterior era zerar o `padding-top` do `.wrap`, e ela funcionava
+   para o guia e estragava a lateral: o `.wrap` embrulha as duas colunas, então
+   a sidebar subia junto e a tela de guia ficava com a lateral numa altura
+   diferente de todas as outras telas do app.
+
+   Margem negativa aqui, e o mesmo valor devolvido como PADDING dentro do
+   documento (`.guia-doc .guia__texto`). Tem que ser padding lá, e não neste
+   elemento: o fundo do guia é do documento, e padding no pai desenharia
+   justamente o vão acima do painel que se quer evitar. */
+.app-shell:has(.guia-doc) .app-main {
+  margin-top: calc(-1 * var(--wrap-pad-y));
+  /* Exatamente a largura do indice, menos o `--pad-x` que ja esta ali.
+
+     O indice e `position: fixed; right: 0`: ele encosta na BORDA DA JANELA,
+     passando por baixo do padding lateral do `.app-shell`. Reservar os 264px
+     cheios somava aquele padding de novo e sobrava vao morto; descontando o
+     `--pad-x`, a coluna termina no pixel exato onde o indice comeca.
+
+     Sem respiro somado aqui, e de proposito: o vao entre o texto e o indice ja
+     e o padding lateral do documento (ver `.guia-doc .guia__texto`), e somar os
+     dois abria uma faixa vazia entre o guia e a lateral. Quem separa as duas
+     faixas visualmente e o `border-left` do proprio indice. */
+  padding-right: calc(264px - var(--pad-x));
+}
+
+/* .guia__titulo e .guia__resumo sairam junto com os elementos: a rota nao
+   desenha mais titulo nem resumo — o guia traz os dele. Ver o comentario em
+   app/(private)/painel/guias/[slug]/page.tsx. */
+/* Nesta rota o documento encosta em tudo: topo, lateral do indice e rodape.
+   O que separa o texto das bordas e o padding DELE — ver
+   `.guia-doc .guia__texto`. Estas duas regras tiram o que a moldura do site
+   somava por fora e que, num documento que tem fundo proprio, aparecia como
+   faixa vazia em volta de um card solto:
+
+     · o `padding-top` do `.wrap`, que vale para toda pagina do site e aqui
+       empurrava o guia ate 64px para baixo;
+     · o `margin-top` do `.footer`, ate 72px, que abria um vao entre o fim do
+       documento e o filete do rodape.
+
+   O `padding-top: 26px` e o `border-top` do rodape ficam: sao padding e linha,
+   nao margem, e e o filete que separa as duas coisas. A sidebar mantem o
+   `padding-block` dela, senao a marca colaria no topo da janela.
+
+   `:has()` para a regra viver aqui, junto do guia, em vez de virar uma classe
+   que o layout de (private) teria que saber passar. */
+.wrap:has(.guia-doc) .footer {
+  margin-top: 0;
+  /* O respiro lateral desce do `.app-footer` para cá, e o motivo é o filete.
+     O `.app-footer` já é `width: 100vw`, mas o `padding-inline: var(--pad-x)`
+     dele encurtava o `border-top` do `.footer` nas duas pontas — numa tela em
+     que todo o resto vai de borda a borda, aquele filete parando 64px antes era
+     a única linha curta da página. Com o padding aqui, a linha atravessa os
+     100vw e o texto continua recuado. */
+  padding-inline: var(--pad-x);
+}
+.wrap:has(.guia-doc) .app-footer { padding-inline: 0; }
+
+/* O "voltar ao topo" do guia. A regra base e nossa: o CSS do documento traz so
+   `.totop.show` e `.totop:hover`, entao sem isto ele seria um "↑" solto no meio
+   do texto. Comeca invisivel e sem receber clique; quem acende e o script do
+   proprio guia, ligando `.show` depois de 500px de rolagem.
+
+   O `right` desvia do indice, que e fixo e ocupa 264px da direita da janela.
+   Abaixo de 1180px o indice deixa de ser barra lateral, e ai o botao volta para
+   o canto. */
+.guia-doc .totop {
+  position: fixed;
+  right: calc(264px + 20px);
+  bottom: 24px;
+  z-index: 6;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  border: 1px solid var(--line); border-radius: 50%;
+  background: var(--surface); color: var(--text-2);
+  font-size: 17px; line-height: 1; text-decoration: none;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease, color 0.18s ease, border-color 0.18s ease;
+}
+@media (max-width: 1180px) {
+  .guia-doc .totop { right: 20px; }
+}
+
+.guia__erro { margin-top: 20px; color: var(--text-2); }
+.guia__erro a { color: var(--pink-light); text-decoration: underline; }
+
+@media (max-width: 1180px) {
+  /* Sem largura para três faixas, o índice deixa de ser barra e volta a ser o
+     começo do documento: rola junto com o texto, como num guia impresso. */
+  .guia-doc .guia__indice {
+    position: static;
+    width: auto;
+    height: auto;
+    max-height: 40vh;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 26px;
+  }
+  .app-shell:has(.guia-doc) .app-main { padding-right: 0; }
+  .guia-doc .guia__texto { max-width: none; }
+}
+

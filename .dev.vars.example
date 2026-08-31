@@ -4,23 +4,47 @@
 #
 #     cp .dev.vars.example .dev.vars
 #
-# O `.dev.vars` é lido pelo `npm run dev` e pelo `npm run preview`, e está no
-# .gitignore — o arquivo preenchido nunca é versionado. Em produção cada valor
-# vira um secret do Worker: `npx wrangler secret put NOME`.
+# O `.dev.vars` é lido pelo `npm run preview` (wrangler dev, runtime workerd), e
+# está no .gitignore — o arquivo preenchido nunca é versionado. Em produção cada
+# valor vira um secret do Worker: `npx wrangler secret put NOME`.
 #
-# Se alguma delas faltar, o app não sobe e o erro traz o nome da variável.
+# ATENÇÃO: o `npm run dev` NÃO lê este arquivo. O `next dev` roda em Node e lê
+# `.env.local`; o "Using secrets defined in .dev.vars" que aparece no terminal é
+# o Miniflare, e aquelas variáveis ficam no env do Worker, fora do `process.env`
+# que os Route Handlers do dev server leem. Copie as mesmas linhas para
+# `.env.local` — com o MESMO SESSION_SECRET, senão trocar de comando desloga
+# você. Sem isso o /entrar cai no atalho de login de mentira, com o terminal
+# dizendo que leu a configuração.
+#
+# Se alguma das obrigatórias faltar, o app não sobe e o erro traz o nome da
+# variável. Com `KEYCLOAK_ISSUER` vazia o login de verdade fica desligado e vale
+# o atalho de desenvolvimento — ver lib/auth/dev.ts.
 
 # Base do realm — é daqui que sai o `.well-known/openid-configuration`.
 # Sem barra no final.
-KEYCLOAK_ISSUER="https://auth.umlequedetecnologia.com.br/realms/nickdev"
+KEYCLOAK_ISSUER="https://auth.rodolfodebonis.com.br/realms/aulas"
 
-# O client criado no realm. Também é a chave usada para achar as roles do
-# curso dentro do claim `resource_access` do token.
-KEYCLOAK_CLIENT_ID="nickdev-aulas"
+# O client do realm. Também é a chave usada para achar as roles do curso dentro
+# do claim `resource_access` do token — role de curso tem que ser client role
+# DESTE client, senão ela não chega ao app.
+KEYCLOAK_CLIENT_ID="aulas-web"
 
-# Segredo do client confidencial: console do Keycloak, aba Credentials.
-# Só existe se `Client authentication` estiver ligado.
-KEYCLOAK_CLIENT_SECRET="troque-pelo-segredo-da-aba-credentials"
+# OPCIONAL, e hoje vazia de propósito.
+#
+# Só existe em client confidencial (`Client authentication` ligado, aba
+# Credentials). O `aulas-web` é público, porque ele também atende um front via
+# keycloak-js e client confidencial não funciona no navegador — então não há
+# segredo para pôr aqui.
+#
+# Sem ela, o app não se autentica na troca do código; quem protege o fluxo é o
+# PKCE S256, que lib/auth/keycloak.ts sempre manda. Para essa proteção ser
+# completa, o realm precisa EXIGIR PKCE no client (Advanced Settings → "Proof
+# Key for Code Exchange Code Challenge Method" = S256), senão um código
+# interceptado pode ser trocado sem challenge nenhum.
+#
+# Se um dia este app ganhar um client confidencial só dele, preencher aqui já
+# volta a autenticá-lo — sem mudar código.
+# KEYCLOAK_CLIENT_SECRET=""
 
 # Chave que cifra o cookie de sessão. 32 bytes ou mais, aleatórios.
 # Gerar um: node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"

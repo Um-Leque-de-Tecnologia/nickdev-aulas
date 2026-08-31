@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { refreshAccessToken } from "@/lib/auth/keycloak";
 import { isExpiring } from "@/lib/auth/tokens";
+import { privateCourseHref } from "@/lib/cursos";
 import {
   clearTokensCookies,
   cookieOptions,
@@ -33,12 +34,21 @@ import {
  * O passo 2 deixou este arquivo esperto, e é exatamente aí que mora o risco de
  * alguém achar que ele virou o guardião da área logada. Não virou, e a
  * diferença é a coisa mais importante escrita aqui: renovar token é manter uma
- * credencial em dia; autorizar é decidir se a pessoa entra. O proxy continua
- * sem abrir o cookie de SESSÃO, sem conferir assinatura e sem saber quem você
- * é — um `nd_session` falsificado, com qualquer lixo dentro, passa por estas
- * linhas sem tropeçar. O que ele abre é o cookie de TOKENS, que não diz quem a
- * pessoa é nem o que ela pode ver: diz só quando a credencial vence e com o que
- * trocá-la.
+ * credencial em dia; autorizar é decidir se a pessoa entra.
+ *
+ * Nas três rotas privadas o proxy não abre o cookie de SESSÃO, não confere
+ * assinatura e não sabe quem você é — um `nd_session` falsificado, com qualquer
+ * lixo dentro, passa por estas linhas sem tropeçar, e quem o barra é o
+ * `readSession()` do Server Component. O que ele abre ali é o cookie de TOKENS,
+ * que não diz quem a pessoa é nem o que ela pode ver: diz só quando a
+ * credencial vence e com o que trocá-la.
+ *
+ * A exceção são as páginas públicas que têm gêmeo logado — a home e as landings
+ * de curso, ver `gemeoLogado()`. Nelas o cookie de sessão é decifrado, mas para
+ * responder "esta pessoa já entrou?" e escolher entre duas telas que qualquer um
+ * pode ver: a versão aberta e a mesma tela dentro do shell, que se protege
+ * sozinha ao chegar. Nenhuma permissão é decidida ali, e o erro cai para o lado
+ * seguro: sessão que não abre vira página pública.
  *
  * Quem autoriza de verdade segue sendo o Server Component, chamando
  * `readSession()`: é lá que a sessão é decifrada e validada, é lá que o lixo
@@ -118,18 +128,135 @@ function redirectToLogin(request: NextRequest): NextResponse {
 }
 
 /**
- * Refresh token morto significa sessão morta.
+ * Os caminhos públicos que têm uma versão logada do outro lado.
  *
- * Deixar a pessoa navegando com o `nd_session` de pé e sem token é o pior dos
- * mundos: a tela desenha, o menu funciona, e toda chamada à API responde 401
- * sem explicar nada. Apagar os três cookies e mandar para o /entrar transforma
- * um erro silencioso numa tela de login, que é o que a situação de fato é. Os
- * três juntos porque eles nascem juntos em app/entrar/retorno/route.ts, e um
- * `nd_id` sobrevivente só serviria de `id_token_hint` para uma sessão que o
- * Keycloak já não tem.
+ * Quem tem sessão não fica na versão aberta: a home devolve para o /painel, e a
+ * landing de um curso devolve para o mesmo curso dentro do shell. A regra
+ * destes caminhos é o espelho da dos outros itens do matcher — lá, sem sessão
+ * sai; aqui, COM sessão sai.
  */
-function expireSession(request: NextRequest): NextResponse {
-  const res = redirectToLogin(request);
+const HOME_PUBLICA = "/";
+const HOME_LOGADA = "/painel";
+const CURSOS_PUBLICO = "/cursos/";
+
+/**
+ * O gêmeo logado de uma página pública — ou `null` quando ela não tem um.
+ *
+ * Nem toda tela pública precisa disto: só as que existem duas vezes, uma aberta
+ * e uma dentro do shell da área logada. Hoje são a home (`/` → `/painel`) e as
+ * landings de curso (`/cursos/<slug>` → `/painel/cursos/<slug>`), que é o par
+ * que `privateCourseHref` documenta em lib/cursos.ts.
+ *
+ * Por que a lista virou função, e não ficou só na home: o link "← voltar ao
+ * curso" que o material desenha aponta para a landing PÚBLICA, e o material é
+ * um HTML no CDN — publicado por `scripts/sincroniza-cdn.mjs`, fora deste repo.
+ * Consertar link por link exigiria republicar o CDN a cada tela nova, e ainda
+ * deixaria de fora bookmark, histórico e link que alguém mandou no grupo. A
+ * regra que resolve todos de uma vez é esta: quem tem sessão nunca fica na
+ * versão pública de uma tela que existe logada.
+ *
+ * `null` para `/cursos/` sozinho e para caminhos mais fundos (`/cursos/a/b`):
+ * o primeiro não é curso nenhum, e o segundo não tem gêmeo — mandar para um
+ * `/painel/cursos/a/b` inexistente trocaria uma tela certa por um 404.
+ */
+function gemeoLogado(pathname: string): string | null {
+  if (pathname === HOME_PUBLICA) return HOME_LOGADA;
+
+  if (pathname.startsWith(CURSOS_PUBLICO)) {
+    const slug = pathname.slice(CURSOS_PUBLICO.length).replace(/\/+$/, "");
+    if (slug === "" || slug.includes("/")) return null;
+    return privateCourseHref(slug);
+  }
+
+  return null;
+}
+
+/**
+ * Por que esta regra mora aqui, e não num `readSession()` no app/page.tsx.
+ *
+ * A home e as seis landings de curso são prerenderizadas no build, e isso não é
+ * acidente: é o motivo de o AccessButton ser Client Component com um `fetch` em
+ * /api/me em vez de ler o cookie no servidor — está escrito lá.
+ * `readSession()` chama `cookies()`, e `cookies()` tira do prerender qualquer
+ * página que o alcance. Fazer o desvio nas páginas trocaria sete telas estáticas
+ * por sete renderizações por requisição, só para atender quem já entrou. Aqui o
+ * desvio acontece ANTES da página, e para quem não tem cookie elas continuam
+ * saindo do prerender, intactas.
+ *
+ * E isto continua não sendo autorização — é o desvio de navegação que o topo
+ * deste arquivo descreve, agora nas duas direções. Quem chega sem sessão vê a
+ * landing; quem chega com sessão VÁLIDA vai para o /painel, que se protege
+ * sozinho ao ser aberto. Errar aqui nunca mostra tela indevida: o pior caso é
+ * uma volta de rede a mais, ou a landing pública, que não esconde nada.
+ *
+ * Por que a decisão decifra o cookie em vez de só ver se ele existe: a primeira
+ * versão olhava a presença, e isso quebrou a home. Cookie que não abre mais —
+ * segredo trocado, prazo vencido, ou a sessão de mentira do atalho de
+ * desenvolvimento sobrevivendo ao dia em que o Keycloak foi configurado —
+ * mandava a pessoa para o /painel, o /painel devolvia para o /entrar e o
+ * /entrar ia para a tela do Keycloak. Resultado: quem só queria ver os cursos
+ * gratuitos caía de cara no login, sem ter clicado em nada, e sem saída a não
+ * ser limpar cookie na mão. A home é a porta de entrada do site — nela, "não
+ * sei se esta sessão vale" tem que virar landing, não login.
+ */
+function redirectToApp(request: NextRequest, destino: string): NextResponse {
+  // A query segue junto: uma landing aberta com "?de=email" que virasse a
+  // versao logada sem ela perderia a unica informacao que aquele link
+  // carregava.
+  return NextResponse.redirect(
+    new URL(destino + request.nextUrl.search, request.url),
+  );
+}
+
+/**
+ * Credencial de API morta NÃO é sessão morta. Cai só a credencial.
+ *
+ * Esta função já foi o contrário — apagava os três cookies e mandava para o
+ * /entrar — e o comentário dela dizia por quê: "deixar a pessoa navegando com o
+ * `nd_session` de pé e sem token é o pior dos mundos, porque toda chamada à API
+ * responde 401 SEM EXPLICAR NADA".
+ *
+ * Essa premissa deixou de valer. A rota que fala com a API
+ * (`app/material/…/route.ts`) hoje distingue "sem sessão" de "com sessão e sem
+ * credencial" e devolve uma página que diz o que aconteceu e o que fazer. O
+ * silêncio que justificava o logout duro não existe mais.
+ *
+ * E o logout duro custava caro: o access token vale 5 minutos, então a PRIMEIRA
+ * navegação depois desse prazo derrubava a sessão inteira de quem só estava
+ * lendo. Quem passa vinte minutos num slide e clica em "voltar ao curso" era
+ * deslogado no clique — sem ter feito nada de errado, e sem entender por quê.
+ *
+ * Agora: as fatias do cookie de tokens saem (a credencial está morta mesmo, e
+ * um refresh token que o Keycloak recusa não pode ficar no navegador), e a
+ * requisição SEGUE. O `nd_session` fica — ele é autocontido, tem prazo próprio e
+ * prova identidade sem depender da API; o `nd_id` fica porque é o
+ * `id_token_hint` de que o /sair precisa.
+ *
+ * O que se ganha: painel, perfil, guias e as landings continuam funcionando, a
+ * pessoa continua logada, e só o material fechado pede uma volta ao login — com
+ * um link de um clique.
+ *
+ * O que se paga, dito claro: se o refresh foi recusado porque a sessão foi
+ * encerrada NO KEYCLOAK (logout em outro lugar, admin revogando), este app
+ * segue mostrando a área logada até o `nd_session` vencer por conta própria —
+ * no máximo o prazo que ele já tinha. Nesse intervalo não há acesso a API
+ * nenhuma, porque a credencial se foi; o que sobra é a pessoa ver o próprio
+ * painel com uma lista de roles possivelmente velha. Foi a troca escolhida:
+ * limitada, sem acesso a dado novo, e sem deslogar quem só virou uma página.
+ */
+function descartaCredencial(): NextResponse {
+  const res = NextResponse.next();
+  clearTokensCookies(res.cookies);
+  return res;
+}
+
+/**
+ * Os três cookies nascem juntos em app/entrar/retorno/route.ts e morrem juntos.
+ * A regra mora aqui porque agora são dois os caminhos que matam sessão: o
+ * refresh recusado, que devolve para o /entrar, e o cookie morto encontrado na
+ * home, que não redireciona nada.
+ */
+function clearSessionCookies(res: NextResponse): NextResponse {
   const expired = cookieOptions(0);
   for (const name of [SESSION_COOKIE, ID_TOKEN_COOKIE]) {
     res.cookies.set(name, "", expired);
@@ -176,7 +303,56 @@ function withTokensCookie(header: string, value: string): string {
 }
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
-  if (!request.cookies.has(SESSION_COOKIE)) return redirectToLogin(request);
+  const temSessao = request.cookies.has(SESSION_COOKIE);
+
+  // A home é o único caminho público do matcher, e sai antes de tudo: quem não
+  // tem cookie recebe o prerender e vai embora, sem pagar nada do que vem
+  // abaixo. Renovar token na volta também não faz falta — a resposta é um
+  // redirect, e o /painel do outro lado passa por este mesmo arquivo.
+  const gemeo = gemeoLogado(request.nextUrl.pathname);
+  if (gemeo !== null) {
+    if (!temSessao) return NextResponse.next();
+
+    // Aqui, e SÓ aqui, o cookie de sessão é aberto — ver o porquê no comentário
+    // de `redirectToApp()`. Presença de cookie não basta nesta decisão: a home
+    // é a porta de entrada do site, e mandar para a área logada quem tem um
+    // cookie que não abre mais custa a landing inteira, não uma volta de rede.
+    const session = await decryptSession(
+      request.cookies.get(SESSION_COOKIE)?.value ?? "",
+    );
+
+    // Cookie morto — vencido, cifrado com outro segredo, ou a sessão de mentira
+    // sobrevivendo ao dia em que o Keycloak entrou. A home aparece, que é o que
+    // a pessoa pediu, e o cookie sai do navegador na mesma resposta: sem isso
+    // ela voltaria a bater aqui em toda visita, e a única saída seria limpar
+    // cookie na mão.
+    if (!session) return clearSessionCookies(NextResponse.next());
+
+    return redirectToApp(request, gemeo);
+  }
+
+  /* `/material` é público como a home: material de curso aberto abre sem
+   * sessão nenhuma, e quem decide se ESTE arquivo pede login é a própria rota,
+   * perguntando à API — não dá para saber aqui.
+   *
+   * Ele entra no matcher só pela RENOVAÇÃO. O access token vale 5 minutos e é
+   * este arquivo que o renova; sem passar por aqui, clicar num material depois
+   * de qualquer pausa entregava um token vencido, `getAccessToken()` devolvia
+   * null e a rota mandava para o login sem que nada estivesse errado com a
+   * sessão. */
+  /* E o resto da árvore de /cursos é público também, mesmo sem gêmeo.
+   *
+   * `/cursos/:path*` no matcher pega mais do que as seis landings: pega
+   * `/cursos` sozinho e `/cursos/a/b`, que não são curso nenhum. Sem esta
+   * linha eles caíam na regra das rotas privadas, e um visitante anônimo que
+   * digitasse /cursos era mandado para a tela de login em vez de receber o 404
+   * que a rota devolve. Página que não existe tem que dizer que não existe. */
+  const publico =
+    request.nextUrl.pathname.startsWith("/material/") ||
+    request.nextUrl.pathname === "/cursos" ||
+    request.nextUrl.pathname.startsWith(CURSOS_PUBLICO);
+
+  if (!temSessao) return publico ? NextResponse.next() : redirectToLogin(request);
 
   // As fatias voltam a ser um JWE só antes de qualquer tentativa de decifrar.
   // Ler só `nd_tok` traria o primeiro pedaço de um JWE cortado em quatro, e
@@ -200,7 +376,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // adulterado, truncado pelo teto de 4 KB do navegador. Não dá para renovar
   // nem para chamar a API, e o `nd_session` do lado continua abrindo a tela: é
   // exatamente a sessão zumbi. Sessão zumbi sai.
-  if (!tokens) return expireSession(request);
+  if (!tokens) return descartaCredencial();
 
   // A folga mora dentro de `isExpiring()`, junto com o motivo dela, para o
   // proxy não ter um segundo número para manter em dia. O caso comum é este
@@ -290,10 +466,22 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return res;
   } catch (cause) {
     console.warn("[proxy] renovação recusada:", failureReason(cause));
-    return expireSession(request);
+    return descartaCredencial();
   }
 }
 
 export const config = {
-  matcher: ["/painel/:path*", "/perfil/:path*", "/admin/:path*"],
+  // O "/" entrou, e é o único aqui que não é área logada. O preço é uma volta
+  // no Worker em toda visita à landing — que não renderiza nada: sem cookie a
+  // resposta é o `NextResponse.next()`, e o Cloudflare entrega o HTML
+  // prerenderizado. As três rotas privadas seguem com `:path*` para cobrir as
+  // sub-rotas; a home é exata, senão o matcher pegaria o site inteiro.
+  matcher: [
+    "/",
+    "/cursos/:path*",
+    "/painel/:path*",
+    "/perfil/:path*",
+    "/admin/:path*",
+    "/material/:path*",
+  ],
 };

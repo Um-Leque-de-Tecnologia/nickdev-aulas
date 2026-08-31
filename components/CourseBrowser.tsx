@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import Link from "next/link";
 import ExclusiveBadge from "@/components/ExclusiveBadge";
-import { technologiesOf, type Course } from "@/lib/cursos";
+import { privateCourseHref, technologiesOf, type Course } from "@/lib/cursos";
 import { guiasDe } from "@/lib/guias";
 
 /**
@@ -75,12 +75,19 @@ function CourseCard({ course }: { course: Course }) {
     </>
   );
 
-  // Curso sem página pública não tem para onde levar ainda. Card sem link é
-  // melhor do que link que cai em 404.
+  // Curso sem página não tem para onde levar ainda. Card sem link é melhor do
+  // que link que cai em 404. `href` é o que marca isso no catálogo: vazio
+  // significa "este curso ainda não tem landing nenhuma", nas duas pontas.
   if (!course.href) return <div className="card">{body}</div>;
 
+  /*
+    Vai para a versão logada do curso, e não para `course.href`, que é a landing
+    pública. As duas mostram o mesmo conteúdo; a diferença é que a de dentro
+    mantém a sidebar na tela. Mandar para a pública daqui tiraria a navegação
+    inteira de quem já está logado, no meio da sessão.
+  */
   return (
-    <Link className="card" href={course.href}>
+    <Link className="card" href={privateCourseHref(course.slug)}>
       {body}
     </Link>
   );

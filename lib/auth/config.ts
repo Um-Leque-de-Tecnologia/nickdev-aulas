@@ -10,7 +10,16 @@
 export type AuthConfig = {
   issuer: string;
   clientId: string;
-  clientSecret: string;
+  /**
+   * Ausente quando o client do realm é público — o caso do `aulas-web`, que
+   * também atende um front via keycloak-js e por isso não pode ter segredo.
+   *
+   * Opcional, e não removido: no dia em que este app ganhar um client
+   * confidencial só dele, definir a variável volta a autenticá-lo na troca do
+   * código, sem mexer em código. Quem decide é o realm, não o build.
+   * `lib/auth/keycloak.ts` explica o que muda de fato quando ela falta.
+   */
+  clientSecret?: string;
   sessionSecret: string;
   appUrl?: string;
 };
@@ -36,10 +45,15 @@ function trimTrailingSlash(url: string): string {
 
 export function readConfig(): AuthConfig {
   const appUrl = process.env.APP_URL;
+  // Vazia conta como ausente: um `KEYCLOAK_CLIENT_SECRET=""` no .dev.vars é
+  // alguém dizendo "não tem secret", e mandar string vazia ao token endpoint
+  // faz o Keycloak recusar com `invalid_client` em vez de tratar o client como
+  // público — um erro que só aparece no fim do login.
+  const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET?.trim();
   return {
     issuer: trimTrailingSlash(required("KEYCLOAK_ISSUER")),
     clientId: required("KEYCLOAK_CLIENT_ID"),
-    clientSecret: required("KEYCLOAK_CLIENT_SECRET"),
+    clientSecret: clientSecret ? clientSecret : undefined,
     sessionSecret: required("SESSION_SECRET"),
     appUrl: appUrl ? trimTrailingSlash(appUrl) : undefined,
   };
@@ -66,12 +80,14 @@ export function baseUrl(req: Request): string {
  * As variáveis que o login pelo Keycloak exige. `SESSION_SECRET` fica de fora
  * de propósito: ela cifra o cookie de sessão e faz sentido mesmo sem Keycloak
  * nenhum — lib/auth/session.ts trata dela por conta própria.
+ *
+ * `KEYCLOAK_CLIENT_SECRET` também ficou de fora, e por outro motivo: client
+ * público não tem secret, e exigi-la aqui diria que o Keycloak não está
+ * configurado num realm em que ele está. O que define se dá para falar com o
+ * Keycloak é ter realm e client — o segredo, quando existe, só muda como o app
+ * se apresenta na troca do código.
  */
-const KEYCLOAK_VARIABLES = [
-  "KEYCLOAK_ISSUER",
-  "KEYCLOAK_CLIENT_ID",
-  "KEYCLOAK_CLIENT_SECRET",
-] as const;
+const KEYCLOAK_VARIABLES = ["KEYCLOAK_ISSUER", "KEYCLOAK_CLIENT_ID"] as const;
 
 /**
  * Dá para falar com o Keycloak neste ambiente?

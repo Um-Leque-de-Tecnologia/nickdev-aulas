@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import { readSession } from "@/lib/auth/session";
 import { isAdmin } from "@/lib/auth/roles";
 import { isDevLoginEnabled } from "@/lib/auth/dev";
-import { GUIAS, hrefDoGuia } from "@/lib/guias";
 
 export const metadata: Metadata = {
   // Área logada não entra em buscador. As páginas filhas herdam isto e só
@@ -55,14 +54,16 @@ export default async function PrivateLayout({
       <div className="app-shell">
         <div className="app-sidebar">
           {/*
-            A marca leva para "/", a home pública — e não para o site
-            institucional, como no SiteHeader. Quem está logado clicando na
-            marca quer voltar para a casa deste app, não sair dele.
+            A marca leva para o /painel — e não para o site institucional, como
+            no SiteHeader, nem para a home pública. Quem está logado clicando na
+            marca quer voltar para a casa deste app, não sair dele; e desde que
+            o proxy.ts desvia o "/" de quem tem sessão, apontar para lá seria
+            pedir um redirect para chegar no mesmo lugar.
           */}
           <Link
             className="app-sidebar__brand"
-            href="/"
-            aria-label="NickDev Aulas — página inicial"
+            href="/painel"
+            aria-label="NickDev Aulas — painel"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/logo/logo-nickdeve.svg" alt="" />
@@ -74,34 +75,6 @@ export default async function PrivateLayout({
             e-mail, `sub` e roles no payload do React, à vista de qualquer um.
           */}
           <PrivateNav isAdmin={admin} />
-
-          {/*
-            Os guias ficam aqui, no Server Component, e não dentro do
-            PrivateNav. Aquele componente só é cliente por causa do
-            `usePathname()`, que existe para acender o item da página aberta —
-            e guia nunca vai ser "página aberta": são arquivos estáticos em
-            `public/guias/`, servidos pelo Cloudflare antes de o app existir.
-            Sem rota, não há item atual, e estes sete links não precisam custar
-            nada ao bundle do navegador.
-
-            Pelo mesmo motivo são `<a>` e não `<Link>`: o Link tentaria
-            navegação de cliente para um `.html` que o roteador não conhece.
-          */}
-          <div className="app-guides">
-            <span className="app-guides__label">Guias</span>
-            <nav className="app-guides__list" aria-label="Guias de tecnologia">
-              {GUIAS.map((guia) => (
-                <a
-                  className="app-guides__link"
-                  href={hrefDoGuia(guia.slug)}
-                  key={guia.slug}
-                >
-                  <span aria-hidden="true">{guia.emoji}</span>
-                  {guia.nome}
-                </a>
-              ))}
-            </nav>
-          </div>
 
           <div className="app-user">
             <div className="app-user__id">
@@ -164,7 +137,7 @@ export default async function PrivateLayout({
         e o filete de cima dele pararia no meio da tela.
       */}
       <div className="app-footer">
-        <Footer withHome />
+        <Footer withHome homeHref="/painel" />
       </div>
     </>
   );

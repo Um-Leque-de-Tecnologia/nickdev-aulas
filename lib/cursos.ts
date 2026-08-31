@@ -1,11 +1,16 @@
 /**
- * O catálogo de cursos que a área logada usa.
+ * O catálogo de cursos. É a única lista de quem existe, e de quem aparece onde.
  *
- * A `app/page.tsx` continua com a própria cópia dos cards — lá o texto tem JSX
- * rico (`<span className="mono">`, `<strong>`), e espremer isso numa string
- * aqui empobreceria a home. Unificar as duas listas é trabalho de outro dia;
- * por enquanto a duplicação é deliberada, e o que amarra as duas é o `slug`,
- * que é igual ao nome da pasta em `app/cursos/`.
+ * A `app/page.tsx` continua com a própria cópia do TEXTO dos cards — lá ele tem
+ * JSX rico (`<span className="mono">`, `<strong>`), e espremer isso numa string
+ * aqui empobreceria a home. O que ela não tem mais é a própria lista: a vitrine
+ * pública é este array filtrado por `access === "public"`, e o `slug` — igual ao
+ * nome da pasta em `app/cursos/` — é o que amarra as duas pontas.
+ *
+ * Ou seja, `access` decide três coisas de uma vez, e é o único lugar de cada
+ * uma: se o curso aparece na home, se ele aparece no painel como liberado ou
+ * como bloqueado (`coursesFor()`, em lib/auth/roles.ts), e se o material exige
+ * sessão. Curso pago novo é uma entrada aqui — nenhuma tela precisa ser tocada.
  *
  * Os campos `name` e `summary` são texto de tela: ficam em português.
  */
@@ -79,8 +84,16 @@ export const COURSES: Course[] = [
     access: "public",
   },
   {
-    // A landing continua pública — é a página que vende o curso. O que a role
-    // libera é o material, dentro da área logada.
+    // Fora da listagem pública: `access: "restricted"` tira o card da home.
+    //
+    // A LANDING (`/cursos/nextjs-ia`) continua pública e aberta por link direto
+    // — é a página que vende o curso para quem chega de fora. Quem já está
+    // logado vê o mesmo conteúdo por `/painel/cursos/nextjs-ia`, com a sidebar
+    // em volta. O que a role libera é o material, dentro da área logada.
+    //
+    // O convite para comprar, portanto, deixou de existir na home e passou a
+    // existir só no painel, para quem já tem conta. Quem chega de fora só
+    // encontra este curso por link que alguém mandou.
     slug: "nextjs-ia",
     name: "Next.js + IA",
     summary:
@@ -94,6 +107,23 @@ export const COURSES: Course[] = [
 
 export function courseBySlug(slug: string): Course | undefined {
   return COURSES.find((course) => course.slug === slug);
+}
+
+/**
+ * O endereço do curso dentro da área logada.
+ *
+ * O mesmo curso tem dois endereços, e é de propósito: `href` é a landing
+ * pública, indexada e aberta a quem chega de fora; este é a mesma página
+ * servida dentro do shell da área logada, onde a sidebar continua na tela.
+ * Quem está logado e clica num curso não pode cair na versão pública — perderia
+ * a navegação inteira e teria que usar o botão de voltar do navegador para
+ * achar o caminho de casa.
+ *
+ * O conteúdo não é duplicado: as duas rotas renderizam o mesmo componente de
+ * `components/cursos`. O que se repete é só a moldura em volta.
+ */
+export function privateCourseHref(slug: string): string {
+  return `/painel/cursos/${slug}`;
 }
 
 /**
