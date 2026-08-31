@@ -87,7 +87,17 @@ export async function GET(req: NextRequest) {
   //   demais. Ignorá-la faz o login de verdade sobrescrever o cookie velho.
   const session = await readSession();
   if (session && !isDevLoginEnabled() && !session.dev) {
-    return NextResponse.redirect(new URL(DEFAULT_RETURN_PATH, origin), 302);
+    // Respeita o `?de=`. Mandar todo mundo para o /painel descartava o destino
+    // justamente de quem mais precisa dele: quem clicou num link protegido e
+    // chegou aqui só porque o access token tinha vencido. A pessoa perdia o
+    // que clicou e caía na listagem de cursos, sem explicação.
+    //
+    // `safeReturnPath` já recusa destino externo e já devolve o padrão quando
+    // não há `de` — não há caminho novo se abrindo aqui.
+    return NextResponse.redirect(
+      new URL(safeReturnPath(req.nextUrl.searchParams.get("de")), origin),
+      302,
+    );
   }
 
   // O atalho de desenvolvimento: sem Keycloak configurado não existe para onde
