@@ -8,11 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#08070E; --surface:#100D1B; --surface-2:#161122; --code-bg:#0b0913;
+    --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E; --code-bg:#0b0913;
     --magenta:#F24487; --purple:#7B4FD0;
-    --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
-    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#7B7392;
-    --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.14);
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --purple-lighter:#C3A6FF; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
     --grad:linear-gradient(100deg,#F24487,#7B4FD0);
     --mono:'JetBrains Mono',ui-monospace,monospace;
     --disp:'Space Grotesk',system-ui,sans-serif;
@@ -156,7 +156,7 @@
   /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
      acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
      código inline e callout. */
-  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple);font-weight:400;margin-right:10px;vertical-align:middle}
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple-light);font-weight:400;margin-right:10px;vertical-align:middle}
   .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
   .item{margin:26px 0;padding-top:4px}
   .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
@@ -166,7 +166,7 @@
   table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
   table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
   table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
-  table.cheat td:first-child{font-family:var(--mono);color:var(--purple);white-space:nowrap}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple-light);white-space:nowrap}
   table.cheat td .muted{color:var(--text-3)}
   .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
     padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
@@ -175,7 +175,7 @@
   /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
      tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
      a seção de onde veio. */
-  .t{color:var(--purple)}
+  .t{color:var(--purple-lighter)}
   .s{color:var(--purple-light)}
   .k{color:var(--magenta)}
   .a{color:var(--pink-light)}
