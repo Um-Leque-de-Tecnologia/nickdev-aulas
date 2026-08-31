@@ -1,0 +1,33 @@
+# Variáveis da área logada (Keycloak).
+#
+# Copie este arquivo para `.dev.vars` e preencha com os dados do seu realm:
+#
+#     cp .dev.vars.example .dev.vars
+#
+# O `.dev.vars` é lido pelo `npm run dev` e pelo `npm run preview`, e está no
+# .gitignore — o arquivo preenchido nunca é versionado. Em produção cada valor
+# vira um secret do Worker: `npx wrangler secret put NOME`.
+#
+# Se alguma delas faltar, o app não sobe e o erro traz o nome da variável.
+
+# Base do realm — é daqui que sai o `.well-known/openid-configuration`.
+# Sem barra no final.
+KEYCLOAK_ISSUER="https://auth.umlequedetecnologia.com.br/realms/nickdev"
+
+# O client criado no realm. Também é a chave usada para achar as roles do
+# curso dentro do claim `resource_access` do token.
+KEYCLOAK_CLIENT_ID="nickdev-aulas"
+
+# Segredo do client confidencial: console do Keycloak, aba Credentials.
+# Só existe se `Client authentication` estiver ligado.
+KEYCLOAK_CLIENT_SECRET="troque-pelo-segredo-da-aba-credentials"
+
+# Chave que cifra o cookie de sessão. 32 bytes ou mais, aleatórios.
+# Gerar um: node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
+# Trocar este valor desloga todo mundo: os cookies antigos param de decifrar.
+SESSION_SECRET="gere-o-seu-com-o-comando-acima-e-cole-aqui"
+
+# Opcional. Sem ela, a URL de retorno vem da origem do próprio request, o que
+# já resolve em localhost. Defina em produção quando houver proxy na frente,
+# para o `redirect_uri` bater exatamente com o cadastrado no Keycloak.
+APP_URL="https://aulas.umlequedetecnologia.com.br"

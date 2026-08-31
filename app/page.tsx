@@ -19,7 +19,9 @@ export default function Home() {
       </p>
       <div className="brand-rule" />
 
-      <div className="section-label">Cursos</div>
+      <div className="section-label" id="cursos">
+        Cursos
+      </div>
       <div className="card-grid">
         <Link className="card" href="/cursos/frontend-transicao">
           <span className="num">01</span>

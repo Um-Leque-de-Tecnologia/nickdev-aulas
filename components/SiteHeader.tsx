@@ -1,3 +1,6 @@
+import Link from "next/link";
+import AccessButton from "@/components/AccessButton";
+
 export default function SiteHeader() {
   return (
     <header className="site-header">
@@ -10,6 +13,22 @@ export default function SiteHeader() {
         <img src="/assets/logo/logo-nickdeve.svg" alt="" />
         <span className="word">NickDev</span>
       </a>
+
+      {/*
+        Âncoras absolutas, com a barra. Este cabeçalho também é o das páginas
+        de curso e o da área logada, e ali "#cursos" sozinho procuraria uma
+        seção que não existe na página atual.
+      */}
+      <nav className="site-nav" aria-label="Navegação principal">
+        <Link className="nav-link" href="/#cursos">
+          Cursos
+        </Link>
+        <Link className="nav-link" href="/#guias">
+          Guias
+        </Link>
+        {/* Só este pedaço do cabeçalho é cliente; o resto segue estático. */}
+        <AccessButton />
+      </nav>
     </header>
   );
 }

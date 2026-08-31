@@ -6,9 +6,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
+  /* Paleta conferida contra WCAG AA em 30/08/2026. Os dois números que mandam
+     nos valores abaixo: a borda de um controle passou a 3,11:1 (1.4.11 pede
+     3:1) e o card voltou a se separar do fundo pela própria cor, e não só
+     pela linha em volta. Mexer nestes tons refaz a conferência. */
+
   /* superfícies */
   --bg: #08070E;
-  --surface: #100D1B;
+  /* Era #100D1B, que dava 1,05:1 contra o --bg: o card não se separava do
+     fundo pela cor — quem enxergava a caixa enxergava a borda, e a borda
+     também não estava lá. */
+  --surface: #1B1632;
 
   /* gradiente da marca */
   --magenta: #F24487;
@@ -25,13 +33,21 @@
   --text: #F3F0FA;
   --text-2: #B4AEC6;
   --text-3: #8B84A0;
-  --text-4: #7B7392;
-  --text-5: #5E5876;
+  /* Era #7B7392, 4,30:1 sobre o card — abaixo dos 4,5:1 de AA, e esta é a cor
+     do placeholder da busca e dos rótulos em caixa alta. */
+  --text-4: #928AA9;
+  /* --text-5 (#5E5876, 2,86:1) saiu: reprovava AA com folga, e era usado uma
+     única vez, num texto de 12px, que agora aponta para --text-4. Token de um
+     uso só é mais um valor para auditar e esquecer. */
 
-  /* bordas */
-  --line: rgba(255, 255, 255, 0.09);
-  --line-soft: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  /* bordas
+     Estavam em 1,20:1 e 1,41:1, contra os 3:1 que o WCAG 1.4.11 exige do
+     limite de um controle: o campo de busca e os chips eram desenhados por uma
+     linha que praticamente não existia.
+     --line-soft (alpha .07, 1,14:1) saiu junto — um uso só, o filete do
+     rodapé, que agora usa --line. */
+  --line: rgba(255, 255, 255, 0.35);
+  --line-strong: rgba(255, 255, 255, 0.45);
 
   /* gradientes */
   --grad: linear-gradient(100deg, #F24487, #7B4FD0);
@@ -57,7 +73,6 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
 }
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: 2px solid var(--purple-light); outline-offset: 3px; border-radius: 4px; }
@@ -86,7 +101,14 @@ a { color: inherit; text-decoration: none; }
 .wrap { max-width: 1100px; margin: 0 auto; padding: clamp(28px, 5vw, 64px) var(--pad-x); position: relative; z-index: 1; }
 
 /* topo --------------------------------------------------------------------- */
-.site-header { display: flex; align-items: center; margin-bottom: clamp(30px, 5vw, 52px); }
+/* Em tela estreita o cabeçalho quebra em duas linhas — marca em cima, navegação
+   inteira embaixo — em vez de esconder a navegação atrás de um ícone. Menu
+   sanfona é decisão para quando houver muito mais que dois links. */
+.site-header {
+  display: flex; align-items: center; flex-wrap: wrap;
+  row-gap: 14px; column-gap: 22px;
+  margin-bottom: clamp(30px, 5vw, 52px);
+}
 .site-header .brand-link { display: inline-flex; align-items: center; gap: 13px; transition: opacity 0.2s ease; }
 .site-header .brand-link:hover { opacity: 0.82; }
 .site-header img { height: 42px; width: auto; display: block; }
@@ -198,7 +220,7 @@ a.guia:hover { transform: translateY(-3px); border-color: var(--purple); }
 
 /* rodapé ------------------------------------------------------------------- */
 .footer {
-  border-top: 1px solid var(--line-soft); margin-top: clamp(40px, 6vw, 72px); padding-top: 26px;
+  border-top: 1px solid var(--line); margin-top: clamp(40px, 6vw, 72px); padding-top: 26px;
   display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
 }
 .footer .brand { display: flex; align-items: center; gap: 10px; }
@@ -212,7 +234,7 @@ a.guia:hover { transform: translateY(-3px); border-color: var(--purple); }
 }
 .footer a.home:hover::after { width: 100%; }
 .footer .copy {
-  flex-basis: 100%; font-family: var(--font-mono); font-size: 12px; color: var(--text-5);
+  flex-basis: 100%; font-family: var(--font-mono); font-size: 12px; color: var(--text-4);
   border-top: 1px solid rgba(255, 255, 255, 0.06); margin-top: 8px; padding-top: 18px;
 }
 
@@ -252,3 +274,383 @@ a.guia:hover { transform: translateY(-3px); border-color: var(--purple); }
 
 /* Fileira de ações no topo de um curso: aulas gravadas, grupo da turma. */
 .acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+
+/* área logada -------------------------------------------------------------- */
+/* Sair é <button> dentro de <form method="post">, porque /sair recusa GET, e o
+   .glow-btn foi escrito pensando em <a>. Botão não herda a fonte do body: sem
+   esta linha o "Sair da minha conta" do /perfil sai na fonte de sistema. O
+   irmão dele na sidebar é o `button.mat`, mais abaixo neste arquivo. */
+button.glow-btn { font-family: inherit; cursor: pointer; }
+
+/* Ficha do perfil: rótulo miúdo em cima, valor embaixo, um dado por linha.
+   Não virou tabela porque tabela de duas colunas quebra feio no celular, e
+   aqui são seis linhas lidas de cima para baixo. */
+.data-list { display: grid; gap: 18px; }
+.data-list dt {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-4);
+}
+.data-list dd { font-size: 15px; color: var(--text); margin-top: 5px; overflow-wrap: anywhere; }
+
+/* navegação do cabeçalho --------------------------------------------------- */
+/* Quem empurra para a direita é o <nav>, e não o botão de acesso: ele é um
+   item qualquer da fileira, ao lado dos links. O `margin-left: auto` que o
+   botão tinha sozinho, de quando ele era o único vizinho da marca, saiu daqui
+   — repetir o mesmo seletor mais abaixo só para zerá-lo deixava no arquivo uma
+   regra morta que descrevia um layout que não existe mais. */
+.site-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-left: auto; }
+
+/* Os links são navegação, não chamada para ação — quem chama é o pill de
+   acesso ao lado. Daí a mono discreta, no mesmo tom dos rótulos de seção. */
+.site-nav .nav-link {
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-2);
+  transition: color 0.18s ease;
+}
+.site-nav .nav-link:hover { color: var(--pink-light); }
+
+/* O rótulo do acesso muda depois que /api/me responde, e "Meu perfil" é mais
+   largo que "Entrar". A largura do rótulo maior fica reservada desde o começo
+   (10 caracteres da mono + os 16px de padding de cada lado do .mat), então o
+   cabeçalho não se remexe nem quando o pill aparece nem quando troca de texto. */
+.site-header .access-link { min-width: calc(10ch + 32px); justify-content: center; }
+.site-header .access-placeholder { visibility: hidden; }
+
+/* Abaixo de 560px a navegação toma a linha inteira, embaixo da marca: o
+   `flex-wrap` do .site-header já permite a quebra, e aqui ela vira obrigatória. */
+@media (max-width: 560px) {
+  .site-nav { width: 100%; margin-left: 0; }
+}
+
+/* faixa da sessão de mentira ----------------------------------------------- */
+/* Só desenha quando o layout da área logada rende a faixa, e ele só a rende na
+   sessão do atalho de desenvolvimento. O amarelo de obra é de propósito: essa
+   cor não existe em mais nenhum canto da marca, então a tela grita "isto é
+   faz-de-conta" antes de alguém ler o texto. A borda tracejada diz o mesmo
+   para quem não separa as cores. */
+.dev-banner {
+  border: 1px dashed #E2B33C; background: rgba(226, 179, 60, 0.1);
+  border-radius: 14px; padding: 14px 18px;
+  margin-bottom: clamp(22px, 4vw, 34px);
+  font-size: 14px; line-height: 1.55; color: var(--text-2);
+}
+.dev-banner strong { color: #F0C95F; }
+.dev-banner code { font-size: 12.5px; }
+
+/* A troca de papel vai para a linha de baixo: em cima é aviso, embaixo é ação,
+   e as duas na mesma linha viram um parágrafo que ninguém termina de ler. */
+.dev-banner__switch { display: block; margin-top: 8px; font-size: 13px; color: var(--text-3); }
+.dev-banner__switch a { color: #F0C95F; text-decoration: underline; }
+
+/* app-shell da área logada -------------------------------------------------- */
+/* Duas colunas dentro do .wrap que o layout raiz já desenha: sidebar de largura
+   fixa e conteúdo no que sobrar. O `minmax(0, 1fr)` da segunda coluna não é
+   firula — coluna de grid tem largura mínima automática, e sem ele um bloco
+   largo do conteúdo (o `sub` em mono do perfil, um card-grid, um bloco de
+   código) estica a coluna para além do .wrap e o corpo inteiro passa a rolar de
+   lado. `align-items: start` para a sidebar parar onde o conteúdo dela acaba,
+   em vez de esticar até o pé de uma página comprida. */
+.app-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: clamp(26px, 4vw, 48px);
+  align-items: start;
+}
+.app-main { min-width: 0; }
+
+.app-sidebar { display: flex; flex-direction: column; gap: 24px; }
+
+/* A marca da sidebar é a mesma do cabeçalho público, só que menor: aqui ela
+   divide 220px com a navegação, e não uma faixa inteira. */
+.app-sidebar__brand { display: inline-flex; align-items: center; gap: 11px; transition: opacity 0.2s ease; }
+.app-sidebar__brand:hover { opacity: 0.82; }
+.app-sidebar__brand img { height: 36px; width: auto; display: block; }
+.app-sidebar__brand .word { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+
+/* navegação da área logada -------------------------------------------------- */
+/* O item aberto é marcado por duas coisas ao mesmo tempo — a barra da marca à
+   esquerda e o fundo — e não só pela cor. Quem não separa o magenta do
+   cinza-lilás do repouso ficaria sem saber onde está, e o `aria-current="page"`
+   do PrivateNav só resolve para quem usa leitor de tela.
+   Os 2px de borda existem transparentes no item em repouso: sem isso o texto
+   escorregaria 2px para a direita no instante em que o item acende. */
+.app-nav { display: flex; flex-direction: column; gap: 2px; }
+.app-nav__link {
+  display: block;
+  font-family: var(--font-mono); font-size: 13.5px; color: var(--text-2);
+  padding: 9px 13px; border-radius: 0 10px 10px 0;
+  border-left: 2px solid transparent;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+.app-nav__link:hover { color: var(--pink-light); background: rgba(255, 255, 255, 0.045); }
+.app-nav__link.is-active {
+  color: var(--pink-light);
+  background: rgba(242, 68, 135, 0.11);
+  border-left-color: var(--magenta);
+}
+
+/* bloco da pessoa ----------------------------------------------------------- */
+/* A linha separa o que é destino do que é estado: acima dela tudo se clica,
+   abaixo dela é quem está logado. */
+.app-user {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 13px;
+  border-top: 1px solid var(--line); padding-top: 18px;
+}
+.app-user__id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.app-user__name { font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; }
+.app-user__role {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-4);
+}
+
+/* Sair é <button> dentro de <form method="post">, porque /sair recusa GET — e o
+   pill .mat foi escrito pensando em <a>. Botão não pega o fundo transparente
+   nem o cursor de mão por herança: sem estas linhas ele sai cinza de sistema no
+   meio da sidebar. A fonte o próprio .mat já declara, então não repito. */
+button.mat { background: none; appearance: none; cursor: pointer; }
+
+/* área logada em tela estreita ---------------------------------------------- */
+/* Abaixo de 900px a sidebar deixa de ser coluna e vira um bloco de topo: marca,
+   faixa de navegação e bloco da pessoa, empilhados acima do conteúdo.
+   A navegação ROLA de lado em vez de virar sanfona: menu escondido atrás de
+   botão exige JavaScript, e esta é a única forma de andar pelo app — não pode
+   depender de um bundle que ainda está baixando, nem sumir se ele falhar.
+   A ordem visual é a mesma do DOM de propósito: `order` e grid-areas
+   reagrupariam a tela sem reagrupar o foco, e o Tab passaria a pular para trás. */
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .app-sidebar { gap: 16px; }
+  .app-sidebar__brand img { height: 32px; }
+
+  .app-nav {
+    flex-direction: row; gap: 6px;
+    overflow-x: auto; scrollbar-width: thin;
+    /* Espaço para a barra de rolagem não cobrir a marca do item aberto. */
+    padding-bottom: 3px;
+  }
+  /* `flex: 0 0 auto` + `nowrap`: item de faixa rolável não encolhe nem quebra
+     "Meu perfil" em duas linhas para caber. */
+  .app-nav__link {
+    flex: 0 0 auto; white-space: nowrap;
+    padding: 8px 13px;
+    /* A barra da marca sai da esquerda e vai para baixo do item, que é onde ela
+       lê como aba na horizontal. */
+    border-left: 0; border-bottom: 2px solid transparent;
+    border-radius: 10px 10px 0 0;
+  }
+  .app-nav__link.is-active { border-bottom-color: var(--magenta); }
+
+  /* Nome, tipo de conta e Sair na mesma linha; em 360px ainda sobra espaço, e o
+     `wrap` cobre o nome comprido em vez de estourar a tela. */
+  .app-user {
+    flex-direction: row; flex-wrap: wrap; align-items: center;
+    width: 100%; gap: 10px 14px;
+  }
+  .app-user__id { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  .app-user form { margin-left: auto; }
+}
+
+/* selo de curso pago --------------------------------------------------------- */
+/* Mesmo pill do .soon-tag — mesma fonte, mesmo tamanho, mesmo raio, mesmo
+   padding — para os dois selos lerem como a mesma família. O que muda é a cor,
+   e a diferença é semântica: "em breve" é ausência e fica no tracejado cinza;
+   "Exclusivo" é marca, e vem colorido.
+   O fundo é um véu do rosa, e não `var(--grad)` cheio: sobre o gradiente o
+   texto branco cai para ~3,5:1 na ponta magenta, abaixo do mínimo de AA. Com
+   `--pink-light` sobre este véu passa de 7:1 em cima do `--surface` (o fundo
+   do .card) e sobra ainda mais sobre o `--bg` da landing. */
+.exclusive-tag {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  color: var(--pink-light);
+  background: rgba(231, 57, 130, 0.14);
+  border: 1px solid var(--pink);
+  padding: 7px 13px; border-radius: 100px;
+  display: inline-flex; align-items: center; vertical-align: middle;
+  /* O selo entra dentro do .eyebrow, que é caixa-alta com letra espaçada.
+     Sem estas duas linhas ele herdaria e viraria "E X C L U S I V O". */
+  text-transform: none; letter-spacing: normal;
+  white-space: nowrap;
+}
+/* A margem mora no contexto, não no selo: no cabeçalho ele vem antes do texto
+   do .eyebrow, no card vem depois do nome do curso. */
+.eyebrow .exclusive-tag { margin-right: 10px; }
+.card h3 .exclusive-tag { margin-left: 10px; }
+
+/* área logada: largura cheia e sidebar que não rola ------------------------- */
+/* O layout raiz embrulha TODA página num `.wrap` de 1100px. A área logada é um
+   app-shell e quer a tela inteira, então ela escapa do `.wrap` aqui, em vez de
+   o `.wrap` sair do layout raiz — que seria o conserto arquiteturalmente certo,
+   mas mexeria nas 7 páginas públicas que hoje estão prontas e estáticas.
+   Se a área logada crescer, o caminho é mover o `.wrap` para dentro de cada
+   página pública e apagar este bloco. */
+
+/* `clip`, e não `hidden`. Os 100vw abaixo incluem a barra de rolagem, então sem
+   isto sobra uma rolagem horizontal de ~15px no desktop. `hidden` também
+   resolveria isso — mas transformaria o html num contêiner de rolagem, e aí o
+   `position: sticky` da sidebar deixaria de grudar. `clip` corta sem criar
+   contêiner: é a única das duas que convive com o sticky logo abaixo.
+
+   E é por isto que o `body` lá em cima não tem mais `overflow-x: hidden`. O
+   overflow do body só sobe para a viewport enquanto o do html é `visible` nos
+   dois eixos; a partir do momento em que esta linha existe, o html deixa de
+   ser `visible` no eixo x, a subida não acontece mais e o `hidden` passa a
+   valer no próprio body — que vira contêiner de rolagem e engole o sticky da
+   sidebar exatamente como o `hidden` no html engoliria. O corte lateral que
+   ele fazia esta linha já faz, para o site inteiro. */
+html { overflow-x: clip; }
+
+.app-shell {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  /* Ao sair do `.wrap`, o respiro lateral dele foi junto. Devolve aqui. */
+  padding-inline: var(--pad-x);
+}
+
+/* A sidebar fica parada enquanto o conteúdo rola.
+   `sticky` e não `fixed`: assim ela continua ocupando a coluna do grid, e o
+   conteúdo não precisa de uma margem chumbada para desviar dela.
+   `align-self: start` é obrigatório — em grid o padrão é `stretch`, e item
+   esticado nunca gruda em lugar nenhum.
+   O `overflow-y` interno é para o dia em que a navegação crescer: ela rola
+   dentro da própria coluna em vez de ser cortada. */
+.app-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding-block: clamp(16px, 3vw, 28px);
+}
+
+@media (max-width: 900px) {
+  /* Em coluna única a sidebar vira a faixa do topo. Grudar ali não ajuda a
+     navegar e ainda comeria altura de uma tela que já é pequena. */
+  .app-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+    padding-block: 0;
+  }
+}
+
+/* busca e filtros do painel -------------------------------------------------- */
+/* O painel trocou o parágrafo de explicação por uma busca: quem chega quer
+   achar, não ler. Tudo daqui para baixo é dessa faixa de controles. */
+
+/* Rótulo que existe para o leitor de tela e some para o olho. Não use
+   `display: none` nem `visibility: hidden` aqui — as duas tiram o elemento da
+   árvore de acessibilidade também, e aí o input ficaria sem nome. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
+
+.browser__field { margin-bottom: 14px; }
+
+/* Primeiro input do projeto. Segue o .card na superfície e na borda para não
+   parecer peça de outro sistema, e é mais arredondado que ele porque campo de
+   texto vizinho de chips em pill fica melhor na mesma família de raio. */
+/* Sem `max-width`: o campo ocupa a largura toda da área logada. Ele é a
+   primeira coisa que se faz no painel, e um campo curto no meio de uma tela
+   larga lê como detalhe, não como ferramenta. */
+.search-input {
+  width: 100%;
+  font-family: var(--font-display); font-size: 15px; color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 16px;
+  transition: border-color 0.18s ease;
+}
+.search-input::placeholder { color: var(--text-4); }
+.search-input:hover { border-color: var(--line-strong); }
+/* Só o que de fato muda no foco mora aqui. O anel vem do `:focus-visible`
+   global, e o raio dele não chega a este campo: o `border-radius: 14px` do
+   `.search-input` acima tem a mesma especificidade e vem depois no arquivo,
+   então já vence — repeti-lo aqui seria declaração morta descrevendo uma
+   briga de cascata que não existe. O que sobra são as duas diferenças reais:
+   2px de offset em vez de 3px, porque num campo largo o anel mais colado lê
+   como parte do campo, e a borda acendendo junto, para o foco continuar
+   visível se o outline for suprimido no sistema de quem olha. */
+.search-input:focus-visible {
+  outline-offset: 2px;
+  border-color: var(--purple-light);
+}
+
+.browser__filters {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+/* Modificador em cima do .mat, não uma regra nova: o chip é o mesmo botão das
+   aulas, só que ligado. O ✓ que o componente desenha é a segunda pista, para
+   quem não separa as cores da marca — cor sozinha nunca marca seleção. */
+.mat.is-selected {
+  border-color: var(--pink); color: var(--pink-light);
+  background: rgba(231, 57, 130, 0.14);
+}
+
+.browser__count {
+  font-family: var(--font-mono); font-size: 12.5px; color: var(--text-3);
+  margin: 16px 0 14px;
+}
+
+.browser__empty {
+  background: var(--surface); border: 1px dashed var(--line-strong);
+  border-radius: 18px; padding: 26px;
+}
+.browser__empty p { font-size: 15px; color: var(--text-2); margin-bottom: 16px; }
+
+@media (max-width: 560px) {
+  /* Em 360px a fileira não cabe: em vez de virar quatro linhas de chip e
+     empurrar os cursos para fora da tela, ela rola de lado. */
+  .browser__filters {
+    flex-wrap: nowrap; overflow-x: auto;
+    /* O outline do foco tem 2px e 3px de offset; sem este respiro o anel do
+       primeiro e do último chip morre no corte da rolagem. */
+    padding: 5px 3px; margin: -5px -3px;
+    scrollbar-width: thin;
+  }
+  .browser__filters > .mat { flex: 0 0 auto; }
+}
+
+/* guias na sidebar ---------------------------------------------------------- */
+/* Sete links num painel de 220px. Ficam menores e mais apagados que os itens de
+   navegação de propósito: guia é consulta, não destino do dia — se competisse
+   em peso com "Painel", a lateral viraria uma parede de links iguais. */
+.app-guides { display: flex; flex-direction: column; gap: 8px; }
+.app-guides__label {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-4); padding-left: 13px;
+}
+.app-guides__list { display: flex; flex-direction: column; gap: 1px; }
+.app-guides__link {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13.5px; color: var(--text-3);
+  padding: 6px 13px; border-radius: 8px;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+.app-guides__link:hover { color: var(--pink-light); background: rgba(255, 255, 255, 0.045); }
+
+@media (max-width: 900px) {
+  /* Em coluna única a lateral já virou faixa. Os guias acompanham: rolam na
+     horizontal junto, em vez de empilhar sete linhas antes do conteúdo. */
+  .app-guides { gap: 6px; }
+  .app-guides__list {
+    flex-direction: row; gap: 6px;
+    overflow-x: auto; scrollbar-width: thin;
+    padding-bottom: 3px;
+  }
+  .app-guides__link { flex: 0 0 auto; white-space: nowrap; }
+  .app-guides__label { padding-left: 0; }
+}
+
+/* respiro do painel e rodapé de largura cheia ------------------------------- */
+/* A saudação era seguida do filete da marca, que dava o respiro de graça. Ele
+   saiu, e sem isto o campo de busca encosta no "Oi". */
+.browser { margin-top: clamp(26px, 4vw, 40px); }
+
+/* Mesma fuga do `.wrap` usada pelo `.app-shell`: o rodapé precisa acompanhar o
+   conteúdo, senão o filete de cima dele para no meio de uma tela cheia. */
+.app-footer {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  padding-inline: var(--pad-x);
+}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import ExclusiveBadge from "@/components/ExclusiveBadge";
 
 export const metadata: Metadata = {
   title: "Next.js + IA · NickDev",
@@ -432,7 +433,14 @@ export default function NextjsIA() {
 
       <SiteHeader />
 
+      {/*
+        Esta landing é pública, mas o material é pago — é o único curso do
+        catálogo com `access: "restricted"`. O selo abre o olho-de-boi, antes
+        da ficha técnica: quem chega aqui precisa saber que o acesso é comprado
+        antes de ler quantas aulas são.
+      */}
       <div className="eyebrow">
+        <ExclusiveBadge />
         Curso · 8 aulas de 2h30 · 4 sprints · trabalho assíncrono na semana
       </div>
       <h1>

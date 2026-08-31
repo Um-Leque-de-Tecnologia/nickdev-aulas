@@ -1,0 +1,140 @@
+/**
+ * O catálogo de cursos que a área logada usa.
+ *
+ * A `app/page.tsx` continua com a própria cópia dos cards — lá o texto tem JSX
+ * rico (`<span className="mono">`, `<strong>`), e espremer isso numa string
+ * aqui empobreceria a home. Unificar as duas listas é trabalho de outro dia;
+ * por enquanto a duplicação é deliberada, e o que amarra as duas é o `slug`,
+ * que é igual ao nome da pasta em `app/cursos/`.
+ *
+ * Os campos `name` e `summary` são texto de tela: ficam em português.
+ */
+
+export type Course = {
+  slug: string;
+  name: string;
+  summary: string;
+  /** Landing pública; "" quando o curso só existe logado. */
+  href: string;
+  /**
+   * Slugs de `lib/guias.ts`, na ordem em que aparecem no curso. Rótulo e emoji
+   * saem de `guiasDe()`; aqui só mora a lista, para nome de tecnologia não
+   * existir em dois lugares.
+   *
+   * Quem quiser saber o que um curso usa pergunta aqui — é esta a lista que o
+   * catálogo responde. As páginas em `app/cursos/` continuam repetindo a sua
+   * própria lista no `BadgesDeTecnologia`, e as duas precisam bater na mão até
+   * alguém unificá-las.
+   */
+  technologies: string[];
+  access: "public" | "restricted";
+  /** Role exigida quando restrito. */
+  role?: string;
+};
+
+export const COURSES: Course[] = [
+  {
+    slug: "frontend-transicao",
+    name: "Frontend — Transição de Carreira",
+    summary:
+      "Do primeiro <h1> ao seu site no ar: HTML, CSS, responsividade e deploy, pra quem está migrando pra tech.",
+    href: "/cursos/frontend-transicao",
+    technologies: ["html", "css", "javascript", "nextjs"],
+    access: "public",
+  },
+  {
+    slug: "orientacao-objetos-java",
+    name: "Orientação a Objetos com Java",
+    summary:
+      "Os quatro pilares de OO, coleções, exceções e lambdas, até um projeto em equipe com persistência e arquitetura em camadas.",
+    href: "/cursos/orientacao-objetos-java",
+    technologies: ["java"],
+    access: "public",
+  },
+  {
+    slug: "introducao-spring-boot",
+    name: "Introdução ao Spring Boot",
+    summary:
+      "Do Java puro à API REST em produção: injeção de dependência, JPA, segurança com JWT, testes, Docker e deploy.",
+    href: "/cursos/introducao-spring-boot",
+    technologies: ["java", "spring-boot"],
+    access: "public",
+  },
+  {
+    slug: "introducao-nextjs",
+    name: "Introdução ao Next.js",
+    summary:
+      "Do primeiro componente ao deploy: App Router, Server Components, Server Actions, autenticação e CI/CD. Começa do zero, sem saber React.",
+    href: "/cursos/introducao-nextjs",
+    technologies: ["javascript", "typescript", "nextjs"],
+    access: "public",
+  },
+  {
+    slug: "frontend-avancado",
+    name: "Frontend Avançado",
+    summary:
+      "A mesma aplicação feita duas vezes: Angular 22 com signals e zoneless, depois Next.js com App Router.",
+    href: "/cursos/frontend-avancado",
+    technologies: ["html", "css", "javascript", "typescript", "nextjs"],
+    access: "public",
+  },
+  {
+    // A landing continua pública — é a página que vende o curso. O que a role
+    // libera é o material, dentro da área logada.
+    slug: "nextjs-ia",
+    name: "Next.js + IA",
+    summary:
+      "Oito sprints simulando um emprego: você pega tickets, abre Pull Request e publica uma feature de IA em produção.",
+    href: "/cursos/nextjs-ia",
+    technologies: ["nextjs"],
+    access: "restricted",
+    role: "curso-nextjs-ia",
+  },
+];
+
+export function courseBySlug(slug: string): Course | undefined {
+  return COURSES.find((course) => course.slug === slug);
+}
+
+/**
+ * Curso exclusivo primeiro, o resto depois.
+ *
+ * A ordem mora aqui, e não na página, porque é regra do catálogo: quem pagou
+ * abre o painel para ver o que pagou, e não para procurar. Qualquer lista nova
+ * que passe por aqui herda a mesma ordem sem ninguém lembrar de ordenar.
+ *
+ * `sort` mexe no array recebido, então copio antes — `COURSES` é constante
+ * compartilhada, e reordenar ela em silêncio bagunçaria quem lê depois.
+ * Dentro de cada grupo a ordem do catálogo é preservada, porque `sort` em JS é
+ * estável desde o ES2019.
+ */
+export function exclusiveFirst(courses: Course[]): Course[] {
+  const rank = (course: Course) => (course.access === "restricted" ? 0 : 1);
+  return [...courses].sort((a, b) => rank(a) - rank(b));
+}
+
+/**
+ * As tecnologias presentes numa lista de cursos, sem repetir.
+ *
+ * A ordem é a de quem lê os cursos de cima para baixo: a primeira aparição
+ * manda. Assim o filtro sai estável entre um render e outro, em vez de dançar
+ * conforme a ordem alfabética ou a contagem de cursos.
+ *
+ * Recebe a lista já filtrada, e não `COURSES`, de propósito: filtro só deve
+ * oferecer tecnologia que existe entre os cursos visíveis — opção que devolve
+ * lista vazia é uma promessa quebrada na cara de quem clicou.
+ */
+export function technologiesOf(courses: Course[]): string[] {
+  const seen = new Set<string>();
+  const slugs: string[] = [];
+
+  for (const course of courses) {
+    for (const slug of course.technologies) {
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      slugs.push(slug);
+    }
+  }
+
+  return slugs;
+}
