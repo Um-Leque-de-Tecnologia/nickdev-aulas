@@ -134,15 +134,46 @@ if (!r.ok) {
   process.exit(1);
 }
 
-const papeis = JSON.parse(Buffer.from(j.access_token.split(".")[1], "base64url")).realm_access?.roles ?? [];
+const claims = JSON.parse(Buffer.from(j.access_token.split(".")[1], "base64url"));
+const papeis = claims.realm_access?.roles ?? [];
 const admin = papeis.includes("aulas-admin");
+const audiencia = [].concat(claims.aud ?? []);
 
 fs.writeFileSync(arqSaida, j.refresh_token, { mode: 0o600 });
 
-console.log(`\n  client   : ${clientId} (público — troca sem secret)`);
-console.log(`  access   : vale ${j.expires_in}s`);
-console.log(`  aulas-admin: ${admin ? "sim" : "NÃO — sem ele as rotas de escrita respondem 403"}`);
-console.log(`  refresh  : gravado em ${arqSaida}\n`);
-console.log(`  agora:  AULAS_CLIENT_ID=${clientId} AULAS_REFRESH_FILE=${arqSaida} \\`);
-console.log(`            node scripts/sincroniza-cdn.mjs --executar\n`);
+console.log(`\n  client     : ${clientId} (público — troca sem secret)`);
+console.log(`  access     : vale ${j.expires_in}s`);
+console.log(`  aud        : ${audiencia.length ? audiencia.join(", ") : "(vazio)"}`);
+console.log(`  aulas-admin: ${admin ? "sim" : "não"}`);
+console.log(`  refresh    : gravado em ${arqSaida}`);
+
+/* A prova dos nove: a API aceita ESTE token?
+ *
+ * Ter as roles certas não basta. A API recusa token cuja audiência não a
+ * inclui, e o sintoma é confuso porque as rotas de auth opcional (como o
+ * detalhe do curso) IGNORAM o token inválido em silêncio e respondem 200 —
+ * só as que exigem auth devolvem 401. Daí dar para ver a listagem do curso e
+ * não o material dele.
+ *
+ * /v1/me exige auth e não depende de matrícula nem de papel: é o teste limpo. */
+const API = process.env.AULAS_API ?? "https://api.aulas.umlequedetecnologia.com.br";
+const me = await fetch(`${API}/v1/me`, { headers: { Authorization: `Bearer ${j.access_token}` } });
+const aceita = me.ok;
+
+console.log(`\n  a API aceita este token? ${aceita ? "SIM" : `NÃO — ${me.status}`}`);
+if (!aceita) {
+  console.log(`     ${(await me.text()).slice(0, 160)}`);
+  console.log(`\n  Falta a audiência da API no token. No Keycloak:`);
+  console.log(`     Clients → ${clientId} → Client scopes → ${clientId}-dedicated`);
+  console.log(`       → Add mapper → By configuration → Audience`);
+  console.log(`       Included Client Audience: leque-aulas-api`);
+  console.log(`       Add to access token: ON`);
+  console.log(`\n  Depois saia e entre de novo no app: o token é emitido no login.`);
+  console.log(`  Se ainda assim der 401 com a audiência presente, o filtro é por`);
+  console.log(`  client (azp) e o conserto é na API, não aqui.\n`);
+  process.exit(1);
+}
+
+console.log(`\n  agora:  AULAS_CLIENT_ID=${clientId} AULAS_REFRESH_FILE=${arqSaida} \\`);
+console.log(`            node scripts/sincroniza-cdn.mjs --materiais=<pasta> --executar\n`);
 process.exit(admin ? 0 : 1);
