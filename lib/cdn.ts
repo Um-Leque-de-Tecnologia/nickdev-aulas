@@ -16,3 +16,17 @@ export const CDN = "https://cdn.aulas.umlequedetecnologia.com.br/public";
 export function materialDaAula(curso: string, aula: string): string {
   return `${CDN}/${curso}/${aula}`;
 }
+
+/**
+ * Pasta de uma aula de curso FECHADO (`visibility=authenticated`).
+ *
+ * Esses arquivos não existem no caminho público do CDN — ele devolve 404 para
+ * eles. A API os entrega por URL assinada, emitida por pessoa e por pedido,
+ * então o link precisa passar pela rota do app que faz essa troca.
+ *
+ * Use `materialDaAula` para curso aberto: linkar o CDN direto evita uma volta
+ * pelo Worker e não exige sessão para ver o que é público.
+ */
+export function materialProtegido(curso: string, aula: string): string {
+  return `/material/${curso}/${aula}`;
+}
