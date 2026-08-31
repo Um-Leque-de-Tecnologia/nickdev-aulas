@@ -37,7 +37,7 @@ _"Could not find compiled Open Next config"_.
 ## Estrutura
 
 ```
-nickdeve-aulas/
+nickdev-aulas/
 ├── app/
 │   ├── layout.tsx                     # layout raiz: <html>, cenário ambiente, globals.css
 │   ├── globals.css                    # tokens da marca (cores, fontes, cards) — ex-brand.css
