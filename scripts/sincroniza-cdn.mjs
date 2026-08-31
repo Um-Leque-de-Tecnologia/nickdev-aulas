@@ -40,6 +40,18 @@ const SO_CURSO = (process.argv.find((a) => a.startsWith("--curso=")) ?? "").spli
 const SALVAR_PLANO = (process.argv.find((a) => a.startsWith("--salvar-plano=")) ?? "").split("=")[1];
 const USAR_PLANO = (process.argv.find((a) => a.startsWith("--plano=")) ?? "").split("=")[1];
 
+/* De onde ler os materiais. O padrão é `public/`, mas depois que os arquivos
+ * saíram do repositório eles vivem no histórico do git e no CDN — e sem esta
+ * opção a ferramenta não teria mais fonte para reenviar nada. Para corrigir
+ * algo, extraia do histórico e aponte para lá:
+ *
+ *     mkdir -p /tmp/mat && git archive <commit> public | tar -x -C /tmp/mat
+ *     node scripts/sincroniza-cdn.mjs --materiais=/tmp/mat/public --executar
+ *
+ * A pasta apontada precisa conter `cursos/` e/ou `guias/`. */
+const MATERIAIS = (process.argv.find((a) => a.startsWith("--materiais=")) ?? "").split("=")[1]
+  || path.join(RAIZ, "public");
+
 /* --------------------------------------------------------------------------
  * Token.
  *
@@ -169,6 +181,30 @@ function kindDe(rel, curso) {
   return "outro";
 }
 
+/** O MIME que o CDN vai devolver.
+ *
+ *  A API grava o Content-Type que vem na parte do multipart. Mandar um Blob sem
+ *  tipo faz o navegador receber `application/octet-stream` e BAIXAR o arquivo
+ *  em vez de abrir — que foi o que aconteceu com os 67 primeiros envios. O
+ *  `charset=utf-8` casa com o que os assets antigos já usam, para o tipo não
+ *  virar sozinho um motivo de reenvio. */
+function tipoDe(rel) {
+  const ext = path.extname(rel).toLowerCase();
+  return {
+    ".html": "text/html; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".avif": "image/avif",
+  }[ext] ?? "application/octet-stream";
+}
+
 function arquivosDe(dir, base = dir) {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -232,7 +268,7 @@ const CURSO_GUIAS = {
 };
 
 function estadoDoDisco() {
-  const base = path.join(RAIZ, "public/cursos");
+  const base = path.join(MATERIAIS, "cursos");
   const cursos = new Map();
   for (const curso of fs.readdirSync(base)) {
     if (SO_CURSO && curso !== SO_CURSO) continue;
@@ -248,7 +284,7 @@ function estadoDoDisco() {
   // Cada guia vira uma aula do curso "guias", com o slug da tecnologia.
   if (!SO_CURSO || SO_CURSO === CURSO_GUIAS.slug) {
     const guias = new Map();
-    for (const g of arquivosDe(path.join(RAIZ, "public/guias"))) {
+    for (const g of arquivosDe(path.join(MATERIAIS, "guias"))) {
       if (g.rel.includes("/")) continue;                 // só o nível de cima
       guias.set(path.basename(g.rel, ".html"), [g]);
     }
@@ -284,7 +320,7 @@ function posicaoDe(slug, curso) {
 async function enviar(aulaId, arquivo, nomeRemoto, curso) {
   const dados = new FormData();
   const buf = fs.readFileSync(arquivo);
-  dados.append("file", new Blob([buf]), nomeRemoto);
+  dados.append("file", new Blob([buf], { type: tipoDe(nomeRemoto) }), nomeRemoto);
   dados.append("kind", kindDe(nomeRemoto, curso));
   return api(`/v1/admin/lessons/${aulaId}/assets`, { method: "POST", body: dados });
 }
@@ -352,8 +388,14 @@ for (const [curso, aulas] of disco) {
         } catch { /* sem rede para o CDN: trata como diferente e reenvia */ }
       }
 
-      if (iguais) plano.igual.push(chave);
-      else plano.enviar.push({ chave, curso, aulaSlug, aulaId: aulaRemota.id, ...f, motivo: "mudou" });
+      /* Conteúdo igual não basta. Servido com o tipo errado o navegador baixa
+       * o arquivo em vez de abrir, então tipo divergente também manda reenviar
+       * — senão o diff por hash diria "em dia" para sempre. */
+      const tipoOk = asset.content_type === tipoDe(f.rel);
+
+      if (iguais && tipoOk) plano.igual.push(chave);
+      else plano.enviar.push({ chave, curso, aulaSlug, aulaId: aulaRemota.id, ...f,
+                               motivo: !iguais ? "mudou" : "tipo" });
     }
 
     for (const a of aulaRemota?.assets ?? []) {
@@ -470,20 +512,28 @@ async function subirTodos(fila, largura = 5) {
         // corpo do POST; a rota /url é reserva para asset travado. Nada de
         // engolir a exceção: verificação que falha calada vira relatório falso.
         const local = fs.readFileSync(e.abs);
+
+        /* Curso fechado por matrícula: a rota que devolve a URL responde 403
+         * mesmo para admin — a checagem é de matrícula, não de papel — então
+         * hash é impossível e tamanho é o mais forte que sobra. Não é falha: é
+         * o limite do que dá para conferir sem furar o controle de acesso. */
+        const porTamanho = () => typeof asset.size_bytes !== "number"
+          ? "NÃO VERIFICADO (travado e sem size_bytes na resposta)"
+          : asset.size_bytes === local.length ? "tamanho confere (travado)" : "TAMANHO DIFERENTE";
+
         let ok;
-        if (asset.locked) {
-          /* Curso fechado por matrícula. A rota que devolve a URL responde 403
-           * mesmo para admin — a checagem é de matrícula, não de papel — então
-           * hash é impossível e tamanho é o mais forte que sobra. Não é falha:
-           * é o limite do que dá para conferir sem furar o controle de acesso. */
-          ok = asset.size_bytes === local.length ? "tamanho confere (travado)" : "TAMANHO DIFERENTE";
-        } else {
+        if (asset.locked) ok = porTamanho();
+        else {
           try {
-            const url = asset.url ?? (await api(`/v1/lessons/${e.aulaId}/assets/${asset.id}/url`)).url;
+            const url = asset.url || (await api(`/v1/lessons/${e.aulaId}/assets/${asset.id}/url`)).url;
             const r = await fetch(url, { cache: "no-store" });
             if (!r.ok) throw new Error(`CDN respondeu ${r.status}`);
             ok = sha(Buffer.from(await r.arrayBuffer())) === sha(local) ? "hash confere" : "HASH DIFERENTE";
-          } catch (err) { ok = `NÃO VERIFICADO (${err.message})`; }
+          } catch (err) {
+            // A resposta do POST nem sempre traz `locked`; o 403 aqui é a
+            // mesma informação chegando pelo outro caminho.
+            ok = /\b403\b/.test(err.message) ? porTamanho() : `NÃO VERIFICADO (${err.message})`;
+          }
         }
 
         const bom = ok === "hash confere" || ok === "tamanho confere (travado)";
