@@ -78,10 +78,21 @@ export default function Home() {
         </Link>
 
         {/*
-          Next.js + IA é um curso pago e não entra nesta listagem — ele vive em
-          /cursos/nextjs-ia e passará para uma área logada. Ao criar a área,
-          mova o link para lá em vez de reintroduzir o card aqui.
+          Next.js + IA é pago e aparece aqui junto com os outros, de propósito:
+          esconder o curso escondia também o convite para comprá-lo. Quem não
+          está logado vê o card e a página do curso; o material é que pede
+          sessão, e disso cuida /material.
         */}
+        <Link className="card" href="/cursos/nextjs-ia">
+          <span className="num">06</span>
+          <h3>Next.js + IA</h3>
+          <p>
+            Oito sprints simulando um emprego: você pega tickets, abre Pull
+            Request e publica uma feature de IA em produção, sobre uma API
+            real.
+          </p>
+          <div className="meta">8 aulas de 2h30 · pago</div>
+        </Link>
       </div>
 
       {/*

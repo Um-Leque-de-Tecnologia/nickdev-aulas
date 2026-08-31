@@ -82,18 +82,39 @@ export async function GET(req: NextRequest, ctx: { params: Promise<Params> }) {
   const voltarAqui = `/entrar?de=${encodeURIComponent(req.nextUrl.pathname)}`;
   if (!token) return NextResponse.redirect(new URL(voltarAqui, req.nextUrl), { status: 307 });
 
-  const rUrl = await fetch(`${API}/v1/lessons/${detalhe.id}/assets/${asset.id}/url`, {
-    headers: cabecalhos,
-    cache: "no-store",
-  });
+  const pedeUrl = () =>
+    fetch(`${API}/v1/lessons/${detalhe.id}/assets/${asset.id}/url`, {
+      headers: cabecalhos,
+      cache: "no-store",
+    });
 
-  // 401 aqui é token vencido entre a leitura da sessão e esta chamada: mandar
-  // para o login resolve, e insistir com o mesmo token não.
+  let rUrl = await pedeUrl();
+
+  /* 403 aqui quer dizer "logado, mas sem matrícula". A regra do produto é que
+   * quem está logado vê todo curso pago, e a API concorda com ela: o endpoint
+   * de matrícula aceita qualquer sessão válida — responde 201, 401 ou 404, e
+   * não tem 403. Então matricula e pede de novo.
+   *
+   * Uma vez só. Se o segundo pedido também negar, o que falta não é matrícula,
+   * e repetir viraria laço contra a API. */
+  if (rUrl.status === 403) {
+    const rMatricula = await fetch(`${API}/v1/courses/${encodeURIComponent(curso)}/enroll`, {
+      method: "POST",
+      headers: cabecalhos,
+      cache: "no-store",
+    });
+    // 409 é "já estava matriculado" — para o que se quer aqui, sucesso também.
+    if (rMatricula.ok || rMatricula.status === 409) rUrl = await pedeUrl();
+  }
+
+  // 401 é token vencido entre a leitura da sessão e esta chamada: mandar para
+  // o login resolve, e insistir com o mesmo token não.
   if (rUrl.status === 401) return NextResponse.redirect(new URL(voltarAqui, req.nextUrl), { status: 307 });
 
   if (rUrl.status === 403) {
     return recado(403, "Conteúdo restrito",
-      "Você está logado, mas ainda não tem acesso a este curso.", paginaDoCurso);
+      "Você está logado e a matrícula foi tentada, mas a API não liberou este material.",
+      paginaDoCurso);
   }
   if (!rUrl.ok) {
     return recado(502, "Não deu para abrir o material",
