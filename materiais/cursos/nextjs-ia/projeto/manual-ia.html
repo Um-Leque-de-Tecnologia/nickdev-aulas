@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual da IA · Next.js + IA · NickDev</title>
+<meta name="description" content="Manual de uso da IA no curso Next.js + IA: onde ela entra em cada etapa do ciclo de desenvolvimento, o comando equivalente no Copilot Chat e no agente de CLI, a anatomia de um prompt que funciona e prompts prontos para entender um projeto, entender código, pedir code review e abrir Pull Request.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --purple-lighter:#C3A6FF; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple-light);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple-light);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple-lighter)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+
+  /* A única regra que este manual acrescenta ao design dos guias: a tabela do
+     ciclo tem quatro colunas e não cabe em telas estreitas. Rolar dentro do
+     próprio bloco é melhor que empurrar a página inteira para o lado. */
+  .tabela{overflow-x:auto;margin:14px 0}
+  .tabela table{margin:0;min-width:520px}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/nextjs-ia">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de tudo</div>
+    <a href="#combinado">O combinado</a>
+    <a href="#ferramentas">As duas ferramentas</a>
+    <div class="grp">O ciclo</div>
+    <a href="#ciclo">Onde a IA entra</a>
+    <a href="#entender-projeto">1. Entender o projeto</a>
+    <a href="#entender-codigo">2. Entender um trecho</a>
+    <a href="#planejar">3. Planejar</a>
+    <a href="#implementar">4. Implementar</a>
+    <a href="#revisar">5. Revisar</a>
+    <a href="#entregar">6. Entregar</a>
+    <div class="grp">Prompt</div>
+    <a href="#anatomia">Anatomia de um prompt</a>
+    <a href="#prompts">Prompts prontos</a>
+    <a href="#comandos">Comandos do repositório</a>
+    <div class="grp">Cuidados</div>
+    <a href="#erra">Onde ela erra aqui</a>
+    <a href="#contexto">Contexto sem estourar</a>
+    <a href="#nunca">O que nunca delegar</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Referência do curso · consulte a semana inteira</div>
+  <h1>Manual da <span class="g">IA</span></h1>
+  <p class="lead">A IA entra em todas as etapas deste curso, e em cada uma ela serve para uma coisa diferente. Este manual diz qual, com o comando no Copilot, o equivalente no agente de linha de comando, e o prompt pronto para copiar.</p>
+  <div class="rule"></div>
+
+  <div class="tip star"><b>A regra que vale mais que o manual:</b> a IA escreve, você assina. O nome no Pull Request é o seu, e a pergunta do code review — "por que assim?" — é feita a você, não a ela.</div>
+
+  <section id="combinado">
+    <h2><span class="n">00</span>O combinado</h2>
+    <p class="sub">Três regras. Elas não são burocracia: cada uma existe por um erro que acontece toda semana.</p>
+
+    <ol class="passos">
+      <li><b>Toda afirmação passa pelo arquivo.</b> A IA erra com a mesma voz de quando acerta — não há hesitação no texto para você usar como pista. Se ela disse que <span class="hl">lib/api.ts</span> exporta <span class="hl">buscarMidia</span>, abra o arquivo e confira. É o lab 1 da aula 01, e é a habilidade que o curso inteiro treina.</li>
+      <li><b>A doc local ganha da memória do modelo.</b> Quando a sugestão divergir da documentação da versão instalada, vale a doc. Isso está escrito no <span class="hl">README.md</span> do LequePlay e é a regra da casa.</li>
+      <li><b>Segredo nunca entra no prompt.</b> Token, senha, cookie de sessão, <span class="hl">.env</span> — nada disso. O que você cola num chat sai da sua máquina, e quem manda um cookie de sessão manda a própria conta junto.</li>
+    </ol>
+
+    <div class="tip warn"><b>Recusar também é trabalho.</b> O template de PR deste curso tem um campo chamado <i>"o que a IA sugeriu e eu recusei"</i>. Ele não é enfeite: saber recusar é metade da habilidade, e é o campo que mais aparece em entrevista.</div>
+  </section>
+
+  <section id="ferramentas">
+    <h2><span class="n">01</span>As duas ferramentas</h2>
+    <p class="sub">O curso é dado com o Copilot no VS Code. Mas quem já usa um agente de linha de comando não precisa trocar: o ciclo é o mesmo, muda o gesto.</p>
+
+    <div class="duo">
+      <div class="box">
+        <b>Copilot Chat (VS Code)</b>
+        <p>Vive dentro do editor e enxerga o que está aberto. O contexto é dado por marcadores:</p>
+        <ul>
+          <li><span class="hl">@workspace</span> — o repositório todo</li>
+          <li><span class="hl">#file:lib/api.ts</span> — um arquivo específico</li>
+          <li><span class="hl">#selection</span> — o trecho selecionado</li>
+        </ul>
+        <p>E tem atalhos prontos: <span class="hl">/explain</span>, <span class="hl">/fix</span>, <span class="hl">/tests</span>, <span class="hl">/doc</span>.</p>
+      </div>
+      <div class="box">
+        <b>Agente de linha de comando</b>
+        <p>Roda no terminal, dentro da pasta do projeto, e lê os arquivos por conta própria — você não precisa apontar cada um. Em troca, ele <i>executa</i>: edita arquivo, roda comando, abre PR.</p>
+        <p>Dois hábitos mudam tudo: <b>pedir o plano antes da execução</b>, e <b>ler o diff antes de aceitar</b>.</p>
+      </div>
+    </div>
+
+    <div class="tip"><b>O que os dois têm em comum:</b> ambos leem instruções versionadas do repositório. No Copilot é <span class="hl">.github/copilot-instructions.md</span>; nos agentes costuma ser um <span class="hl">AGENTS.md</span> ou <span class="hl">CLAUDE.md</span>. É o time escrevendo as regras uma vez, para não repeti-las em todo prompt.</div>
+  </section>
+
+  <section id="ciclo">
+    <h2><span class="n">02</span>Onde a IA entra no ciclo</h2>
+    <p class="sub">Seis etapas. Em cada uma, o que você quer da IA é diferente — e pedir a coisa errada na etapa errada é a causa mais comum de resposta ruim.</p>
+
+    <div class="tabela">
+      <table>
+        <thead><tr><th>Etapa</th><th>O que você quer</th><th>Copilot</th><th>Agente</th></tr></thead>
+        <tbody>
+          <tr><td><b>1. Entender o projeto</b></td><td>mapa, não código</td><td><span class="hl">@workspace</span></td><td>modo plano</td></tr>
+          <tr><td><b>2. Entender um trecho</b></td><td>tradução linha a linha</td><td><span class="hl">/explain</span> + <span class="hl">#selection</span></td><td>pergunta com o caminho do arquivo</td></tr>
+          <tr><td><b>3. Planejar</b></td><td>os passos, sem tocar em arquivo</td><td>Chat comum</td><td>modo plano</td></tr>
+          <tr><td><b>4. Implementar</b></td><td>rascunho que você revisa</td><td>agent mode / Edits</td><td>execução em passos</td></tr>
+          <tr><td><b>5. Revisar</b></td><td>primeiro leitor rápido</td><td>Copilot Code Review</td><td>revisão do diff</td></tr>
+          <tr><td><b>6. Entregar</b></td><td>descrição do PR</td><td>Chat com o diff</td><td>a partir do próprio diff</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip warn"><b>O erro clássico:</b> pular da etapa 1 para a 4. "Implemente o botão de copiar link" sem antes ter entendido onde o código roda produz exatamente o bug da aula 01 — um <span class="hl">onClick</span> num arquivo que roda no servidor.</div>
+  </section>
+
+  <section id="entender-projeto">
+    <h2><span class="n">03</span>1. Entender um projeto que não é seu</h2>
+    <p class="sub">Primeiro dia num repositório de outra pessoa. Você quer o mapa: onde ficam as coisas, e por onde passa o acesso a dado.</p>
+
+    <div class="duo">
+      <div class="box"><b>Copilot</b><p>Comece o prompt com <span class="hl">@workspace</span>. Sem isso ele responde só com o arquivo aberto, e você recebe um palpite com cara de mapa.</p></div>
+      <div class="box"><b>Agente</b><p>Entre em modo plano antes de perguntar. Assim ele lê e responde, sem começar a editar arquivo achando que você pediu.</p></div>
+    </div>
+
+    <div class="file">prompt · entender um projeto</div>
+    <div class="code"><button class="cp">copiar</button><pre>@workspace Estou entrando neste projeto hoje e não conheço nada dele.
+
+Me dê um mapa em quatro partes:
+1. o que cada pasta de primeiro nível faz, numa linha cada;
+2. por onde passa TODO acesso a dado externo (arquivo e função);
+3. as três convenções que o time segue e que eu descobriria só errando;
+4. os três arquivos que eu preciso ler antes de tocar em qualquer coisa.
+
+Para cada afirmação, cite o arquivo e a linha onde você viu.
+Se não tiver certeza de algo, diga "não confirmei" em vez de supor.</pre></div>
+
+    <div class="tip ok"><b>O detalhe que muda a resposta:</b> pedir arquivo e linha. Isso transforma uma resposta que você teria que acreditar numa lista que você consegue conferir — e é o que o lab 1 pede que você faça, uma afirmação por vez.</div>
+  </section>
+
+  <section id="entender-codigo">
+    <h2><span class="n">04</span>2. Entender um trecho de código</h2>
+    <p class="sub">Você abriu um arquivo e travou em vinte linhas. Aqui o que se quer não é resumo — é tradução, com o "por quê".</p>
+
+    <div class="file">prompt · entender código</div>
+    <div class="code"><button class="cp">copiar</button><pre>/explain #selection
+
+Explique em três camadas:
+1. o que este código faz, em português, sem jargão;
+2. por que ele foi escrito assim e não do jeito óbvio — que decisão está
+   embutida aqui;
+3. o que quebra se eu mudar cada parte.
+
+Termine com uma pergunta que eu deveria fazer para quem escreveu isso.</pre></div>
+
+    <div class="tip"><b>A terceira camada é a que ensina.</b> "O que quebra se eu mudar" força a IA a expor a dependência escondida — e é exatamente o que você precisa saber antes de mexer no arquivo de outra pessoa.</div>
+
+    <div class="tip warn"><b>Quando a resposta vier redonda demais, desconfie.</b> Peça: <i>"cite a linha exata onde isso acontece"</i>. Se ela não conseguir apontar, provavelmente inventou.</div>
+  </section>
+
+  <section id="planejar">
+    <h2><span class="n">05</span>3. Planejar antes de escrever</h2>
+    <p class="sub">A etapa que quase todo mundo pula, e a que mais economiza tempo. O objetivo aqui é uma lista de passos — <b>nenhum arquivo é tocado</b>.</p>
+
+    <div class="duo">
+      <div class="box"><b>Copilot</b><p>Chat comum, sem agent mode. Peça o plano explicitamente e diga que não quer código ainda.</p></div>
+      <div class="box"><b>Agente</b><p>Modo plano. Ele lê o que precisa, propõe os passos e espera sua aprovação antes de executar qualquer coisa.</p></div>
+    </div>
+
+    <div class="file">prompt · planejar um ticket</div>
+    <div class="code"><button class="cp">copiar</button><pre>@workspace Não escreva código ainda. Quero um plano.
+
+TICKET: &lt;cole aqui o texto do ticket&gt;
+
+Me devolva:
+1. os arquivos que precisam mudar, e o que muda em cada um;
+2. a ORDEM dos passos, e o que dá para verificar no fim de cada um;
+3. as decisões que este ticket exige de mim — as bifurcações onde existe
+   mais de um caminho defensável;
+4. o que pode quebrar em outro lugar do projeto;
+5. o que este ticket NÃO inclui, para eu não aumentar o escopo sem querer.
+
+Se faltar informação no ticket para planejar, pergunte antes de assumir.</pre></div>
+
+    <div class="tip ok"><b>O item 3 é o mais valioso.</b> Ele separa o que a IA pode decidir do que é seu — e as decisões que aparecem ali são justamente as que vão para o campo <i>"a decisão que eu tomei"</i> do Pull Request.</div>
+  </section>
+
+  <section id="implementar">
+    <h2><span class="n">06</span>4. Implementar</h2>
+    <p class="sub">Aqui a IA produz rascunho. Rascunho é para revisar, não para aceitar — e a diferença entre as duas coisas é o seu nome no commit.</p>
+
+    <ol class="passos">
+      <li><b>Um passo por vez.</b> Pedir a feature inteira devolve um bloco grande que ninguém revisa de verdade. Pedir passo 1 do plano devolve algo que você lê em um minuto.</li>
+      <li><b>Rode antes de acreditar.</b> <span class="hl">npm run dev</span> aberto, e o terminal à vista. O curso inteiro se apoia nisso: onde o <span class="hl">console.log</span> aparece é a aula.</li>
+      <li><b>Leia o diff, não o chat.</b> A explicação no chat é o que a IA <i>diz</i> que fez. O diff é o que ela fez.</li>
+      <li><b>Erro na tela é material, não obstáculo.</b> No lab 2 você deixa quebrar de propósito e lê o erro inteiro. Cole a mensagem completa no prompt — não o resumo dela.</li>
+    </ol>
+
+    <div class="file">prompt · implementar um passo</div>
+    <div class="code"><button class="cp">copiar</button><pre>Implemente APENAS o passo 1 do plano.
+
+Restrições deste projeto:
+- Next 16 com App Router; Server Component é o padrão;
+- "use client" só quando houver estado, efeito, evento de usuário ou API
+  de navegador — e sempre na folha, nunca na página;
+- todo acesso à API passa por lib/api.ts;
+- arquivo em kebab-case, componente em PascalCase;
+- sem `any` e sem `!` para calar o compilador.
+
+Antes do código, escreva em uma frase o que você vai mudar e por quê.
+Depois do código, liste o que eu preciso testar na tela para saber se
+funcionou.</pre></div>
+
+    <div class="tip"><b>Por que repetir as restrições se elas já estão no <span class="hl">copilot-instructions.md</span>:</b> porque instrução do repositório é o piso, não a garantia. Num prompt onde a restrição importa muito — e "use client" na folha é o caso — repetir custa três linhas e evita o retrabalho.</div>
+  </section>
+
+  <section id="revisar">
+    <h2><span class="n">07</span>5. Revisar — o próprio código e o do colega</h2>
+    <p class="sub">A IA é um primeiro leitor rápido. Ela acha coisa boa e fala bobagem, e as duas com a mesma convicção.</p>
+
+    <div class="duo">
+      <div class="box"><b>Copilot Code Review</b><p>Roda sozinho no Pull Request e comenta antes de qualquer humano. <b>Responda cada comentário</b> — aceitando ou recusando com um motivo. Silêncio não fecha revisão.</p></div>
+      <div class="box"><b>Antes de abrir o PR</b><p>Peça a revisão a você mesmo primeiro. É mais barato descobrir no seu editor do que no comentário de alguém.</p></div>
+    </div>
+
+    <div class="file">prompt · code review do meu próprio diff</div>
+    <div class="code"><button class="cp">copiar</button><pre>Revise este diff como se você fosse a pessoa mais exigente do time,
+e antes de eu abrir o Pull Request.
+
+&lt;cole a saída de `git diff main...HEAD`&gt;
+
+Organize em quatro grupos, e em cada um só o que você consegue apontar
+com arquivo e linha:
+1. BUG — está errado e vai quebrar; diga com qual entrada;
+2. RISCO — funciona hoje e quebra amanhã; diga em qual cenário;
+3. CONVENÇÃO — divergiu do que o resto do repositório faz;
+4. SIMPLIFICAÇÃO — mesmo resultado com menos código.
+
+Regras da revisão:
+- não sugira renomear nada só por gosto;
+- não invente problema para preencher os quatro grupos: grupo vazio é
+  uma resposta válida;
+- para cada item, diga o que acontece se eu NÃO corrigir.</pre></div>
+
+    <div class="tip ok"><b>"Grupo vazio é resposta válida" muda o resultado.</b> Sem essa linha, a IA preenche os quatro grupos porque você pediu quatro grupos — e você perde tempo com achismo de indentação.</div>
+
+    <div class="file">prompt · revisar o PR de um colega</div>
+    <div class="code"><button class="cp">copiar</button><pre>Vou revisar o Pull Request de um colega e quero entender antes de opinar.
+
+&lt;cole o diff&gt;
+
+1. Resuma em duas frases o que este PR faz.
+2. Diga qual decisão técnica a pessoa tomou, e qual seria a alternativa.
+3. Liste três perguntas que eu poderia fazer no review e que ajudariam
+   a pessoa a pensar — não perguntas retóricas, e nada de "por que você
+   não fez do jeito X".
+
+Não me dê o comentário pronto: eu escrevo. Me dê o que eu preciso saber
+para escrever.</pre></div>
+  </section>
+
+  <section id="entregar">
+    <h2><span class="n">08</span>6. Entregar</h2>
+    <p class="sub">Nada vai direto para a <span class="hl">main</span>. O ticket termina num PR com o template preenchido, e a descrição é onde você defende a decisão.</p>
+
+    <div class="file">prompt · descrição do Pull Request</div>
+    <div class="code"><button class="cp">copiar</button><pre>Escreva a descrição deste Pull Request a partir do diff.
+
+&lt;cole o diff&gt;
+
+Formato:
+- O QUE MUDA: duas ou três frases, sem lista de arquivos (o diff já mostra);
+- POR QUE ASSIM: a decisão técnica principal e a alternativa que eu
+  descartei, com o motivo;
+- COMO TESTAR: os passos exatos que a pessoa revisora deve seguir na tela;
+- O QUE FICOU DE FORA: o que eu decidi não fazer neste PR.
+
+Escreva no meu lugar, em primeira pessoa, sem adjetivos de venda
+("robusto", "elegante", "poderoso"). Se o diff não deixar claro POR QUE
+alguma coisa foi feita, escreva "&lt;justificar&gt;" no lugar em vez de inventar
+uma justificativa.</pre></div>
+
+    <div class="tip star"><b>O <span class="hl">&lt;justificar&gt;</span> é de propósito.</b> A IA não sabe por que você escolheu; ela sabe o que você escreveu. Deixar o buraco à vista é melhor que preencher com uma explicação bonita que você não consegue defender no review.</div>
+
+    <div class="file">terminal · antes de todo push</div>
+    <div class="terminal"><span class="p">$</span> npm run build     <span class="cm"># tem que passar ANTES do push</span>
+<span class="p">$</span> git push -u origin feat/&lt;nome-curto&gt;</div>
+  </section>
+
+  <section id="anatomia">
+    <h2><span class="n">09</span>Anatomia de um prompt que funciona</h2>
+    <p class="sub">Todo prompt bom deste manual tem as mesmas cinco partes. Depois que você vê o padrão, para de precisar de prompt pronto.</p>
+
+    <ol class="passos">
+      <li><b>Contexto</b> — onde a IA deve olhar. <span class="hl">@workspace</span>, <span class="hl">#file:</span>, o diff colado. Sem isso, ela responde sobre um projeto genérico que não é o seu.</li>
+      <li><b>Objetivo</b> — o que você quer <i>receber</i>, não o que você quer que ela faça. "Quero um plano" e "quero o código" produzem respostas diferentes para o mesmo pedido.</li>
+      <li><b>Restrições</b> — as regras do projeto que a resposta precisa respeitar. É aqui que entra "Server Component é o padrão".</li>
+      <li><b>Formato</b> — como a resposta deve vir. Lista numerada, quatro grupos, tabela. Formato pedido é resposta que você consegue conferir item por item.</li>
+      <li><b>Critério de dúvida</b> — o que fazer quando ela não souber. "Diga não confirmei", "pergunte antes de assumir", "escreva &lt;justificar&gt;". Sem essa linha, o vazio é preenchido com invenção.</li>
+    </ol>
+
+    <div class="duo">
+      <div class="box"><b>Antes</b><p><i>"como faço um botão de copiar link no next?"</i></p><p>Resposta: um botão genérico, provavelmente com <span class="hl">onClick</span> num Server Component, e sem uma palavra sobre onde o código roda.</p></div>
+      <div class="box"><b>Depois</b><p><i>"#file:app/midias/[slug]/page.tsx — quero um botão que copia a URL da página. Esta página é Server Component e precisa continuar sendo. Antes do código, diga onde a fronteira cliente/servidor tem que ficar e por quê."</i></p><p>Resposta: a fronteira na folha, e o motivo.</p></div>
+    </div>
+
+    <div class="tip"><b>O prompt não precisa ser longo, precisa ser específico.</b> A diferença entre os dois exemplos acima não é tamanho — é ter dito onde olhar e o que não pode mudar.</div>
+  </section>
+
+  <section id="prompts">
+    <h2><span class="n">10</span>Prompts prontos</h2>
+    <p class="sub">Os quatro que não estão nas seções acima e que você vai usar toda semana.</p>
+
+    <div class="file">prompt · ler um erro que você não entende</div>
+    <div class="code"><button class="cp">copiar</button><pre>Recebi este erro e não entendi.
+
+ERRO (completo, sem cortes):
+&lt;cole o erro inteiro, incluindo o stack trace&gt;
+
+O QUE EU FIZ ANTES: &lt;a última coisa que você mudou&gt;
+
+1. Traduza o erro para português, na ordem em que ele deve ser lido.
+2. Diga qual palavra dele entrega a causa.
+3. Diga em qual arquivo eu devo olhar primeiro, e o que procurar lá.
+
+Não me dê a correção ainda. Quero entender antes de consertar.</pre></div>
+
+    <div class="tip warn"><b>"Não me dê a correção ainda" não é frescura.</b> Erro lido é erro que você reconhece na próxima vez. Erro consertado por outra pessoa é erro que volta.</div>
+
+    <div class="file">prompt · escrever teste do fluxo crítico</div>
+    <div class="code"><button class="cp">copiar</button><pre>#file:&lt;caminho do arquivo&gt;
+
+Escreva testes para este código, mas comece pelo que importa:
+
+1. antes do código, liste os casos em ordem de risco — o que quebraria
+   pior se estivesse errado vem primeiro;
+2. diga quais desses casos NÃO vale a pena testar, e por quê;
+3. só então escreva os testes dos que sobraram.
+
+Nada de teste que só confirma que a função existe.</pre></div>
+
+    <div class="file">prompt · gerar cliente a partir de documentação</div>
+    <div class="code"><button class="cp">copiar</button><pre>Aqui está a documentação de um endpoint da API:
+
+&lt;cole o trecho de docs/api-contrato.md&gt;
+
+Escreva a função que consome isso, seguindo o padrão que já existe em
+#file:lib/api.ts — mesma forma de tratar erro, mesmo estilo de tipo.
+
+Depois do código, liste separadamente:
+- os campos que a documentação garante que sempre vêm;
+- os campos que podem vir nulos ou ausentes;
+- o que a sua implementação faz em cada caso de ausência.</pre></div>
+
+    <div class="tip warn"><b>Tipo é onde a IA mais erra.</b> Ela preenche o que a documentação não diz — e o campo que "sempre vem" chega nulo na terça. A lista separada existe para você conferir o contrato, não o código.</div>
+
+    <div class="file">prompt · auditar o que a IA acabou de escrever</div>
+    <div class="code"><button class="cp">copiar</button><pre>Você escreveu este código agora. Assuma que ele tem pelo menos um
+problema e me diga qual, com arquivo e linha.
+
+Olhe especificamente:
+- alguma coisa que você supôs sobre a API e não verificou na doc;
+- algum campo que você tratou como garantido;
+- alguma convenção deste repositório que você não seguiu;
+- alguma API do Next que mudou de versão e você usou pela memória.
+
+Se depois de olhar você achar que não há problema, diga isso — mas
+diga o que você conferiu para concluir.</pre></div>
+  </section>
+
+  <section id="comandos">
+    <h2><span class="n">11</span>Comandos do repositório: o <span class="hl">/plan</span> e o <span class="hl">/go</span></h2>
+    <p class="sub">Prompt bom que você usa toda semana não deve morar no seu histórico de chat. Ele deve morar no repositório, versionado, com nome curto.</p>
+
+    <p>É isso que um comando de barra é: um arquivo de prompt com um nome. Quem digita <span class="hl">/plan</span> não está usando um recurso mágico da ferramenta — está chamando um texto que alguém do time escreveu e commitou. Nos agentes de linha de comando isso costuma ser uma pasta de comandos no repositório; no Copilot, o equivalente mais próximo é o <span class="hl">.github/copilot-instructions.md</span>, que vale para todo prompt.</p>
+
+    <div class="tip ok"><b>Por que isso importa mais do que parece:</b> um prompt versionado melhora com o time. Alguém descobre que pedir "arquivo e linha" reduz invenção, edita o arquivo, abre PR — e na semana seguinte todo mundo já pergunta melhor. Prompt no histórico de chat de uma pessoa não melhora nada.</div>
+
+    <p>Dois comandos que valem a pena existir, com o conteúdo que já está neste manual:</p>
+
+    <div class="duo">
+      <div class="box"><b><span class="hl">/plan</span></b><p>O prompt de <a href="#planejar">planejar um ticket</a>. Sempre a primeira coisa depois de pegar um card.</p></div>
+      <div class="box"><b><span class="hl">/go</span></b><p>O prompt de <a href="#implementar">implementar um passo</a>, com as restrições do projeto já dentro. Um passo por chamada.</p></div>
+    </div>
+
+    <div class="tip"><b>O nome curto é o ponto.</b> Um prompt de vinte linhas que você tem que reescrever nunca é usado na terça-feira corrida. O mesmo prompt atrás de quatro caracteres é usado sempre.</div>
+  </section>
+
+  <section id="erra">
+    <h2><span class="n">12</span>Onde ela erra neste projeto</h2>
+    <p class="sub">Não é aleatório. São três erros previsíveis, e saber quais são vale mais que qualquer prompt.</p>
+
+    <ol class="passos">
+      <li><b>"Este não é o Next que você conhece."</b> O <span class="hl">AGENTS.md</span> na raiz do LequePlay diz isso em inglês, e não foi o time que escreveu: é o próprio <span class="hl">next dev</span> que escreve e re-adiciona esse arquivo. O framework avisa, sozinho, que os modelos estão desatualizados sobre ele.</li>
+      <li><b><span class="hl">params</span> é Promise.</b> No Next 16, <span class="hl">params</span> e <span class="hl">searchParams</span> precisam de <span class="hl">await</span>. O modelo aprendeu a versão antiga, e o erro que aparece não fala em <span class="hl">params</span> coisa nenhuma — <span class="hl">params.slug</span> só vem <span class="hl">undefined</span>.</li>
+      <li><b>O <span class="hl">"use client"</span> que ela esquece.</b> A regra está escrita no <span class="hl">.github/copilot-instructions.md</span>, o Copilot leu esse arquivo, e mesmo assim entrega o botão sem a linha. É o lab 2 da aula 01, e o erro é o material da aula.</li>
+    </ol>
+
+    <div class="tip warn"><b>O padrão dos três:</b> a IA erra onde a versão mudou depois do treino dela. Toda vez que você usar uma API de framework, a pergunta é "isso é da versão instalada?" — e a resposta está em <span class="hl">node_modules</span>, não no chat.</div>
+  </section>
+
+  <section id="contexto">
+    <h2><span class="n">13</span>Contexto: como dar, e como não estourar</h2>
+    <p class="sub">Resposta ruim quase nunca é falta de inteligência da ferramenta. É falta de contexto, ou contexto demais.</p>
+
+    <div class="duo">
+      <div class="box"><b>Contexto de menos</b><p>Pergunta sem apontar arquivo. A IA responde sobre um projeto imaginário e você não percebe, porque a resposta é plausível.</p><p><b>Sintoma:</b> nomes de arquivo e de função que não existem no repositório.</p></div>
+      <div class="box"><b>Contexto demais</b><p>Colar o projeto inteiro no chat. A resposta fica genérica, porque nada foi destacado como importante.</p><p><b>Sintoma:</b> resposta longa que não decide nada.</p></div>
+    </div>
+
+    <ol class="passos">
+      <li><b>Aponte, não cole.</b> <span class="hl">#file:lib/api.ts</span> é melhor que colar o arquivo: a ferramenta lê a versão atual, e você não erra ao copiar.</li>
+      <li><b>Um assunto por conversa.</b> Terminou o ticket, abra um chat novo. Contexto velho de outro assunto puxa a resposta para o lugar errado.</li>
+      <li><b>Erro vai inteiro.</b> Stack trace completo, sem cortar. A linha que você julgou irrelevante é frequentemente a que diz o arquivo.</li>
+      <li><b>Diga o que já tentou.</b> "Já tentei X e deu Y" evita receber X de volta como sugestão.</li>
+    </ol>
+  </section>
+
+  <section id="nunca">
+    <h2><span class="n">14</span>O que nunca delegar</h2>
+    <p class="sub">Cinco coisas. Em todas, o custo de errar é seu, não dela.</p>
+
+    <ol class="passos">
+      <li><b>Onde guardar credencial.</b> É a pergunta em que a resposta fácil costuma ser a errada — e a aula 04 existe por causa disso. Token vai em cookie <span class="hl">httpOnly</span>, escrito por Route Handler, e não em <span class="hl">localStorage</span> porque um chat disse que era mais simples.</li>
+      <li><b>A decisão que vai no PR.</b> Se você não consegue explicar por que o componente é client e a página continuou server, você não terminou o ticket — mesmo que ele funcione.</li>
+      <li><b>Aceitar review sem entender.</b> Comentário do Copilot Code Review que você aplicou sem entender é dívida com o seu nome no commit.</li>
+      <li><b>Escopo.</b> A IA aumenta escopo com naturalidade: você pede um botão e vem refatoração de três arquivos. Escopo é combinado no ticket.</li>
+      <li><b>Medir.</b> "Ficou mais rápido" precisa de número antes e depois. A IA sugere otimização; quem mede é você.</li>
+    </ol>
+
+    <div class="tip star"><b>O resumo do curso em uma frase:</b> a IA acelera quem sabe o que quer, e acelera na direção errada quem não sabe. Este manual existe para você saber o que quer antes de pedir.</div>
+  </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="/cursos/nextjs-ia">voltar ao curso</a>
+  </div>
+</main>
+</div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  /* Copiar o bloco de código. O botão vive dentro de `.code`, e o texto que
+     interessa é o do `pre` irmão — não o do botão. */
+  document.querySelectorAll(".code .cp").forEach((botao) => {
+    botao.addEventListener("click", async () => {
+      const pre = botao.parentElement.querySelector("pre");
+      if (!pre) return;
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        botao.textContent = "copiado ✓";
+        botao.classList.add("done");
+        setTimeout(() => {
+          botao.textContent = "copiar";
+          botao.classList.remove("done");
+        }, 1400);
+      } catch {
+        /* Sem permissão de clipboard o texto continua selecionável na mão —
+           melhor não fingir que copiou. */
+        botao.textContent = "copie na mão";
+        setTimeout(() => { botao.textContent = "copiar"; }, 1400);
+      }
+    });
+  });
+
+  /* O "voltar ao topo" aparece depois de 500px. `tt` pode não existir se
+     alguém remover o elemento: sem esta guarda, o ouvinte estouraria em toda
+     rolagem. */
+  const tt = document.getElementById("totop");
+  if (tt) {
+    addEventListener("scroll", () => {
+      tt.classList.toggle("show", scrollY > 500);
+    });
+  }
+</script>
+</body>
+</html>

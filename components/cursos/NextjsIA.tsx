@@ -264,6 +264,20 @@ export default function NextjsIA() {
               mesmo motivo, mora no repositório e muda por PR.
             */}
             <div className="mats">
+              {/*
+                O manual da IA e o unico material desta fileira, e por isso e o
+                unico que passa por `/material`: os outros tres sao links
+                externos (GitHub, Trello), enquanto este e um arquivo do curso
+                no CDN, entregue por URL assinada como os slides. Fica aqui, e
+                nao numa aula, pelo mesmo motivo dos vizinhos — e consultado a
+                semana inteira, e nao no dia de uma cerimonia.
+              */}
+              <a
+                className="mat"
+                href={`${materialProtegido("nextjs-ia", "projeto")}/manual-ia.html`}
+              >
+                🤖 Manual da IA
+              </a>
               <a
                 className="mat primary"
                 href="https://github.com/Um-Leque-de-Tecnologia/lequeplay-web/blob/main/CONTRIBUTING.md"
