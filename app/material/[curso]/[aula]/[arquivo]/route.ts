@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getAccessToken } from "@/lib/auth/tokens";
 import { readSession } from "@/lib/auth/session";
+import { resolveMaterial } from "@/lib/material";
 
 /**
  * Entrega um material de aula.
@@ -20,8 +20,6 @@ import { readSession } from "@/lib/auth/session";
  * O que ela NÃO faz é decidir quem pode ver: isso é a API que responde. Aqui
  * só se traduz a resposta dela em algo navegável.
  */
-
-const API = process.env.AULAS_API ?? "https://api.aulas.umlequedetecnologia.com.br";
 
 /**
  * O domínio que está GRAVADO dentro dos arquivos de material.
@@ -141,142 +139,65 @@ function recado(
 export async function GET(req: NextRequest, ctx: { params: Promise<Params> }) {
   const { curso, aula, arquivo } = await ctx.params;
   const paginaDoCurso = `/cursos/${encodeURIComponent(curso)}`;
-
-  // O token pode não existir, e tudo bem: o catálogo e a lista de assets são
-  // públicos mesmo para curso fechado — o que fica de fora é a URL do arquivo.
-  const token = await getAccessToken();
-  const cabecalhos: HeadersInit = { Accept: "application/json" };
-  if (token) (cabecalhos as Record<string, string>).Authorization = `Bearer ${token}`;
-
-  const rAula = await fetch(
-    `${API}/v1/courses/${encodeURIComponent(curso)}/lessons/${encodeURIComponent(aula)}`,
-    { headers: cabecalhos, cache: "no-store" },
-  );
-  if (!rAula.ok) {
-    return recado(404, "Aula não encontrada",
-      "Esse endereço não corresponde a nenhuma aula publicada.", paginaDoCurso);
-  }
-
-  const detalhe = (await rAula.json()) as {
-    id: string;
-    assets?: { id: string; filename: string; url?: string; content_type?: string }[];
-  };
-  const asset = detalhe.assets?.find((a) => a.filename === arquivo);
-  if (!asset) {
-    return recado(404, "Material não encontrado",
-      `A aula existe, mas não tem nenhum arquivo chamado “${arquivo}”.`, paginaDoCurso);
-  }
-
-  /* A API ja devolveu a URL no detalhe da aula: nao precisa pedir de novo.
-     Passa pela mesma entrega do outro caminho — ver `entrega()` para o porque
-     de isto NAO significar "conteudo aberto, redireciona e pronto". */
-  if (asset.url) {
-    return entrega({
-      url: asset.url,
-      arquivo,
-      contentType: asset.content_type,
-      paginaDoCurso,
-    });
-  }
-
-  // Daqui para baixo o conteúdo é fechado.
   const voltarAqui = `/entrar?de=${encodeURIComponent(req.nextUrl.pathname)}`;
-  /* Mesmo destino, mas forcando a reautenticacao: e o link que a pessoa com
-     sessao viva e credencial morta precisa. Ver `renovar` em app/entrar. */
+  /* Mesmo destino, forçando a reautenticação: é o link de quem tem sessão viva
+     e credencial morta. Ver `renovar` em app/entrar. */
   const renovarAqui = `${voltarAqui}&renovar=1`;
 
-  /* Sem token, mas os motivos são dois — e mandar os dois para o /entrar
-   * escondia justamente o que interessa.
-   *
-   * Quem não tem sessão: o /entrar leva ao Keycloak e volta. Funciona.
-   *
-   * Quem TEM sessão e não tem token: o /entrar vê sessão válida e devolve para
-   * o /painel sem sequer olhar o `de=` — de propósito, para não ficar se
-   * empurrando com esta rota. O resultado é que clicar no material levava ao
-   * painel, sem erro, sem explicação e sem nada para procurar. Este é o estado
-   * de quem entrou e ficou sem cookie de tokens, e a causa comum está escrita
-   * em app/entrar/retorno/route.ts: o Keycloak não devolveu refresh token, e
-   * sem ele o login não grava credencial nenhuma para a API. O aviso sai no
-   * terminal do servidor; aqui sai a versão que a pessoa na tela precisa. */
-  if (!token) {
-    const session = await readSession();
-    if (!session) {
-      return NextResponse.redirect(new URL(voltarAqui, req.nextUrl), { status: 307 });
+  /* Onde está o arquivo — e se dá para pegá-lo. A sequência tem quatro passos e
+     três formas de falhar, e mora em lib/material.ts porque a página que lê
+     material dentro da área logada faz a mesma pergunta. Aqui só se traduz a
+     resposta em algo navegável. */
+  const material = await resolveMaterial({
+    curso,
+    aula,
+    arquivo,
+    temSessao: (await readSession()) !== null,
+  });
+
+  if (!material.ok) {
+    switch (material.motivo) {
+      case "aula":
+        return recado(404, "Aula não encontrada",
+          "Esse endereço não corresponde a nenhuma aula publicada.", paginaDoCurso);
+
+      case "arquivo":
+        return recado(404, "Material não encontrado",
+          `A aula existe, mas não tem nenhum arquivo chamado “${arquivo}”.`, paginaDoCurso);
+
+      /* Sem sessão o /entrar resolve: leva ao Keycloak e volta. */
+      case "sem-sessao":
+        return NextResponse.redirect(new URL(voltarAqui, req.nextUrl), { status: 307 });
+
+      /* Com sessão e sem credencial, mandar para o /entrar sem `renovar=1` não
+         resolve: ele vê sessão válida e devolve para cá com o mesmo problema.
+         Antes isso era um 307 calado que virava passeio até o painel. */
+      case "sem-credencial":
+        return recado(
+          409,
+          "Precisamos revalidar o seu acesso",
+          "Você continua logado — o que venceu foi a credencial que a API pede " +
+            "para liberar o material. É um clique para recuperar, e você volta " +
+            "direto para este arquivo.",
+          paginaDoCurso,
+          { texto: "Revalidar e abrir o material", href: renovarAqui },
+        );
+
+      case "recusado":
+        return recado(403, "Conteúdo restrito",
+          "Você está logado e a matrícula foi tentada, mas a API não liberou este material.",
+          paginaDoCurso);
+
+      default:
+        return recado(502, "Não deu para abrir o material",
+          "A API respondeu de um jeito inesperado. Tente de novo em instantes.", paginaDoCurso);
     }
-    return recado(
-      409,
-      "Precisamos revalidar o seu acesso",
-      "Você continua logado — o que venceu foi a credencial que a API pede para " +
-        "liberar o material. É um clique para recuperar, e você volta direto " +
-        "para este arquivo.",
-      paginaDoCurso,
-      { texto: "Revalidar e abrir o material", href: renovarAqui },
-    );
-  }
-
-  const pedeUrl = () =>
-    fetch(`${API}/v1/lessons/${detalhe.id}/assets/${asset.id}/url`, {
-      headers: cabecalhos,
-      cache: "no-store",
-    });
-
-  let rUrl = await pedeUrl();
-
-  /* 403 aqui quer dizer "logado, mas sem matrícula". A regra do produto é que
-   * quem está logado vê todo curso pago, e a API concorda com ela: o endpoint
-   * de matrícula aceita qualquer sessão válida — responde 201, 401 ou 404, e
-   * não tem 403. Então matricula e pede de novo.
-   *
-   * Uma vez só. Se o segundo pedido também negar, o que falta não é matrícula,
-   * e repetir viraria laço contra a API. */
-  if (rUrl.status === 403) {
-    const rMatricula = await fetch(`${API}/v1/courses/${encodeURIComponent(curso)}/enroll`, {
-      method: "POST",
-      headers: cabecalhos,
-      cache: "no-store",
-    });
-    // 409 é "já estava matriculado" — para o que se quer aqui, sucesso também.
-    if (rMatricula.ok || rMatricula.status === 409) rUrl = await pedeUrl();
-  }
-
-  /* 401 aqui é a API recusando um token que ESTE servidor considerava bom.
-   * Token vencido na corrida entre a leitura da sessão e a chamada acontece, e
-   * para esse caso voltar ao /entrar resolve. Mas se a sessão está de pé, o
-   * /entrar devolve para o /painel e o clique se perde outra vez — então o
-   * recado fica na tela, com o que olhar. */
-  if (rUrl.status === 401) {
-    return recado(
-      401,
-      "Precisamos revalidar o seu acesso",
-      "O material existe e você continua logado, mas a API recusou a credencial " +
-        "desta sessão. Um clique resolve. Se repetir sempre, o token está sendo " +
-        "emitido de um jeito que a API não aceita — emissor ou audiência — e isso " +
-        "se ajusta no client do Keycloak, não aqui.",
-      paginaDoCurso,
-      { texto: "Revalidar e abrir o material", href: renovarAqui },
-    );
-  }
-
-  if (rUrl.status === 403) {
-    return recado(403, "Conteúdo restrito",
-      "Você está logado e a matrícula foi tentada, mas a API não liberou este material.",
-      paginaDoCurso);
-  }
-  if (!rUrl.ok) {
-    return recado(502, "Não deu para abrir o material",
-      "A API respondeu de um jeito inesperado. Tente de novo em instantes.", paginaDoCurso);
-  }
-
-  const { url } = (await rUrl.json()) as { url: string };
-  if (!url) {
-    return recado(502, "Não deu para abrir o material",
-      "A API não devolveu um endereço para este arquivo.", paginaDoCurso);
   }
 
   return entrega({
-    url,
+    url: material.url,
     arquivo,
-    contentType: asset.content_type,
+    contentType: material.contentType,
     paginaDoCurso,
   });
 }

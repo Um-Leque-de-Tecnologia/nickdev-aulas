@@ -217,26 +217,43 @@ function extrairTags(html: string, tag: "style" | "script") {
  * `no-store` porque a rota já é dinâmica e o guia é republicado pelo script de
  * sincronia do CDN — guardar aqui só atrasaria a correção de um texto errado.
  */
-export async function carregaGuia(slug: string): Promise<GuiaInline | null> {
-  const resposta = await fetch(hrefDoGuia(slug), { cache: "no-store" });
-  if (!resposta.ok) return null;
-
-  const html = await resposta.text();
-
+/**
+ * Desmonta um documento já em mãos.
+ *
+ * Separado do `carregaGuia` porque a origem do HTML deixou de ser sempre a
+ * mesma: o guia de tecnologia vem de uma URL pública do CDN, e o manual da IA —
+ * que é material de curso fechado — vem de uma URL ASSINADA, emitida pela API
+ * por pessoa e por pedido. Quem sabe obter aquela URL é a rota do material, não
+ * este arquivo; então este arquivo passou a aceitar o HTML pronto.
+ *
+ * Devolve `null` quando o documento não é desmontável — sem `<main>`, não há o
+ * que colocar na coluna de leitura. É esse `null` que separa um documento de
+ * consulta de um deck de slides, sem precisar de uma lista de nomes de arquivo:
+ * o deck não tem `<main>`, tem `<section class="slide">`, e cai fora sozinho.
+ */
+export function desmonta(html: string): GuiaInline | null {
   const estilos = extrairTags(html, "style");
   const scripts = extrairTags(estilos.limpo, "script");
   const semTags = scripts.limpo;
 
-  // O índice é o `<nav>` de dentro do `<aside>`. Pegar o `<aside>` inteiro
-  // traria junto a marca do guia e o "← todos os guias", que aponta para a
-  // home pública — os dois já existem, e melhor, na sidebar do app.
-  const indice = inner(inner(semTags, "aside"), "nav");
   const conteudo = inner(semTags, "main");
+  if (conteudo.trim() === "") return null;
 
   return {
     css: scopeCss(estilos.partes.join("\n")),
-    indice,
+    indice: inner(inner(semTags, "aside"), "nav"),
     conteudo,
     script: scripts.partes.join("\n;\n"),
   };
+}
+
+export async function carregaGuia(slug: string): Promise<GuiaInline | null> {
+  const resposta = await fetch(hrefDoGuia(slug), { cache: "no-store" });
+  if (!resposta.ok) return null;
+
+  /* O índice sai do `<nav>` de dentro do `<aside>`, e não do `<aside>` inteiro:
+     ali vêm também a marca do guia e o "← todos os guias", que aponta para a
+     home pública. Os dois já existem, e melhor, na sidebar do app. O como está
+     em `desmonta()`. */
+  return desmonta(await resposta.text());
 }

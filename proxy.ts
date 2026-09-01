@@ -138,14 +138,34 @@ function redirectToLogin(request: NextRequest): NextResponse {
 const HOME_PUBLICA = "/";
 const HOME_LOGADA = "/painel";
 const CURSOS_PUBLICO = "/cursos/";
+const MATERIAL_PUBLICO = "/material/";
+
+/**
+ * O escape do desvio de material.
+ *
+ * `/painel/material/...` desiste e manda para a tela cheia em dois casos: o
+ * documento não desmonta (deck de slides não tem `<main>`) e a credencial de API
+ * morreu. Sem uma marca, o desvio daqui pegaria esse redirect e mandaria de
+ * volta para o shell — que desistiria de novo, em laço, até o navegador parar.
+ *
+ * A página do shell põe esta marca no redirect, e o link "abrir em página
+ * inteira" também: é o jeito de dizer "esta ida à tela cheia é deliberada".
+ */
+const INTEIRA = "inteira";
 
 /**
  * O gêmeo logado de uma página pública — ou `null` quando ela não tem um.
  *
  * Nem toda tela pública precisa disto: só as que existem duas vezes, uma aberta
- * e uma dentro do shell da área logada. Hoje são a home (`/` → `/painel`) e as
- * landings de curso (`/cursos/<slug>` → `/painel/cursos/<slug>`), que é o par
- * que `privateCourseHref` documenta em lib/cursos.ts.
+ * e uma dentro do shell da área logada. Hoje são três:
+ *
+ *   /                       → /painel
+ *   /cursos/<slug>          → /painel/cursos/<slug>
+ *   /material/<c>/<a>/<f>   → /painel/material/<c>/<a>/<f>
+ *
+ * As duas primeiras são o par que `privateCourseHref` documenta em
+ * lib/cursos.ts. A terceira é a leitura de material: em tela cheia para quem
+ * chega de fora, e dentro do shell — com sidebar e índice — para quem entrou.
  *
  * Por que a lista virou função, e não ficou só na home: o link "← voltar ao
  * curso" que o material desenha aponta para a landing PÚBLICA, e o material é
@@ -159,13 +179,29 @@ const CURSOS_PUBLICO = "/cursos/";
  * o primeiro não é curso nenhum, e o segundo não tem gêmeo — mandar para um
  * `/painel/cursos/a/b` inexistente trocaria uma tela certa por um 404.
  */
-function gemeoLogado(pathname: string): string | null {
+function gemeoLogado(url: URL): string | null {
+  const pathname = url.pathname;
+
   if (pathname === HOME_PUBLICA) return HOME_LOGADA;
 
   if (pathname.startsWith(CURSOS_PUBLICO)) {
     const slug = pathname.slice(CURSOS_PUBLICO.length).replace(/\/+$/, "");
     if (slug === "" || slug.includes("/")) return null;
     return privateCourseHref(slug);
+  }
+
+  /* Material: quem está logado lê no shell do app, com a sidebar e o índice do
+     documento — não em tela cheia. Vale para QUALQUER caminho até o arquivo, e é
+     por isso que mora aqui e não no href de um botão: bookmark, link dentro de
+     um slide e link que alguém mandou no grupo também passam por aqui.
+
+     Exige os três segmentos exatos (curso/aula/arquivo) porque é o que a rota do
+     shell atende; qualquer outra profundidade não tem gêmeo. */
+  if (pathname.startsWith(MATERIAL_PUBLICO)) {
+    if (url.searchParams.get(INTEIRA) === "1") return null;
+    const partes = pathname.slice(MATERIAL_PUBLICO.length).split("/");
+    if (partes.length !== 3 || partes.some((p) => p === "")) return null;
+    return `/painel/material/${partes.join("/")}`;
   }
 
   return null;
@@ -309,7 +345,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // tem cookie recebe o prerender e vai embora, sem pagar nada do que vem
   // abaixo. Renovar token na volta também não faz falta — a resposta é um
   // redirect, e o /painel do outro lado passa por este mesmo arquivo.
-  const gemeo = gemeoLogado(request.nextUrl.pathname);
+  const gemeo = gemeoLogado(request.nextUrl);
   if (gemeo !== null) {
     if (!temSessao) return NextResponse.next();
 

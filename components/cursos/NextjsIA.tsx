@@ -178,7 +178,14 @@ function CardDeAula({ a }: { a: Aula }) {
         */}
         {a.base ? (
           <div className="mats" style={{ marginTop: 18 }}>
-            <a className="mat primary" href={`${a.base}/slides.html`}>
+            {/*
+              `?inteira=1` porque deck é tela cheia, sempre. Sem ele o proxy
+              desviaria para a leitura no shell, que não conseguiria desmontar um
+              deck (ele não tem `<main>`) e devolveria para cá — duas voltas de
+              rede para chegar no mesmo lugar. Declarar no link resolve na
+              primeira. Ver `INTEIRA` em proxy.ts.
+            */}
+            <a className="mat primary" href={`${a.base}/slides.html?inteira=1`}>
               ▶ Slides da aula
             </a>
           </div>
@@ -274,7 +281,14 @@ export default function NextjsIA() {
               */}
               <a
                 className="mat"
-                href={`${materialProtegido("nextjs-ia", "projeto")}/manual-ia.html`}
+                /*
+                  Aponta para a leitura DENTRO da área logada, e não para
+                  `/material` — o manual é documento de consulta, e ali ele abre
+                  com a sidebar do app e o índice fixo à direita, como um guia.
+                  Quem chegar sem sessão é mandado ao login pelo proxy, que é o
+                  mesmo destino de antes: o material é de curso fechado.
+                */
+                href="/painel/material/nextjs-ia/projeto/manual-ia.html"
               >
                 🤖 Manual da IA
               </a>

@@ -183,12 +183,17 @@ export default function IntroducaoSpringBoot() {
               <a className="mat" href={`${AULA_03}/codigos-desafio.html`}>
                 🧩 Código do desafio
               </a>
-              <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
-                👁️ Prévia da resposta
-              </a>
-              <a className="mat" href={`${PROJETO}/brief.html`}>
-                💼 Briefing do projeto
-              </a>
+              {/*
+                A aula 03 não lista "Prévia da resposta" nem "Briefing do
+                projeto", e a ausência é decisão — não link que faltou.
+
+                Os dois arquivos continuam publicados: `modelo-resposta.html`
+                está entre os cinco assets desta aula na API, e o `brief.html`
+                está na aula `projeto`. Tirar o botão esconde a porta, não fecha
+                — quem tiver o endereço continua abrindo. Se um dia a intenção
+                for impedir o acesso, e não só deixar de oferecer, isso se
+                resolve na API, despublicando o arquivo.
+              */}
             </div>
           </div>
         </div>

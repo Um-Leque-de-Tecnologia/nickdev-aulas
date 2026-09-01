@@ -145,6 +145,11 @@ h2 { font-weight: 700; font-size: clamp(24px, 3.2vw, 34px); letter-spacing: -0.0
   transition: transform 0.25s ease, box-shadow 0.3s ease;
 }
 .glow-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px -12px rgba(231, 57, 130, 0.65); }
+/* Botao desabilitado tem que PARECER desabilitado. Sem isto o `disabled` do
+   formulario de publicacao ficava so no DOM: o gradiente continuava cheio e
+   convidava um clique que nao fazia nada. */
+.glow-btn:disabled { opacity: 0.45; filter: grayscale(0.4); cursor: not-allowed; }
+.glow-btn:disabled:hover { transform: none; box-shadow: none; }
 
 /* cards de curso ----------------------------------------------------------- */
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
@@ -802,6 +807,13 @@ html { overflow-x: clip; }
    documento (`.guia-doc .guia__texto`). Tem que ser padding lá, e não neste
    elemento: o fundo do guia é do documento, e padding no pai desenharia
    justamente o vão acima do painel que se quer evitar. */
+/* Documento também encosta na sidebar: o `column-gap` do shell é a última das
+   quatro bordas que ainda abria vão. As outras três já foram — topo, lateral do
+   índice e rodapé — e deixar só a esquerda com 48px fazia o painel parecer
+   solto de um lado. O que separa o texto da borda continua sendo o padding do
+   documento, não um vão da moldura. */
+.app-shell:has(.guia-doc) { column-gap: 0; }
+
 .app-shell:has(.guia-doc) .app-main {
   margin-top: calc(-1 * var(--wrap-pad-y));
   /* Exatamente a largura do indice, menos o `--pad-x` que ja esta ali.
@@ -895,3 +907,97 @@ html { overflow-x: clip; }
   .guia-doc .guia__texto { max-width: none; }
 }
 
+
+/* publicar material (admin) -------------------------------------------------- */
+/* Formulário de admin, e o tom acompanha: sem gradiente, sem card com sombra.
+   Quem está aqui vai enviar arquivo para produção — a tela tem que parecer
+   ferramenta, não vitrine. */
+.pub {
+  display: flex; flex-direction: column; gap: 18px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 22px 24px; margin-bottom: 8px;
+}
+.pub__linha { display: flex; flex-wrap: wrap; gap: 16px; }
+.pub__campo { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.pub__rotulo {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.pub select,
+.pub input[type="text"] {
+  font-family: inherit; font-size: 14.5px; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; width: 100%;
+}
+.pub input[type="text"][aria-invalid="true"] { border-color: var(--magenta); }
+.pub input[type="file"] {
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-2);
+  background: var(--bg); border: 1px dashed var(--line-strong);
+  border-radius: 10px; padding: 14px; width: 100%;
+}
+
+.pub__grupo { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.pub__grupo legend { padding: 0; margin-bottom: 4px; }
+.pub__radio { display: flex; align-items: center; gap: 9px; font-size: 14.5px; color: var(--text-2); }
+.pub__radio input { accent-color: var(--magenta); }
+.pub__select-aula { margin: 0 0 4px 26px; max-width: calc(100% - 26px); }
+.pub__nova { display: flex; flex-direction: column; gap: 12px; margin-left: 26px; }
+@media (max-width: 700px) {
+  .pub__select-aula, .pub__nova { margin-left: 0; max-width: none; }
+}
+
+.pub__erro { font-size: 13.5px; color: var(--pink-light); }
+/* O aviso do slug permanente fica na cor de alerta da marca: é a única coisa
+   nesta tela que não dá para desfazer depois. */
+.pub__aviso {
+  font-size: 13.5px; color: var(--text-2);
+  border-left: 2px solid var(--magenta); padding-left: 12px;
+}
+.pub__aviso b { color: var(--pink-light); }
+
+/* Um arquivo por linha, com o `kind` à vista antes do envio — é a última chance
+   de ver que `manual.html` virou `outro` e renomear. */
+.pub__arquivos { list-style: none; display: flex; flex-direction: column; gap: 1px; }
+.pub__arquivos li {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-2);
+  padding: 8px 12px; border-radius: 8px; background: var(--bg);
+}
+.pub__nome { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--text); }
+.pub__kind {
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--purple-light); border: 1px solid rgba(169, 140, 224, 0.5);
+  padding: 2px 8px; border-radius: 999px;
+}
+.pub__tamanho { color: var(--text-3); }
+
+.pub__resultado { font-size: 14.5px; color: var(--text-2); display: flex; flex-direction: column; gap: 10px; }
+.pub__resultado ul { list-style: none; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono); font-size: 13px; }
+.pub__resultado li.ok { color: var(--green); }
+.pub__resultado li.falhou { color: var(--pink-light); }
+.pub__resultado a { color: var(--pink-light); text-decoration: underline; }
+.pub__resultado--erro { color: var(--pink-light); }
+
+/* árvore do que já está publicado ------------------------------------------- */
+.pubtree { display: flex; flex-direction: column; gap: 8px; }
+.pubtree__curso {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 4px 16px;
+}
+.pubtree__curso summary {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 12px 0; cursor: pointer; font-size: 15px;
+}
+.pubtree__titulo { font-weight: 600; }
+.pubtree__slug { font-size: 12.5px; color: var(--text-3); }
+.pubtree__conta {
+  margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--text-3);
+}
+.pubtree__aulas { list-style: none; display: flex; flex-direction: column; gap: 1px; padding: 0 0 12px; }
+.pubtree__aulas li {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  font-size: 13.5px; color: var(--text-2);
+  padding: 8px 12px; border-radius: 8px; background: var(--bg);
+}
+.pubtree__aulas .mono { font-size: 12.5px; color: var(--purple-light); }
+.pubtree__aula-titulo { flex: 1; min-width: 0; }
