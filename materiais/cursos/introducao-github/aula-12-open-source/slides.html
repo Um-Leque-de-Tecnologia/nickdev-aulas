@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open source, ecossistema e o que levar daqui · Aula 12 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 12 do curso Introdução ao GitHub: contribuir com um projeto que não é seu do fork ao PR aceito, ler o CONTRIBUTING, achar uma good first issue, manter o fork em dia com o upstream, GitHub CLI, Discussions, Gists, Codespaces, Copilot e Sponsors — e o ciclo inteiro das doze aulas numa página só.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 12</span> · introdução ao github · última</div>
+    <div class="tagtitle"><span class="br">git </span><span class="nm">push origin</span><span class="br"> primeira-contribuicao</span></div>
+    <h1 style="margin:24px 0 14px">Open source, ecossistema e <span class="grad">o que levar daqui</span></h1>
+    <p class="lead" style="max-width:60ch">Hoje você mexe no projeto de outra pessoa — do fork ao Pull Request aberto — conhece o resto do GitHub que ainda não apareceu, e vê o ciclo inteiro das doze aulas numa página só.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o terminal, a sua conta do GitHub e um projeto que você usa de verdade. hoje a gente contribui pra valer.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>"Eu não posso mexer nisso, não é meu"</h2>
+    <p class="lead">Onze aulas depois, você já sabe tudo que é preciso para contribuir com qualquer projeto público do mundo. O que falta não é técnica — é permissão psicológica.</p>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx">"Vão descobrir que eu não sei nada." <b>Ninguém revisa você, revisa o diff.</b> E o diff que conserta um link quebrado é um diff válido.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">"Eu não tenho acesso de escrita." <b>Nem precisa.</b> É exatamente para isso que o fork existe.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">"Só vale se for código difícil." Documentação errada, teste faltando e tradução torta são <b>contribuição de verdade</b> — e costumam ser as mais bem-vindas.</span></div>
+      <div class="r"><span class="num">4</span><span class="tx">"E se recusarem?" Vão recusar alguma hora. <b>Isso faz parte</b>, e a gente fala disso com honestidade daqui a pouco.</span></div>
+    </div>
+    <p class="note"><strong>Open source não é um clube com porteiro.</strong> É um repositório público onde qualquer pessoa pode abrir um PR — inclusive você, hoje.</p>
+  </section>
+
+  <!-- 03 O FORK -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o conceito</div>
+    <h2>O fork é a <span class="grad">sua cópia</span> no servidor</h2>
+    <p class="lead">Na aula 06 fork e branch apareceram lado a lado. Agora é a hora de usar o fork para valer: quando o repositório não é seu, você não tem onde criar a branch — então cria um repositório que é seu.</p>
+    <div class="flow" style="margin:22px 0 6px">
+      <div class="node"><div class="ico">🌍</div><b>upstream</b><span>o projeto original. você <strong>lê</strong>, mas não escreve</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🍴</div><b>origin</b><span>o seu fork, na sua conta. aqui você manda o que quiser</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">💻</div><b>a sua máquina</b><span>o clone do fork, onde o trabalho acontece</span></div>
+    </div>
+    <p class="note" style="margin-top:22px"><strong>Três cópias do mesmo repositório, em três lugares.</strong> O Pull Request é o pedido que atravessa a seta de volta: da sua branch no <span class="code-inline">origin</span> para a branch base do <span class="code-inline">upstream</span>.</p>
+  </section>
+
+  <!-- 04 ESCOLHER O PROJETO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>escolher</div>
+    <h2>Que projeto merece a sua primeira vez</h2>
+    <p class="lead">Não escolha pela fama. Escolha pelo que você tem chance de entender — e pelos sinais de que tem gente atendendo a porta.</p>
+    <div class="duo" style="margin-top:20px">
+      <div class="card ok">
+        <span class="verdict yes">bom sinal</span>
+        <h3>Vale abrir o PR</h3>
+        <p>Commit na última semana. Issues sendo respondidas. Tem <span class="code-inline">CONTRIBUTING.md</span>. Tem <span class="code-inline">LICENSE</span>. PRs recentes com merge, não só abertos. E — decisivo — <strong>é uma ferramenta que você usa</strong>.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict no">sinal ruim</span>
+        <h3>Guarde para depois</h3>
+        <p>Último commit há dois anos. Trezentos PRs abertos sem resposta. Sem licença — e a aula 04 já disse: sem licença, ninguém tem direito de usar. Ou o extremo oposto: um projeto gigante onde o seu PR é o número 4.000 da fila.</p>
+      </div>
+    </div>
+    <p class="note"><strong>O melhor projeto para começar é aquele em que você já se irritou com alguma coisa.</strong> Erro de digitação no README, mensagem de erro confusa, exemplo da documentação que não roda — você achou o bug de graça, sem procurar.</p>
+  </section>
+
+  <!-- 05 CONTRIBUTING -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a regra da casa</div>
+    <h2>Leia o <span class="code-inline">CONTRIBUTING.md</span> antes de digitar</h2>
+    <p class="lead">Na aula 04 ele era um arquivo do repositório. Hoje ele é <strong>a regra que decide se o seu PR entra ou volta</strong>.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <div class="tree">projeto/
+  <b>README.md</b>            <span class="cm">← o que é e como usar</span>
+  <b>CONTRIBUTING.md</b>      <span class="cm">← como contribuir. leia este</span>
+  <b>CODE_OF_CONDUCT.md</b>   <span class="cm">← como se comportar por lá</span>
+  <b>LICENSE</b>              <span class="cm">← o que você pode fazer</span>
+  <b>.github/</b>
+    <b>PULL_REQUEST_TEMPLATE.md</b>
+    <b>ISSUE_TEMPLATE/</b></div>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Qual <b>branch base</b>? Nem todo projeto usa <span class="code-inline">main</span> — muitos pedem PR contra <span class="code-inline">develop</span> ou <span class="code-inline">next</span>.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Como <b>nomear a branch</b> e escrever a mensagem do commit. Vários exigem Conventional Commits, que é a <b>aula 07</b>.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">O que rodar <b>antes</b> de abrir o PR: lint, teste, formatação. É o que os checks da <b>aula 09</b> vão cobrar de você lá.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Se o projeto exige <b>issue antes</b> do PR, e se pede para assinar um CLA.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Não existe <span class="code-inline">CONTRIBUTING</span>? Leia os <b>três últimos PRs com merge</b>. Eles são o manual não escrito da casa.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>PR que ignora o CONTRIBUTING dá trabalho ao mantenedor.</strong> E trabalho a mais é o motivo número um de um PR ficar parado.</p>
+  </section>
+
+  <!-- 06 GOOD FIRST ISSUE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a porta de entrada</div>
+    <h2><span class="code-inline">good first issue</span>: a placa de boas-vindas</h2>
+    <p class="lead">É uma label — aquilo da aula 05 — que o mantenedor põe na issue que ele acha resolvível por quem nunca abriu aquele código.</p>
+    <div class="grid2" style="margin-top:18px">
+      <div>
+        <div class="filetab">a busca, no github.com</div>
+<pre class="code" style="font-size:12.5px">is:issue is:open label:<span class="st">"good first issue"</span> no:assignee
+
+<span class="cm"># restringindo à sua linguagem e a projetos vivos:</span>
+is:issue is:open label:<span class="st">"good first issue"</span> no:assignee
+  language:python stars:&gt;500 pushed:&gt;2026-06-01</pre>
+        <p class="note" style="margin-top:14px"><span class="code-inline">no:assignee</span> é o filtro que importa: sem ele, metade da lista já tem dono.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Outros nomes da mesma placa: <b>good-first-issue</b>, <b>help wanted</b>, <b>beginner friendly</b>, <b>E-easy</b>. Cada projeto batiza o seu.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Leia a issue <b>inteira</b>, com os comentários. Muita issue já foi resolvida e ninguém fechou.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Issue aberta há três dias e já com quinze comentários? <b>Pule.</b> Aquilo ali já virou fila.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Não precisa ser da label: <b>qualquer</b> erro que você achou na documentação vale um PR — e esse nem pede issue antes.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 COMENTAR ANTES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>etiqueta</div>
+    <h2>Comente <span class="grad">antes</span> de começar</h2>
+    <p class="lead">É o passo que quase todo mundo pula — e é o que evita duas pessoas gastarem o fim de semana no mesmo conserto.</p>
+    <div class="duo" style="margin-top:20px">
+      <div class="card ok">
+        <span class="verdict yes">assim</span>
+        <p style="font-family:var(--mono);font-size:.92em">"Oi! Posso pegar essa? Pelo que li, é trocar a validação em <span class="code-inline">src/form.js</span> pra aceitar CEP com hífen, e ajustar o teste em <span class="code-inline">form.test.js</span>. É por aí? Consigo abrir o PR até quinta."</p>
+        <p style="margin-top:10px">Mostra que você leu, propõe um caminho e dá um prazo. O mantenedor responde "manda ver" em dez segundos.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict no">não assim</span>
+        <p style="font-family:var(--mono);font-size:.92em">"assign me"<br>"can I work on this?"<br>"+1"<br>"any update?"</p>
+        <p style="margin-top:10px">Cinco pessoas escreveram isso na mesma issue e nenhuma voltou. Quem cuida da issue já aprendeu a ignorar essas linhas.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Se ninguém responder em uns dias, comece assim mesmo</strong> — avisando no comentário que você vai começar. O silêncio é comum: quase todo mantenedor faz isso de graça, no tempo que sobra.</p>
+  </section>
+
+  <!-- 08 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">Achar a sua issue</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Ainda sem código. Só escolher onde você vai entrar — que é a parte que decide todo o resto.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Liste três projetos que você usa</h3><p>Biblioteca, CLI, tema do editor, tradução de documentação. Qualquer coisa que já esteja na sua máquina.</p></div></div>
+      <div class="st"><div class="body"><h3>Rode a busca no github.com</h3><p>Troque a linguagem pela sua e abra cinco issues em abas diferentes.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">is:issue is:open label:<span class="st">"good first issue"</span> no:assignee
+  language:javascript pushed:&gt;2026-06-01</pre></div></div>
+      <div class="st"><div class="body"><h3>Abra o <span class="code-inline">CONTRIBUTING.md</span> do escolhido</h3><p>Anote duas coisas: <strong>qual é a branch base</strong> e <strong>o que precisa rodar antes do PR</strong>.</p></div></div>
+      <div class="st"><div class="body"><h3>Escreva o comentário — e publique</h3><p>Diga o que você entendeu do problema e o que pretende mudar. Duas linhas bastam.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Diga em voz alta: qual projeto, qual issue e <span class="grn">qual é a branch base do PR</span>. Se a terceira você não sabe, volte ao <span class="code-inline">CONTRIBUTING</span> — é o erro que mais faz PR nascer torto.</p>
+    </div>
+  </section>
+
+  <!-- 09 ORIGIN x UPSTREAM -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>os dois remotos</div>
+    <h2><span class="code-inline">origin</span> e <span class="code-inline">upstream</span></h2>
+    <p class="lead">Na aula 03 você teve um remoto só. Trabalhando em fork são dois — e trocar um pelo outro é a origem de metade da confusão.</p>
+    <div class="grid2" style="margin-top:18px">
+      <div>
+        <div class="filetab">terminal</div>
+<pre class="code" style="font-size:12.5px"><span class="cm"># clonei o MEU fork, então origin já é ele</span>
+git clone git@github.com:<span class="st">voce</span>/projeto.git
+cd projeto
+
+<span class="cm"># o original vira um segundo remoto, chamado upstream</span>
+git remote add upstream https://github.com/<span class="st">dono</span>/projeto.git
+
+git remote -v
+<span class="an">origin    git@github.com:voce/projeto.git (push)</span>
+<span class="an">upstream  https://github.com/dono/projeto.git (fetch)</span></pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>origin</b> é sempre <b>o seu</b> fork. É para onde você dá <span class="code-inline">push</span>.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>upstream</b> é o original. Você só faz <span class="code-inline">fetch</span> dele — <span class="code-inline">push</span> ali dá erro de permissão, e está certo que dê.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">O nome <span class="code-inline">upstream</span> é <b>convenção</b>, não regra do Git. Todo tutorial do mundo usa esse, então use também.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Cuidado com o outro sentido de "upstream": na aula 03 era a branch remota que a sua branch segue. Mesma palavra, coisa diferente.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Puxa do upstream, empurra pro origin.</strong> Essa frase resolve quase toda dúvida de fork.</p>
+  </section>
+
+  <!-- 10 MANTER O FORK EM DIA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o fork envelhece</div>
+    <h2>Manter o fork em dia</h2>
+    <p class="lead">O fork é uma foto do dia em que você clicou. O projeto continuou andando; o seu fork, não. Duas semanas depois, o seu PR chega cheio de conflito que nem é seu.</p>
+    <div class="grid2" style="margin-top:18px">
+      <div>
+        <div class="filetab">antes de criar qualquer branch</div>
+<pre class="code" style="font-size:12.5px">git switch main
+git fetch upstream                <span class="cm"># baixa, não mexe em nada</span>
+git rebase upstream/main          <span class="cm"># põe a main igual à do original</span>
+git push origin main              <span class="cm"># atualiza o fork no site</span>
+
+<span class="cm"># e aí sim a branch nasce em dia:</span>
+git switch -c fix/cep-com-hifen</pre>
+        <p class="note" style="margin-top:14px">Se o PR já está aberto e o mantenedor pedir "rebase, por favor": faça o mesmo com a sua branch e depois <span class="code-inline">git push --force-with-lease</span>.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Faça isso <b>toda vez</b> que for começar algo novo. Custa cinco segundos.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Na <b>sua</b> main de fork, <span class="code-inline">rebase</span> é seguro: ninguém mais usa aquela branch. É a exceção honesta à regra da <b>aula 11</b>.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Nunca trabalhe <b>na main do fork</b>. Uma branch por contribuição — senão o segundo PR carrega o primeiro junto.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">No site existe o botão <b>Sync fork</b>, que faz o mesmo pela interface. Só que ele não atualiza a sua cópia local.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Sem seguir sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Quatro perguntas. As três primeiras são desta aula; a quarta é do curso inteiro.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:800px">
+      <div class="r"><span class="num">1</span><span class="tx">Você deu <span class="code-inline">git push origin</span>. O código foi para o <b>projeto original</b> ou para o <b>seu fork</b>?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Por que se lê o <span class="code-inline">CONTRIBUTING</span> <b>antes</b> de escrever a primeira linha?</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">O seu fork está três semanas atrás do original. <b>Quais comandos</b> resolvem — e de qual remoto eles puxam?</span></div>
+      <div class="r"><span class="num">4</span><span class="tx">Um check vermelho barrou o merge do seu PR. <b>Em que aulas</b> isso foi configurado?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 1 — pro seu fork, sempre; 3 — <span class="code-inline">git fetch upstream</span> e <span class="code-inline">git rebase upstream/main</span>; 4 — branch protection é a 07, o check obrigatório é a 09.</p>
+  </section>
+
+  <!-- 12 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Do fork até a branch pronta</h2>
+      <span class="t">~14 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:16px">Agora é a sua vez de montar o triângulo: original, fork e máquina.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Fork pelo botão</h3><p>No repositório escolhido, canto superior direito: <strong>Fork</strong>. Ele nasce em <span class="code-inline">github.com/voce/projeto</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Clone o <em>seu</em> fork — não o original</h3><p>Se você clonar o original por engano, o <span class="code-inline">push</span> vai falhar lá na frente.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git clone git@github.com:<span class="st">voce</span>/projeto.git
+cd projeto</pre></div></div>
+      <div class="st"><div class="body"><h3>Adicione o <span class="code-inline">upstream</span> e confira</h3><p>Dois remotos devem aparecer. Se só aparecer <span class="code-inline">origin</span>, o comando não pegou.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git remote add upstream https://github.com/<span class="st">dono</span>/projeto.git
+git remote -v</pre></div></div>
+      <div class="st"><div class="body"><h3>Sincronize e crie a branch</h3><p>Use o nome que o <span class="code-inline">CONTRIBUTING</span> pedir; na dúvida, o padrão da aula 07.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git fetch upstream
+git switch main
+git rebase upstream/main
+git switch -c fix/link-quebrado-no-readme</pre></div></div>
+      <div class="st"><div class="body"><h3>Faça a mudança, commite e empurre</h3><p>Uma mudança pequena e completa. Depois do push, o GitHub mostra um botão de abrir PR.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git commit -am <span class="st">"docs: corrige link da seção de instalação"</span>
+git push -u origin fix/link-quebrado-no-readme</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>O <span class="code-inline">git remote -v</span> tem que mostrar <span class="grn">dois</span> nomes diferentes. Se <span class="code-inline">origin</span> apontar para o repositório do dono, refaça o clone — daqui pra frente tudo dá errado por causa disso.</p>
+    </div>
+  </section>
+
+  <!-- 13 ABRIR O PR ENTRE FORKS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o pedido</div>
+    <h2>O PR que atravessa dois repositórios</h2>
+    <p class="lead">Abrir e revisar PR foi a aula 06 — aqui muda uma coisa só, e é justamente onde todo mundo tropeça: <strong>o PR sai do seu fork e entra no repositório do outro</strong>.</p>
+    <div class="grid2" style="margin-top:18px">
+      <div>
+        <div class="filetab">o cabeçalho do PR, no site</div>
+<pre class="code" style="font-size:12.5px">base repository: <span class="an">dono/projeto</span>   base: <span class="an">main</span>
+                                    <span class="cm">↑ o destino</span>
+
+head repository: <span class="st">voce/projeto</span>   compare: <span class="st">fix/link-quebrado-no-readme</span>
+                                    <span class="cm">↑ a sua branch, no seu fork</span></pre>
+        <p class="note" style="margin-top:14px">Confira essa linha <strong>antes</strong> de clicar em criar. PR aberto contra a branch errada não se corrige: fecha e abre outro.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Marque <b>Allow edits by maintainers</b>. É o que deixa o mantenedor dar um retoque em vez de te devolver o PR por uma vírgula.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Escreva a descrição pensando em <b>quem não estava na sua cabeça</b>: o que quebrava, o que você mudou, como testar.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><span class="code-inline">Closes #123</span> só fecha a issue se o PR for para o <b>mesmo</b> repositório da issue — e aqui é. Aula 06.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Os checks da <b>aula 09</b> vão rodar no seu PR. Em muitos projetos, o primeiro PR de alguém precisa de <b>aprovação</b> para os workflows rodarem — espere.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 O LADO HUMANO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>honestidade</div>
+    <h2>Agora vem a parte que ninguém conta</h2>
+    <p class="lead">O PR está aberto. E aí, provavelmente, não acontece nada durante um bom tempo.</p>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card"><h3>Pode demorar semanas</h3><p>Quem mantém o projeto quase sempre faz isso de graça, depois do trabalho. Duas, três semanas de silêncio é normal — não é desprezo.</p></div>
+      <div class="card"><h3>Pode virar dez comentários</h3><p>Revisão detalhada é <em>investimento</em> em você: ninguém gasta meia hora comentando um PR que pretende ignorar. Responda tudo, mesmo que seja "boa, corrigi".</p></div>
+      <div class="card no"><h3>Pode ser recusado</h3><p>"Não é a direção do projeto", "isso já está em outro PR", "aqui a gente resolve de outro jeito". Nenhuma dessas frases é sobre a sua competência.</p></div>
+    </div>
+    <div class="regras" style="margin-top:20px">
+      <div class="r"><span class="num">1</span><span class="tx">Um <b>lembrete educado</b> depois de duas semanas é aceitável, e só um: "oi, tem algo que eu possa ajustar aqui?".</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Se pedirem mudança, <b>não abra outro PR</b>: commite na mesma branch e dê push. O PR se atualiza sozinho.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">PR recusado <b>continua no seu histórico</b> e continua sendo trabalho seu. E a próxima issue daquele projeto você já lê como quem conhece a casa.</span></div>
+    </div>
+    <p class="note"><strong>Você não está sendo avaliado — está oferecendo um presente.</strong> Quem recebe presente escolhe se cabe na casa.</p>
+  </section>
+
+  <!-- 15 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>Os cinco tropeços da primeira contribuição</h2>
+    <table>
+      <tr><th>o tropeço</th><th>o que acontece</th><th>o jeito certo</th></tr>
+      <tr><td>Trabalhar direto na <code>main</code> do fork</td><td>O segundo PR carrega os commits do primeiro junto</td><td>Uma branch por contribuição, sempre</td></tr>
+      <tr><td>Clonar o repositório <b>original</b></td><td><code>push</code> volta com <code>403 Permission denied</code></td><td>Clone o seu fork; o original vira <code>upstream</code></td></tr>
+      <tr><td>PR gigante, com dez assuntos</td><td>Ninguém revisa. Fica parado até morrer</td><td>Um assunto por PR. Dois PRs pequenos &gt; um enorme</td></tr>
+      <tr><td>Rodar o formatador do seu editor no projeto inteiro</td><td>O diff tem 4.000 linhas e a sua correção some no meio</td><td>Rode o que o <code>CONTRIBUTING</code> manda, e só isso</td></tr>
+      <tr><td>Sumir depois do primeiro comentário da revisão</td><td>O PR é fechado por inatividade semanas depois</td><td>Responder "vou olhar no fim de semana" já basta</td></tr>
+    </table>
+    <p class="note"><strong>Nenhum desses é erro de Git.</strong> São erros de convivência — e é por isso que doem mais de consertar.</p>
+  </section>
+
+  <!-- 16 GH CLI -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>ecossistema · gh</div>
+    <h2>GitHub CLI: o site, <span class="grad">sem o site</span></h2>
+    <p class="lead">O <span class="code-inline">gh</span> é o programa oficial do GitHub para o terminal. Ele não substitui o Git — ele faz a parte que o Git nunca soube fazer: issue, PR, release, workflow.</p>
+    <div class="grid2" style="margin-top:18px">
+      <div>
+        <div class="filetab">instalar e entrar</div>
+<pre class="code" style="font-size:12.5px"><span class="cm"># macOS: brew install gh</span>
+<span class="cm"># Windows: winget install GitHub.cli</span>
+<span class="cm"># Linux: veja cli.github.com</span>
+
+gh auth login
+<span class="an">? What account do you want to log into? GitHub.com</span>
+<span class="an">? Preferred protocol for Git operations? SSH</span>
+<span class="an">? Authenticate Git with your GitHub credentials? Yes</span>
+<span class="an">✓ Logged in as voce</span></pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O <span class="code-inline">gh auth login</span> <b>resolve a autenticação</b> da aula 03 de uma vez: chave SSH e credencial do Git, no mesmo passo.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Ele sabe <b>em que repositório você está</b>. Dentro da pasta clonada, quase nenhum comando precisa dizer qual é o projeto.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Vale mais quando você já <b>sabe o que ia clicar</b>. Não aprenda o <span class="code-inline">gh</span> antes de entender a tela que ele imita.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><span class="code-inline">gh</span> não é obrigatório em lugar nenhum. É conforto — e conforto que economiza uns dez minutos por dia.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 GH NA PRATICA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>ecossistema · gh</div>
+    <h2>O que você clicava × o que você digita</h2>
+    <table>
+      <tr><th>no site</th><th>no terminal</th></tr>
+      <tr><td>Entrar na conta, criar token, cadastrar chave</td><td><code>gh auth login</code></td></tr>
+      <tr><td>Copiar a URL e clonar</td><td><code>gh repo clone dono/projeto</code></td></tr>
+      <tr><td>Botão <b>Fork</b>, depois clonar o fork</td><td><code>gh repo fork dono/projeto --clone</code></td></tr>
+      <tr><td>Aba Issues, filtrar pela label</td><td><code>gh issue list --label "good first issue"</code></td></tr>
+      <tr><td>Ler a issue #123</td><td><code>gh issue view 123</code></td></tr>
+      <tr><td>Push, e o botão verde <b>Compare &amp; pull request</b></td><td><code>gh pr create --base main --fill</code></td></tr>
+      <tr><td>Baixar a branch de um PR de outra pessoa pra testar</td><td><code>gh pr checkout 47</code></td></tr>
+      <tr><td>Ficar dando F5 na aba Checks</td><td><code>gh pr checks --watch</code></td></tr>
+      <tr><td>Aba Actions, abrir o log do job</td><td><code>gh run watch</code> · <code>gh run view --log-failed</code></td></tr>
+      <tr><td>Draft new release</td><td><code>gh release create v1.2.0 --generate-notes</code></td></tr>
+    </table>
+    <p class="note"><span class="code-inline">gh pr checkout 47</span> é o mais subestimado da lista: ele monta a branch de qualquer PR — <strong>inclusive de um fork alheio</strong> — sem você configurar remoto nenhum. Revisar rodando o código fica trivial.</p>
+  </section>
+
+  <!-- 18 LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Abrir o PR sem sair do terminal</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:16px">A mesma coisa do LAB 2, agora em quatro linhas. Se você já abriu o PR pelo site, use os comandos de leitura no lugar.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Instale e entre</h3><p>Escolha SSH quando ele perguntar o protocolo, e deixe ele configurar o Git também.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">gh auth login
+gh auth status</pre></div></div>
+      <div class="st"><div class="body"><h3>Ache uma issue pela linha de comando</h3><p>Sem <span class="code-inline">--repo</span> ele usa o repositório da pasta em que você está.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">gh issue list --repo <span class="st">dono/projeto</span> --label <span class="st">"good first issue"</span>
+gh issue view 123 --repo <span class="st">dono/projeto</span></pre></div></div>
+      <div class="st"><div class="body"><h3>Abra o PR a partir da sua branch</h3><p><span class="code-inline">--fill</span> aproveita a mensagem do commit como título e corpo. <span class="code-inline">--web</span> abre no navegador pra revisar antes de enviar.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">gh pr create --base main --fill --web</pre></div></div>
+      <div class="st"><div class="body"><h3>Acompanhe sem abrir o navegador</h3><p>O <span class="code-inline">--watch</span> fica na tela até o último check terminar.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">gh pr status
+gh pr checks --watch</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Cole no chat o link que o <span class="code-inline">gh pr create</span> devolveu. <span class="grn">É a sua primeira contribuição open source</span> — e ela existe mesmo que o merge demore um mês.</p>
+    </div>
+  </section>
+
+  <!-- 19 DISCUSSIONS E GISTS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>ecossistema</div>
+    <h2>Discussions e Gists</h2>
+    <div class="duo" style="margin-top:14px">
+      <div class="card">
+        <span class="verdict mid">discussions</span>
+        <h3>O fórum do repositório</h3>
+        <p>Issue é <strong>tarefa</strong>: nasce para ser fechada. Discussion é <strong>conversa</strong>: pergunta de uso, ideia crua, enquete, anúncio de versão. Tem thread, resposta marcada como aceita e categoria.</p>
+        <p style="margin-top:10px"><strong>Quando vale:</strong> quando o seu repositório começa a receber "como eu faço X?" como issue. Ative em Settings → Features, e a fila de issues volta a ser só trabalho.</p>
+      </div>
+      <div class="card">
+        <span class="verdict mid">gists</span>
+        <h3>O repositório de um arquivo só</h3>
+        <p>Um trecho de código com URL, histórico de versões e comentários — sem criar projeto para isso. Público ou secreto (secreto = link não listado, <strong>não</strong> é privado de verdade).</p>
+        <p style="margin-top:10px"><strong>Quando vale:</strong> mandar um script de setup para um colega, guardar aquele comando que você sempre esquece, anexar um log inteiro num comentário de issue sem entupir a página.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Nenhum segredo em Gist</strong> — nem no secreto. Quem tiver o link, entra. Segredo é <span class="code-inline">.env</span> e Secrets do repositório, como na aula 09.</p>
+  </section>
+
+  <!-- 20 CODESPACES, COPILOT, SPONSORS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>ecossistema</div>
+    <h2>Codespaces, Copilot e Sponsors</h2>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card">
+        <h3>☁️ Codespaces</h3>
+        <p>Um computador de desenvolvimento na nuvem, com o VS Code no navegador e o repositório já clonado. O ambiente vem descrito num <span class="code-inline">.devcontainer/</span> versionado junto com o código.</p>
+        <p style="margin-top:8px"><strong>Quando vale:</strong> contribuir num projeto cujo setup é um pesadelo, dar aula sem perder duas horas instalando, ou revisar de um computador que não é o seu. Tem cota grátis por mês; passou dela, cobra por hora.</p>
+      </div>
+      <div class="card">
+        <h3>🤖 Copilot</h3>
+        <p>Sugestão de código dentro do editor, revisão automática de PR e chat sobre o repositório. Grátis para conta de estudante e para quem mantém projeto open source popular.</p>
+        <p style="margin-top:8px"><strong>Quando vale:</strong> como quem tem um estagiário rápido e distraído. Ele acerta o repetitivo e inventa o resto com muita confiança — <strong>o que entra no commit continua sendo responsabilidade sua</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>💜 Sponsors</h3>
+        <p>Botão de doação recorrente no perfil ou no repositório: quem depende do seu trabalho paga por mês para ele continuar existindo.</p>
+        <p style="margin-top:8px"><strong>Quando vale:</strong> a hora em que "de graça, no fim de semana" deixa de dar conta.</p>
+      </div>
+    </div>
+    <p class="note">Tem muito mais — Pages, Packages, Wiki, Projects, Apps, API. <strong>Você não precisa conhecer tudo</strong>; precisa saber que existe, para procurar no dia em que a necessidade aparecer.</p>
+  </section>
+
+  <!-- 21 O CICLO INTEIRO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o curso inteiro</div>
+    <h2>O ciclo, do começo ao fim</h2>
+    <p class="lead">Doze aulas, uma volta só. Cada etapa aqui é uma coisa que você já fez com a mão.</p>
+    <table style="margin-top:10px">
+      <tr><th>etapa</th><th>o que acontece</th><th>aula</th></tr>
+      <tr><td><b>issue</b></td><td>O trabalho vira texto: o que, por quê, como reproduzir. Label, milestone, quadro</td><td>05</td></tr>
+      <tr><td><b>branch</b></td><td>Uma linha do tempo só para esse assunto, criada a partir da <code>main</code> em dia</td><td>02 · 07</td></tr>
+      <tr><td><b>commit</b></td><td><code>status → add → commit</code>, um assunto por commit, mensagem no padrão do time</td><td>01 · 07</td></tr>
+      <tr><td><b>push</b></td><td>A branch sai da sua máquina e chega no remoto — no seu fork, se o projeto não é seu</td><td>03 · 12</td></tr>
+      <tr><td><b>pull request</b></td><td>O pedido de merge, com descrição, <code>Closes #12</code> e revisores</td><td>06</td></tr>
+      <tr><td><b>checks</b></td><td>Actions roda build, lint e teste. Vermelho barra o merge, por regra da branch protegida</td><td>08 · 09</td></tr>
+      <tr><td><b>review</b></td><td>Gente lendo o diff: comentário em linha, sugestão, aprovar ou pedir alterações</td><td>06</td></tr>
+      <tr><td><b>merge</b></td><td>Entra na <code>main</code> — merge, squash ou rebase, conforme o combinado</td><td>02 · 06</td></tr>
+      <tr><td><b>release</b></td><td>Tag anotada, SemVer, changelog, deploy com secrets e environment</td><td>10</td></tr>
+      <tr><td><b>deu ruim</b></td><td><code>revert</code>, <code>reflog</code>, <code>bisect</code>, voltar a versão anterior sem apagar história</td><td>11</td></tr>
+    </table>
+  </section>
+
+  <!-- 22 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">💜</div>
+    <div class="eyebrow"><span class="b">fim do curso</span> · o que você leva daqui</div>
+    <h1 style="max-width:22ch">Você fecha o <span class="grad">ciclo inteiro</span> agora</h1>
+    <p class="lead" style="max-width:64ch;margin-top:16px">Da pasta <span class="code-inline">projeto-final-v2-AGORA-VAI</span> da aula 01 até um Pull Request aberto no projeto de outra pessoa. Issue → branch → commit → push → PR → review → check → merge → release — e o conserto para quando dá ruim.</p>
+    <div class="tags" style="justify-content:center;margin-top:20px;max-width:900px">
+      <span class="pill on">commit</span><span class="pill on">branch</span><span class="pill on">merge</span><span class="pill on">conflito</span><span class="pill on">push · pull · fetch</span><span class="pill on">issue</span><span class="pill on">pull request</span><span class="pill on">code review</span><span class="pill on">branch protection</span><span class="pill on">actions</span><span class="pill on">checks</span><span class="pill on">release</span><span class="pill on">revert · reflog</span><span class="pill on">fork · upstream</span><span class="pill on">gh</span>
+    </div>
+    <p class="lead" style="max-width:64ch;margin-top:26px;font-size:clamp(15px,1.7vw,20px)"><strong>Por onde seguir:</strong> monorepo e workspaces · GitOps · self-hosted runners · GitHub Enterprise e SSO · assinar commits com GPG ou SSH · a API e os GitHub Apps.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0"><strong>O próximo passo não é uma aula 13.</strong> É o segundo PR — e ele é sempre mais fácil que o primeiro.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">refaça tudo sozinho com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 22</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

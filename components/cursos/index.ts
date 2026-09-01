@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import FrontendAvancado from "./FrontendAvancado";
 import FrontendTransicao from "./FrontendTransicao";
+import IntroducaoGithub from "./IntroducaoGithub";
 import IntroducaoNextjs from "./IntroducaoNextjs";
 import IntroducaoSpringBoot from "./IntroducaoSpringBoot";
 import NextjsIA from "./NextjsIA";
@@ -28,6 +29,7 @@ import OrientacaoObjetosJava from "./OrientacaoObjetosJava";
 const CONTENT = new Map<string, ComponentType>([
   ["frontend-avancado", FrontendAvancado],
   ["frontend-transicao", FrontendTransicao],
+  ["introducao-github", IntroducaoGithub],
   ["introducao-nextjs", IntroducaoNextjs],
   ["introducao-spring-boot", IntroducaoSpringBoot],
   ["nextjs-ia", NextjsIA],

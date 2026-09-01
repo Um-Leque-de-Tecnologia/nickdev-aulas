@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxos de trabalho e proteção da branch principal · Aula 07 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 07 do curso Introdução ao GitHub: GitHub Flow, trunk-based e Git Flow e como escolher em vez de copiar, nomenclatura de branch, Conventional Commits com tipos, corpo, rodapé e BREAKING CHANGE, e branch protection na main — sem push direto, com revisão obrigatória, conversas resolvidas e histórico linear.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 07</span> · introdução ao github</div>
+    <div class="tagtitle"><span class="br">main </span><span class="nm">protected</span></div>
+    <h1 style="margin:24px 0 14px">Fluxos de trabalho e <span class="grad">proteção da main</span></h1>
+    <p class="lead" style="max-width:60ch">No fim de hoje o seu repositório tem um fluxo escolhido de propósito, um <span class="code-inline">CONTRIBUTING.md</span> dizendo como se nomeia branch e commit, e uma <span class="code-inline">main</span> que recusa push direto — inclusive o seu.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o terminal e um repositório seu no github.com em que você seja <strong>admin</strong>. sem ser admin, a tela de proteção não abre.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>O time combinou. E aí veio a sexta-feira.</h2>
+    <div class="grid2">
+      <div>
+        <div class="terminal"><span class="p">$</span> git log --oneline -8
+<span class="out">3f9a1c2</span> ajustes
+<span class="out">c14b8e0</span> Update index.html
+<span class="out">9b2d770</span> WIP
+<span class="out">51e6aa4</span> agora vai
+<span class="out">0dd3f19</span> Merge branch 'nicoly-teste-2'
+<span class="out">88c0b45</span> fix bug
+<span class="out">a7e2f31</span> .
+<span class="out">6c5d012</span> hotfix direto na main (desculpa)</div>
+        <p class="note" style="margin-top:14px">Este histórico é de um time que <strong>combinou</strong> tudo direitinho. Numa reunião. Em março.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Ninguém sabe <b>o que entrou</b> na versão de ontem sem abrir arquivo por arquivo.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">As branches se chamam <b>o nome de quem criou</b> — o que não diz nada sobre o que tem dentro.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Alguém empurrou direto na <b>main</b> às 18h50. Quebrou. Foi descoberto na segunda.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Não dá pra gerar nota de versão disso. Nem à mão, nem por robô.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Combinado que depende de todo mundo lembrar não sobrevive a uma sexta-feira corrida.</strong> A aula de hoje é sobre trocar a memória do time por uma regra que o servidor cobra.</p>
+  </section>
+
+  <!-- 03 OS TRES MODELOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o conceito</div>
+    <h2>Fluxo é um <span class="grad">acordo</span>, não uma ferramenta</h2>
+    <p class="lead">Nenhum destes três é um programa que se instala. São combinados sobre <strong>onde o código nasce, por onde passa e quando vira produção</strong>. O Git faz os três sem saber a diferença.</p>
+    <div class="grid3" style="margin-top:24px">
+      <div class="card ok"><h3>GitHub Flow</h3><p>Uma branch eterna (<span class="code-inline">main</span>) e branches curtas de trabalho. Toda mudança passa por PR. É o padrão do curso.</p></div>
+      <div class="card"><h3>Trunk-based</h3><p>Todo mundo integra na <span class="code-inline">main</span> quase todo dia. As branches vivem horas, não dias.</p></div>
+      <div class="card no"><h3>Git Flow</h3><p>Cinco tipos de branch, duas eternas, ritual de release. Nasceu em 2010 para software com versões instaladas.</p></div>
+    </div>
+    <p class="note"><strong>A pergunta certa não é "qual é o melhor".</strong> É: quantas pessoas somos, com que frequência a gente entrega, e existe mais de uma versão viva ao mesmo tempo?</p>
+  </section>
+
+  <!-- 04 GITHUB FLOW -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>modelo 1</div>
+    <h2>GitHub Flow</h2>
+    <div class="flow" style="margin:6px 0 4px">
+      <div class="node"><div class="ico">🌱</div><b>branch da main</b><span>curta, com nome que diz o assunto</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🔁</div><b>PR + revisão</b><span>a discussão acontece aqui</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🚀</div><b>merge na main</b><span>a main está sempre pronta pra sair</span></div>
+    </div>
+    <div class="grid2" style="margin-top:22px">
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Só existe <b>uma</b> branch de longa vida: a <span class="code-inline">main</span>. Tudo o mais é temporário.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">A <b>main sempre funciona</b>. Essa é a promessa central — e o que a proteção de branch existe pra garantir.</span></div>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">3</span><span class="tx">A branch morre no merge. Vida útil de <b>horas a poucos dias</b>.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Assume que você consegue <b>entregar quando quiser</b> — típico de web, API, app com deploy contínuo.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>É o que a gente adota no curso</strong> — e o que a esmagadora maioria dos times de produto usa hoje. A mecânica do PR em si foi a <strong>aula 06</strong>.</p>
+  </section>
+
+  <!-- 05 TRUNK-BASED -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>modelo 2</div>
+    <h2>Trunk-based</h2>
+    <p class="lead">O GitHub Flow levado ao extremo: a branch vive <strong>horas</strong>, e integrar é o evento diário — não o evento da semana.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <h3>O que ele assume sobre o time</h3>
+        <ul class="clean">
+          <li>Suíte de testes automática e <strong>rápida</strong>, rodando a cada integração.</li>
+          <li>Gente experiente o bastante pra quebrar tarefa grande em pedaços pequenos que já podem entrar.</li>
+          <li><strong>Feature flag</strong>: o código entra desligado e só liga quando estiver pronto. É isso que permite integrar algo incompleto sem quebrar ninguém.</li>
+          <li>Deploy várias vezes por dia, sem cerimônia.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>O que ele resolve</h3>
+        <ul class="clean">
+          <li><strong>Conflito de merge quase some.</strong> Quem integra todo dia nunca fica dez dias longe da main.</li>
+          <li>Ninguém segura trabalho pronto esperando uma data.</li>
+          <li>O feedback de erro chega em minutos, não em semanas.</li>
+        </ul>
+        <p class="note">Sem teste automático, trunk-based vira <strong>empurrar direto na main</strong> com nome bonito. Aí é o pior dos mundos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 GIT FLOW -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>modelo 3</div>
+    <h2>Git Flow — e por que ele <span class="grad">pesa</span></h2>
+    <div class="grid2">
+      <div>
+        <div class="tree"><b>main</b>        <span class="cm">← o que está em produção, com tags</span>
+<b>develop</b>     <span class="cm">← integração do que vem depois</span>
+  <b>feature/*</b> <span class="cm">← sai de develop, volta pra develop</span>
+  <b>release/*</b> <span class="cm">← congela, estabiliza, vira versão</span>
+  <b>hotfix/*</b>  <span class="cm">← sai da main, volta pras duas</span></div>
+        <p class="note" style="margin-top:14px">Cinco tipos de branch. <strong>Duas</strong> de longa vida. Toda entrega tem ritual.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Foi desenhado em <b>2010</b>, para software que o cliente <b>instala</b> e mantém versões antigas rodando. Nesse mundo ele é excelente.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Hoje a maioria dos times entrega <b>web</b>: existe uma versão viva só, a que está no ar. As duas branches eternas viram trabalho sem dono.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Toda mudança é <b>mesclada duas vezes</b> (develop e main). Dobra o conflito e dobra a chance de esquecer um lado.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Branch de feature longa vira <b>merge gigante</b> semanas depois. É exatamente a dor que o fluxo devia evitar.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">O próprio autor publicou uma nota dizendo que, se você entrega continuamente, <b>não use isto</b>.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Git Flow é pesado demais para a maioria dos times de hoje.</strong> Não porque é errado — porque resolve um problema que o seu time provavelmente não tem. Adote se você mantém <strong>versões em paralelo</strong>: biblioteca, SDK, app desktop, firmware.</p>
+  </section>
+
+  <!-- 07 COMO ESCOLHER -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a decisão</div>
+    <h2>Escolher em vez de copiar</h2>
+    <table>
+      <tr><th>se o seu time…</th><th>o fluxo é</th><th>por quê</th></tr>
+      <tr><td>É de 1 a 3 pessoas, projeto de estudo ou produto novo</td><td><b>GitHub Flow</b></td><td>Cerimônia mínima, PR como registro do que mudou. Dá pra crescer daqui.</td></tr>
+      <tr><td>Entrega várias vezes por dia e tem teste automático rápido</td><td><b>Trunk-based</b></td><td>Integrar todo dia é mais barato que resolver conflito de dez dias.</td></tr>
+      <tr><td>Tem versões suportadas em paralelo (<code>2.x</code> e <code>3.x</code> vivas)</td><td><b>Git Flow</b> ou variante</td><td>Você realmente precisa de mais de uma linha de manutenção ao mesmo tempo.</td></tr>
+      <tr><td>Entrega em janelas fixas, com homologação separada</td><td>GitHub Flow + <code>release/*</code></td><td>Uma branch de release só quando existe janela — não as cinco de uma vez.</td></tr>
+      <tr><td>Copiou o fluxo do emprego anterior sem perguntar por quê</td><td><b>Nenhum</b></td><td>Fluxo que ninguém entende vira burocracia que todo mundo contorna.</td></tr>
+    </table>
+    <p class="note"><strong>Você pode começar simples e apertar depois.</strong> O caminho barato é GitHub Flow e acrescentar o que doer. O caro é começar no Git Flow e tentar tirar peça de um ritual que já virou hábito.</p>
+  </section>
+
+  <!-- 08 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">Escolher o fluxo do seu projeto</h2>
+      <span class="t">~8 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Sem terminal. Pegue um projeto real seu — o do curso serve — e responda por escrito.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Quantas pessoas commitam nele?</h3><p>Conte de verdade, incluindo você. Uma pessoa e oito pessoas pedem coisas diferentes.</p></div></div>
+      <div class="st"><div class="body"><h3>De quanto em quanto tempo vai pro ar?</h3><p>Todo dia? Toda semana? Quando alguém lembra? Anote a frequência real, não a desejada.</p></div></div>
+      <div class="st"><div class="body"><h3>Existe mais de uma versão viva ao mesmo tempo?</h3><p>Alguém ainda usa a versão antiga e você precisa consertar bug lá? Se a resposta é não, você acabou de eliminar o Git Flow.</p></div></div>
+      <div class="st"><div class="body"><h3>Escreva a frase</h3><p>Uma linha só, no formato: <em>"Neste projeto a gente usa ___ porque ___."</em> Ela vai virar o primeiro parágrafo do seu <span class="code-inline">CONTRIBUTING.md</span> daqui a pouco.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Leia a sua frase em voz alta. Se o "porque" for <span class="key">"é o que todo mundo usa"</span>, volte ao passo 1 — isso é copiar, não escolher.</p>
+    </div>
+  </section>
+
+  <!-- 09 NOME DE BRANCH -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>convenção · branches</div>
+    <h2>O nome da branch é um <span class="grad">recado</span></h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">o formato</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">tipo</span>/<span class="an">numero-da-issue</span>-<span class="st">descricao-curta</span>
+
+<span class="cm"># exemplos bons</span>
+<span class="kw">feat</span>/<span class="an">42</span>-<span class="st">login-com-google</span>
+<span class="kw">fix</span>/<span class="an">57</span>-<span class="st">menu-quebrado-no-mobile</span>
+<span class="kw">chore</span>/<span class="an">61</span>-<span class="st">atualiza-dependencias</span>
+<span class="kw">docs</span>/<span class="an">63</span>-<span class="st">readme-de-instalacao</span></pre>
+        <div class="filetab" style="margin-top:16px">o que não ajuda ninguém</div>
+<pre class="code" style="font-size:12.5px"><span class="key">nicoly</span>
+<span class="key">teste2</span>
+<span class="key">nova-branch</span>
+<span class="key">correcao</span>
+<span class="key">feature/ajustes-gerais</span></pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O <b>tipo</b> é o mesmo vocabulário dos commits: <span class="code-inline">feat</span>, <span class="code-inline">fix</span>, <span class="code-inline">chore</span>, <span class="code-inline">docs</span>. Um vocabulário só pro time inteiro.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O <b>número da issue</b> é o que liga a branch ao contexto. Quem abrir daqui a três meses acha a discussão inteira em um clique.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><b>Minúsculas e hífen.</b> Nada de espaço, acento ou maiúscula: sistema de arquivos que não diferencia caixa transforma isso em bug de verdade.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><b>Curto.</b> A branch é temporária — o nome só precisa durar até o merge.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Nome de pessoa não é tipo. <b>Quem</b> fez o Git já grava sozinho; o nome tem que dizer <b>o quê</b>.</span></div>
+      </div>
+    </div>
+    <div class="terminal" style="margin-top:20px"><span class="p">$</span> git switch -c feat/42-login-com-google
+<span class="out">Switched to a new branch 'feat/42-login-com-google'</span></div>
+  </section>
+
+  <!-- 10 CONVENTIONAL COMMITS - A ESTRUTURA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conventional commits</div>
+    <h2>Conventional Commits: a estrutura</h2>
+    <p class="lead">Uma convenção pública, com especificação escrita, para a <strong>primeira linha</strong> da mensagem de commit. Três peças e dois sinais de pontuação.</p>
+    <div class="filetab" style="margin-top:18px">a forma canônica</div>
+<pre class="code"><span class="kw">tipo</span>(<span class="ty">escopo</span>)<span class="key">!</span>: <span class="st">descrição no imperativo</span>
+<span class="cm">└┬─┘ └──┬──┘ ┬  └────────┬────────┘</span>
+<span class="cm"> │      │    │           └── minúscula, sem ponto final, até ~72 caracteres</span>
+<span class="cm"> │      │    └────────────── opcional: marca mudança incompatível</span>
+<span class="cm"> │      └─────────────────── opcional: a parte do sistema que mudou</span>
+<span class="cm"> └────────────────────────── obrigatório: um da lista fechada de tipos</span></pre>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card ok"><h3>feat(auth): aceita login com Google</h3><p>Tipo, escopo e descrição. Lê-se como uma frase.</p></div>
+      <div class="card ok"><h3>fix: corrige menu no Safari</h3><p>O escopo é opcional. Sem ele continua válido.</p></div>
+      <div class="card no"><h3>Ajustes finais</h3><p>Não tem tipo, não tem assunto, não gera nada. É o commit que a gente está aposentando hoje.</p></div>
+    </div>
+    <p class="note"><strong>É a mesma mensagem de sempre — só que com um prefixo que um programa consegue ler.</strong> Essa é a diferença inteira.</p>
+  </section>
+
+  <!-- 11 OS TIPOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conventional commits · tipos</div>
+    <h2>A lista fechada de tipos</h2>
+    <table>
+      <tr><th>tipo</th><th>quando usar</th><th>exemplo</th></tr>
+      <tr><td><code>feat</code></td><td>Funcionalidade nova para quem usa</td><td><code>feat(carrinho): permite cupom de desconto</code></td></tr>
+      <tr><td><code>fix</code></td><td>Correção de bug que chegou ao usuário</td><td><code>fix(login): aceita e-mail com maiúscula</code></td></tr>
+      <tr><td><code>docs</code></td><td>Só documentação</td><td><code>docs: explica como rodar os testes</code></td></tr>
+      <tr><td><code>style</code></td><td>Formatação, espaço, ponto e vírgula — <b>zero</b> mudança de comportamento</td><td><code>style: aplica o prettier no src</code></td></tr>
+      <tr><td><code>refactor</code></td><td>Reescreve sem mudar o que o código faz</td><td><code>refactor(api): extrai a validação para um módulo</code></td></tr>
+      <tr><td><code>test</code></td><td>Acrescenta ou conserta teste</td><td><code>test(carrinho): cobre cupom expirado</code></td></tr>
+      <tr><td><code>chore</code></td><td>Manutenção que não é nenhuma das outras</td><td><code>chore: atualiza dependências menores</code></td></tr>
+      <tr><td><code>build</code></td><td>Empacotamento, dependências, ferramenta de build</td><td><code>build: sobe o Vite para a versão 6</code></td></tr>
+      <tr><td><code>ci</code></td><td>Arquivos de integração contínua</td><td><code>ci: roda os testes também no Node 22</code></td></tr>
+      <tr><td><code>perf</code></td><td>Melhora de desempenho</td><td><code>perf(lista): evita renderizar item fora da tela</code></td></tr>
+    </table>
+    <p class="note"><strong>Só <span class="code-inline">feat</span> e <span class="code-inline">fix</span> são obrigatórios pela especificação</strong> — o resto é convenção de mercado, e é a que praticamente todo mundo usa. Não invente tipo novo sem o time inteiro concordar.</p>
+  </section>
+
+  <!-- 12 CORPO, RODAPE, BREAKING -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conventional commits · o resto da mensagem</div>
+    <h2>Corpo, rodapé e o <span class="grad">quebra-tudo</span></h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">a mensagem completa</div>
+<pre class="code" style="font-size:12px"><span class="kw">feat</span>(<span class="ty">api</span>)<span class="key">!</span>: <span class="st">troca o token por JWT</span>
+<span class="cm">← linha em branco obrigatória</span>
+O token antigo era um UUID guardado em tabela,
+o que obrigava uma consulta ao banco por request.
+Agora o próprio token carrega a expiração.
+<span class="cm">← outra linha em branco</span>
+<span class="an">BREAKING CHANGE:</span> quem usa /v1/login precisa ler
+o campo access_token em vez de session_id.
+
+<span class="an">Refs:</span> #128
+<span class="an">Reviewed-by:</span> Nicoly Almeida</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O <b>corpo</b> é o <em>porquê</em>. Separado do título por uma linha em branco — sem ela, o Git entende tudo como título.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O <b>rodapé</b> guarda metadado: <span class="code-inline">Refs: #128</span>, <span class="code-inline">Closes #42</span>, coautoria.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><b>BREAKING CHANGE:</b> no rodapé anuncia que quem já usava vai quebrar. Escreva <b>o que fazer</b>, não só o que mudou.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">O <b>!</b> antes dos dois-pontos é o atalho visual da mesma coisa. Pode usar os dois juntos — e é o que se recomenda.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Esse marcador é o que faz a versão pular de <b>1.4.2 para 2.0.0</b> em vez de 1.5.0. O detalhe é a <b>aula 10</b>.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 BOM x RUIM -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>lado a lado</div>
+    <h2>O mesmo trabalho, escrito de dois jeitos</h2>
+    <div class="duo">
+      <div class="card no">
+        <span class="verdict no">como estava</span>
+<pre class="code" style="font-size:12px">Update index.html
+ajustes
+fix
+mudanças pedidas na review
+agora vai
+correção do bug
+WIP
+final</pre>
+        <p style="margin-top:10px">Oito commits, nenhuma informação. Pra saber o que mudou você tem que ler o diff dos oito.</p>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">como fica</span>
+<pre class="code" style="font-size:12px"><span class="kw">feat</span>(<span class="ty">busca</span>): <span class="st">filtra por categoria</span>
+<span class="kw">fix</span>(<span class="ty">busca</span>): <span class="st">ignora acento no termo</span>
+<span class="kw">test</span>(<span class="ty">busca</span>): <span class="st">cobre termo vazio</span>
+<span class="kw">docs</span>: <span class="st">documenta o parâmetro categoria</span>
+<span class="kw">refactor</span>(<span class="ty">busca</span>): <span class="st">extrai o normalizador</span>
+<span class="kw">perf</span>(<span class="ty">busca</span>): <span class="st">indexa o campo categoria</span>
+<span class="kw">chore</span>: <span class="st">remove o console.log esquecido</span>
+<span class="kw">ci</span>: <span class="st">roda os testes no Pull Request</span></pre>
+        <p style="margin-top:10px">Oito commits e um resumo da entrega. Sem abrir um arquivo.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Repare no que mudou de verdade:</strong> não é o capricho. É que agora cada linha responde <em>o que</em> e <em>onde</em> — e um programa consegue separar as <span class="code-inline">feat</span> das <span class="code-inline">fix</span> sem perguntar pra ninguém.</p>
+  </section>
+
+  <!-- 14 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Sem seguir sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Três perguntas. A segunda metade da aula empilha em cima destas.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:800px">
+      <div class="r"><span class="num">1</span><span class="tx">Você mantém um app web com uma versão só no ar, entrega toda semana, time de quatro. <b>Qual fluxo</b> e por quê?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Você renomeou uma função interna sem mudar o comportamento. <b>Qual tipo</b> de commit? E se tivesse renomeado um parâmetro da API pública?</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Por que <b>escrever bem</b> a mensagem não basta — por que ela precisa ter um <b>formato</b>?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 1 — GitHub Flow; 2 — <span class="code-inline">refactor</span>, e na API pública vira <span class="code-inline">feat!</span> com BREAKING CHANGE; 3 — porque texto livre humano nenhum programa lê.</p>
+  </section>
+
+  <!-- 15 POR QUE NAO E FRESCURA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>por que isso importa</div>
+    <h2>Isso não é frescura de commit bonito</h2>
+    <p class="lead">Convenção existe pra que uma <strong>máquina</strong> consiga ler o que antes só uma pessoa lia — e mal.</p>
+    <div class="flow" style="margin:22px 0 6px">
+      <div class="node"><div class="ico">✍️</div><b>você escreve</b><span>feat(busca): filtra por categoria</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🤖</div><b>o robô agrupa</b><span>separa feat de fix de perf sozinho</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🏷️</div><b>sai versão e changelog</b><span>1.4.2 → 1.5.0, com as notas prontas</span></div>
+    </div>
+    <ul class="clean" style="margin-top:20px">
+      <li><span class="code-inline">fix</span> vira <strong>patch</strong> (1.4.2 → 1.4.3). <span class="code-inline">feat</span> vira <strong>minor</strong> (1.4.2 → 1.5.0). <span class="code-inline">BREAKING CHANGE</span> vira <strong>major</strong> (1.4.2 → 2.0.0).</li>
+      <li>O changelog deixa de ser aquele arquivo que alguém escreve na véspera da entrega, de memória, errado.</li>
+      <li>Dá pra achar <strong>quando um comportamento entrou</strong> filtrando o log por tipo e escopo.</li>
+      <li>Um robô só decide isso se a informação estiver num lugar <strong>previsível</strong>. Daí o formato.</li>
+    </ul>
+    <p class="note"><strong>Gerar changelog e versão a partir destes commits é a aula 10 inteira.</strong> Hoje a gente planta; lá a gente colhe. Se você pular a convenção agora, a aula 10 não tem de onde tirar nada.</p>
+  </section>
+
+  <!-- 16 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Escrever o combinado no repositório</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Combinado de boca some. Combinado versionado fica. Vamos escrever o <span class="code-inline">CONTRIBUTING.md</span> — o manual tem o modelo inteiro pra copiar.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie a branch com o nome na convenção</h3><p>Já praticando o que a gente acabou de ver.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git switch main
+git pull
+git switch -c docs/1-contributing</pre></div></div>
+      <div class="st"><div class="body"><h3>Escreva o CONTRIBUTING.md</h3><p>Quatro blocos: o fluxo escolhido (a sua frase do LAB 1), o padrão de nome de branch, o padrão de commit e como se abre um PR.</p></div></div>
+      <div class="st"><div class="body"><h3>Commite na convenção que você acabou de escrever</h3><p>É o primeiro teste dela — se ficar difícil de nomear o próprio commit, o combinado ainda está confuso.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git add CONTRIBUTING.md
+git commit -m <span class="st">"docs: define fluxo, nome de branch e padrão de commit"</span>
+git push -u origin docs/1-contributing</pre></div></div>
+      <div class="st"><div class="body"><h3>Abra o PR e deixe aberto</h3><p>Não faça o merge ainda. A gente vai proteger a <span class="code-inline">main</span> no LAB 3 e usar este PR pra provar que a proteção funciona.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Abra o seu <span class="code-inline">CONTRIBUTING.md</span> e pergunte: <strong>alguém que nunca falou comigo consegue seguir isto sozinho?</strong> Se precisar de você para explicar, ainda não está pronto.</p>
+    </div>
+  </section>
+
+  <!-- 17 A TRAVA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a trava</div>
+    <h2>Branch protection: o combinado vira <span class="grad">regra</span></h2>
+    <p class="lead">Tudo até aqui é acordo. Acordo depende de memória — e memória falha às 18h50 de sexta. <strong>Proteção de branch é o acordo escrito num lugar que cobra sozinho.</strong></p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card no">
+        <span class="verdict no">só combinado</span>
+        <h3>"A gente não empurra direto na main"</h3>
+        <p>Funciona nos dias bons. Na correria alguém pula — quase sempre a pessoa mais experiente, que "sabe o que está fazendo". E ninguém fica sabendo até quebrar.</p>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">com proteção</span>
+        <h3>O servidor recusa o push</h3>
+        <p>Não tem exceção por antiguidade, nem por pressa. O GitHub responde que a branch é protegida, e o push simplesmente não acontece.</p>
+      </div>
+    </div>
+    <div class="terminal" style="margin-top:22px"><span class="p">$</span> git push origin main
+<span class="out">remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: error: Changes must be made through a pull request.</span>
+<span class="cm"># não é bug. é a regra funcionando — e ela vale pra você também.</span></div>
+    <p class="note">A regra mora no <strong>servidor</strong>, não na sua máquina. Não adianta clonar de novo, trocar de computador ou usar outro cliente Git.</p>
+  </section>
+
+  <!-- 18 AS OPCOES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a tela de proteção</div>
+    <h2>Caixa por caixa, o que cada uma faz</h2>
+    <table>
+      <tr><th>a opção</th><th>o que ela impede</th></tr>
+      <tr><td><b>Require a pull request before merging</b></td><td>Push direto na <code>main</code>. Toda mudança passa por PR — inclusive a sua.</td></tr>
+      <tr><td><b>Require approvals</b> <span class="muted">(1 ou 2)</span></td><td>Merge sem ninguém ter olhado. Uma aprovação já muda o jogo; duas travam time pequeno.</td></tr>
+      <tr><td><b>Dismiss stale approvals</b></td><td>Aprovar, empurrar mais commits e mesclar coisa que ninguém revisou. Push novo, aprovação zerada.</td></tr>
+      <tr><td><b>Require conversation resolution</b></td><td>Merge com comentário de revisão em aberto. Cada linha discutida precisa ser resolvida.</td></tr>
+      <tr><td><b>Require linear history</b></td><td>Commit de merge na <code>main</code>. Obriga squash ou rebase — histórico em linha reta, legível.</td></tr>
+      <tr><td><b>Require branches to be up to date</b></td><td>Mesclar código testado contra uma <code>main</code> velha.</td></tr>
+      <tr><td><b>Do not allow bypassing</b></td><td>Que admin (você) fure a própria regra. <b>Ligue.</b> Regra com exceção pro chefe não é regra.</td></tr>
+      <tr><td><b>Block force pushes</b> · <b>Restrict deletions</b></td><td>Reescrever ou apagar a <code>main</code>. Já vêm ligadas por padrão — não desligue.</td></tr>
+    </table>
+    <p class="note">Nessa mesma tela existe <strong>Require status checks to pass</strong> — os testes e o lint como porteiro do merge. Isso é a <strong>aula 09</strong>: primeiro a gente cria os checks na <strong>aula 08</strong>, depois volta aqui pra torná-los obrigatórios.</p>
+  </section>
+
+  <!-- 19 LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Trancar a main — e testar a tranca</h2>
+      <span class="t">~14 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">No seu repositório, onde você é admin. O passo a passo detalhado está no manual.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie a regra</h3><p><span class="code-inline">Settings → Rules → Rulesets → New branch ruleset</span>. Alvo: <span class="code-inline">Default branch</span>. Status: <span class="code-inline">Active</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Marque as quatro caixas do dia</h3><p>Pull request obrigatório com 1 aprovação, conversas resolvidas, histórico linear e <strong>sem bypass</strong> — nem pra você.</p></div></div>
+      <div class="st"><div class="body"><h3>Prove que a tranca fecha</h3><p>Este push <strong>tem que falhar</strong>. É o resultado esperado.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git switch main
+echo <span class="st">"teste"</span> &gt;&gt; README.md
+git commit -am <span class="st">"chore: testa a protecao"</span>
+git push origin main   <span class="cm"># ← vai ser recusado</span></pre></div></div>
+      <div class="st"><div class="body"><h3>Limpe a bagunça e mescle pelo caminho certo</h3><p>Desfaça o commit local de teste e volte ao PR do LAB 2 — que agora só entra por merge revisado.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git reset --hard origin/main</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Se o push na <span class="code-inline">main</span> passou, a regra não está ativa ou o <strong>bypass de admin</strong> ficou ligado. Volte no ruleset: status <span class="code-inline">Active</span> e a lista de bypass <strong>vazia</strong>.</p>
+    </div>
+  </section>
+
+  <!-- 20 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>O que costuma dar errado aqui</h2>
+    <table>
+      <tr><th>o que acontece</th><th>por quê</th><th>o conserto</th></tr>
+      <tr><td><code>GH006: Protected branch update failed</code></td><td>Não é erro: a proteção está fazendo o trabalho dela.</td><td>Crie uma branch, abra PR e mescle por lá.</td></tr>
+      <tr><td>"Protegi a main e agora nem eu consigo dar push"</td><td>Certo assim. Você tirou o bypass — de propósito.</td><td>PR, sempre. Se for emergência real, o admin desativa o ruleset por alguns minutos; o GitHub registra quem fez.</td></tr>
+      <tr><td>Commitou 20 vezes na <code>main</code> local antes de descobrir a trava</td><td>Trabalho todo na branch errada. Nada foi perdido.</td><td><code>git switch -c fix/12-descricao</code> e <code>git push</code>. A branch nova leva os commits junto.</td></tr>
+      <tr><td>PR não deixa mesclar: <code>not up to date</code></td><td>A <code>main</code> andou depois que você abriu o PR.</td><td><code>git pull --rebase origin main</code>, resolva se houver conflito, e empurre de novo.</td></tr>
+      <tr><td>Merge bloqueado com tudo aprovado</td><td>Sobrou <b>conversa não resolvida</b> na revisão.</td><td>Percorra os comentários e clique em <code>Resolve conversation</code> em cada um.</td></tr>
+      <tr><td>Ninguém segue a convenção de commit</td><td>Ela está só na cabeça de quem propôs.</td><td><code>CONTRIBUTING.md</code> no repositório e template de PR. Validar por robô é <b>aula 09</b>.</td></tr>
+      <tr><td>Errou o tipo do commit e já empurrou</td><td>Acontece todo dia.</td><td>Sozinho na branch, <code>git commit --amend</code>. Em branch compartilhada, deixe — e explique no PR. Desfazer é a <b>aula 11</b>.</td></tr>
+    </table>
+  </section>
+
+  <!-- 21 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">🔒</div>
+    <div class="eyebrow"><span class="b">fim da aula 07</span> · o que você já sabe fazer</div>
+    <h1 style="max-width:22ch">A sua <span class="grad">main</span> agora se defende sozinha</h1>
+    <p class="lead" style="max-width:62ch;margin-top:16px">Você escolheu um fluxo em vez de copiar, escreveu o combinado no <span class="code-inline">CONTRIBUTING.md</span>, adotou Conventional Commits e trancou a <span class="code-inline">main</span> — sem exceção nem pra você.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">github flow</span><span class="pill on">trunk-based</span><span class="pill on">git flow</span><span class="pill on">feat/42-...</span><span class="pill on">tipo(escopo):</span><span class="pill on">BREAKING CHANGE</span><span class="pill on">branch protection</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Aula 08:</strong> GitHub Actions, a primeira automação rodando a cada push. <strong>Aula 09:</strong> esses testes viram status check obrigatório nesta mesma tela de proteção. <strong>Aula 10:</strong> os commits de hoje viram changelog e versão sozinhos.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)">refaça tudo sozinho com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 21</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

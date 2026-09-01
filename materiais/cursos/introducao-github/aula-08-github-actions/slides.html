@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Actions: a primeira automação · Aula 08 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 08 do curso Introdução ao GitHub: o que é integração contínua e por que ela existe, o arquivo em .github/workflows/ e o vocabulário evento, job, step, runner e action, o primeiro workflow rodando build e teste a cada push e a cada Pull Request, ler a aba Actions e o log de um job que falhou, matriz de versões, cache, artefatos e o badge de status no README.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 08</span> · introdução ao github</div>
+    <div class="tagtitle"><span class="br">on: </span><span class="nm">push</span></div>
+    <h1 style="margin:24px 0 14px">GitHub Actions: a <span class="grad">primeira automação</span></h1>
+    <p class="lead" style="max-width:58ch">No fim de hoje o seu repositório tem um robô contratado. A cada push e a cada Pull Request ele pega o código numa máquina limpa, instala, roda o build e o teste — e escreve na tela se passou ou se quebrou.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: um repositório seu no GitHub, com <span class="code-inline">package.json</span> e a <span class="code-inline">main</span> protegida desde a aula 07.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>"Na minha máquina funciona"</h2>
+    <p class="lead">A frase mais cara do desenvolvimento de software. E o pior é que ela quase sempre é <strong>verdade</strong> — é justamente esse o problema.</p>
+    <div class="terminal" style="margin-top:20px"><span class="p">você@casa ~/projeto $</span> npm test
+<span class="out">  ✓ 14 testes passaram em 2.1s</span>
+<span class="p">você@casa ~/projeto $</span> git push
+
+<span class="cm"># ...duas horas depois, na máquina de outra pessoa</span>
+
+<span class="p">colega@trabalho ~/projeto $</span> npm test
+<span class="cm">  ✗ Cannot find module 'dayjs'</span></div>
+    <div class="regras" style="margin-top:20px">
+      <div class="r"><span class="num">1</span><span class="tx">Você instalou o <b>dayjs</b> e esqueceu de commitar o <span class="code-inline">package.json</span>.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Você está no <b>Node 22</b>; o servidor de produção roda <b>Node 18</b>.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Um arquivo de que o build precisa está no seu disco — e no <span class="code-inline">.gitignore</span>.</span></div>
+      <div class="r"><span class="num">4</span><span class="tx">Ninguém rodou os testes antes do merge. <b>Ninguém nunca roda.</b></span></div>
+    </div>
+    <p class="note">A sua máquina tem anos de sujeira acumulada que o repositório não tem. Só uma máquina <strong>limpa</strong> diz a verdade sobre o seu código.</p>
+  </section>
+
+  <!-- 03 O CONCEITO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o conceito</div>
+    <h2>Integração contínua</h2>
+    <p class="lead" style="margin-bottom:20px">Toda vez que alguém integra código ao tronco, uma máquina neutra recomeça o projeto <strong>do zero</strong> e confere se ele ainda funciona.</p>
+    <div class="flow">
+      <div class="node"><div class="ico">⬆️</div><b>você dá push</b><span>ou abre um PR</span></div>
+      <div class="arw">›</div>
+      <div class="node"><div class="ico">🧼</div><b>máquina limpa</b><span>nada seu instalado nela</span></div>
+      <div class="arw">›</div>
+      <div class="node"><div class="ico">📦</div><b>clona e instala</b><span>só o que está no repo</span></div>
+      <div class="arw">›</div>
+      <div class="node"><div class="ico">🧪</div><b>build e teste</b><span>os comandos que você escolheu</span></div>
+      <div class="arw">›</div>
+      <div class="node"><div class="ico">🚦</div><b>verde ou vermelho</b><span>com o log inteiro guardado</span></div>
+    </div>
+    <p class="note"><strong>Contínua</strong> quer dizer: a cada mudança, não uma vez por mês. Um erro descoberto em três minutos custa um comentário. O mesmo erro descoberto três semanas depois custa uma reunião.</p>
+  </section>
+
+  <!-- 04 CONTINUIDADE COM A AULA 07 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>de onde a gente veio</div>
+    <h2>O robô revisa antes da pessoa</h2>
+    <p class="lead" style="margin-bottom:20px">Na <strong>aula 07</strong> você protegeu a <span class="code-inline">main</span> e passou a exigir revisão de gente. Hoje entra mais uma camada — e ela vem antes.</p>
+    <div class="grid2">
+      <div class="card no">
+        <h3>Sem CI</h3>
+        <p>Quem revisa gasta os primeiros dez minutos baixando a branch, instalando e rodando os testes na mão. Se der erro, escreve "quebrou aqui" — e o autor responde "quebrou como?".</p>
+      </div>
+      <div class="card ok">
+        <h3>Com CI</h3>
+        <p>O robô já rodou tudo e deixou o log linkado no PR. A pessoa revisa <strong>o desenho da solução</strong>, que é o que só ela sabe fazer. O serviço braçal ficou com a máquina.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Hoje o robô só avisa.</strong> Ele pinta um ✗ no Pull Request, mas o botão de merge continua clicável. Transformar esse ✗ em <strong>check obrigatório</strong> — que trava o merge de verdade, amarrado na branch protection da 07 — é a <strong>aula 09</strong>.</p>
+  </section>
+
+  <!-- 05 ONDE MORA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>onde mora</div>
+    <h2>Um arquivo. Dentro do próprio repositório.</h2>
+    <p class="lead" style="margin-bottom:18px">Não tem painel pra configurar nem servidor pra alugar. A automação é um <span class="code-inline">.yml</span> versionado junto com o código — quem clonar o projeto leva o pipeline junto.</p>
+    <div class="tree">meu-projeto/
+  <b>.github/</b>
+    <b>workflows/</b>
+      <b>ci.yml</b>          <span class="cm">← o robô de hoje mora aqui</span>
+      <b>deploy.yml</b>      <span class="cm">← outro robô, outro assunto (aula 10)</span>
+  src/
+  package.json
+  package-lock.json
+  README.md</div>
+    <p class="note">O caminho é <strong>exatamente</strong> <span class="code-inline">.github/workflows/</span>: com ponto na frente, no plural, na raiz do repositório. Um caractere fora e o GitHub simplesmente não enxerga o arquivo — sem erro, sem aviso. O nome do <span class="code-inline">.yml</span>, esse sim, é livre.</p>
+  </section>
+
+  <!-- 06 VOCABULARIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>vocabulário</div>
+    <h2>Cinco palavras e você lê qualquer workflow</h2>
+    <dl class="glossario" style="margin-top:16px">
+      <dt>workflow</dt><dd>O arquivo inteiro: uma receita automatizada, com nome.</dd>
+      <dt>evento (on:)</dt><dd>O <strong>gatilho</strong>. O que precisa acontecer no repositório pra receita começar: um push, um PR aberto, um horário.</dd>
+      <dt>job</dt><dd>Um <strong>bloco de trabalho</strong> que roda numa máquina só. Dois jobs rodam em paralelo, em máquinas diferentes, e não compartilham nada.</dd>
+      <dt>step</dt><dd>Uma <strong>linha da receita</strong>, dentro do job. Rodam em ordem, de cima pra baixo. Se um falha, os de baixo nem começam.</dd>
+      <dt>runner</dt><dd>A <strong>máquina</strong> que executa o job. O GitHub liga uma virgem pra você, roda, e destrói no fim.</dd>
+      <dt>action (uses:)</dt><dd>Um <strong>step pronto</strong> que alguém já escreveu e publicou. Você chama pelo nome em vez de reescrever.</dd>
+    </dl>
+    <p class="note">A hierarquia, numa frase: um <strong>workflow</strong> reage a um <strong>evento</strong>, tem um ou mais <strong>jobs</strong>, cada job roda num <strong>runner</strong> e é feito de <strong>steps</strong> — que são comando seu ou <strong>action</strong> de terceiro.</p>
+  </section>
+
+  <!-- 07 EVENTOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>on:</div>
+    <h2>O gatilho</h2>
+    <p class="lead" style="margin-bottom:16px">Tudo começa no <span class="code-inline">on:</span>. Hoje a gente usa os dois primeiros — os outros ficam aqui só pra você saber que existem.</p>
+<pre class="code"><span class="kw">on</span>:
+  <span class="cm"># toda vez que alguém empurra pra main</span>
+  <span class="kw">push</span>:
+    <span class="kw">branches</span>: [<span class="st">main</span>]
+
+  <span class="cm"># e toda vez que um PR mira a main — inclusive a cada commit novo no PR</span>
+  <span class="kw">pull_request</span>:
+    <span class="kw">branches</span>: [<span class="st">main</span>]
+
+  <span class="cm"># todo dia às 3h da manhã, horário UTC</span>
+  <span class="kw">schedule</span>:
+    - <span class="kw">cron</span>: <span class="st">"0 3 * * *"</span>
+
+  <span class="cm"># um botão "rodar agora" na aba Actions</span>
+  <span class="kw">workflow_dispatch</span>:</pre>
+    <p class="note"><strong>Por que os dois, push e pull_request?</strong> O <span class="code-inline">pull_request</span> testa a sua branch <em>já combinada</em> com a main: é o resultado do merge que ainda não aconteceu. O <span class="code-inline">push</span> na main testa o que ficou de fato <em>depois</em> que o merge aconteceu. São duas perguntas diferentes.</p>
+  </section>
+
+  <!-- 08 O PRIMEIRO WORKFLOW -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o primeiro workflow</div>
+    <h2>Linha por linha</h2>
+    <span class="filetab">.github/workflows/ci.yml</span>
+<pre class="code" style="font-size:11.5px"><span class="kw">name</span>: CI                            <span class="cm"># o nome que aparece na aba Actions</span>
+
+<span class="kw">on</span>:                                  <span class="cm"># O EVENTO — quando rodar</span>
+  <span class="kw">push</span>:
+    <span class="kw">branches</span>: [<span class="st">main</span>]
+  <span class="kw">pull_request</span>:
+    <span class="kw">branches</span>: [<span class="st">main</span>]
+
+<span class="kw">jobs</span>:                                <span class="cm"># O JOB — um bloco de trabalho</span>
+  <span class="fn">build</span>:                              <span class="cm"># "build" é um id que você inventa</span>
+    <span class="kw">name</span>: Build e testes
+    <span class="kw">runs-on</span>: <span class="st">ubuntu-latest</span>         <span class="cm"># O RUNNER — a máquina virgem</span>
+
+    <span class="kw">steps</span>:                            <span class="cm"># OS STEPS, em ordem</span>
+      - <span class="kw">name</span>: Baixar o código
+        <span class="kw">uses</span>: <span class="st">actions/checkout@v4</span>    <span class="cm"># A ACTION — step pronto de terceiro</span>
+
+      - <span class="kw">name</span>: Instalar o Node
+        <span class="kw">uses</span>: <span class="st">actions/setup-node@v4</span>
+        <span class="kw">with</span>:
+          <span class="kw">node-version</span>: <span class="st">"20"</span>
+
+      - <span class="kw">name</span>: Instalar dependências
+        <span class="kw">run</span>: npm ci                   <span class="cm"># comando seu, no shell do runner</span>
+
+      - <span class="kw">name</span>: Rodar os testes
+        <span class="kw">run</span>: npm test</pre>
+    <p class="note">O exemplo é Node, mas o <strong>desenho é o mesmo em qualquer stack</strong>: troque <span class="code-inline">setup-node</span> + <span class="code-inline">npm ci</span> por <span class="code-inline">setup-java</span> + <span class="code-inline">mvn verify</span>, ou <span class="code-inline">setup-python</span> + <span class="code-inline">pytest</span>. Evento, job, runner e steps não mudam uma vírgula. O assunto da aula é o <strong>processo</strong>, não a linguagem.</p>
+  </section>
+
+  <!-- 09 USES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>uses:</div>
+    <h2>Duas actions fazem quase todo o trabalho</h2>
+    <div class="grid2" style="margin-top:6px">
+      <div class="card">
+        <h3><span class="str">actions/checkout@v4</span></h3>
+        <p>O runner nasce <strong>vazio</strong> — ele não tem o seu código. Esta action clona o repositório na branch certa. Sem ela nada funciona: é sempre o primeiro step.</p>
+      </div>
+      <div class="card">
+        <h3><span class="str">actions/setup-node@v4</span></h3>
+        <p>Instala a versão do Node que você pedir e põe o <span class="code-inline">npm</span> no PATH. Com <span class="code-inline">cache</span> ligado, ainda guarda as dependências entre execuções.</p>
+      </div>
+    </div>
+    <table style="margin-top:22px">
+      <tr><th>o que você lê</th><th>o que significa</th></tr>
+      <tr><td><code>uses:</code></td><td>Chama código de terceiro. Por baixo, é um repositório do GitHub.</td></tr>
+      <tr><td><code>actions/checkout</code></td><td>Dono <code>actions</code> (a própria GitHub), repositório <code>checkout</code>.</td></tr>
+      <tr><td><code>@v4</code></td><td>A <strong>versão</strong>. Prenda sempre — sem isso, quem mantém a action muda o seu pipeline sem avisar.</td></tr>
+      <tr><td><code>with:</code></td><td>Os parâmetros daquela action. Cada uma documenta os seus.</td></tr>
+      <tr><td><code>run:</code></td><td>O oposto de <code>uses</code>: um comando de shell escrito por você.</td></tr>
+    </table>
+    <p class="note">Um step tem <strong>ou</strong> <span class="code-inline">uses</span>, <strong>ou</strong> <span class="code-inline">run</span>. Nunca os dois no mesmo step.</p>
+  </section>
+
+  <!-- 10 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">O seu primeiro pipeline</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Do arquivo vazio ao check verde no Pull Request. Faça numa branch — a <span class="code-inline">main</span> está protegida desde a aula 07.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie a pasta e o arquivo</h3><p>O caminho é literal. Confira o ponto, o plural e a raiz do repositório.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git switch -c ci/primeiro-workflow
+mkdir -p .github/workflows
+touch .github/workflows/ci.yml</pre></div></div>
+      <div class="st"><div class="body"><h3>Escreva o workflow</h3><p>Copie o YAML de dois slides atrás — ou do <a href="manual.html" style="color:var(--str)">manual</a>, que tem o arquivo inteiro pra copiar num clique. <strong>Indentação com espaços, nunca Tab.</strong></p></div></div>
+      <div class="st"><div class="body"><h3>Commite e empurre</h3><p>Conventional Commits, como na aula 07. Isto é infraestrutura, então o prefixo é <span class="code-inline">ci:</span>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git add .github/workflows/ci.yml
+git commit -m <span class="st">"ci: roda build e testes a cada push e PR"</span>
+git push -u origin ci/primeiro-workflow</pre></div></div>
+      <div class="st"><div class="body"><h3>Abra o PR e olhe pra baixo</h3><p>Abaixo dos commits aparece uma caixa nova de checks. Clique em <b>Details</b> e acompanhe ao vivo.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Levante a mão se a aba <span class="code-inline">Actions</span> continuar vazia depois do push. Em nove de cada dez casos é o caminho do arquivo — <strong>.github</strong>, não <strong>github</strong>; <strong>workflows</strong>, não <strong>workflow</strong>.</p>
+    </div>
+  </section>
+
+  <!-- 11 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Sem seguir sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Quatro perguntas. Daqui pra frente a gente só melhora o pipeline que você já entendeu — então é agora.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:820px">
+      <div class="r"><span class="num">1</span><span class="tx">Em que <b>pasta exata</b> o arquivo do workflow precisa estar?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Qual a diferença entre um step com <span class="code-inline">uses:</span> e um com <span class="code-inline">run:</span>?</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Por que o <span class="code-inline">actions/checkout</span> tem que ser o <b>primeiro</b> step?</span></div>
+      <div class="r"><span class="num">4</span><span class="tx">O check ficou vermelho no seu PR. O botão de merge <b>trava</b>?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 1 — <span class="code-inline">.github/workflows/</span>; 3 — porque o runner nasce vazio, sem uma linha do seu código; 4 — <strong>não</strong>, hoje ele só avisa. Travar o merge é a aula 09.</p>
+  </section>
+
+  <!-- 12 A ABA ACTIONS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a aba actions</div>
+    <h2>Onde o robô mostra serviço</h2>
+    <p class="lead" style="margin-bottom:16px">Cada disparo do evento vira uma <strong>execução</strong> na lista. Dentro dela, os jobs. Dentro do job, os steps — cada um com o seu próprio log e o seu cronômetro.</p>
+    <div class="tree" style="font-size:12.5px">Actions
+  <b>CI</b>                                    <span class="cm">← o name: do workflow</span>
+    <span class="grn">✓</span> <b>ci: roda build e testes...</b>   #7    <span class="cm">← a execução, pelo título do commit</span>
+        <span class="grn">✓</span> Build e testes   1m 04s          <span class="cm">← o job</span>
+             ✓ Set up job
+             ✓ Baixar o código                <span class="cm">← os steps</span>
+             ✓ Instalar o Node
+             ✓ Instalar dependências
+             ✓ Rodar os testes
+             ✓ Complete job
+    <span class="key">✗</span> <b>feat: filtro de busca</b>          #6
+    <span class="grn">✓</span> <b>docs: ajusta o README</b>          #5</div>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card ok"><h3><span class="grn">✓ verde</span></h3><p>Todos os steps passaram. O log fica guardado do mesmo jeito — e vale ler quando você quiser saber quanto tempo cada coisa levou.</p></div>
+      <div class="card no"><h3><span class="key">✗ vermelho</span></h3><p>Um step terminou com código diferente de zero. Os steps abaixo dele nem chegaram a começar.</p></div>
+      <div class="card"><h3>🟡 amarelo</h3><p>Está rodando agora. Dá pra acompanhar o log ao vivo, linha por linha, sem esperar acabar.</p></div>
+    </div>
+  </section>
+
+  <!-- 13 LER O LOG -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>quando fica vermelho</div>
+    <h2>Ler o log é uma habilidade</h2>
+    <p class="lead" style="margin-bottom:14px">Não leia de cima pra baixo. <strong>Clique no step que tem o ✗</strong> — o GitHub já abre esse expandido — e leia as últimas linhas.</p>
+    <div class="terminal" style="font-size:12px"><span class="cm">▸ Instalar dependências        ✓  8s</span>
+▾ Rodar os testes              ✗  4s
+  <span class="p">Run npm test</span>
+
+  FAIL  src/carrinho.test.js
+    ● soma o total do carrinho
+
+      expect(received).toBe(expected)
+
+      Expected: <span class="out">30</span>
+      Received: 25
+
+        at Object.&lt;anonymous&gt; (src/carrinho.test.js:12:29)
+
+  Tests:  1 failed, 13 passed, 14 total
+  <span class="cm">Error: Process completed with exit code 1.</span></div>
+    <div class="regras" style="margin-top:18px">
+      <div class="r"><span class="num">1</span><span class="tx"><b>Qual step</b> quebrou. Instalação, build e teste falham por motivos completamente diferentes.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">A <b>mensagem de erro real</b> — que costuma estar algumas linhas <em>acima</em> do <span class="code-inline">exit code 1</span>.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Se dá pra <b>reproduzir na sua máquina</b>: rode o mesmo comando do <span class="code-inline">run:</span>, igualzinho.</span></div>
+    </div>
+    <p class="note"><span class="code-inline">Process completed with exit code 1</span> não é o erro — é o robô contando que o comando terminou mal. <strong>O erro está acima dessa linha.</strong></p>
+  </section>
+
+  <!-- 14 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Quebre de propósito</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Um pipeline em que você nunca viu o vermelho é um pipeline em que você não confia. <strong>Vamos quebrar de propósito</strong>, na mesma branch do LAB 1.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Escreva um teste que não tem como passar</h3><p>É feio de propósito. A ideia é justamente ficar vermelho.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">cat &gt; src/quebra.test.js &lt;&lt;<span class="st">'FIM'</span>
+test(<span class="st">'quebra de propósito'</span>, () =&gt; {
+  expect(2 + 2).toBe(5);
+});
+FIM</pre></div></div>
+      <div class="st"><div class="body"><h3>Empurre e espere o vermelho</h3><p>O PR já está aberto: o commit novo dispara o workflow de novo, sozinho.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git add src/quebra.test.js
+git commit -m <span class="st">"test: quebra proposital pra ler o log"</span>
+git push</pre></div></div>
+      <div class="st"><div class="body"><h3>Abra o log e ache a linha do erro</h3><p>Actions → a execução vermelha → o job → o step com ✗. Ache o <span class="code-inline">Expected: 5</span> e o <span class="code-inline">Received: 4</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Conserte e veja voltar ao verde</h3><p>Apague o arquivo e empurre. O mesmo PR fica verde sozinho, sem você clicar em nada.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">rm src/quebra.test.js
+git commit -am <span class="st">"test: remove a quebra proposital"</span>
+git push</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Responda duas coisas: em qual <strong>step</strong> quebrou, e qual foi a <strong>última linha útil</strong> antes do <span class="code-inline">exit code 1</span>. Quem sabe responder isso sabe ler qualquer log de CI.</p>
+    </div>
+  </section>
+
+  <!-- 15 MATRIZ -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>strategy.matrix</div>
+    <h2>Matriz: o mesmo job, várias versões</h2>
+    <p class="lead" style="margin-bottom:14px">Você promete no README que o projeto roda no Node 18, 20 e 22. Sem matriz, você <strong>torce</strong>. Com matriz, você <strong>sabe</strong>.</p>
+<pre class="code" style="font-size:12.5px"><span class="kw">jobs</span>:
+  <span class="fn">build</span>:
+    <span class="kw">runs-on</span>: <span class="st">ubuntu-latest</span>
+    <span class="kw">strategy</span>:
+      <span class="kw">fail-fast</span>: <span class="an">false</span>          <span class="cm"># não cancele as outras quando uma falhar</span>
+      <span class="kw">matrix</span>:
+        <span class="kw">node</span>: [<span class="st">18</span>, <span class="st">20</span>, <span class="st">22</span>]
+    <span class="kw">name</span>: Node $&#123;&#123; matrix.node &#125;&#125;
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: <span class="st">actions/checkout@v4</span>
+      - <span class="kw">uses</span>: <span class="st">actions/setup-node@v4</span>
+        <span class="kw">with</span>:
+          <span class="kw">node-version</span>: $&#123;&#123; matrix.node &#125;&#125;
+      - <span class="kw">run</span>: npm ci
+      - <span class="kw">run</span>: npm test</pre>
+    <p class="note">Um job vira <strong>três</strong>, cada um na sua máquina, <strong>em paralelo</strong>: custa quase o mesmo tempo de relógio e devolve três respostas. O <span class="code-inline">fail-fast: false</span> é importante — sem ele, o Node 18 quebrando cancela o 20 e o 22, e você fica sem saber se o problema é geral ou só daquela versão.</p>
+  </section>
+
+  <!-- 16 CACHE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>cache</div>
+    <h2>Não baixe a internet duas vezes</h2>
+    <p class="lead" style="margin-bottom:14px">O runner nasce vazio <strong>toda vez</strong>. Sem cache, o <span class="code-inline">npm ci</span> rebaixa as mesmas centenas de pacotes em cada execução.</p>
+    <div class="duo">
+      <div>
+        <span class="verdict no">sem cache</span>
+        <div class="terminal" style="font-size:12px;max-width:none"><span class="p">Instalar dependências</span>
+<span class="cm">added 812 packages in 47s</span>
+
+total do job: 1m 12s</div>
+      </div>
+      <div>
+        <span class="verdict yes">com cache</span>
+        <div class="terminal" style="font-size:12px;max-width:none"><span class="p">Instalar dependências</span>
+<span class="cm">Cache restored from key: node-a3f9...</span>
+<span class="cm">added 812 packages in 6s</span>
+<span class="out">total do job: 0m 24s</span></div>
+      </div>
+    </div>
+    <p style="margin-top:18px;margin-bottom:6px">E ligar custa <strong>uma linha</strong>, porque a própria <span class="code-inline">setup-node</span> faz o serviço:</p>
+<pre class="code" style="font-size:12.5px">      - <span class="kw">uses</span>: <span class="st">actions/setup-node@v4</span>
+        <span class="kw">with</span>:
+          <span class="kw">node-version</span>: <span class="st">"20"</span>
+          <span class="kw">cache</span>: <span class="st">"npm"</span>       <span class="cm">← a chave sai do package-lock.json, sozinha</span></pre>
+    <p class="note">A chave do cache é o <strong>hash do lockfile</strong>: mudou uma dependência, muda a chave, o cache é refeito. Por isso <span class="code-inline">npm ci</span> e não <span class="code-inline">npm install</span> — o <span class="code-inline">ci</span> obedece o lockfile ao pé da letra, e é isso que torna a execução <strong>reprodutível</strong>.</p>
+  </section>
+
+  <!-- 17 ARTEFATOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>artefatos</div>
+    <h2>Trazer arquivo de volta do runner</h2>
+    <p class="lead" style="margin-bottom:14px">O runner é destruído no fim do job. Tudo que ele produziu — a pasta <span class="code-inline">dist/</span>, o relatório de cobertura, o print do teste que falhou — <strong>evapora junto</strong>, a menos que você peça pra guardar.</p>
+<pre class="code" style="font-size:12.5px">      - <span class="kw">name</span>: Guardar o build
+        <span class="kw">uses</span>: <span class="st">actions/upload-artifact@v4</span>
+        <span class="kw">if</span>: <span class="an">always()</span>                <span class="cm"># guarde mesmo se o teste falhou</span>
+        <span class="kw">with</span>:
+          <span class="kw">name</span>: <span class="st">build-dist</span>
+          <span class="kw">path</span>: <span class="st">dist/</span>
+          <span class="kw">retention-days</span>: <span class="st">7</span>         <span class="cm"># some sozinho depois de uma semana</span></pre>
+    <p style="margin-top:16px">O arquivo aparece pra download <strong>na página da execução</strong>, lá embaixo, num quadro chamado <em>Artifacts</em>.</p>
+    <div class="tags" style="margin-top:12px">
+      <span class="pill on">o build pronto</span><span class="pill on">relatório de cobertura</span><span class="pill on">log de teste em HTML</span><span class="pill on">screenshot do teste que falhou</span>
+    </div>
+    <p class="note">O <span class="code-inline">if: always()</span> é o detalhe que separa quem já sofreu: <strong>o artefato mais útil é o do job que quebrou</strong>. Sem essa linha ele não é gerado justamente quando você mais precisa dele.</p>
+  </section>
+
+  <!-- 18 PIPELINE LENTO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a regra que ninguém conta</div>
+    <h2>Pipeline lento é pipeline ignorado</h2>
+    <p class="lead" style="margin-bottom:18px">Isto não é papo de performance. É <strong>comportamento humano</strong> — e mata mais CI do que qualquer bug.</p>
+    <div class="agenda">
+      <div class="row"><span class="t">até 5 min</span><span class="d">Você espera olhando. O erro é consertado <b>enquanto você ainda lembra do que fez</b>.</span><span class="tag">saudável</span></div>
+      <div class="row"><span class="t">10 min</span><span class="d">Você troca de tarefa. Volta depois, com a cabeça em outro lugar.</span><span class="tag">atenção</span></div>
+      <div class="row"><span class="t">25 min</span><span class="d">Você faz merge sem olhar. "Depois eu vejo." <b>Ninguém vê depois.</b></span><span class="tag">ruim</span></div>
+      <div class="row brk"><span class="t">40 min +</span><span class="d">Nasce o "esse teste sempre falha, ignora". O vermelho vira paisagem.</span><span class="tag">morto</span></div>
+    </div>
+    <p style="margin-top:20px;margin-bottom:4px">O que segura o tempo, em ordem de retorno:</p>
+    <ul class="clean">
+      <li><strong>Cache de dependências.</strong> Uma linha, e costuma cortar metade do tempo.</li>
+      <li><strong>Jobs em paralelo.</strong> Lint e teste são jobs separados, não steps do mesmo job.</li>
+      <li><strong>Só o necessário em cada evento.</strong> O teste de ponta a ponta pode rodar só no push pra main.</li>
+      <li><strong>Olhe o cronômetro de cada step.</strong> A aba Actions mede todos. O gargalo quase nunca é onde você acha que é.</li>
+    </ul>
+    <p class="note">Um CI vermelho que o time aprendeu a ignorar é <strong>pior que nenhum CI</strong>: dá a sensação de segurança sem a segurança.</p>
+  </section>
+
+  <!-- 19 LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Matriz, cache e o crachá</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Ainda na mesma branch. O pipeline vai passar a responder três perguntas em vez de uma — e a ficar mais rápido no caminho.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Acrescente a matriz ao job</h3><p>Entre o <span class="code-inline">runs-on:</span> e o <span class="code-inline">steps:</span>. Cuide da indentação: <span class="code-inline">strategy</span> alinha com <span class="code-inline">runs-on</span>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="kw">strategy</span>:
+  <span class="kw">fail-fast</span>: <span class="an">false</span>
+  <span class="kw">matrix</span>:
+    <span class="kw">node</span>: [<span class="st">18</span>, <span class="st">20</span>, <span class="st">22</span>]</pre></div></div>
+      <div class="st"><div class="body"><h3>Use a versão da matriz e ligue o cache</h3><p>Duas mudanças dentro do mesmo step do <span class="code-inline">setup-node</span>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">  <span class="kw">with</span>:
+    <span class="kw">node-version</span>: $&#123;&#123; matrix.node &#125;&#125;
+    <span class="kw">cache</span>: <span class="st">"npm"</span></pre></div></div>
+      <div class="st"><div class="body"><h3>Empurre e conte os jobs</h3><p>Agora são <strong>três</strong> jobs na mesma execução, ao mesmo tempo. Compare o tempo do "Instalar dependências" com o da primeira rodada.</p></div></div>
+      <div class="st"><div class="body"><h3>Pendure o badge no topo do README</h3><p>Troque <span class="code-inline">usuario/repo</span> pelo seu. O nome no fim do caminho é o do <strong>arquivo</strong>.</p>
+<pre class="code" style="font-size:12px;margin-top:10px">![CI](https://github.com/<span class="st">usuario/repo</span>/actions/workflows/ci.yml/badge.svg)</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>O badge tem que aparecer <strong>verde</strong> na página do repositório. Se aparecer "no status", o caminho no link está errado — ou o workflow ainda não rodou na <span class="code-inline">main</span>.</p>
+    </div>
+  </section>
+
+  <!-- 20 BADGE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>badge</div>
+    <h2>O crachá no README</h2>
+    <p class="lead" style="margin-bottom:16px">Uma imagem que o GitHub desenha na hora, dizendo se a branch padrão está passando. Quem chega no repositório descobre isso <strong>antes de clonar</strong>.</p>
+    <span class="filetab">README.md</span>
+<pre class="code" style="font-size:12px"><span class="cm"># Meu Projeto</span>
+
+![<span class="st">CI</span>](https://github.com/usuario/repo/actions/workflows/<span class="fn">ci.yml</span>/badge.svg)
+                             <span class="cm">└─usuário─┘└repo┘                └ o nome do ARQUIVO</span></pre>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card ok"><h3>passing</h3><p>A última execução na branch padrão passou. É o que você quer ver.</p></div>
+      <div class="card no"><h3>failing</h3><p>A main está quebrada agora. Isso é um chamado, não um enfeite.</p></div>
+      <div class="card"><h3>no status</h3><p>O caminho do arquivo está errado, ou o workflow nunca rodou na branch padrão.</p></div>
+    </div>
+    <p class="note">Dá pra apontar pra uma branch específica com <span class="code-inline">?branch=main</span> no fim da URL. E o badge não é decoração: repositório com <strong>failing</strong> parado há meses conta uma história — só que não é a que você queria contar.</p>
+  </section>
+
+  <!-- 21 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>O que costuma dar errado no primeiro workflow</h2>
+    <table>
+      <tr><th>o que acontece</th><th>por quê</th><th>o conserto</th></tr>
+      <tr><td>A aba Actions não mostra <strong>nada</strong></td><td>Caminho ou nome do arquivo errado: <code>github/</code> sem ponto, <code>workflow/</code> no singular, ou o arquivo fora da raiz.</td><td><code>git ls-files .github</code> — tem que sair <code>.github/workflows/ci.yml</code>.</td></tr>
+      <tr><td><code>Invalid workflow file</code>, com número de linha</td><td>YAML com indentação errada. Quase sempre é <strong>Tab</strong> no lugar de espaço.</td><td>Só espaços, dois por nível. Configure o editor pra converter Tab em espaço nos <code>.yml</code>.</td></tr>
+      <tr><td><code>npm: command not found</code></td><td>Faltou o step do <code>setup-node</code> — ou ele veio <em>depois</em> do <code>npm ci</code>.</td><td>Steps rodam em ordem: <code>checkout</code>, <code>setup-node</code>, e só então os <code>run:</code>.</td></tr>
+      <tr><td><code>npm ci</code> reclama que não achou o lockfile</td><td>O <code>package-lock.json</code> está no <code>.gitignore</code>, ou nunca foi commitado.</td><td>Commite o lockfile. Ele <strong>deve</strong> entrar no repositório — é ele que torna a instalação reprodutível.</td></tr>
+      <tr><td>Passa na minha máquina, quebra no runner</td><td>Versão de Node diferente, dependência instalada só localmente, ou arquivo ignorado que o build precisa.</td><td>Compare o <code>node-version</code> com o seu <code>node -v</code>; rode <code>git status</code> e veja se falta commitar alguma coisa.</td></tr>
+      <tr><td>O workflow roda duas vezes no mesmo commit</td><td>Você tem <code>push</code> e <code>pull_request</code> valendo pra mesma branch que está em PR.</td><td>Não é erro. Se incomodar, limite o <code>push</code> a <code>branches: [main]</code>.</td></tr>
+      <tr><td>O check ficou vermelho e o merge liberou assim mesmo</td><td>Esperado. Hoje o check só <strong>informa</strong>.</td><td>Nada a consertar. Tornar o check obrigatório é a <strong>aula 09</strong>.</td></tr>
+    </table>
+  </section>
+
+  <!-- 22 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">🤖</div>
+    <div class="eyebrow"><span class="b">fim da aula 08</span> · o que você já sabe fazer</div>
+    <h1 style="max-width:22ch">Agora tem um robô <span class="grad">olhando junto</span></h1>
+    <p class="lead" style="max-width:62ch;margin-top:16px">Você escreveu um workflow do zero, viu ele rodar a cada push e a cada PR, quebrou de propósito e leu o log, rodou em três versões de Node com cache e pendurou o badge no README.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">.github/workflows/</span><span class="pill on">on:</span><span class="pill on">jobs</span><span class="pill on">steps</span><span class="pill on">runs-on</span><span class="pill on">uses:</span><span class="pill on">matrix</span><span class="pill on">cache</span><span class="pill on">artefatos</span><span class="pill on">badge</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Aula 09:</strong> esse ✗ passa a <strong>travar o merge</strong> — status check obrigatório amarrado na branch protection da aula 07 — mais lint, Dependabot e scanning de segurança. <strong>Aula 10:</strong> o workflow que publica, com secrets e environments.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)">refaça tudo sozinha com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 22</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

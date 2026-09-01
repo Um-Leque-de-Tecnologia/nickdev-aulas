@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issues, labels, milestones e Projects · Aula 05 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 05 do curso Introdução ao GitHub: o trabalho antes do código — a anatomia de uma issue que outra pessoa consegue resolver, com passos para reproduzir e esperado × obtido, labels, milestones, responsáveis, referência cruzada com #12, templates de issue em YAML e o GitHub Projects como quadro do time.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 05</span> · introdução ao github</div>
+    <div class="tagtitle"><span class="br">issue </span><span class="nm">#12</span></div>
+    <h1 style="margin:24px 0 14px">Issues, labels, milestones e <span class="grad">Projects</span></h1>
+    <p class="lead" style="max-width:60ch">No fim de hoje o seu repositório tem issues que <strong>outra pessoa consegue pegar</strong>, um conjunto de labels, um milestone com data, um template que barra o "não funciona" — e um quadro mostrando o trabalho andar.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o repositório que você deixou apresentável na aula 04. hoje a gente não escreve uma linha de código — e é de propósito.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>O relato de bug mais comum do mundo</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">issue #41 · aberta por @alguem</div>
+<pre class="code" style="font-size:13px"><span class="cm">título:</span> nao funciona
+
+<span class="cm">corpo:</span>  ta dando erro na hora de salvar
+
+        alguem olha ai pfv</pre>
+        <p class="note" style="margin-top:14px">Não é má vontade. É a pessoa achando que o que está óbvio na cabeça dela está óbvio na sua.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Salvar <b>o quê</b>? Que tela, que formulário, que botão?</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Como chegar lá?</b> Quem for consertar precisa ver o erro acontecer.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Erro <b>qual</b>? A mensagem inteira, não a lembrança dela.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">O que <b>deveria</b> ter acontecido? Às vezes o "bug" é o programa fazendo o certo.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx"><b>Onde?</b> Navegador, sistema, versão. Bug que só existe num lugar é a maioria deles.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Issue mal escrita não custa cinco minutos: custa três dias de ida e volta.</strong> Cada pergunta ali em cima vira um comentário, e cada comentário espera a outra pessoa acordar.</p>
+  </section>
+
+  <!-- 03 O CONCEITO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o conceito</div>
+    <h2>Issue é uma conversa com <span class="grad">um assunto só</span></h2>
+    <p class="lead">Pense numa <strong>ordem de serviço</strong>. Tem número, tem descrição do problema, tem quem pediu, tem quem vai fazer — e sai da parede quando o serviço acaba.</p>
+    <div class="grid3" style="margin-top:24px">
+      <div class="card"><h3>Tem número para sempre</h3><p>A <span class="code-inline">#12</span> é a décima segunda coisa que alguém abriu ali. O número nunca é reaproveitado — dá pra citar em qualquer lugar, pra sempre.</p></div>
+      <div class="card"><h3>Tem estado, e só dois</h3><p><strong>Aberta</strong> ou <strong>fechada</strong>. O GitHub não tem "quase pronto" — quem inventa os estados do meio é o quadro, no fim da aula.</p></div>
+      <div class="card"><h3>É Markdown</h3><p>O mesmo da <strong>aula 04</strong>: título, lista, bloco de código, caixinha de tarefa. Uma issue bem formatada se lê em dez segundos.</p></div>
+    </div>
+    <p class="note">Serve pra bug, pra ideia de funcionalidade, pra tarefa de documentação e pra pergunta interna. <strong>Não</strong> serve pra três assuntos ao mesmo tempo — aí vira issue que nunca fecha.</p>
+  </section>
+
+  <!-- 04 ANATOMIA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>anatomia</div>
+    <h2>As cinco partes de uma issue que se resolve</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Título específico</h3><p>Uma frase que já diz o problema. <span class="code-inline">Salvar cadastro com CEP vazio derruba a página</span> — não <span class="code-inline">erro no cadastro</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Contexto</h3><p>Duas linhas: o que você estava tentando fazer e por que isso importa. É o que separa urgente de chato.</p></div></div>
+      <div class="st"><div class="body"><h3>Passo a passo para reproduzir</h3><p>Numerado, do zero, como se fosse pra alguém que nunca abriu o sistema. <strong>É a parte que mais falta e a que mais vale.</strong></p></div></div>
+      <div class="st"><div class="body"><h3>Esperado × obtido</h3><p>Duas linhas, uma embaixo da outra. Sem elas, quem lê tem que adivinhar qual dos dois comportamentos você considera o certo.</p></div></div>
+      <div class="st"><div class="body"><h3>Ambiente</h3><p>Versão, navegador, sistema. E, se houver, a mensagem de erro <strong>copiada inteira</strong> — não descrita, não lembrada.</p></div></div>
+    </div>
+    <p class="note">Numa issue de funcionalidade, os passos viram <strong>critério de aceite</strong>: como a gente vai saber que ficou pronto?</p>
+  </section>
+
+  <!-- 05 RUIM x BOA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>lado a lado</div>
+    <h2>A mesma issue, duas vezes</h2>
+    <div class="duo" style="margin-top:6px">
+      <div class="card no">
+        <span class="verdict no">ninguém consegue pegar</span>
+        <h3>nao funciona</h3>
+        <p class="mono" style="font-size:13px;line-height:1.7">ta dando erro na hora de salvar<br><br>alguem olha ai pfv</p>
+        <p style="margin-top:14px">Quem ler isso vai fazer <strong>quatro perguntas</strong> antes de escrever uma linha de código. E vai esperar a resposta de cada uma.</p>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">dá pra começar hoje</span>
+        <h3>Salvar cadastro com CEP vazio derruba a página</h3>
+        <p class="mono" style="font-size:13px;line-height:1.7">passos: 1. abrir a tela de cadastro · 2. preencher só o nome · 3. clicar em Salvar<br><br>esperado: aviso "CEP é obrigatório"<br>obtido: tela branca + TypeError no console<br><br>v1.4.2 · Chrome 129 · Windows 11</p>
+        <p style="margin-top:14px">Mesma pessoa, mesmo bug, <strong>três minutos a mais de escrita</strong>. E quem for consertar começa pelo conserto.</p>
+      </div>
+    </div>
+    <p class="note"><strong>A pergunta que decide se a issue está boa:</strong> alguém que nunca viu este projeto conseguiria reproduzir o problema só com o que está escrito aí?</p>
+  </section>
+
+  <!-- 06 A ISSUE POR INTEIRO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o texto de verdade</div>
+    <h2>O corpo da issue, em Markdown</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">corpo da issue #12</div>
+<pre class="code" style="font-size:12px"><span class="kw">## Contexto</span>
+Ao cadastrar cliente sem CEP, a página cai
+e o formulário some. Acontece toda vez.
+
+<span class="kw">## Passos para reproduzir</span>
+1. Abrir a tela de cadastro
+2. Preencher só o campo <span class="st">Nome</span>
+3. Clicar em <span class="st">Salvar</span>
+
+<span class="kw">## Resultado esperado</span>
+Aviso <span class="st">"CEP é obrigatório"</span> abaixo do campo.
+
+<span class="kw">## Resultado obtido</span>
+Tela branca. No console do navegador:
+<span class="an">TypeError: Cannot read properties of null</span>
+
+<span class="kw">## Ambiente</span>
+- v1.4.2 · Chrome 129 · Windows 11
+- Reproduz também no Firefox 131</pre>
+      </div>
+      <div>
+        <h3>Por que este formato ganha</h3>
+        <ul class="clean">
+          <li>Os títulos <span class="code-inline">##</span> deixam a issue <strong>varrível</strong>: dá pra achar o passo 2 sem ler o resto.</li>
+          <li>A mensagem de erro está <strong>copiada</strong>, então dá pra procurar por ela dentro do código.</li>
+          <li>"Reproduz também no Firefox" já elimina metade das hipóteses.</li>
+          <li>O Markdown é o mesmo da <strong>aula 04</strong> — você não aprendeu nada novo aqui, só passou a usar no lugar certo.</li>
+        </ul>
+        <p class="note">Caixinha de tarefa (<span class="code-inline">- [ ]</span>) funciona dentro da issue, e o GitHub conta quantas já foram marcadas. Ótimo pra issue com três subtarefas óbvias.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">A sua primeira issue de verdade</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">No seu repositório da aula 04. Aba <strong>Issues</strong> → botão <strong>New issue</strong>. Se a aba não aparecer, ela está desligada em Settings → Features.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Escolha um incômodo real do seu projeto</h3><p>Um link quebrado no README, uma instrução que falta, um botão sem estilo. Real é bem melhor que inventado.</p></div></div>
+      <div class="st"><div class="body"><h3>Escreva o título como uma frase</h3><p>Sujeito, verbo, problema. Se o título sozinho na lista de issues já fizer sentido, está bom.</p></div></div>
+      <div class="st"><div class="body"><h3>Preencha as cinco partes</h3><p>Contexto, passos, esperado, obtido, ambiente — cada uma com o seu <span class="code-inline">##</span>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="kw">## Contexto</span>
+<span class="kw">## Passos para reproduzir</span>
+<span class="kw">## Resultado esperado</span>
+<span class="kw">## Resultado obtido</span>
+<span class="kw">## Ambiente</span></pre></div></div>
+      <div class="st"><div class="body"><h3>Antes de enviar, use a aba <span class="code-inline">Preview</span></h3><p>É onde você descobre que a lista não virou lista porque faltou uma linha em branco antes dela.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Troque de cadeira com quem está do lado e leia a issue da outra pessoa. <strong>Você conseguiria reproduzir?</strong> Se a resposta for "acho que sim", falta alguma coisa.</p>
+    </div>
+  </section>
+
+  <!-- 08 LABELS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>labels</div>
+    <h2>Cinco labels resolvem a vida de um time pequeno</h2>
+    <div class="grid2">
+      <div>
+        <table>
+          <tr><th>label</th><th>quando usar</th></tr>
+          <tr><td><code>bug</code></td><td>Está quebrado. Alguma coisa faz o que não devia fazer.</td></tr>
+          <tr><td><code>feature</code></td><td>Não existe ainda, e a gente quer que exista.</td></tr>
+          <tr><td><code>docs</code></td><td>O código está certo; o texto que explica é que não está.</td></tr>
+          <tr><td><code>good first issue</code></td><td>Pequena, isolada, com o caminho descrito. A porta de entrada de quem chega.</td></tr>
+          <tr><td><code>blocked</code></td><td>Não dá pra andar por causa de outra coisa. <strong>Diga qual, no comentário.</strong></td></tr>
+        </table>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Label é <b>filtro</b>, não enfeite. Se ninguém filtra por ela, ela não deveria existir.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Comece com <b>cinco</b>. Trinta labels no primeiro mês é um jeito elegante de não classificar nada.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">A label diz o <b>tipo</b>; a coluna do quadro diz o <b>estado</b>. Misturar os dois é o erro clássico.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><b>good first issue</b> tem esse nome exato porque o próprio GitHub usa a label pra recomendar o seu projeto a iniciantes.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Apague as de fábrica que você não usa. <span class="code-inline">duplicate</span>, <span class="code-inline">wontfix</span> e <span class="code-inline">invalid</span> ficam — são respostas de fechamento.</span></div>
+      </div>
+    </div>
+    <p class="note">Onde ficam: <strong>Issues</strong> → <strong>Labels</strong> → <strong>New label</strong>. Nome, descrição e cor. Escreva a descrição — ela aparece no mouse por cima, e é ela que evita duas pessoas usando a mesma label pra coisas diferentes.</p>
+  </section>
+
+  <!-- 09 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Sem seguir sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Três perguntas. O resto da aula — template e quadro — só faz sentido se estas estiverem firmes.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:800px">
+      <div class="r"><span class="num">1</span><span class="tx">Qual é a parte da issue que mais falta na prática — e por que é justo a que mais economiza tempo?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">A label diz o <b>tipo</b> da issue. Quem diz o <b>estado</b> dela?</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Você abriu uma issue que precisa de outra pra andar. O que você escreve nela?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 1 — o passo a passo para reproduzir; 2 — a coluna do quadro, que a gente monta daqui a pouco; 3 — a label <span class="code-inline">blocked</span> e um comentário citando <span class="code-inline">#numero</span> da outra.</p>
+  </section>
+
+  <!-- 10 MILESTONES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>milestones</div>
+    <h2>Milestone é o <span class="grad">pacote com data</span></h2>
+    <div class="grid2">
+      <div>
+        <p class="lead">A label agrupa por <strong>tipo</strong>. A milestone agrupa por <strong>entrega</strong>: um conjunto de issues que fazem sentido juntas e têm um prazo.</p>
+        <div class="terminal" style="margin-top:20px"><span class="p">milestone</span> v1.1 — lançamento de outubro
+<span class="p">prazo</span>     31/10/2026
+<span class="out">7 de 12 concluídas · 58%</span>
+<span class="cm">#12  Salvar cadastro com CEP vazio derruba a página</span>
+<span class="cm">#14  Tela de login sem estado de carregando</span>
+<span class="cm">#19  README sem instrução de instalação</span></div>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Uma issue tem <b>uma</b> milestone só. Isso força a pergunta boa: isto entra nesta entrega, ou não?</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">A barra de progresso é automática — ela conta issues fechadas. <b>Não é chute de gerente.</b></span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Chegou a data e sobrou coisa? <b>Mova pra próxima milestone.</b> Milestone que fica aberta pra sempre parou de significar alguma coisa.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Nomeie pelo que alguém de fora entende: <span class="code-inline">v1.1</span>, <span class="code-inline">MVP</span>, <span class="code-inline">Sprint 4</span>. Versão de verdade, com tag e release, é a <b>aula 10</b>.</span></div>
+      </div>
+    </div>
+    <p class="note">Onde ficam: <strong>Issues</strong> → <strong>Milestones</strong> → <strong>New milestone</strong>. Título, data e uma descrição de duas linhas dizendo o que essa entrega significa.</p>
+  </section>
+
+  <!-- 11 RESPONSAVEIS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>responsáveis</div>
+    <h2>Uma pessoa por issue — e ela sabe disso</h2>
+    <div class="grid3">
+      <div class="card"><h3>Assignee</h3><p>Quem está <strong>fazendo</strong>. O GitHub aceita mais de um, mas dois donos é o mesmo que nenhum: alguém precisa ser a pessoa a quem se pergunta.</p></div>
+      <div class="card"><h3>Menção com @</h3><p><span class="code-inline">@fulano</span> num comentário notifica a pessoa. Serve pra pedir opinião <em>sem</em> transferir a tarefa.</p></div>
+      <div class="card"><h3>Issue sem dono</h3><p>É o normal do backlog, e está tudo certo. Só não pode ser o estado de uma issue que alguém jurou que estava fazendo.</p></div>
+    </div>
+    <ul class="clean" style="margin-top:22px">
+      <li><strong>Atribuir não é mandar.</strong> Em time saudável, a pessoa se atribui quando pega — e isso vira o sinal público de "esta é minha, não mexe".</li>
+      <li>Sem responsável e sem quadro, duas pessoas consertam o mesmo bug na quinta-feira. Já aconteceu com todo mundo.</li>
+      <li>Vai parar no meio? <strong>Tire o seu nome</strong> e comente o que já descobriu. A próxima pessoa começa de onde você parou.</li>
+      <li>Quem revisa o código não é o assignee — é o <em>reviewer</em>, e ele aparece no Pull Request, na <strong>aula 06</strong>.</li>
+    </ul>
+  </section>
+
+  <!-- 12 REFERENCIA CRUZADA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>#12</div>
+    <h2>Issues conversam entre si</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">comentários em issues</div>
+<pre class="code" style="font-size:12.5px"><span class="cm"># citar outra issue: vira link nos dois lados</span>
+Bloqueada pela <span class="hl">#9</span> — sem o endpoint novo
+não dá pra validar o CEP.
+
+<span class="cm"># citar issue de outro repositório</span>
+Mesmo caso da <span class="hl">nickdev/api#31</span>.
+
+<span class="cm"># chamar alguém sem passar a tarefa</span>
+<span class="fn">@nicoly</span> isso muda o contrato da API?
+
+<span class="cm"># fechar explicando, no mesmo comentário</span>
+Resolvido no commit <span class="st">a1c9f0e</span>: o campo agora
+valida antes de enviar. Fechando.</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Escrever <b>#9</b> cria um link <b>nos dois sentidos</b>: a #9 passa a mostrar que alguém a citou. Rastro de graça.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Feche com um <b>comentário explicando</b>, nunca no silêncio. Quem abriu merece saber o que foi feito.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Não vai fazer? Feche assim mesmo, dizendo <b>por quê</b>, e ponha <span class="code-inline">wontfix</span>. Issue aberta há dois anos é ruído.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Fechar não apaga: número, texto e discussão continuam lá. Reabrir é um clique.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Tem um jeito de a issue fechar <b>sozinha</b> quando o código entra — <span class="code-inline">Closes #12</span> na descrição do Pull Request. É a <b>aula 06</b>.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 TEMPLATES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>templates</div>
+    <h2>Pare de pedir por favor. Peça no formulário.</h2>
+    <p class="lead">Você não vai convencer cem pessoas a escrever bem uma issue. Mas você pode fazer o campo <strong>ser obrigatório</strong>.</p>
+    <div class="flow" style="margin:22px 0 6px">
+      <div class="node"><div class="ico">📝</div><b>New issue</b><span>a pessoa clica</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🗂️</div><b>escolhe o tipo</b><span>bug, funcionalidade, documentação</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">✅</div><b>formulário</b><span>com os campos obrigatórios já ali</span></div>
+    </div>
+    <ul class="clean" style="margin-top:20px">
+      <li>Os arquivos moram em <span class="code-inline">.github/ISSUE_TEMPLATE/</span>, na <strong>branch principal</strong> do repositório. Fora dali, o GitHub não enxerga.</li>
+      <li>O formato moderno é o <strong>issue form</strong>, em YAML (<span class="code-inline">.yml</span>): campos de verdade, com validação.</li>
+      <li>O arquivo <span class="code-inline">config.yml</span> desliga a issue em branco e manda pergunta pra outro lugar.</li>
+      <li>Template <strong>de Pull Request</strong> é outro arquivo e outra aula — <strong>aula 06</strong>.</li>
+    </ul>
+    <p class="note"><strong>Template é a sua regra de qualidade escrita uma vez.</strong> Depois ela trabalha sozinha, pra sempre, com gente que você nunca vai conhecer.</p>
+  </section>
+
+  <!-- 14 O YAML -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>issue form</div>
+    <h2>O template, por dentro</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">.github/ISSUE_TEMPLATE/bug.yml</div>
+<pre class="code" style="font-size:11.5px"><span class="kw">name</span>: Relato de bug
+<span class="kw">description</span>: Alguma coisa não funciona
+<span class="kw">title</span>: <span class="st">"[bug]: "</span>
+<span class="kw">labels</span>: [<span class="st">"bug"</span>]
+<span class="kw">body</span>:
+  - <span class="ty">type</span>: textarea
+    <span class="ty">id</span>: passos
+    <span class="ty">attributes</span>:
+      label: Passo a passo para reproduzir
+      description: Numere. Alguém vai seguir na mão.
+      value: |
+        1.
+        2.
+        3.
+    <span class="ty">validations</span>:
+      <span class="an">required: true</span></pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>title</b> e <b>labels</b> já chegam preenchidos na issue. Ninguém mais esquece de rotular.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Os tipos de campo: <span class="code-inline">input</span>, <span class="code-inline">textarea</span>, <span class="code-inline">dropdown</span>, <span class="code-inline">checkboxes</span> e <span class="code-inline">markdown</span> — este último é texto fixo, só pra ler.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><b>required: true</b> é a linha que faz o trabalho todo: sem ela preenchida, o botão de enviar não libera.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><b>value</b> deixa o campo começar com um esqueleto — <span class="code-inline">1. 2. 3.</span> convida a numerar.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">YAML é sensível a <b>indentação</b>: só espaço, nunca tabulação. O arquivo inteiro está no manual, pronto pra copiar.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Instalar o template no repositório</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Dá pra fazer direto pelo site — e hoje a gente faz pelo site, pra você ver o efeito na hora.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie o arquivo pelo próprio GitHub</h3><p><strong>Add file</strong> → <strong>Create new file</strong>. Digite o caminho inteiro no nome: as barras criam as pastas sozinhas.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">.github/ISSUE_TEMPLATE/bug.yml</pre></div></div>
+      <div class="st"><div class="body"><h3>Cole o YAML do manual e commite na branch principal</h3><p>Mensagem: <span class="code-inline">chore: template de issue para bug</span>. Confira a indentação antes de salvar.</p></div></div>
+      <div class="st"><div class="body"><h3>Repita para o <span class="code-inline">config.yml</span></h3><p>Ele desliga a issue em branco e oferece um link de contato no lugar. Também está no manual.</p></div></div>
+      <div class="st"><div class="body"><h3>Teste como quem chega de fora</h3><p>Vá em <strong>Issues</strong> → <strong>New issue</strong>. Em vez da caixa vazia, aparece a lista de tipos.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Abra o formulário e tente enviar <strong>vazio</strong>. Ele tem que recusar. Se enviou, ou faltou o <span class="code-inline">required: true</span>, ou o arquivo não está na branch principal.</p>
+    </div>
+  </section>
+
+  <!-- 16 PROJECTS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>github projects</div>
+    <h2>O quadro que mostra o trabalho <span class="grad">andando</span></h2>
+    <p class="lead">A lista de issues responde "o que existe?". Ela não responde "<strong>em que pé está?</strong>". Quem responde isso é o Project.</p>
+    <div class="grid2" style="margin-top:22px">
+      <div>
+        <div class="tree">Project · Time do site
+  <b>Backlog</b>        <span class="cm">#19 #23 #24 #27</span>
+  <b>Refinamento</b>    <span class="cm">#21</span>
+  <b>Em andamento</b>   <span class="cm">#12 (nicoly)</span>
+  <b>Em revisão</b>     <span class="cm">#14 (joao)</span>
+  <b>Pronto</b>         <span class="cm">#08 #11</span></div>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O cartão <b>é</b> a issue, não uma cópia dela. Mudou o título lá, mudou aqui.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Fechou a issue, o cartão anda sozinho pra <b>Pronto</b> — o Project já vem com esse fluxo ligado.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Um Project junta issues de <b>vários repositórios</b>. É o quadro do time, não o quadro do repositório.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Além do quadro, o mesmo Project vira <b>tabela</b> e <b>linha do tempo</b> — é a mesma informação, vista de outro jeito.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Automatizar o quadro de verdade — mover cartão quando o teste passa, por exemplo — é <b>Actions</b>, na <b>aula 08</b>.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 COLUNAS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>as colunas</div>
+    <h2>Coluna só vale se alguém <span class="grad">move</span></h2>
+    <div class="grid2">
+      <div>
+        <h3>O que mata um quadro</h3>
+        <ul class="clean">
+          <li>Doze colunas. Ninguém lembra a diferença entre "Em análise" e "Sendo analisado".</li>
+          <li>Coluna que descreve <em>desejo</em> — "Prioridade alta" — em vez de <strong>estado</strong>. Prioridade é campo, não coluna.</li>
+          <li>Quinze cartões em "Em andamento". Isso não é andamento, é pilha.</li>
+          <li>Quadro que só o líder atualiza. Duas semanas depois ele mente, e todo mundo sabe.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>O que funciona</h3>
+        <ul class="clean">
+          <li><strong>Quatro ou cinco colunas.</strong> Cada uma responde a uma pergunta clara sobre a issue.</li>
+          <li>Um <strong>limite combinado</strong> em "Em andamento" — duas por pessoa é um bom começo.</li>
+          <li>Quem pega move o cartão <strong>e</strong> se atribui à issue. Um gesto, dois sinais.</li>
+          <li>O quadro é olhado <strong>junto</strong>, uma vez por semana. Quadro que ninguém abre já morreu.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note"><strong>A coluna diz o estado; a label diz o tipo; a milestone diz a entrega.</strong> Três eixos diferentes — quando um começa a fazer o trabalho do outro, o quadro fica confuso.</p>
+  </section>
+
+  <!-- 18 VOCABULARIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>vocabulário de processo</div>
+    <h2>As palavras que vêm junto com o quadro</h2>
+    <dl class="glossario">
+      <dt>backlog</dt>
+      <dd>Tudo que a gente quer fazer e ainda não começou. É uma <strong>lista de intenções</strong>, não uma promessa. Backlog pode e deve ser podado.</dd>
+      <dt>refinamento</dt>
+      <dd>A conversa que transforma ideia solta em issue executável: passos, critério de aceite, tamanho. É onde a issue mal escrita é consertada — <strong>antes</strong> de alguém pegar.</dd>
+      <dt>critério de aceite</dt>
+      <dd>A lista que diz <strong>como se sabe que acabou</strong>. Escrita antes de começar, senão vira opinião no fim.</dd>
+      <dt>em andamento</dt>
+      <dd>Alguém está fazendo <em>agora</em>. Se você não trabalhou nisso hoje, o cartão provavelmente está na coluna errada.</dd>
+      <dt>pronto</dt>
+      <dd>Combinado uma vez, pro time inteiro: código na branch principal, revisado, testado, documentado. <strong>"Funciona na minha máquina" não é pronto.</strong></dd>
+      <dt>bloqueada</dt>
+      <dd>Depende de outra coisa pra andar. Fica visível — label <span class="code-inline">blocked</span> mais um comentário dizendo do que depende.</dd>
+    </dl>
+    <p class="note">Você vai ouvir esse vocabulário em toda entrevista e em todo time. Ele não é do GitHub — o GitHub só deu botões pra ele.</p>
+  </section>
+
+  <!-- 19 LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Montar o quadro e ligar as issues</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Você precisa de <strong>pelo menos três issues</strong> abertas. Se só tem uma, abra mais duas rapidinho — tarefa pequena serve.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie o Project</h3><p>No seu perfil, aba <strong>Projects</strong> → <strong>New project</strong> → modelo <strong>Board</strong>. Dê o nome do time ou do produto, não "Projeto 1".</p></div></div>
+      <div class="st"><div class="body"><h3>Ajuste as colunas</h3><p>Ele nasce com três. Renomeie e acrescente até ficar assim:</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">Backlog · Refinamento · Em andamento · Em revisão · Pronto</pre></div></div>
+      <div class="st"><div class="body"><h3>Puxe as suas issues pra dentro</h3><p>Botão <strong>Add item</strong> → digite <span class="code-inline">#</span> e o número, ou procure pelo título. Faça com as três.</p></div></div>
+      <div class="st"><div class="body"><h3>Encene uma semana</h3><p>Mova uma pra <strong>Em andamento</strong> e atribua a você. Feche outra pela aba Issues e volte no quadro pra ver o cartão andar sozinho.</p></div></div>
+      <div class="st"><div class="body"><h3>Crie a milestone e ponha duas issues nela</h3><p><strong>Issues</strong> → <strong>Milestones</strong> → <strong>New milestone</strong>, com data. Depois abra cada issue e escolha a milestone na barra da direita.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Olhe o quadro e responda em voz alta: <strong>quem está fazendo o quê agora?</strong> Se você precisou abrir uma issue pra descobrir, falta assignee em algum cartão.</p>
+    </div>
+  </section>
+
+  <!-- 20 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>O que costuma dar errado aqui</h2>
+    <table>
+      <tr><th>o que acontece</th><th>por quê</th><th>o conserto</th></tr>
+      <tr><td>A aba <code>Issues</code> não existe no repositório</td><td>Ela foi desligada — ou você está olhando um <strong>fork</strong>, que nasce com as issues desativadas.</td><td>Settings → Features → marque <code>Issues</code>.</td></tr>
+      <tr><td>O template não aparece em <code>New issue</code></td><td>O arquivo não está na branch principal, ou o caminho tem uma letra fora do lugar.</td><td>Confira <code>.github/ISSUE_TEMPLATE/</code> — com <code>ISSUE_TEMPLATE</code> em maiúsculas.</td></tr>
+      <tr><td>Erro de sintaxe ao salvar o template</td><td>Tabulação no lugar de espaço, ou indentação irregular no YAML.</td><td>Só espaços, dois por nível. Cole de novo o modelo do manual e edite por cima.</td></tr>
+      <tr><td>O quadro está sempre desatualizado</td><td>Só uma pessoa move os cartões, e ela não é quem faz o trabalho.</td><td>Quem pega a issue move o cartão. Combine isso em voz alta, uma vez.</td></tr>
+      <tr><td>Trinta labels e ninguém filtra por nenhuma</td><td>Foram criadas "por precaução", antes de existir a necessidade.</td><td>Apague tudo que não foi usado no último mês. Volte pras cinco.</td></tr>
+      <tr><td>Issue de três meses que ninguém sabe se ainda vale</td><td>Backlog que nunca é podado vira depósito.</td><td>Feche com um comentário honesto. Reabrir custa um clique.</td></tr>
+      <tr><td>"Quero que a issue feche sozinha quando o código entrar"</td><td>Isso é o Pull Request fazendo o trabalho, não a issue.</td><td><code>Closes #12</code> na descrição do PR — é a <strong>aula 06</strong>.</td></tr>
+    </table>
+  </section>
+
+  <!-- 21 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">🗂️</div>
+    <div class="eyebrow"><span class="b">fim da aula 05</span> · o que você já sabe fazer</div>
+    <h1 style="max-width:22ch">O trabalho agora está <span class="grad">visível</span></h1>
+    <p class="lead" style="max-width:64ch;margin-top:16px">Você escreve issue que outra pessoa consegue pegar, rotula, agrupa em milestone, atribui, cruza referência, instalou um template que cobra o mínimo e montou um quadro que diz em que pé o trabalho está.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">issue</span><span class="pill on">labels</span><span class="pill on">milestone</span><span class="pill on">assignee</span><span class="pill on">#12</span><span class="pill on">ISSUE_TEMPLATE</span><span class="pill on">Projects</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Aula 06:</strong> o Pull Request — onde o código encontra a issue, com <span class="code-inline">Closes #12</span> fechando ela sozinha, e o code review do outro lado da mesa.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)">refaça tudo sozinho com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 21</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual · Aula 10 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Passo a passo da aula 10: criar e publicar a primeira tag anotada, escolher o número certo pelo versionamento semântico, abrir a Release com changelog gerado dos commits, cadastrar um secret, criar um environment com aprovação manual, escrever o workflow de deploy no GitHub Pages com as permissions corretas e fazer rollback sem apagar histórico.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --purple-lighter:#C3A6FF; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple-light);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple-light);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple-lighter)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+
+  /* A única regra que este manual acrescenta ao design dos guias: a tabela do
+     ciclo tem quatro colunas e não cabe em telas estreitas. Rolar dentro do
+     próprio bloco é melhor que empurrar a página inteira para o lado. */
+  .tabela{overflow-x:auto;margin:14px 0}
+  .tabela table{margin:0;min-width:520px}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de começar</div>
+    <a href="#o-que-e">01 · O que você vai fazer aqui</a>
+    <a href="#semver">02 · Versionamento semântico</a>
+    <div class="grp">Marcar a versão</div>
+    <a href="#tag">03 · A primeira tag anotada</a>
+    <a href="#release">04 · A Release e o changelog</a>
+    <div class="grp">Preparar a produção</div>
+    <a href="#secrets">05 · Cadastrar um secret</a>
+    <a href="#environments">06 · Environment com aprovação</a>
+    <a href="#pages">07 · Ligar o GitHub Pages</a>
+    <div class="grp">O deploy</div>
+    <a href="#workflow">08 · O workflow de deploy</a>
+    <a href="#outro-provedor">09 · Quando o destino é outro</a>
+    <div class="grp">Quando dá errado</div>
+    <a href="#rollback">10 · Voltar a versão anterior</a>
+    <a href="#cola">11 · Cola de comandos</a>
+    <a href="#se-travar">12 · Se travar</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Manual · Aula 10 · Introdução ao GitHub</div>
+  <h1>Release, versionamento e <span class="g">deploy contínuo</span></h1>
+  <p class="lead">O passo a passo para você levar o seu repositório do merge até a produção: criar a primeira tag anotada, publicar a Release com changelog, guardar um secret, exigir aprovação humana antes do deploy, escrever o workflow que publica no GitHub Pages — e voltar a versão anterior quando der ruim, sem apagar nada do histórico.</p>
+  <div class="rule"></div>
+
+  <div class="divisor">Antes de começar</div>
+
+  <section id="o-que-e">
+    <h2><span class="n">01</span>O que você vai fazer aqui</h2>
+    <p>Este é o passo a passo da <b>aula 10</b>, para você refazer sozinho, no seu ritmo. No fim dele o seu repositório tem uma versão marcada, uma Release publicada, um secret guardado, um ambiente de produção com aprovação manual e um site que <b>sobe no ar sozinho</b> toda vez que você cria uma tag.</p>
+
+    <h3>De onde você vem</h3>
+    <p>Este manual continua o repositório das aulas 08 e 09. Antes de começar, confira que você tem:</p>
+    <ul>
+      <li>Um repositório no GitHub com alguma coisa <b>estática</b> para publicar — um <code>index.html</code> já basta.</li>
+      <li>A <code>main</code> protegida e o CI verde, como na <b>aula 09</b>.</li>
+      <li>Commits no padrão <b>Conventional Commits</b> da <b>aula 07</b> — <code>feat:</code>, <code>fix:</code>, <code>chore:</code>. É deles que o changelog sai pronto.</li>
+      <li>Permissão de administrador no repositório: secrets, environments e Pages moram todos em <code>Settings</code>.</li>
+    </ul>
+
+    <div class="tip"><b>Não tem o repositório da aula 09?</b> Serve qualquer repositório seu com um <code>index.html</code> na raiz de uma pasta. O que você vai perder é só a parte de “o CI já barrava merge quebrado” — o resto funciona igual.</div>
+
+    <div class="tip warn"><b>Fora do escopo de hoje:</b> desfazer commit com <code>git revert</code>, <code>reset</code> e <code>reflog</code> é a <b>aula 11</b> inteira. Criar um workflow do zero, com a explicação de evento, job, step e runner, foi a <b>aula 08</b> — se travar no YAML, o manual de lá é o lugar. E os checks de qualidade que barram o merge são a <b>aula 09</b>.</div>
+  </section>
+
+  <section id="semver">
+    <h2><span class="n">02</span>Versionamento semântico</h2>
+    <p>Antes de criar a tag, decida o número. <b>SemVer</b> é o combinado de três números — <code>MAJOR.MINOR.PATCH</code> — em que cada um promete uma coisa diferente para quem depende do seu projeto.</p>
+
+    <dl class="gloss">
+      <dt>MAJOR</dt><dd>Quebrei alguma coisa que você já usava. Atualizar vai dar trabalho: leia as notas antes.</dd>
+      <dt>MINOR</dt><dd>Tem funcionalidade nova, e o seu código antigo continua funcionando igual.</dd>
+      <dt>PATCH</dt><dd>Só correção de bug. Atualize sem medo.</dd>
+    </dl>
+
+    <p><b>Quebra de contrato</b> é qualquer mudança que faz o código de quem te usa parar de funcionar <b>sem que essa pessoa tenha mexido em nada</b>. Renomear uma função pública, tirar um parâmetro, mudar o formato da resposta de uma API, exigir uma configuração que antes tinha valor padrão. Tudo isso é MAJOR.</p>
+
+    <h3>Que número sobe?</h3>
+    <div class="tabela">
+    <table>
+      <tr><th>o que você fez</th><th>que número sobe</th><th>de → para</th></tr>
+      <tr><td>Corrigiu um bug, sem mudar mais nada</td><td><b>PATCH</b></td><td><code>1.4.2 → 1.4.3</code></td></tr>
+      <tr><td>Melhorou o desempenho, mesmo comportamento</td><td><b>PATCH</b></td><td><code>1.4.3 → 1.4.4</code></td></tr>
+      <tr><td>Adicionou uma função nova</td><td><b>MINOR</b></td><td><code>1.4.4 → 1.5.0</code></td></tr>
+      <tr><td>Adicionou um parâmetro <b>opcional</b>, com valor padrão</td><td><b>MINOR</b></td><td><code>1.5.0 → 1.6.0</code></td></tr>
+      <tr><td>Marcou algo como obsoleto, mas ainda funcionando</td><td><b>MINOR</b></td><td><code>1.6.0 → 1.7.0</code></td></tr>
+      <tr><td>Renomeou ou apagou uma função pública</td><td><b>MAJOR</b></td><td><code>1.7.0 → 2.0.0</code></td></tr>
+      <tr><td>Tornou <b>obrigatório</b> um parâmetro que era opcional</td><td><b>MAJOR</b></td><td><code>2.0.0 → 3.0.0</code></td></tr>
+      <tr><td>Mudou o formato da resposta da API</td><td><b>MAJOR</b></td><td><code>3.0.0 → 4.0.0</code></td></tr>
+      <tr><td>Subiu a versão mínima de Node exigida</td><td><b>MAJOR</b></td><td><code>4.0.0 → 5.0.0</code></td></tr>
+      <tr><td>Corrigiu um erro de português no README</td><td><span class="muted">nenhum</span></td><td><span class="muted">documentação não vira versão</span></td></tr>
+    </table>
+    </div>
+
+    <div class="tip ok"><b>As duas regras que ninguém decora:</b> quando o MINOR sobe, o PATCH <b>zera</b>. Quando o MAJOR sobe, os dois zeram. De <code>1.6.4</code> com quebra você vai para <code>2.0.0</code> — nunca para <code>2.6.4</code>.</div>
+
+    <div class="tip"><b>E antes do 1.0.0?</b> Tudo com <code>0.x.y</code> é assumidamente instável: a promessa vale a partir do <code>1.0.0</code>. Publicar o <code>1.0.0</code> é você dizendo “dá para confiar nisto agora”.</div>
+
+    <h3>Como o commit vira o número</h3>
+    <p>É aqui que a <b>aula 07</b> volta. Com Conventional Commits, o próprio tipo do commit já diz que número sobe:</p>
+    <div class="code"><button class="cp">copiar</button><pre><span class="kw">fix:</span> corrige total errado com desconto        <span class="cm"># PATCH</span>
+<span class="kw">feat:</span> exporta o relatório em CSV              <span class="cm"># MINOR</span>
+<span class="kw">feat!:</span> remove o endpoint /v1/user            <span class="cm"># MAJOR (o ! é a quebra)</span>
+<span class="kw">chore:</span> atualiza dependências de teste       <span class="cm"># nada</span></pre></div>
+    <p>O <code>!</code> depois do tipo — ou um rodapé <code>BREAKING CHANGE:</code> no corpo do commit — é a marca de quebra de contrato. É o que faz o changelog abrir uma seção separada e gritante.</p>
+  </section>
+
+  <div class="divisor">Marcar a versão</div>
+
+  <section id="tag">
+    <h2><span class="n">03</span>A primeira tag anotada</h2>
+    <p>A tag é uma etiqueta permanente colada num commit. A branch anda a cada merge; a tag <b>fica</b>. É por isso que release se marca com tag.</p>
+
+    <h3>Leve × anotada</h3>
+    <div class="duo">
+      <div class="box no">
+        <h4>Tag leve — evite</h4>
+        <p>Só um apelido para o hash. Sem autor, sem data, sem mensagem.</p>
+        <div class="code"><button class="cp">copiar</button><pre>git tag v1.0.0</pre></div>
+      </div>
+      <div class="box ok">
+        <h4>Tag anotada — use esta</h4>
+        <p>Um objeto de verdade no repositório: guarda quem criou, quando e por quê.</p>
+        <div class="code"><button class="cp">copiar</button><pre>git tag -a v1.0.0 -m "primeira versão pública"</pre></div>
+      </div>
+    </div>
+
+    <h3>Passo a passo</h3>
+    <ol class="passos">
+      <li><b>Vá para a main atualizada</b>
+        A tag marca o commit em que você está agora — então esteja no commit certo.
+        <div class="code"><button class="cp">copiar</button><pre>git switch main
+git pull
+git log --oneline -3</pre></div>
+      </li>
+      <li><b>Crie a tag anotada</b>
+        O <code>-a</code> é o que transforma a tag num objeto com autor e data. O <code>-m</code> é a mensagem dela.
+        <div class="code"><button class="cp">copiar</button><pre>git tag -a v1.0.0 -m <span class="st">"primeira versão pública"</span></pre></div>
+      </li>
+      <li><b>Confira o que você criou</b>
+        <div class="code"><button class="cp">copiar</button><pre>git tag
+git show v1.0.0</pre></div>
+        Você deve ver algo assim — repare no <code>Tagger</code>, que a tag leve não tem:
+        <div class="terminal"><span class="p">$</span> git show v1.0.0
+<span class="out">tag v1.0.0
+Tagger: Seu Nome &lt;voce@exemplo.com&gt;
+Date:   Mon Sep 1 10:12:44 2025 -0300
+
+primeira versão pública</span>
+<span class="cm">commit a3f9c2e... (HEAD -&gt; main, tag: v1.0.0, origin/main)</span></div>
+      </li>
+      <li><b>Mande a tag para o GitHub</b>
+        Este é o passo que todo mundo esquece: <b><code>git push</code> sozinho não leva tag nenhuma.</b>
+        <div class="code"><button class="cp">copiar</button><pre><span class="cm"># uma tag específica — o jeito recomendado</span>
+git push origin v1.0.0
+
+<span class="cm"># ou todas as tags locais de uma vez</span>
+git push --tags</pre></div>
+      </li>
+      <li><b>Confirme no site</b>
+        Abra o repositório no GitHub e clique no seletor de branch → aba <code>Tags</code>. A <code>v1.0.0</code> tem que estar lá.
+      </li>
+    </ol>
+
+    <div class="tip warn"><b>Errou a tag e ainda não publicou?</b> Dá para apagar local e remota — <code>git tag -d v1.0.0</code> e <code>git push origin --delete v1.0.0</code>. Mas só faça isso <b>nos primeiros minutos</b>, antes de alguém baixar. Tag publicada é imutável na cabeça de quem já usou: erro de versão se conserta com <b>versão nova</b>, não mexendo na antiga.</div>
+
+    <h3>Comandos úteis de tag</h3>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># tags que começam com v1., em ordem de versão</span>
+git tag -l <span class="st">"v1.*"</span> --sort=-v:refname
+
+<span class="cm"># marcar um commit antigo, que não é o atual</span>
+git tag -a v0.9.0 a3f9c2e -m <span class="st">"versão que foi pro cliente"</span>
+
+<span class="cm"># o que mudou entre duas versões</span>
+git log --oneline v1.0.0..v1.1.0
+
+<span class="cm"># em que versão este commit entrou</span>
+git describe --tags</pre></div>
+  </section>
+
+  <section id="release">
+    <h2><span class="n">04</span>A Release e o changelog</h2>
+    <p>A tag é do Git e vive no repositório. A <b>Release</b> é do GitHub: é a página que pendura na tag um título, um texto de notas e, se você quiser, arquivos prontos para download.</p>
+
+    <ol class="passos">
+      <li><b>Abra o formulário</b>
+        No repositório, vá em <code>Releases</code> (coluna da direita, na página inicial) e clique em <b>Draft a new release</b>.
+      </li>
+      <li><b>Escolha a tag que você já subiu</b>
+        Em <code>Choose a tag</code>, selecione a <code>v1.0.0</code>. Se ela não aparecer na lista, você não deu <code>git push origin v1.0.0</code> — volte à seção <a href="#tag">03</a>.
+      </li>
+      <li><b>Dê um título</b>
+        Pode ser o próprio número (<code>v1.0.0</code>) ou o número com um apelido: <code>v1.0.0 — primeira pública</code>.
+      </li>
+      <li><b>Clique em “Generate release notes”</b>
+        Este é o botão que faz o trabalho. O GitHub lê <b>todos os commits e PRs desde a tag anterior</b> e monta o changelog sozinho.
+      </li>
+      <li><b>Revise e publique</b>
+        Apague o que ficou repetido, escreva uma linha de resumo no topo e clique em <b>Publish release</b>.
+      </li>
+    </ol>
+
+    <h3>Por que o changelog sai bom (ou ruim)</h3>
+    <p>O botão não faz mágica: ele só organiza o que você escreveu. Compare.</p>
+
+    <div class="duo">
+      <div class="box no">
+        <h4>Histórico sem padrão</h4>
+        <div class="code"><button class="cp">copiar</button><pre>ajustes
+agora vai
+correções do fulano
+testando</pre></div>
+        <p>Changelog gerado: quatro linhas que não dizem nada. E ninguém consegue decidir se a próxima versão é <code>1.0.1</code> ou <code>2.0.0</code>.</p>
+      </div>
+      <div class="box ok">
+        <h4>Conventional Commits (aula 07)</h4>
+        <div class="code"><button class="cp">copiar</button><pre>feat: exporta relatório em CSV
+fix: total errado com desconto
+feat!: remove o endpoint /v1/user</pre></div>
+        <p>Changelog com <b>Features</b> e <b>Bug fixes</b> separados, e o <code>!</code> avisando que a versão é MAJOR.</p>
+      </div>
+    </div>
+
+    <div class="tip star"><b>Este é o laço da aula 07:</b> aquele padrão de mensagem não era mania de organização. Ele existe para que o changelog e o próximo número de versão saiam <b>sozinhos</b>, sem ninguém abrir o histórico à mão na véspera do lançamento.</div>
+
+    <h3>Deixar o changelog mais bonito, de graça</h3>
+    <p>Crie este arquivo e o gerador passa a agrupar por tipo e a ignorar o que não interessa:</p>
+    <div class="file">.github/release.yml</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="ty">changelog:</span>
+  <span class="fn">exclude:</span>
+    <span class="fn">labels:</span>
+      - <span class="st">ignore-for-release</span>
+  <span class="fn">categories:</span>
+    - <span class="fn">title:</span> <span class="st">🚨 Mudanças que quebram</span>
+      <span class="fn">labels:</span> [<span class="st">breaking-change</span>]
+    - <span class="fn">title:</span> <span class="st">✨ Novidades</span>
+      <span class="fn">labels:</span> [<span class="st">feature</span>, <span class="st">enhancement</span>]
+    - <span class="fn">title:</span> <span class="st">🩹 Correções</span>
+      <span class="fn">labels:</span> [<span class="st">bug</span>]
+    - <span class="fn">title:</span> <span class="st">📦 Outras</span>
+      <span class="fn">labels:</span> [<span class="st">"*"</span>]</pre></div>
+
+    <div class="tip"><b>Pré-release:</b> marque <code>Set as a pre-release</code> quando a versão for <code>v2.0.0-beta.1</code> ou qualquer coisa que você não quer que as pessoas peguem como estável. A Release fica visível, mas o GitHub para de anunciá-la como “Latest”.</div>
+  </section>
+
+  <div class="divisor">Preparar a produção</div>
+
+  <section id="secrets">
+    <h2><span class="n">05</span>Cadastrar um secret</h2>
+    <p>Para publicar, o workflow quase sempre precisa de uma credencial. Essa credencial <b>não pode</b> estar num arquivo do repositório — é exatamente o vazamento que a aula 09 te ensinou a caçar. O lugar dela é o <b>secret</b>.</p>
+
+    <ol class="passos">
+      <li><b>Abra o cofre</b>
+        <code>Settings → Secrets and variables → Actions</code>, aba <code>Secrets</code>.
+      </li>
+      <li><b>Clique em “New repository secret”</b>
+        Nome em MAIÚSCULAS com sublinhado: <code>TOKEN_DE_DEPLOY</code>. Valor: o token de verdade — ou, para treinar hoje, <code>teste-123</code>.
+      </li>
+      <li><b>Salve e tente ver de novo</b>
+        Você não consegue. O GitHub só deixa <b>substituir</b> ou apagar. Se desse para ler de volta, não era cofre.
+      </li>
+    </ol>
+
+    <h3>Como o workflow lê o secret</h3>
+    <div class="code"><button class="cp">copiar</button><pre><span class="ty">steps:</span>
+  - <span class="fn">name:</span> Publica no provedor
+    <span class="fn">env:</span>
+      <span class="fn">TOKEN_DE_DEPLOY:</span> $&#123;{ secrets.TOKEN_DE_DEPLOY }}
+    <span class="fn">run:</span> ./publica.sh</pre></div>
+    <p>No log do Actions, o valor sai como <code>***</code>. O arquivo do workflow, que está no repositório e todo mundo lê, tem só o <b>nome</b> do segredo.</p>
+
+    <h3>Secret × variable</h3>
+    <div class="tabela">
+    <table>
+      <tr><th></th><th>secret</th><th>variable</th></tr>
+      <tr><td><b>Serve para</b></td><td>Token, senha, chave de API</td><td>URL do ambiente, nome do bucket, flag de build</td></tr>
+      <tr><td><b>Dá para ler depois</b></td><td>Não, só substituir</td><td>Sim, fica visível</td></tr>
+      <tr><td><b>No log</b></td><td>Sai mascarado como <code>***</code></td><td>Sai como está</td></tr>
+      <tr><td><b>Como se lê</b></td><td><code>secrets.NOME</code></td><td><code>vars.NOME</code></td></tr>
+    </table>
+    </div>
+
+    <div class="tip warn"><b>O mascaramento cobre descuido, não má-fé.</b> Quem tem permissão de editar um workflow tem, na prática, permissão de imprimir o segredo — basta montar o valor em pedaços que o filtro não reconhece. Nunca dê <code>echo</code> em secret, nem para depurar. E se um vazou: <b>rotacione primeiro</b>, limpe depois — o procedimento é o da aula 09.</div>
+  </section>
+
+  <section id="environments">
+    <h2><span class="n">06</span>Environment com aprovação</h2>
+    <p>Um <b>environment</b> é um destino nomeado — <code>staging</code>, <code>production</code> — com regras próprias. Ele serve para três coisas: guardar secrets que só valem naquele destino, restringir quem pode publicar ali e, a mais importante hoje, <b>exigir que uma pessoa aprove</b> antes do job rodar.</p>
+
+    <ol class="passos">
+      <li><b>Crie o environment</b>
+        <code>Settings → Environments → New environment</code>. Nome: <code>production</code>.
+      </li>
+      <li><b>Ligue a aprovação manual</b>
+        Marque <code>Required reviewers</code> e adicione você mesmo (ou o time). Até seis pessoas; qualquer uma delas destrava.
+      </li>
+      <li><b>Restrinja quem dispara</b>
+        Em <code>Deployment branches and tags</code>, escolha <code>Selected branches and tags</code> e adicione a regra <code>v*</code>. Assim só tag de versão publica em produção.
+      </li>
+      <li><b>Guarde o secret aqui, e não no repositório</b>
+        Ainda na tela do environment, <code>Add environment secret</code>. Um secret de environment só é legível por um job que declarou aquele environment — ou seja, por um job que <b>passou pela aprovação</b>.
+      </li>
+      <li><b>Amarre o job ao environment</b>
+        É uma linha no YAML:
+        <div class="code"><button class="cp">copiar</button><pre><span class="ty">jobs:</span>
+  <span class="fn">deploy:</span>
+    <span class="fn">runs-on:</span> ubuntu-latest
+    <span class="fn">environment:</span> production
+    <span class="fn">steps:</span>
+      - <span class="fn">run:</span> echo <span class="st">"só chego aqui depois que alguém aprovou"</span></pre></div>
+      </li>
+    </ol>
+
+    <h3>O que você vê quando roda</h3>
+    <p>O job aparece na aba <code>Actions</code> com o estado <b>Waiting</b> e um botão <code>Review deployments</code>. Quem está na lista recebe notificação, abre, escolhe o environment, escreve um comentário opcional e clica em <b>Approve and deploy</b>. Fica registrado quem aprovou, quando e para qual versão.</p>
+
+    <div class="tip ok"><b>Deploy contínuo não é deploy sem gente.</b> É deploy que cabe num clique, em vez de trinta passos manuais na mão de uma pessoa só. O arranjo mais comum: <code>staging</code> automático a cada merge na main, <code>production</code> com aprovação a cada tag.</div>
+  </section>
+
+  <section id="pages">
+    <h2><span class="n">07</span>Ligar o GitHub Pages</h2>
+    <p>O Pages hospeda arquivos estáticos direto do seu repositório, de graça e com HTTPS. É o destino que a gente usa hoje porque não exige conta em lugar nenhum.</p>
+
+    <div class="duo">
+      <div class="box ok">
+        <h4>Serve bem</h4>
+        <p>Site estático, portfólio, documentação, landing page, o resultado do <code>build</code> de um projeto de front.</p>
+      </div>
+      <div class="box no">
+        <h4>Não serve</h4>
+        <p>Qualquer coisa que precise de servidor: banco de dados, login de verdade, API. Não existe backend no Pages.</p>
+      </div>
+    </div>
+
+    <ol class="passos">
+      <li><b>Abra as configurações do Pages</b>
+        <code>Settings → Pages</code>.
+      </li>
+      <li><b>Escolha o Source certo</b>
+        Em <code>Build and deployment → Source</code>, selecione <b>GitHub Actions</b>. <b>Não</b> deixe em “Deploy from a branch”.
+      </li>
+      <li><b>Anote o endereço</b>
+        Vai ser <code>https://SEU-USUARIO.github.io/NOME-DO-REPO/</code>. Guarde — é para lá que você olha no fim.
+      </li>
+    </ol>
+
+    <div class="tip warn"><b>O susto número um desta aula:</b> se o <code>Source</code> ficar em “Deploy from a branch”, o seu workflow roda, fica <b>verde</b> — e o site não muda uma vírgula, porque o Pages está servindo outra coisa. Confira este campo antes de sair caçando erro no YAML.</div>
+
+    <div class="tip"><b>Repositório privado?</b> No plano gratuito, Pages de repositório privado é público ou não existe, dependendo do plano da conta. Se a aba reclamar, torne o repositório público — para o exercício de hoje não tem problema nenhum.</div>
+  </section>
+
+  <div class="divisor">O deploy</div>
+
+  <section id="workflow">
+    <h2><span class="n">08</span>O workflow de deploy</h2>
+    <p>Agora o arquivo. A mecânica de workflow — evento, job, step, runner, action — é a <b>aula 08</b>; se alguma palavra aqui parecer nova, o manual de lá explica. O que muda no deploy é uma coisa só, e é onde todo mundo trava: <b>permissões</b>.</p>
+
+    <h3>O arquivo completo</h3>
+    <p>Crie <code>.github/workflows/deploy.yml</code> com este conteúdo. Ele publica a pasta <code>./site</code> no Pages toda vez que você sobe uma tag que começa com <code>v</code>.</p>
+
+    <div class="file">.github/workflows/deploy.yml</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="ty">name:</span> deploy
+
+<span class="cm"># Dispara só em tag de versão. A main continua sendo testada pelo CI da</span>
+<span class="cm"># aula 09 — o que publica é a tag, não o merge.</span>
+<span class="ty">on:</span>
+  <span class="fn">push:</span>
+    <span class="fn">tags:</span> [<span class="st">'v*'</span>]
+  <span class="fn">workflow_dispatch:</span>
+
+<span class="cm"># É AQUI QUE A TURMA INTEIRA TRAVA. Sem estas três linhas o job morre com 403</span>
+<span class="cm"># na última etapa, depois de o build ter dado tudo certo.</span>
+<span class="ty">permissions:</span>
+  <span class="fn">contents:</span> read
+  <span class="fn">pages:</span> write
+  <span class="fn">id-token:</span> write
+
+<span class="cm"># Um deploy por vez. Sem cancelar o que já começou: deploy pela metade</span>
+<span class="cm"># é pior que deploy atrasado.</span>
+<span class="ty">concurrency:</span>
+  <span class="fn">group:</span> pages
+  <span class="fn">cancel-in-progress:</span> <span class="an">false</span>
+
+<span class="ty">jobs:</span>
+  <span class="fn">build:</span>
+    <span class="fn">runs-on:</span> ubuntu-latest
+    <span class="fn">steps:</span>
+      - <span class="fn">name:</span> Baixa o código
+        <span class="fn">uses:</span> actions/checkout@v4
+
+      - <span class="fn">name:</span> Prepara o Pages
+        <span class="fn">uses:</span> actions/configure-pages@v5
+
+      - <span class="fn">name:</span> Empacota a pasta do site
+        <span class="fn">uses:</span> actions/upload-pages-artifact@v3
+        <span class="fn">with:</span>
+          <span class="cm"># A pasta que tem o index.html. Use ./ se ele está na raiz.</span>
+          <span class="fn">path:</span> ./site
+
+  <span class="fn">deploy:</span>
+    <span class="fn">needs:</span> build
+    <span class="fn">runs-on:</span> ubuntu-latest
+    <span class="cm"># O environment 'github-pages' é criado pelo próprio GitHub.</span>
+    <span class="cm"># Troque por 'production' se quiser a sua aprovação manual aqui.</span>
+    <span class="fn">environment:</span>
+      <span class="fn">name:</span> github-pages
+      <span class="fn">url:</span> $&#123;{ steps.deployment.outputs.page_url }}
+    <span class="fn">steps:</span>
+      - <span class="fn">name:</span> Publica
+        <span class="fn">id:</span> deployment
+        <span class="fn">uses:</span> actions/deploy-pages@v4</pre></div>
+
+    <h3>Linha por linha, o que importa</h3>
+    <div class="tabela">
+    <table>
+      <tr><th>linha</th><th>por que ela existe</th></tr>
+      <tr><td><code>tags: ['v*']</code></td><td>Só tag que começa com <code>v</code> dispara. Push na main não publica nada.</td></tr>
+      <tr><td><code>contents: read</code></td><td>Ler o código do repositório. Sem isto o <code>checkout</code> falha.</td></tr>
+      <tr><td><code>pages: write</code></td><td>Publicar no Pages. <b>É a que falta em nove de cada dez 403.</b></td></tr>
+      <tr><td><code>id-token: write</code></td><td>Emitir o token OIDC que prova ao Pages que é este workflow falando. Sem ela, 403 também.</td></tr>
+      <tr><td><code>concurrency</code></td><td>Duas tags subidas juntas não brigam pelo mesmo destino.</td></tr>
+      <tr><td><code>needs: build</code></td><td>Só publica depois que o pacote existe.</td></tr>
+      <tr><td><code>path: ./site</code></td><td>A pasta que vira o site. Errar isto é o segundo motivo de “verde, mas não mudou nada”.</td></tr>
+      <tr><td><code>environment: url:</code></td><td>Faz o endereço do site aparecer clicável no resumo do job.</td></tr>
+    </table>
+    </div>
+
+    <div class="tip warn"><b>Onde ficam as <code>permissions</code>:</b> na raiz do arquivo, na mesma indentação de <code>on:</code> e <code>jobs:</code> — <b>zero espaço</b> antes. Se você indentar por engano, o YAML vira outra coisa e o Actions ignora em silêncio. Depois de colar, confira a coluna.</div>
+
+    <h3>Se o seu projeto precisa de build</h3>
+    <p>Troque o step que empacota por estes três — é o caso de qualquer projeto de front com <code>npm run build</code>:</p>
+    <div class="code"><button class="cp">copiar</button><pre>      - <span class="fn">uses:</span> actions/setup-node@v4
+        <span class="fn">with:</span>
+          <span class="fn">node-version:</span> <span class="st">'20'</span>
+          <span class="fn">cache:</span> npm
+
+      - <span class="fn">run:</span> npm ci
+      - <span class="fn">run:</span> npm run build
+
+      - <span class="fn">uses:</span> actions/upload-pages-artifact@v3
+        <span class="fn">with:</span>
+          <span class="fn">path:</span> ./dist</pre></div>
+
+    <h3>Rodar e conferir</h3>
+    <ol class="passos">
+      <li><b>Mande o workflow pela main</b>
+        Pelo PR, como sempre — a branch protegida da aula 07 continua valendo.
+        <div class="code"><button class="cp">copiar</button><pre>git switch -c ci/deploy-pages
+git add .github/workflows/deploy.yml
+git commit -m <span class="st">"ci: publica no GitHub Pages a cada tag"</span>
+git push -u origin ci/deploy-pages</pre></div>
+      </li>
+      <li><b>Depois do merge, suba uma tag</b>
+        <div class="code"><button class="cp">copiar</button><pre>git switch main
+git pull
+git tag -a v1.0.1 -m <span class="st">"primeiro deploy automático"</span>
+git push origin v1.0.1</pre></div>
+      </li>
+      <li><b>Acompanhe na aba Actions</b>
+        Se você pôs aprovação, o job <code>deploy</code> fica em <b>Waiting</b> até alguém clicar. Aprove.
+      </li>
+      <li><b>Abra a URL</b>
+        Ela aparece no resumo do job, no cartão do environment. É a página no ar.
+      </li>
+    </ol>
+  </section>
+
+  <section id="outro-provedor">
+    <h2><span class="n">09</span>Quando o destino é outro</h2>
+    <p>Vercel, Netlify, Cloudflare, um servidor da empresa, um bucket na nuvem. A <b>forma</b> do workflow não muda: um evento dispara, um job constrói, um passo autenticado envia. O que muda é de onde vem a autorização e qual é o último step.</p>
+
+    <div class="tabela">
+    <table>
+      <tr><th>peça</th><th>no GitHub Pages</th><th>em outro provedor</th></tr>
+      <tr><td>Quem autoriza</td><td><code>permissions:</code> com <code>pages: write</code> e <code>id-token: write</code></td><td>Um <b>token do provedor</b>, guardado como secret</td></tr>
+      <tr><td>Onde a credencial mora</td><td>Não existe credencial: é o OIDC do próprio GitHub</td><td><code>secrets.VERCEL_TOKEN</code>, <code>secrets.CLOUDFLARE_API_TOKEN</code>…</td></tr>
+      <tr><td>O step que publica</td><td><code>actions/deploy-pages@v4</code></td><td>A action oficial deles, ou a CLI: <code>vercel deploy</code>, <code>wrangler deploy</code>, <code>rsync</code></td></tr>
+      <tr><td>Onde o site fica</td><td><code>usuario.github.io/repo</code></td><td>O domínio do provedor, ou o seu</td></tr>
+      <tr><td>Aprovação manual</td><td>environment</td><td>environment — <b>igualzinho</b></td></tr>
+      <tr><td>Rollback</td><td>Re-rodar o deploy da versão anterior</td><td>Re-rodar, ou o botão “promote” do painel deles</td></tr>
+    </table>
+    </div>
+
+    <h3>O esqueleto genérico</h3>
+    <div class="code"><button class="cp">copiar</button><pre><span class="ty">jobs:</span>
+  <span class="fn">deploy:</span>
+    <span class="fn">runs-on:</span> ubuntu-latest
+    <span class="fn">environment:</span> production      <span class="cm"># a aprovação manual continua aqui</span>
+    <span class="fn">steps:</span>
+      - <span class="fn">uses:</span> actions/checkout@v4
+      - <span class="fn">run:</span> npm ci
+      - <span class="fn">run:</span> npm run build
+
+      - <span class="fn">name:</span> Envia para o provedor
+        <span class="fn">env:</span>
+          <span class="fn">DEPLOY_TOKEN:</span> $&#123;{ secrets.DEPLOY_TOKEN }}
+        <span class="fn">run:</span> npx <span class="st">--yes</span> alguma-cli deploy --prod</pre></div>
+
+    <div class="tip"><b>Não decore action, entenda a forma.</b> Toda documentação de provedor descreve a mesma coisa com nomes diferentes. Se você sabe onde entra o secret e qual step publica, trocar de provedor é reescrever <b>um</b> step.</div>
+  </section>
+
+  <div class="divisor">Quando dá errado</div>
+
+  <section id="rollback">
+    <h2><span class="n">10</span>Voltar a versão anterior</h2>
+    <p>Subiu quebrado. A tentação é apagar o commit ruim e fingir que nunca existiu. <b>Não faça isso</b>: a <code>main</code> é compartilhada, e reescrever o histórico dela estraga o repositório de todo mundo que já deu <code>pull</code>.</p>
+    <p>O procedimento certo tem três tempos, nesta ordem.</p>
+
+    <h3>1. Pare o sangramento (segundos)</h3>
+    <p>Não corrija código ainda. Só coloque a versão boa de volta no ar.</p>
+    <ol class="passos">
+      <li><b>Ache o deploy da versão anterior</b>
+        Aba <code>Actions</code> → o workflow <code>deploy</code> → a execução da tag <code>v1.0.0</code>.
+      </li>
+      <li><b>Clique em “Re-run all jobs”</b>
+        O mesmo commit é construído e publicado de novo. Em poucos minutos o ar volta a ser a versão que funcionava. Se houver aprovação, aprove.
+      </li>
+    </ol>
+    <div class="tip ok"><b>Por que isto é seguro:</b> você não mexeu em uma linha de código nem em uma tag. Só mandou o robô repetir uma publicação que já tinha dado certo.</div>
+
+    <h3>2. Corrija por cima (minutos ou horas)</h3>
+    <p>Agora, com calma, conserte de verdade — em branch, com PR e CI verde, como qualquer outra mudança. E marque a correção com uma <b>tag nova</b>.</p>
+    <div class="code"><button class="cp">copiar</button><pre>git switch main
+git pull
+
+<span class="cm"># conserta, commita, abre o PR, faz o merge... e só então:</span>
+git tag -a v1.0.2 -m <span class="st">"corrige o deploy quebrado da v1.0.1"</span>
+git push origin v1.0.2</pre></div>
+    <p>O histórico ganhou uma linha. Não perdeu nenhuma. <code>v1.0.1</code> continua lá, com a sua data e o seu autor, contando o que aconteceu.</p>
+
+    <h3>3. Sinalize a versão ruim (um minuto)</h3>
+    <p>Abra a Release da <code>v1.0.1</code>, clique em <code>Edit</code>, marque <b>Set as a pre-release</b> e escreva uma linha no topo das notas:</p>
+    <div class="code"><button class="cp">copiar</button><pre>&gt; ⚠️ Esta versão quebra o carregamento da página inicial.
+&gt; Use a v1.0.2.</pre></div>
+    <p>Assim quem chegar daqui a seis meses entende o que houve sem precisar perguntar.</p>
+
+    <div class="tip warn"><b>O que NÃO fazer:</b> <code>git push --force</code> na main, apagar a tag ruim para “limpar”, ou apagar a Release. As três apagam a evidência de um incidente que aconteceu de verdade — e a segunda quebra o repositório de quem já baixou aquela tag.</div>
+
+    <div class="callout"><b>E o <code>git revert</code>?</b> Ele é o comando que desfaz um commit específico criando um commit contrário, sem apagar nada — exatamente a filosofia desta seção. Mas ele, o <code>reset</code>, o <code>reflog</code>, o <code>stash</code> e o <code>cherry-pick</code> são a <b>aula 11</b> inteira. O rollback de hoje é de <b>deploy</b>: você troca o que está no ar, não o histórico.</div>
+  </section>
+
+  <section id="cola">
+    <h2><span class="n">11</span>Cola de comandos</h2>
+    <p>Tudo que apareceu nesta aula, numa tabela só.</p>
+
+    <table class="cheat">
+      <tr><th>comando</th><th>o que faz</th></tr>
+      <tr><td>git tag</td><td>Lista as tags locais.</td></tr>
+      <tr><td>git tag -a v1.0.0 -m "…"</td><td>Cria a tag <b>anotada</b> no commit atual. <span class="muted">A que você quer.</span></td></tr>
+      <tr><td>git tag v1.0.0</td><td>Cria uma tag <b>leve</b>. <span class="muted">Sem autor, sem data. Evite.</span></td></tr>
+      <tr><td>git tag -a v0.9.0 a3f9c2e -m "…"</td><td>Marca um commit antigo, pelo hash.</td></tr>
+      <tr><td>git show v1.0.0</td><td>Mostra a tag: quem criou, quando, e o commit apontado.</td></tr>
+      <tr><td>git push origin v1.0.0</td><td>Manda <b>uma</b> tag para o GitHub.</td></tr>
+      <tr><td>git push --tags</td><td>Manda <b>todas</b> as tags locais.</td></tr>
+      <tr><td>git tag -d v1.0.0</td><td>Apaga a tag local.</td></tr>
+      <tr><td>git push origin --delete v1.0.0</td><td>Apaga a tag no GitHub. <span class="muted">Só nos primeiros minutos.</span></td></tr>
+      <tr><td>git tag -l "v1.*" --sort=-v:refname</td><td>Lista tags por padrão, em ordem de versão.</td></tr>
+      <tr><td>git log --oneline v1.0.0..v1.1.0</td><td>O que mudou entre duas versões.</td></tr>
+      <tr><td>git describe --tags</td><td>Em que versão o commit atual está.</td></tr>
+      <tr><td>git fetch --tags</td><td>Traz as tags que outra pessoa criou.</td></tr>
+    </table>
+
+    <h3>E na tela do GitHub</h3>
+    <table class="cheat">
+      <tr><th>onde</th><th>para quê</th></tr>
+      <tr><td>Releases → Draft a new release</td><td>Publicar a versão com notas.</td></tr>
+      <tr><td>Generate release notes</td><td>Changelog automático a partir dos commits e PRs.</td></tr>
+      <tr><td>Settings → Secrets and variables</td><td>Guardar token e senha fora do código.</td></tr>
+      <tr><td>Settings → Environments</td><td>Criar <code>production</code> e exigir aprovação.</td></tr>
+      <tr><td>Settings → Pages → Source</td><td>Precisa estar em <b>GitHub Actions</b>.</td></tr>
+      <tr><td>Actions → Re-run all jobs</td><td>O rollback: republicar a versão anterior.</td></tr>
+    </table>
+
+    <div class="callout"><b>O que fica para as próximas:</b> desfazer commit de verdade — <code>revert</code>, <code>reset</code>, <code>stash</code>, <code>reflog</code>, <code>bisect</code> — é a <b>aula 11</b>. Levar tudo isso para projeto de outra pessoa, com fork e PR aceito, é a <b>aula 12</b>.</div>
+  </section>
+
+  <section id="se-travar">
+    <h2><span class="n">12</span>Se travar</h2>
+    <p>Ache o sintoma na primeira coluna — é quase sempre um destes.</p>
+
+    <div class="tabela">
+    <table>
+      <tr><th>sintoma</th><th>causa</th><th>conserto</th></tr>
+      <tr>
+        <td><b>A tag não subiu.</b> Criei, mas não aparece no GitHub</td>
+        <td><code>git push</code> sozinho <b>não</b> leva tag. Ele só empurra commits da branch.</td>
+        <td><code>git push origin v1.0.0</code> para aquela tag, ou <code>git push --tags</code> para todas. Confira depois em <code>Tags</code>, ao lado de <code>Branches</code>.</td>
+      </tr>
+      <tr>
+        <td><code>Error: Resource not accessible by integration</code> <span class="muted">(HTTP <b>403</b> no fim do deploy)</span></td>
+        <td>Faltou o bloco <code>permissions</code>. O token padrão do runner não pode publicar no Pages.</td>
+        <td>Acrescente <code>pages: write</code> e <code>id-token: write</code> na raiz do arquivo, sem indentação. Veja a seção <a href="#workflow">08</a>.</td>
+      </tr>
+      <tr>
+        <td>Pus <code>permissions</code> e continua <b>403</b></td>
+        <td>Ou o bloco ficou indentado dentro de <code>jobs:</code>, ou a organização restringe o token padrão a somente leitura.</td>
+        <td>Confira a coluna zero do <code>permissions</code>. Depois, <code>Settings → Actions → General → Workflow permissions</code>: precisa estar em <b>Read and write</b>.</td>
+      </tr>
+      <tr>
+        <td>O job ficou <b>verde</b>, mas o site não mudou</td>
+        <td>O <code>Source</code> do Pages está em “Deploy from a branch”.</td>
+        <td><code>Settings → Pages → Source: <b>GitHub Actions</b></code>. Depois rode o workflow de novo.</td>
+      </tr>
+      <tr>
+        <td>Verde, Source certo, e o site está em branco (ou dá 404)</td>
+        <td>O <code>path:</code> do <code>upload-pages-artifact</code> aponta para pasta sem <code>index.html</code>.</td>
+        <td>Ajuste o <code>path:</code> — <code>./</code> se o arquivo está na raiz, <code>./dist</code> ou <code>./build</code> se vem de um build.</td>
+      </tr>
+      <tr>
+        <td>Empurrei a tag e <b>nenhum workflow rodou</b></td>
+        <td>O <code>on:</code> não casa com o nome da tag, ou o arquivo do workflow ainda não estava na main quando a tag foi criada.</td>
+        <td>Confira <code>tags: ['v*']</code> contra o nome que você usou. E lembre: a tag executa o workflow <b>daquele commit</b> — faça o merge antes de taguear.</td>
+      </tr>
+      <tr>
+        <td>O job está parado em <b>Waiting</b> e não anda</td>
+        <td>Não é erro: é o environment esperando aprovação.</td>
+        <td>Abra a execução e clique em <code>Review deployments → Approve and deploy</code>. Se o botão não aparece, você não está na lista de <code>Required reviewers</code>.</td>
+      </tr>
+      <tr>
+        <td><code>fatal: tag 'v1.0.0' already exists</code></td>
+        <td>Você já criou essa tag antes.</td>
+        <td>Use um número novo. Se a antiga era um erro e <b>ninguém baixou ainda</b>: <code>git tag -d v1.0.0</code> e <code>git push origin --delete v1.0.0</code>.</td>
+      </tr>
+      <tr>
+        <td>A Release não encontra a minha tag na lista</td>
+        <td>A tag existe só na sua máquina.</td>
+        <td><code>git push origin v1.0.0</code> e recarregue o formulário.</td>
+      </tr>
+      <tr>
+        <td>O changelog gerado saiu vazio ou inútil</td>
+        <td>Não há tag anterior para comparar, ou as mensagens de commit não seguem padrão nenhum.</td>
+        <td>Na primeira Release é normal vir cru — escreva à mão. Da próxima, use os <b>Conventional Commits</b> da <b>aula 07</b>: é deles que o texto sai.</td>
+      </tr>
+      <tr>
+        <td><code>secrets.MEU_TOKEN</code> chega vazio no step</td>
+        <td>O secret está no <b>environment</b> e o job não declarou <code>environment:</code>. Ou o nome está diferente — secret diferencia maiúscula de minúscula.</td>
+        <td>Adicione a linha <code>environment: production</code> ao job, ou copie o nome exato da tela de secrets.</td>
+      </tr>
+      <tr>
+        <td>Vi um segredo escrito por extenso no log</td>
+        <td>Alguém montou o valor em pedaços, ou deu <code>echo</code> nele. O mascaramento não pega isso.</td>
+        <td><b>Rotacione o segredo primeiro</b> — gere um token novo e troque o secret. Só depois limpe o log. É o procedimento da <b>aula 09</b>.</td>
+      </tr>
+      <tr>
+        <td>Subiu quebrado e eu quero apagar o commit</td>
+        <td>Reescrever a <code>main</code> quebra o repositório de todo mundo que já deu <code>pull</code>.</td>
+        <td>Não apague. Re-rode o deploy da versão anterior, corrija por cima e publique uma tag nova — seção <a href="#rollback">10</a>. O <code>revert</code> em si é a <b>aula 11</b>.</td>
+      </tr>
+      <tr>
+        <td>Não sei se a próxima versão é <code>1.5.0</code> ou <code>2.0.0</code></td>
+        <td>A dúvida é sempre a mesma: alguém precisa mudar o código por sua causa?</td>
+        <td>Se sim, é <b>MAJOR</b>. Se é só coisa nova que ninguém é obrigado a usar, é <b>MINOR</b>. Tabela completa na seção <a href="#semver">02</a>.</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="tip star"><b>Antes de pedir ajuda:</b> abra a execução na aba <code>Actions</code> e leia o <b>último step vermelho</b> de baixo para cima. O Actions diz o nome do recurso que faltou — e, em deploy, esse nome quase sempre é uma linha ausente do bloco <code>permissions</code>.</div>
+
+    <a class="cta primary" href="slides.html">▶ rever os slides da aula 10</a>
+    <a class="cta" href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html">guia de GitHub</a>
+  </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">voltar ao curso</a> · <a href="slides.html">slides da aula 10</a> 💜
+  </div>
+</main>
+</div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  /* Copiar o bloco de código. O botão vive dentro de `.code`, e o texto que
+     interessa é o do `pre` irmão — não o do botão. */
+  document.querySelectorAll(".code .cp").forEach((botao) => {
+    botao.addEventListener("click", async () => {
+      const pre = botao.parentElement.querySelector("pre");
+      if (!pre) return;
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        botao.textContent = "copiado ✓";
+        botao.classList.add("done");
+        setTimeout(() => {
+          botao.textContent = "copiar";
+          botao.classList.remove("done");
+        }, 1400);
+      } catch {
+        /* Sem permissão de clipboard o texto continua selecionável na mão —
+           melhor não fingir que copiou. */
+        botao.textContent = "copie na mão";
+        setTimeout(() => { botao.textContent = "copiar"; }, 1400);
+      }
+    });
+  });
+
+  /* O "voltar ao topo" aparece depois de 500px. `tt` pode não existir se
+     alguém remover o elemento: sem esta guarda, o ouvinte estouraria em toda
+     rolagem. */
+  const tt = document.getElementById("totop");
+  if (tt) {
+    addEventListener("scroll", () => {
+      tt.classList.toggle("show", scrollY > 500);
+    });
+  }
+</script>
+</body>
+</html>

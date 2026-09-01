@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O repositório remoto: clone, push, pull e fetch · Aula 03 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 03 do curso Introdução ao GitHub: autenticação primeiro — chave SSH ou personal access token, porque senha de conta não funciona desde 2021 —, clone × init + remote add, push -u e o upstream, a diferença entre fetch e pull, por que pull --rebase deixa o histórico legível e o que fazer quando aparece rejected: non-fast-forward.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 03</span> · introdução ao github</div>
+    <div class="tagtitle"><span class="br">git </span><span class="nm">push -u</span></div>
+    <h1 style="margin:24px 0 14px">O repositório <span class="grad">remoto</span></h1>
+    <p class="lead" style="max-width:60ch">Hoje o GitHub entra. Aquele repositório das aulas 01 e 02 — com os seus commits, as suas branches e o seu merge — sai da sua máquina e vai para a internet, inteiro.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o terminal, o repositório da aula 02 e uma conta no github.com já criada. hoje a gente vai precisar dela de verdade.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>Todo o seu histórico cabe num HD só</h2>
+    <div class="grid2">
+      <div>
+        <div class="tree">meu-primeiro-repo/
+  <b>.git/</b>          <span class="cm">← duas aulas de história moram aqui</span>
+  <b>README.md</b>
+  <b>index.html</b>
+  <b>.gitignore</b>
+
+<span class="cm">e existe uma cópia disso em: nenhum outro lugar.</span></div>
+        <p class="note" style="margin-top:14px">O Git é excelente guardando história. Ele só não sabe guardar história em <strong>dois lugares</strong> sozinho — isso é você que manda fazer.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Notebook roubado, HD queimado, formatação sem querer: <b>a história inteira vai junto</b>.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Você não consegue continuar o trabalho na máquina do trabalho, nem na de casa.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Ninguém consegue ver o que você fez — nem revisar, nem contribuir, nem contratar.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Duas pessoas em duas máquinas não têm <b>ponto de encontro</b>. Voltou o zip por e-mail.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Remoto não é backup, é ponto de encontro.</strong> Backup é consequência — o que importa é ter um lugar onde todas as máquinas conversam.</p>
+  </section>
+
+  <!-- 03 O CONCEITO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o conceito</div>
+    <h2>O remoto é um repositório igual ao seu</h2>
+    <p class="lead">Não é uma "pasta na nuvem", nem um servidor especial. É um repositório Git — com os mesmos commits e os mesmos hashes — que por acaso mora num computador de outra pessoa.</p>
+    <div class="flow" style="margin:24px 0 6px">
+      <div class="node"><div class="ico">💻</div><b>o seu repositório</b><span>commits, branches, <span class="code-inline">.git</span></span></div>
+      <div class="arw">⇄</div>
+      <div class="node"><div class="ico">☁️</div><b>origin</b><span>o mesmo conteúdo, no github.com</span></div>
+      <div class="arw">⇄</div>
+      <div class="node"><div class="ico">🧑‍💻</div><b>a máquina do colega</b><span>outra cópia completa, igualzinha</span></div>
+    </div>
+    <ul class="clean" style="margin-top:20px">
+      <li><strong>Todo mundo tem tudo.</strong> O Git é distribuído: cada cópia tem o histórico inteiro, não um pedaço.</li>
+      <li><span class="code-inline">origin</span> é só um <strong>apelido</strong> para um endereço. Não tem nada de mágico no nome — é a convenção de "o remoto principal".</li>
+      <li>O GitHub não roda nada de diferente. Roda Git. Por isso o mesmo repositório funciona no GitLab, no Codeberg ou num servidor seu.</li>
+      <li>Sincronizar é uma <strong>escolha sua</strong>, feita por comando. O Git nunca manda nada sozinho.</li>
+    </ul>
+  </section>
+
+  <!-- 04 AUTENTICACAO PRIMEIRO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>antes de qualquer comando</div>
+    <h2>Autenticação <span class="grad">primeiro</span></h2>
+    <p class="lead">Esta é a parte em que a turma trava. Não é por ser difícil — é por ser a única do curso que depende de um site, de uma conta e de um cadastro. Faça isso <strong>antes</strong> de tentar o primeiro push.</p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card no">
+        <span class="verdict no">morreu em 2021</span>
+        <h3>Senha da conta</h3>
+        <p>Em <strong>13 de agosto de 2021</strong> o GitHub desligou a senha da conta para operações de Git. Digitar sua senha no terminal hoje devolve um erro — e é um erro que engana, porque parece que a senha está errada.</p>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">o que funciona</span>
+        <h3>Chave SSH ou token</h3>
+        <p>Ou você cadastra uma <strong>chave SSH</strong> na sua conta, ou gera um <strong>personal access token</strong> e usa ele no lugar da senha. São dois caminhos; escolha um e siga só ele hoje.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Autenticar é provar quem você é para o servidor.</strong> Nada a ver com o <span class="code-inline">git config user.name</span> da aula 01 — aquilo é só o texto que assina o commit, e o Git não confere nada.</p>
+  </section>
+
+  <!-- 05 SSH x PAT -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>escolha um</div>
+    <h2>SSH ou token: qual é o seu</h2>
+    <table>
+      <tr><th></th><th>chave SSH</th><th>personal access token</th></tr>
+      <tr><td><b>Endereço do repositório</b></td><td><code>git@github.com:voce/repo.git</code></td><td><code>https://github.com/voce/repo.git</code></td></tr>
+      <tr><td><b>Como funciona</b></td><td>Um par de arquivos: a chave <b>privada</b> fica na sua máquina, a <b>pública</b> vai pro GitHub.</td><td>Uma senha descartável, gerada pelo site, com prazo de validade e permissões escolhidas.</td></tr>
+      <tr><td><b>Configura</b></td><td>Uma vez por máquina.</td><td>Uma vez por máquina, e de novo quando o token expira.</td></tr>
+      <tr><td><b>Bom quando</b></td><td>É a sua máquina, e você vai usar todo dia.</td><td>Rede corporativa que bloqueia SSH, ou máquina emprestada.</td></tr>
+      <tr><td><b>Cuidado</b></td><td>A chave <b>privada</b> não sai da máquina. Nunca. Não commite, não mande no WhatsApp.</td><td>Token é senha: aparece <b>uma vez só</b> na tela. Copiou, guardou.</td></tr>
+    </table>
+    <p class="note">Se você não tem um motivo pra escolher, escolha <strong>SSH</strong>. Configura uma vez e não expira.</p>
+  </section>
+
+  <!-- 06 GERAR A CHAVE SSH -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>chave ssh</div>
+    <h2>Gerar o par de chaves</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">terminal</div>
+<pre class="code" style="font-size:12.5px"><span class="cm"># 1. gerar o par (aceite o caminho padrão com Enter)</span>
+ssh-keygen -t ed25519 -C <span class="st">"voce@exemplo.com"</span>
+
+<span class="cm"># 2. ver a chave PÚBLICA — é esta que vai pro site</span>
+cat ~/.ssh/id_ed25519.pub
+
+<span class="cm"># 3. testar depois de cadastrar</span>
+ssh -T git@github.com</pre>
+        <p class="note" style="margin-top:14px">Sai um <span class="code-inline">id_ed25519</span> (privada) e um <span class="code-inline">id_ed25519.pub</span> (pública). O <span class="code-inline">.pub</span> é o único que se mostra.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O <b>e-mail</b> no <span class="code-inline">-C</span> é só um rótulo pra você lembrar de qual máquina é a chave. Não precisa ser o do GitHub.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">A <b>passphrase</b> é opcional e é uma senha da chave, não da conta. Pode deixar em branco hoje.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">No site: <b>foto do perfil → Settings → SSH and GPG keys → New SSH key</b>. Cole o conteúdo inteiro do <span class="code-inline">.pub</span>, do <span class="code-inline">ssh-ed25519</span> até o fim.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Uma chave <b>por máquina</b>. Não copie a chave do notebook pro desktop — gere outra e cadastre as duas.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Nunca abra o arquivo sem <span class="code-inline">.pub</span>.</strong> Se você colar a chave privada em algum lugar, ela deixa de valer — gere outra e apague a antiga do GitHub.</p>
+  </section>
+
+  <!-- 07 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">Autenticar de verdade</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Ninguém segue pro resto da aula sem a linha <span class="grn">successfully authenticated</span> na tela.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Veja se você já tem chave</h3><p>Se listar um <span class="code-inline">id_ed25519.pub</span>, pule o próximo passo.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">ls -a ~/.ssh</pre></div></div>
+      <div class="st"><div class="body"><h3>Gere o par</h3><p>Três Enters: caminho padrão, passphrase vazia, confirmação vazia.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">ssh-keygen -t ed25519 -C <span class="st">"voce@exemplo.com"</span></pre></div></div>
+      <div class="st"><div class="body"><h3>Copie a pública e cadastre no site</h3><p>Settings → SSH and GPG keys → New SSH key. Título: o nome da sua máquina.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">cat ~/.ssh/id_ed25519.pub</pre></div></div>
+      <div class="st"><div class="body"><h3>Teste a conexão</h3><p>Na primeira vez ele pergunta se confia no host: responda <span class="code-inline">yes</span>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">ssh -T git@github.com</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>A resposta certa é <span class="grn">Hi seu-usuario! You've successfully authenticated, but GitHub does not provide shell access.</span> — a segunda metade da frase não é erro, é o GitHub avisando que ali não tem terminal. Se veio <span class="code-inline">Permission denied (publickey)</span>, a chave não chegou ao site.</p>
+    </div>
+  </section>
+
+  <!-- 08 PAT -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o outro caminho</div>
+    <h2>Personal access token, passo a passo</h2>
+    <div class="grid2">
+      <div>
+        <div class="steps">
+          <div class="st"><div class="body"><h3>Settings → Developer settings</h3><p>Lá no fim do menu lateral esquerdo, depois de tudo.</p></div></div>
+          <div class="st"><div class="body"><h3>Personal access tokens → Fine-grained tokens</h3><p>Escolha a validade e <b>só os repositórios</b> que este token pode tocar.</p></div></div>
+          <div class="st"><div class="body"><h3>Permissão <span class="code-inline">Contents: Read and write</span></h3><p>É o mínimo pra dar push. Não marque o resto "por garantia".</p></div></div>
+          <div class="st"><div class="body"><h3>Generate token e copie na hora</h3><p>Ele aparece <b>uma vez</b>. Fechou a página, perdeu — só resta gerar outro.</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="filetab">terminal · quando o git perguntar</div>
+<pre class="code" style="font-size:12.5px">Username for <span class="st">'https://github.com'</span>: seu-usuario
+Password for <span class="st">'https://github.com'</span>: <span class="cm">← cole o TOKEN aqui</span>
+
+<span class="cm"># o campo não mostra nada enquanto você cola. é normal.</span>
+
+<span class="cm"># pra não digitar de novo a cada push:</span>
+<span class="cm"># windows — já vem com o Git, não faça nada</span>
+<span class="cm"># macos</span>
+git config --global credential.helper osxkeychain
+<span class="cm"># linux</span>
+git config --global credential.helper store</pre>
+        <p class="note" style="margin-top:14px">No Linux, <span class="code-inline">store</span> grava o token <strong>em texto puro</strong> no seu home. Em máquina compartilhada, prefira SSH.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 CLONE x INIT -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>dois caminhos</div>
+    <h2>Já existe lá × já existe aqui</h2>
+    <p class="lead">A pergunta que decide o comando é uma só: <strong>o repositório já existe no GitHub?</strong></p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card ok">
+        <span class="verdict yes">existe lá, não existe aqui</span>
+        <h3><span class="code-inline">git clone</span></h3>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git clone git@github.com:voce/repo.git
+cd repo</pre>
+        <p style="margin-top:10px">Um comando faz tudo: cria a pasta, roda o <span class="code-inline">init</span>, cadastra o <span class="code-inline">origin</span>, baixa a história inteira, abre a branch principal <strong>e já deixa o upstream ligado</strong>.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict mid">existe aqui, não existe lá</span>
+        <h3><span class="code-inline">remote add</span></h3>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="cm"># o repo local você já tem desde a aula 01</span>
+git remote add origin git@github.com:voce/repo.git
+git push -u origin main</pre>
+        <p style="margin-top:10px">É o caso de hoje. Você faz à mão os dois passos que o <span class="code-inline">clone</span> faria por você: apontar o endereço e mandar a história.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Clonar não é baixar um zip.</strong> Vem o <span class="code-inline">.git</span> junto — todos os commits, todas as branches, todo o histórico. É por isso que dá pra trabalhar offline logo depois.</p>
+  </section>
+
+  <!-- 10 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Sem seguir sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Quatro perguntas. A partir daqui todo comando fala com um servidor — e servidor não perdoa quem pulou etapa.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:800px">
+      <div class="r"><span class="num">1</span><span class="tx">O seu <span class="code-inline">ssh -T git@github.com</span> respondeu <b>successfully authenticated</b>? <b>Sim ou não.</b></span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Por que a <b>senha da sua conta</b> não serve mais no terminal?</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Você tem um repositório local com commits. Vai usar <b>clone</b> ou <b>remote add</b>?</span></div>
+      <div class="r"><span class="num">4</span><span class="tx">O que <span class="code-inline">origin</span> é, exatamente?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 2 — o GitHub desligou em agosto de 2021; 3 — <span class="code-inline">remote add</span>, porque a história já é sua; 4 — um apelido para um endereço.</p>
+  </section>
+
+  <!-- 11 GIT REMOTE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>git remote</div>
+    <h2>Ler e mexer no que está ligado</h2>
+    <div class="grid2">
+      <div>
+        <div class="terminal"><span class="p">$</span> git remote -v
+<span class="out">origin  git@github.com:voce/repo.git (fetch)
+origin  git@github.com:voce/repo.git (push)</span>
+
+<span class="p">$</span> git remote add origin git@github.com:voce/repo.git
+<span class="p">$</span> git remote set-url origin git@github.com:voce/outro.git
+<span class="p">$</span> git remote remove origin</div>
+        <p class="note" style="margin-top:14px">Sem nenhum remoto cadastrado, <span class="code-inline">git remote -v</span> não imprime nada. Silêncio aqui quer dizer "não está ligado em lugar nenhum".</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O <b>-v</b> mostra o endereço. Sem ele você vê só o apelido, que não ajuda em nada quando o erro é de URL.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Aparecem <b>duas linhas</b> pro mesmo remoto: uma pra buscar, outra pra enviar. Normalmente são iguais.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Errou a URL? <span class="code-inline">set-url</span> conserta. Não precisa apagar nada nem clonar de novo.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Dá pra ter <b>mais de um remoto</b> — o seu e o do projeto original. Isso vira <span class="code-inline">upstream</span> de verdade nas <b>aulas 06 e 12</b>, com fork.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 PUSH -U E UPSTREAM -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>push -u</div>
+    <h2>O que aquele <span class="code-inline">-u</span> faz</h2>
+    <div class="grid2">
+      <div>
+        <div class="terminal"><span class="p">$</span> git push -u origin main
+<span class="out">Enumerating objects: 12, done.
+Writing objects: 100% (12/12), 1.24 KiB, done.
+To github.com:voce/repo.git
+ * [new branch]      main -&gt; main
+branch 'main' set up to track 'origin/main'.</span>
+
+<span class="p">$</span> git branch -vv
+<span class="out">* main a1c9f0e [origin/main] feat: horário das aulas</span></div>
+        <p class="note" style="margin-top:14px">A última linha do push é a que interessa: <strong>set up to track</strong>. É o <span class="code-inline">-u</span> falando.</p>
+      </div>
+      <div>
+        <h3>Upstream é um casamento entre duas branches</h3>
+        <ul class="clean">
+          <li>O <span class="code-inline">-u</span> anota, no repositório, que a sua <span class="code-inline">main</span> local <strong>corresponde</strong> à <span class="code-inline">origin/main</span>.</li>
+          <li>Depois disso, <span class="code-inline">git push</span> e <span class="code-inline">git pull</span> secos já sabem para onde ir. Sem ele, você repete <span class="code-inline">origin main</span> pra sempre.</li>
+          <li>É por causa do upstream que o <span class="code-inline">git status</span> passa a dizer <em>"your branch is ahead of origin/main by 2 commits"</em>.</li>
+          <li><strong>Uma vez por branch.</strong> A branch nova da aula 02 vai precisar do próprio <span class="code-inline">-u</span> no primeiro push dela.</li>
+        </ul>
+        <p class="note">Esqueceu o <span class="code-inline">-u</span>? O Git avisa com <span class="code-inline">has no upstream branch</span> e escreve o comando completo pra você colar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">O repositório da aula 02 vai pro GitHub</h2>
+      <span class="t">~15 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Mesma pasta das duas primeiras aulas, com os commits e o merge que você já fez. Nada some.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie o repositório vazio no site</h3><p>Botão <b>+ → New repository</b>. Nome igual ao da pasta. <b>Não marque</b> "Add a README", "Add .gitignore" nem licença — o repositório precisa nascer <b>vazio</b>.</p></div></div>
+      <div class="st"><div class="body"><h3>Confira onde você está</h3><p>Tem que existir <span class="code-inline">.git</span> e tem que existir commit.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">cd meu-primeiro-repo
+git log --oneline
+git remote -v</pre></div></div>
+      <div class="st"><div class="body"><h3>Ligue o local ao remoto</h3><p>Copie a URL <b>SSH</b> da tela do repositório recém-criado.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git remote add origin git@github.com:SEU-USUARIO/meu-primeiro-repo.git
+git remote -v</pre></div></div>
+      <div class="st"><div class="body"><h3>Primeiro push</h3><p>E depois recarregue a página do GitHub.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git push -u origin main
+git status</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Abra o repositório no site e clique em <strong>commits</strong>. Todos os seus commits das aulas 01 e 02 estão lá, com data e autor de quando você fez — não de agora. O push não criou história nova: ele <strong>copiou</strong> a que já existia.</p>
+    </div>
+  </section>
+
+  <!-- 14 ORIGIN/MAIN -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o detalhe que destrava tudo</div>
+    <h2><span class="code-inline">origin/main</span> não é a <span class="code-inline">main</span></h2>
+    <p class="lead">Depois do primeiro push você passa a ter <strong>três coisas</strong> com nome parecido. Confundir as três é a origem de quase todo susto com remoto.</p>
+    <div class="grid3" style="margin-top:24px">
+      <div class="card ok"><h3><span class="code-inline">main</span></h3><p>A sua branch, na sua máquina. É nela que você commita. <b>Só você mexe.</b></p></div>
+      <div class="card"><h3><span class="code-inline">origin/main</span></h3><p>Uma <b>anotação local</b>: "da última vez que eu olhei, a main do servidor estava neste commit". Fica velha sozinha, sem avisar.</p></div>
+      <div class="card no"><h3>a <span class="code-inline">main</span> lá</h3><p>A branch de verdade no github.com. Pode ter andado agora mesmo, e a sua máquina não faz ideia.</p></div>
+    </div>
+    <p class="note" style="margin-top:24px"><strong><span class="code-inline">origin/main</span> só muda quando você roda <span class="code-inline">fetch</span>, <span class="code-inline">pull</span> ou <span class="code-inline">push</span>.</strong> É exatamente por isso que o próximo slide existe: alguém precisa ir lá perguntar.</p>
+  </section>
+
+  <!-- 15 FETCH x PULL -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>fetch × pull</div>
+    <h2>Buscar × buscar e integrar</h2>
+    <div class="duo">
+      <div class="card ok">
+        <span class="verdict yes">seguro sempre</span>
+        <h3><span class="code-inline">git fetch</span></h3>
+        <p>Vai ao servidor, <strong>baixa</strong> o que tem de novo e atualiza o <span class="code-inline">origin/main</span>. E para por aí: não encosta nos seus arquivos, não mexe na sua branch, não gera conflito.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git fetch origin
+git log --oneline --graph --all
+git diff main origin/main</pre>
+      </div>
+      <div class="card">
+        <span class="verdict mid">mexe no seu trabalho</span>
+        <h3><span class="code-inline">git pull</span></h3>
+        <p>É <strong>fetch + integrar</strong>, numa tacada. Baixa e já junta o que veio com o que você tem — e é aqui que pode aparecer conflito, aquele mesmo da <strong>aula 02</strong>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git pull origin main
+
+<span class="cm"># equivale a:</span>
+git fetch origin
+git merge origin/main</pre>
+      </div>
+    </div>
+    <p class="note"><strong>Na dúvida, <span class="code-inline">fetch</span> primeiro.</strong> Você olha o que chegou antes de deixar entrar. É a diferença entre espiar pelo olho mágico e abrir a porta.</p>
+  </section>
+
+  <!-- 16 PULL --REBASE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>pull --rebase</div>
+    <h2>Por que o histórico fica legível</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">git pull (merge) · o padrão</div>
+<pre class="code" style="font-size:12.5px">*   9f2a1b0 <span class="kw">Merge branch 'main' of github.com…</span>
+|\
+| * 7c4d8e2 fix: typo no README   <span class="cm">(do colega)</span>
+* | 3b9a5f1 feat: rodapé          <span class="cm">(seu)</span>
+|/
+* a1c9f0e feat: horário das aulas</pre>
+        <p class="note" style="margin-top:12px">Um commit de merge que não diz nada, só "sincronizei". Multiplique por vinte por semana.</p>
+      </div>
+      <div>
+        <div class="filetab">git pull --rebase</div>
+<pre class="code" style="font-size:12.5px"><span class="an">* 5d1e7c3 feat: rodapé</span>          <span class="cm">(seu, reescrito por cima)</span>
+* 7c4d8e2 fix: typo no README   <span class="cm">(do colega)</span>
+* a1c9f0e feat: horário das aulas</pre>
+        <ul class="clean" style="margin-top:12px">
+          <li>O rebase <strong>pega os seus commits, guarda, aplica o que veio e recoloca os seus por cima</strong>. Linha reta, sem commit de merge.</li>
+          <li>Repare no hash: <span class="code-inline">3b9a5f1</span> virou <span class="code-inline">5d1e7c3</span>. <strong>São commits novos</strong> — mesmo conteúdo, identidade diferente.</li>
+          <li>Vale a pena porque <strong>o seu commit ainda não foi pra lugar nenhum</strong>. Reescrever o que já é público é outra história — e é a <strong>aula 11</strong>.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="filetab" style="margin-top:16px">deixar como padrão</div>
+<pre class="code" style="font-size:12.5px">git config --global pull.rebase true</pre>
+  </section>
+
+  <!-- 17 LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Quebrar de propósito: o push rejeitado</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px"><strong>Este lab foi feito pra dar erro.</strong> O erro é o conteúdo — a gente provoca, lê e conserta.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Mude o README pelo site</h3><p>No GitHub, abra o <span class="code-inline">README.md</span>, clique no lápis, escreva uma linha e clique em <b>Commit changes</b>. Agora existe um commit lá que você não tem aqui.</p></div></div>
+      <div class="st"><div class="body"><h3>Mude o mesmo arquivo aqui, sem saber de nada</h3><p>É o que acontece na vida real: você estava trabalhando, não recarregou página nenhuma.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">echo <span class="st">"linha escrita no terminal"</span> &gt;&gt; README.md
+git commit -am <span class="st">"docs: linha local"</span>
+git push</pre></div></div>
+      <div class="st"><div class="body"><h3>Leia o erro inteiro, sem pular</h3><p>Ele tem a palavra <span class="code-inline">rejected</span>, a palavra <span class="code-inline">non-fast-forward</span> e um bloco de <span class="code-inline">hint:</span> que já diz o conserto.</p></div></div>
+      <div class="st"><div class="body"><h3>Conserte do jeito certo</h3><p>Traga o que falta, ponha o seu por cima e mande de novo.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git pull --rebase origin main
+git log --oneline
+git push</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Compare o <span class="code-inline">git log --oneline</span> de antes e de depois: os dois commits estão lá, em linha reta, sem commit de merge no meio. <strong>Nenhum trabalho foi perdido</strong> — nem o seu, nem o que você fez pelo site.</p>
+    </div>
+  </section>
+
+  <!-- 18 NON-FAST-FORWARD -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o erro mais comum da vida real</div>
+    <h2><span class="code-inline">rejected: non-fast-forward</span></h2>
+    <div class="grid2">
+      <div>
+        <div class="terminal"><span class="p">$</span> git push
+<span class="out">To github.com:voce/repo.git
+ ! [rejected]        main -&gt; main (fetch first)
+error: failed to push some refs
+hint: Updates were rejected because the remote
+hint: contains work that you do not have locally.
+hint: You may want to first integrate the remote
+hint: changes (e.g., 'git pull ...') before pushing.</span></div>
+        <div class="filetab" style="margin-top:16px">o conserto, sempre este</div>
+<pre class="code" style="font-size:12.5px">git pull --rebase
+git push</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>Fast-forward</b> é quando o servidor só precisa <b>andar pra frente</b> na mesma linha. Aí o push passa.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Non-fast-forward</b> é o contrário: as duas histórias se separaram. Aceitar o seu push <b>apagaria</b> o commit que está lá.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Então <b>isto não é um erro</b> — é o Git te protegendo. Ele se recusa a destruir trabalho de alguém sem perguntar.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Quase sempre a causa é banal: <b>você editou pelo site</b>, ou alguém do time deu push cinco minutos antes.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Traduzindo o erro em uma frase:</strong> "tem coisa lá que não tem aqui — pega antes de mandar".</p>
+  </section>
+
+  <!-- 19 O FORCE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a tentação</div>
+    <h2>Por que <span class="code-inline">--force</span> <span class="grad">não</span> é a resposta</h2>
+    <p class="lead">A internet vai te dizer pra usar <span class="code-inline">git push --force</span>. Funciona — no sentido em que uma marreta abre uma porta.</p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card no">
+        <span class="verdict no">o que ele faz de verdade</span>
+        <p><span class="code-inline">--force</span> não resolve a divergência: ele manda o servidor <strong>substituir</strong> a branch pela sua. O commit que estava lá <strong>sai do histórico</strong> — e sai também de todo mundo que der pull depois. O trabalho do colega não fica "em outro lugar". Ele some do repositório, e só existe ainda se alguém tiver a cópia local intacta.</p>
+      </div>
+      <div class="card">
+        <span class="verdict mid">e ainda por cima</span>
+        <ul class="clean" style="margin-top:6px">
+          <li>Quem já tinha dado pull passa a ter um histórico que <strong>não bate com o servidor</strong>, e o próximo pull dessa pessoa vira um nó.</li>
+          <li>Em repositório de trabalho, <span class="code-inline">--force</span> na <span class="code-inline">main</span> costuma ser bloqueado — a proteção de branch da <strong>aula 07</strong>.</li>
+          <li>Existe o <span class="code-inline">--force-with-lease</span>, que ao menos checa se ninguém mexeu desde a sua última olhada. É a versão adulta, e mesmo assim só na <strong>sua</strong> branch.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note"><strong>Regra que vale a carreira inteira: nunca <span class="code-inline">--force</span> numa branch compartilhada.</strong> Reescrever história tem hora e lugar, e é a <strong>aula 11</strong>. Para o <span class="code-inline">non-fast-forward</span> do dia a dia, o conserto é <span class="code-inline">pull --rebase</span> e mais nada.</p>
+  </section>
+
+  <!-- 20 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>O que costuma dar errado com remoto</h2>
+    <table>
+      <tr><th>o que aparece</th><th>por quê</th><th>o conserto</th></tr>
+      <tr><td><code>Permission denied (publickey)</code></td><td>A chave pública não está cadastrada na conta, ou o SSH está usando outra chave.</td><td>Rode <code>ssh -T git@github.com</code> e recadastre o conteúdo do <code>.pub</code> em Settings → SSH and GPG keys.</td></tr>
+      <tr><td><code>Support for password authentication was removed</code></td><td>Você digitou a senha da conta numa URL <code>https://</code>. Isso acabou em agosto de 2021.</td><td>Cole um <b>token</b> no lugar da senha, ou troque a URL para SSH com <code>git remote set-url</code>.</td></tr>
+      <tr><td><code>src refspec main does not match any</code></td><td>Não existe nenhum commit ainda, ou a sua branch se chama <code>master</code>.</td><td><code>git log --oneline</code> para conferir; <code>git branch</code> para ver o nome certo.</td></tr>
+      <tr><td><code>remote origin already exists</code></td><td>Você já tinha cadastrado o <code>origin</code> — talvez com a URL errada.</td><td><code>git remote set-url origin …</code> em vez de <code>add</code>.</td></tr>
+      <tr><td><code>has no upstream branch</code></td><td>Primeiro push desta branch, sem o <code>-u</code>.</td><td><code>git push -u origin nome-da-branch</code>. O Git já sugere a linha pronta.</td></tr>
+      <tr><td><code>Repository not found</code></td><td>Erro de digitação na URL, repositório privado de outra pessoa, ou conta errada.</td><td>Confira <code>git remote -v</code> letra por letra contra a URL da página.</td></tr>
+      <tr><td><code>! [rejected] … non-fast-forward</code></td><td>Tem commit no servidor que você não tem aqui.</td><td><code>git pull --rebase</code> e <code>git push</code>. <b>Nunca</b> <code>--force</code>.</td></tr>
+    </table>
+  </section>
+
+  <!-- 21 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">☁️</div>
+    <div class="eyebrow"><span class="b">fim da aula 03</span> · o que você já sabe fazer</div>
+    <h1 style="max-width:22ch">O seu código <span class="grad">saiu da sua máquina</span></h1>
+    <p class="lead" style="max-width:62ch;margin-top:16px">Você autenticou de verdade, ligou o repositório local ao GitHub, mandou duas aulas de história num push, entendeu o upstream, viu a diferença entre buscar e integrar — e quebrou um push de propósito só pra saber consertar.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">ssh-keygen</span><span class="pill on">git remote add</span><span class="pill on">git clone</span><span class="pill on">git push -u</span><span class="pill on">git fetch</span><span class="pill on">git pull --rebase</span><span class="pill on">non-fast-forward</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Aula 04:</strong> o site por dentro — repositório público × privado, README, LICENSE, perfil e organizações. <strong>Aula 06:</strong> fork e Pull Request, o jeito de mandar código pro projeto dos outros.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)">refaça tudo sozinho com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 21</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

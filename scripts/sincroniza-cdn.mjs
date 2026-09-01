@@ -204,7 +204,10 @@ function kindDe(rel, curso) {
   if (/\.css$/.test(nome)) return "estilo";
   if (nome === "brief.html") return "projeto";
   for (const [prefixo, kind] of [["slides", "slides"], ["guia", "guia"], ["desafio", "desafio"],
-                                 ["codigos", "codigos"], ["modelo", "modelo"], ["roteiro", "roteiro"]]) {
+                                 ["codigos", "codigos"], ["modelo", "modelo"], ["roteiro", "roteiro"],
+                                 // `manual.html` é guia de aula: passo a passo de consulta, não
+                                 // roteiro de quem ensina. Sem esta linha ele entrava como "outro".
+                                 ["manual", "guia"]]) {
     if (nome.startsWith(prefixo)) return kind;
   }
   return "outro";
@@ -329,6 +332,10 @@ const idxDe = (slug) => Number((/^aula-(\d+)/.exec(slug) ?? [, 0])[1]);
 const NOME_DO_GUIA = {
   html: "HTML", css: "CSS", javascript: "JavaScript", typescript: "TypeScript",
   nextjs: "Next.js", java: "Java", "spring-boot": "Spring Boot",
+  // A ordem deste objeto é a posição da aula dentro do curso "guias"
+  // (`posicaoDe`), então guia novo entra no FIM — senão os sete já publicados
+  // trocam de lugar na listagem sem ninguém ter pedido.
+  github: "GitHub",
 };
 
 /** Título legível a partir do slug, para quando a aula precisar ser criada. */
@@ -339,6 +346,22 @@ const NOME_DO_GUIA = {
  * Aula nova entra aqui ANTES de ser criada; depois não dá mais. */
 const TITULO_DA_AULA = {
   "introducao-spring-boot/aula-03-api-rest": "API REST: recursos, verbos e status",
+
+  // As doze de Introdução ao GitHub, cadastradas antes da primeira publicação.
+  // Os títulos são os mesmos de `components/cursos/IntroducaoGithub.tsx`, para
+  // a API e a landing não contarem histórias diferentes.
+  "introducao-github/aula-01-controle-de-versao": "Controle de versão e o primeiro repositório",
+  "introducao-github/aula-02-branches-e-merge": "Branches, merge e o conflito que todo mundo teme",
+  "introducao-github/aula-03-repositorio-remoto": "O repositório remoto: clone, push, pull e fetch",
+  "introducao-github/aula-04-anatomia-do-github": "Anatomia do GitHub: repositório, perfil e organização",
+  "introducao-github/aula-05-issues-e-projects": "Issues, labels, milestones e Projects",
+  "introducao-github/aula-06-pull-request-e-code-review": "Pull Request e code review",
+  "introducao-github/aula-07-fluxos-e-branch-protection": "Fluxos de trabalho e proteção da branch principal",
+  "introducao-github/aula-08-github-actions": "GitHub Actions: a primeira automação",
+  "introducao-github/aula-09-qualidade-automatica": "Qualidade automática: testes, lint e segurança no PR",
+  "introducao-github/aula-10-release-e-deploy": "Release, versionamento e deploy contínuo",
+  "introducao-github/aula-11-desfazendo": "Desfazendo: reflog, revert, reset e amigos",
+  "introducao-github/aula-12-open-source": "Open source, ecossistema e o que levar daqui",
 };
 
 function tituloDe(slug, curso) {

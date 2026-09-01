@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desfazendo: reflog, revert, reset e amigos · Aula 11 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 11 do curso Introdução ao GitHub: desfazer organizado por sintoma — restore no arquivo e na bancada, commit --amend antes do push, revert × reset (--soft, --mixed, --hard) e por que em branch compartilhada só revert serve, stash, cherry-pick, rebase -i, bisect e o reflog recuperando um reset --hard.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 11</span> · introdução ao github</div>
+    <div class="tagtitle"><span class="br">git </span><span class="nm">reflog</span></div>
+    <h1 style="margin:24px 0 14px">Desfazendo: <span class="grad">reflog, revert, reset</span> e amigos</h1>
+    <p class="lead" style="max-width:60ch">Hoje a gente quebra o repositório de propósito — várias vezes — e traz tudo de volta. No fim da aula você não tem mais medo de digitar comando no Git.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o terminal, dentro de um repositório de teste. tudo que a gente faz hoje é destrutivo de mentirinha — não use o repositório do trabalho.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>O medo trava mais gente que o erro</h2>
+    <div class="grid2">
+      <div>
+        <div class="terminal"><span class="p">$</span> git status
+<span class="cm"># 14 arquivos modificados</span>
+<span class="cm"># 3 commits que não deviam existir</span>
+<span class="cm"># uma senha no meio deles</span>
+
+<span class="p">$</span> <span class="cm">_ (a pessoa olha por 20 minutos</span>
+<span class="cm">     e não digita nada)</span></div>
+        <p class="note" style="margin-top:14px">É sempre a mesma cena. A pessoa sabe que errou, sabe mais ou menos o que quer — e não digita, porque acha que o próximo comando é o que apaga tudo.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">"Se eu rodar isso, <b>perco o meu trabalho</b>?"</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">"Se eu rodar isso, <b>estrago o repositório dos outros</b>?"</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Aí vem a saída mais cara de todas: <b>apagar a pasta e clonar de novo</b> — jogando fora tudo que ainda não subiu.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Ou pior: deixar o erro lá, commitado, porque mexer dá medo.</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>A verdade que ninguém conta:</strong> depois que você faz um commit, o Git é uma das ferramentas mais difíceis do mundo de se perder coisa. Ele quase não apaga — ele desencosta.</p>
+  </section>
+
+  <!-- 03 O CONCEITO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o conceito</div>
+    <h2>Onde a sua mudança pode estar</h2>
+    <p class="lead">Todo comando de desfazer responde à mesma pergunta: <strong>em qual dos três lugares</strong> está o que você quer mudar? Escolher o comando errado é quase sempre ter errado o lugar.</p>
+    <div class="flow" style="margin-top:26px">
+      <div class="node"><div class="ico">📝</div><b>diretório</b><span>o arquivo aberto no editor. mudança viva, ainda não guardada.</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🧰</div><b>bancada</b><span>o <span class="code-inline">git add</span> já foi. está montado, mas o commit não fechou.</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">📦</div><b>histórico</b><span>o commit existe. tem hash, tem data — e é praticamente indestrutível.</span></div>
+    </div>
+    <p class="note" style="margin-top:24px">Da esquerda para a direita, a coisa fica <strong>mais segura</strong>. Mudança que nunca foi commitada é a única que some de verdade. Por isso a regra do dia: <strong>na dúvida, commite antes de experimentar</strong>. Commit é barato, e a gente conserta o histórico depois.</p>
+  </section>
+
+  <!-- 04 O MAPA POR SINTOMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o mapa da aula</div>
+    <h2>Procure pelo sintoma, não pelo comando</h2>
+    <p class="lead">Ninguém acorda querendo usar <span class="code-inline">cherry-pick</span>. A pessoa acorda com um problema. Esta é a tabela que a aula inteira constrói.</p>
+    <table style="margin-top:22px">
+      <tr><th>o que aconteceu</th><th>o comando</th><th>reescreve história?</th></tr>
+      <tr><td>Estraguei um arquivo e nem commitei</td><td><code>git restore arquivo</code></td><td class="grn">não</td></tr>
+      <tr><td>Dei <code>add</code> em coisa demais</td><td><code>git restore --staged arquivo</code></td><td class="grn">não</td></tr>
+      <tr><td>A mensagem do último commit está errada</td><td><code>git commit --amend</code></td><td class="key">sim</td></tr>
+      <tr><td>Preciso anular um commit que já foi pro remoto</td><td><code>git revert &lt;hash&gt;</code></td><td class="grn">não</td></tr>
+      <tr><td>Quero jogar fora os commits locais de hoje</td><td><code>git reset --hard</code></td><td class="key">sim</td></tr>
+      <tr><td>Estou no meio de uma coisa e preciso trocar de branch</td><td><code>git stash</code></td><td class="grn">não</td></tr>
+      <tr><td>Commitei na branch errada</td><td><code>git cherry-pick</code> + <code>reset</code></td><td class="key">sim (na origem)</td></tr>
+      <tr><td>Achei que tinha perdido tudo</td><td><code>git reflog</code></td><td class="grn">não</td></tr>
+    </table>
+  </section>
+
+  <!-- 05 RESTORE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 01</span> · "estraguei o arquivo e quero ele como estava"</div>
+    <h2>Nem commitei ainda: <span class="grad">restore</span></h2>
+    <p class="lead">Dois comandos, dois lugares diferentes. A palavra <span class="code-inline">--staged</span> é o que decide qual dos dois.</p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card">
+        <h3 class="attr">tirar a mudança do arquivo</h3>
+        <div class="code" style="margin-top:10px"><span class="kw">git</span> restore estilo.css</div>
+        <p style="margin-top:10px">Volta o arquivo ao estado do último commit. A sua edição <strong>vai embora e não existe reflog para ela</strong> — ela nunca foi um commit.</p>
+      </div>
+      <div class="card">
+        <h3 class="attr">tirar o arquivo da bancada</h3>
+        <div class="code" style="margin-top:10px"><span class="kw">git</span> restore --staged estilo.css</div>
+        <p style="margin-top:10px">Desfaz só o <span class="code-inline">git add</span>. <strong>A sua edição continua lá</strong>, intacta, apenas fora do commit que você está montando.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Leia sempre a saída do <span class="code-inline">git status</span>.</strong> Ele imprime esses dois comandos, em texto, logo abaixo de cada grupo de arquivos. O Git literalmente te diz o que digitar.</p>
+  </section>
+
+  <!-- 06 LAB 01 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">lab 01</span> · 6 minutos · em dupla</div>
+    <div class="labhead"><span class="n">LAB 01</span><span class="t">restore × restore --staged</span></div>
+    <h2>Desfaça as duas metades</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Bagunce dois arquivos</h3><p>Edite <span class="code-inline">a.txt</span> e <span class="code-inline">b.txt</span> num repositório de teste. Rode <span class="code-inline">git status</span> e leia a saída com atenção.</p></div></div>
+      <div class="st"><div class="body"><h3>Coloque só um na bancada</h3><p><span class="code-inline">git add a.txt</span>. Rode <span class="code-inline">git status</span> de novo — agora são dois grupos, e cada grupo sugere um comando diferente.</p></div></div>
+      <div class="st"><div class="body"><h3>Tire o a.txt da bancada</h3><p><span class="code-inline">git restore --staged a.txt</span>. Confira que a sua edição continua no arquivo — abra ele.</p></div></div>
+      <div class="st"><div class="body"><h3>Jogue fora a edição do b.txt</h3><p><span class="code-inline">git restore b.txt</span>. Abra o arquivo. A edição sumiu, e sumiu de verdade.</p></div></div>
+    </div>
+    <div class="ask"><b>responda antes de virar o slide</b><p>Qual dos dois comandos você <strong>não</strong> vai conseguir desfazer com o <span class="code-inline">reflog</span> mais tarde — e por quê?</p></div>
+  </section>
+
+  <!-- 07 AMEND -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 02</span> · "a mensagem está errada" / "esqueci um arquivo"</div>
+    <h2>O commit recém-feito: <span class="grad">--amend</span></h2>
+    <p class="lead">O <span class="code-inline">--amend</span> não edita o commit. Ele faz <strong>um commit novo</strong> no lugar do anterior — hash novo, conteúdo corrigido — e desencosta o velho.</p>
+    <div class="terminal" style="margin-top:20px"><span class="cm"># só a mensagem estava errada</span>
+<span class="p">$</span> git commit --amend -m <span class="st">"fix: corrige o cálculo do frete"</span>
+
+<span class="cm"># esqueceu um arquivo no commit? adicione e emende</span>
+<span class="p">$</span> git add teste-frete.js
+<span class="p">$</span> git commit --amend --no-edit
+<span class="out">[main a9f3c21] fix: corrige o cálculo do frete</span>
+<span class="out"> 2 files changed, 18 insertions(+)</span></div>
+    <p class="note"><span class="code-inline">--no-edit</span> quer dizer "mantenha a mensagem que já estava lá". Sem ele, o Git abre o editor pra você reescrever.</p>
+    <p class="note" style="border-left-color:var(--key);color:var(--key)"><strong>⚠ Só antes do push.</strong> O hash muda. Se o commit antigo já está no remoto, quem deu <span class="code-inline">pull</span> tem uma versão que você acabou de dizer que não existe — e o seu próximo push volta rejeitado com <span class="code-inline">non-fast-forward</span> (aula 03).</p>
+  </section>
+
+  <!-- 08 REVERT x RESET -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a decisão mais importante da aula</div>
+    <h2>revert × reset</h2>
+    <p class="lead">Os dois "desfazem um commit". Mas fazem coisas <strong>opostas</strong> com a história — e é isso, não o efeito no código, que decide qual você pode usar.</p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card ok">
+        <span class="verdict yes">revert</span>
+        <h3>escreve uma errata</h3>
+        <p>Cria um <strong>commit novo</strong> que desfaz o que o commit antigo fez. O antigo continua no histórico, visível, com a errata logo abaixo.</p>
+        <div class="code" style="margin-top:12px"><span class="kw">git</span> revert 4f2a91c</div>
+        <p style="margin-top:10px" class="grn">Seguro em qualquer branch. Ninguém precisa fazer nada do outro lado.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict no">reset</span>
+        <h3>arranca a página</h3>
+        <p>Move o ponteiro da branch para trás. Os commits somem <strong>da sua branch</strong> — como se nunca tivessem sido escritos.</p>
+        <div class="code" style="margin-top:12px"><span class="kw">git</span> reset --hard HEAD~1</div>
+        <p style="margin-top:10px" class="key">Só na sua branch local, que ninguém mais tem. Nunca na compartilhada.</p>
+      </div>
+    </div>
+    <p class="note"><strong>A analogia:</strong> num diário já publicado você não passa corretivo na página — todo mundo tem a cópia impressa. Você escreve uma errata na página seguinte. No rascunho em casa, arrancar a página é o certo, porque ninguém mais leu.</p>
+  </section>
+
+  <!-- 09 OS TRES RESET -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o comando com três personalidades</div>
+    <h2>--soft, --mixed, --hard</h2>
+    <p class="lead">Os três movem a branch para trás igualzinho. A diferença é <strong>o que acontece com o trabalho</strong> que estava nos commits removidos.</p>
+    <table style="margin-top:20px">
+      <tr><th>opção</th><th>histórico</th><th>bancada</th><th>seus arquivos</th><th>quando usar</th></tr>
+      <tr><td><code>--soft</code></td><td class="key">volta</td><td class="grn">mantém, montado</td><td class="grn">intactos</td><td>Juntar 3 commits em 1: volta e commita de novo.</td></tr>
+      <tr><td><code>--mixed</code> <span class="muted">(padrão)</span></td><td class="key">volta</td><td class="attr">esvazia</td><td class="grn">intactos</td><td>Refazer os commits do zero, com outra divisão.</td></tr>
+      <tr><td><code>--hard</code></td><td class="key">volta</td><td class="key">esvazia</td><td class="key">sobrescritos</td><td>Jogar fora mesmo. É o único que apaga arquivo.</td></tr>
+    </table>
+    <p class="note" style="border-left-color:var(--key);color:var(--key)"><strong>⚠ O <span class="code-inline">--hard</span> é o único comando desta aula que destrói trabalho não commitado.</strong> Commit removido você recupera pelo reflog. Edição que nunca virou commit, não. Antes de um <span class="code-inline">--hard</span>: <span class="code-inline">git stash -u</span> ou um commit "wip".</p>
+  </section>
+
+  <!-- 10 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Você está na <span class="grad">main</span>, e o commit já foi pro GitHub. Anular com revert ou com reset?</h1>
+    <p class="lead" style="max-width:56ch;margin:22px auto 0">Diga em voz alta a resposta <strong>e o motivo</strong>. O motivo vale mais que a resposta — é ele que você vai lembrar daqui a seis meses.</p>
+    <p class="note" style="margin-top:24px;border:0;padding:0">Segunda pergunta, pra ninguém escapar: <strong>o que exatamente quebra</strong> na máquina do seu colega se você escolher errado?</p>
+  </section>
+
+  <!-- 11 LAB 02 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">lab 02</span> · 8 minutos · em dupla</div>
+    <div class="labhead"><span class="n">LAB 02</span><span class="t">revert de verdade</span></div>
+    <h2>Anule um commit sem apagar nada</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Cometa o erro</h3><p>Crie <span class="code-inline">bug.txt</span> com qualquer besteira dentro e commite: <span class="code-inline">git commit -m "feat: recurso que vai dar errado"</span>.</p></div></div>
+      <div class="st"><div class="body"><h3>Faça mais um commit por cima</h3><p>Qualquer coisa. Isso importa: o commit ruim <strong>não</strong> pode ser o último, senão o exercício fica fácil demais.</p></div></div>
+      <div class="st"><div class="body"><h3>Pegue o hash do commit ruim</h3><p><span class="code-inline">git log --oneline</span>. Copie os 7 primeiros caracteres — basta isso.</p></div></div>
+      <div class="st"><div class="body"><h3>Reverta</h3><p><span class="code-inline">git revert &lt;hash&gt;</span>. O editor abre com uma mensagem pronta — salve e feche.</p></div></div>
+      <div class="st"><div class="body"><h3>Confira as duas coisas</h3><p><span class="code-inline">ls</span>: o <span class="code-inline">bug.txt</span> sumiu. <span class="code-inline">git log --oneline</span>: agora tem <strong>um commit a mais</strong>, não a menos.</p></div></div>
+    </div>
+    <div class="ask"><b>responda antes de virar o slide</b><p>O commit ruim continua aparecendo no <span class="code-inline">log</span>. Isso é defeito do <span class="code-inline">revert</span> ou é exatamente o ponto dele?</p></div>
+  </section>
+
+  <!-- 12 STASH -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 03</span> · "estou no meio de uma coisa e preciso trocar de branch"</div>
+    <h2>O trabalho pela metade: <span class="grad">stash</span></h2>
+    <p class="lead">A gaveta. Você guarda a bagunça, a pasta fica limpa, você resolve o urgente e depois traz a bagunça de volta — exatamente como estava.</p>
+    <div class="terminal" style="margin-top:20px"><span class="p">$</span> git stash push -m <span class="st">"meio do formulário de login"</span>
+<span class="out">Saved working directory and index state On main: meio do formulário de login</span>
+
+<span class="p">$</span> git switch hotfix        <span class="cm"># a pasta está limpa, dá pra trocar</span>
+<span class="p">$</span> git switch main
+<span class="p">$</span> git stash list
+<span class="out">stash@{0}: On main: meio do formulário de login</span>
+
+<span class="p">$</span> git stash pop            <span class="cm"># traz de volta E apaga da gaveta</span>
+<span class="p">$</span> git stash apply          <span class="cm"># traz de volta E mantém na gaveta</span></div>
+    <p class="note">Sempre com <strong>-m e uma frase</strong>. Um <span class="code-inline">stash list</span> com seis entradas anônimas de duas semanas atrás é lixo — ninguém lembra o que era, e ninguém tem coragem de apagar.</p>
+    <p class="note" style="border-left-color:var(--key);color:var(--key)"><strong>⚠ O stash ignora arquivo novo</strong> que o Git ainda não rastreia. Se o seu trabalho inclui arquivo recém-criado, use <span class="code-inline">git stash -u</span> — senão ele fica para trás e você troca de branch achando que guardou tudo.</p>
+  </section>
+
+  <!-- 13 CHERRY-PICK -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 04</span> · "commitei na branch errada"</div>
+    <h2>Levar um commit de lá pra cá: <span class="grad">cherry-pick</span></h2>
+    <p class="lead">O clássico: você commitou na <span class="code-inline">main</span> o que era pra estar numa branch. Conserto em dois tempos — <strong>copiar para o lugar certo</strong>, depois <strong>remover do lugar errado</strong>.</p>
+    <div class="terminal" style="margin-top:20px"><span class="cm"># 1. anote o hash do commit que está no lugar errado</span>
+<span class="p">$</span> git log --oneline -1
+<span class="out">7c1e0aa feat: filtro de busca na listagem</span>
+
+<span class="cm"># 2. vá para a branch certa e traga só aquele commit</span>
+<span class="p">$</span> git switch -c feat/filtro-busca
+<span class="p">$</span> git cherry-pick 7c1e0aa
+<span class="out">[feat/filtro-busca 2b8d5f3] feat: filtro de busca na listagem</span>
+
+<span class="cm"># 3. volte e apague o commit da main LOCAL</span>
+<span class="p">$</span> git switch main
+<span class="p">$</span> git reset --hard HEAD~1</div>
+    <p class="note">O <span class="code-inline">cherry-pick</span> <strong>copia</strong>, não move: o commit ganha um hash novo no destino, e o original continua onde estava até você removê-lo.</p>
+    <p class="note" style="border-left-color:var(--key);color:var(--key)"><strong>⚠ O passo 3 só vale se você ainda não deu push.</strong> Se a <span class="code-inline">main</span> já subiu com esse commit, o passo 3 vira <span class="code-inline">git revert 7c1e0aa</span> — nunca o <span class="code-inline">reset</span>.</p>
+  </section>
+
+  <!-- 14 SENHA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 05</span> · "commitei uma senha"</div>
+    <h2>O caso que não é só técnico</h2>
+    <div class="grid2">
+      <div>
+        <h3 class="grn">Se ainda NÃO deu push</h3>
+        <div class="code" style="margin-top:10px"><span class="cm"># era o último commit?</span>
+<span class="kw">git</span> rm --cached .env
+<span class="kw">git</span> commit --amend --no-edit
+
+<span class="cm"># estava alguns commits atrás?</span>
+<span class="kw">git</span> reset --soft HEAD~3
+<span class="cm"># tire o segredo e commite de novo</span></div>
+        <p class="note" style="margin-top:14px">Ponha o arquivo no <span class="code-inline">.gitignore</span> no mesmo commit (aula 01), senão ele volta amanhã.</p>
+      </div>
+      <div>
+        <h3 class="key">Se JÁ deu push</h3>
+        <div class="regras" style="margin-top:10px">
+          <div class="r"><span class="num">1</span><span class="tx"><b>Rotacione a chave agora.</b> Antes de qualquer comando de Git. Ela está no histórico, nos forks, nos caches e nos scanners que varrem o GitHub o dia inteiro.</span></div>
+          <div class="r"><span class="num">2</span><span class="tx">Só depois limpe o histórico — e isso é <b>reescrever o repositório inteiro</b>, com todo mundo tendo que clonar de novo.</span></div>
+          <div class="r"><span class="num">3</span><span class="tx">O procedimento completo, com <b>secret scanning</b> e o que comunicar ao time, é a <b>aula 09</b>. Aqui a gente viu só a parte mecânica do Git.</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="border-left-color:var(--key);color:var(--key)"><strong>⚠ Apagar o arquivo num commit novo não resolve nada.</strong> O valor continua no commit antigo, e o commit antigo continua lá. Trocar a chave é o único passo que realmente fecha a porta.</p>
+  </section>
+
+  <!-- 15 REBASE INTERATIVO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 06</span> · "meus 9 commits são um vexame"</div>
+    <h2>Limpar a série antes da revisão: <span class="grad">rebase -i</span></h2>
+    <p class="lead">Ninguém precisa ver os seus <span class="code-inline">wip</span>, <span class="code-inline">agora vai</span> e <span class="code-inline">ops</span>. Antes de abrir o PR (aula 06), você reescreve a sua própria série numa coisa legível.</p>
+    <div class="filetab" style="margin-top:18px">o editor que abre com <span class="key">git rebase -i HEAD~4</span></div>
+    <div class="code"><span class="kw">pick</span>   a1b2c3d feat: adiciona o formulário de contato
+<span class="kw">reword</span> e4f5g6h fet: valdiação do email        <span class="cm">← corrigir a mensagem</span>
+<span class="kw">squash</span> i7j8k9l wip                          <span class="cm">← funde no de cima</span>
+<span class="kw">drop</span>   m0n1o2p console.log de teste         <span class="cm">← some com ele</span></div>
+    <div class="glossario" style="margin-top:22px">
+      <dt>pick</dt><dd>Mantém o commit como está. É o padrão de todas as linhas.</dd>
+      <dt>reword</dt><dd>Mantém o conteúdo, abre o editor pra você corrigir só a mensagem.</dd>
+      <dt>squash</dt><dd>Funde este commit no da linha <strong>de cima</strong>. É assim que 9 commits viram 2.</dd>
+      <dt>drop</dt><dd>Descarta o commit inteiro. (Apagar a linha faz a mesma coisa.)</dd>
+    </div>
+    <p class="note" style="border-left-color:var(--key);color:var(--key)"><strong>⚠ Rebase reescreve tudo que ele toca.</strong> Só na <strong>sua</strong> branch, e só antes de outra pessoa ter baixado. Se você já tinha empurrado a branch e é a única pessoa nela, o push seguinte precisa de <span class="code-inline">--force-with-lease</span> — que, ao contrário do <span class="code-inline">--force</span>, aborta se alguém tiver mandado algo que você não viu.</p>
+  </section>
+
+  <!-- 16 BISECT -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 07</span> · "funcionava mês passado, agora não funciona"</div>
+    <h2>Achar o commit culpado: <span class="grad">bisect</span></h2>
+    <p class="lead">Busca binária no histórico. Com <strong>200 commits</strong> suspeitos, o Git acha o culpado em <strong>8 testes</strong> — e você só responde "funciona" ou "não funciona".</p>
+    <div class="terminal" style="margin-top:20px"><span class="p">$</span> git bisect start
+<span class="p">$</span> git bisect bad                  <span class="cm"># o commit de agora está quebrado</span>
+<span class="p">$</span> git bisect good v1.4.0          <span class="cm"># nesta tag funcionava</span>
+<span class="out">Bisecting: 97 revisions left to test after this (roughly 7 steps)</span>
+
+<span class="cm"># o Git te joga num commit do meio. teste e responda:</span>
+<span class="p">$</span> git bisect good                 <span class="cm"># ou: git bisect bad</span>
+<span class="out">Bisecting: 48 revisions left to test after this (roughly 6 steps)</span>
+
+<span class="cm"># ... seis respostas depois ...</span>
+<span class="out">b3f9a1d is the first bad commit</span>
+<span class="p">$</span> git bisect reset                <span class="cm"># SEMPRE. volta pra onde você estava</span></div>
+    <p class="note">Esqueceu o <span class="code-inline">reset</span> no fim? Você fica preso num commit velho, em <span class="code-inline">detached HEAD</span>, achando que o projeto inteiro voltou no tempo. Não voltou — é só o bisect ainda aberto.</p>
+  </section>
+
+  <!-- 17 REFLOG -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">sintoma 08</span> · "achei que tinha perdido"</div>
+    <h2>A rede de segurança: <span class="grad">reflog</span></h2>
+    <p class="lead">O <span class="code-inline">git log</span> mostra a história <strong>que a branch conta hoje</strong>. O <span class="code-inline">git reflog</span> mostra <strong>tudo por onde o seu HEAD passou</strong> — inclusive o que o reset "apagou".</p>
+    <div class="terminal" style="margin-top:20px"><span class="p">$</span> git reflog
+<span class="out">a1f9c02 HEAD@{0}: reset: moving to HEAD~3</span>
+<span class="out">9d3e7bb HEAD@{1}: commit: feat: exportar relatório em CSV</span>
+<span class="out">4c81a90 HEAD@{2}: commit: feat: filtro por período</span>
+<span class="out">77b2d15 HEAD@{3}: commit: refatora o serviço de relatório</span>
+<span class="out">a1f9c02 HEAD@{4}: commit: chore: sobe a versão</span>
+
+<span class="cm"># os três commits "apagados" estão ali. traga a branch de volta:</span>
+<span class="p">$</span> git reset --hard 9d3e7bb
+<span class="out">HEAD is now at 9d3e7bb feat: exportar relatório em CSV</span></div>
+    <p class="note"><strong>Todo commit que existiu na sua máquina passa por aqui</strong> e fica por volta de 90 dias. Reset, rebase, amend, merge desastrado, branch deletada — tudo deixa rastro. É por isso que "commite antes de experimentar" é o melhor conselho da aula.</p>
+    <p class="note" style="margin-top:14px">O reflog é <strong>seu, local e intransferível</strong>. Não vai pro GitHub e não vem no <span class="code-inline">clone</span>. O reflog do colega não te salva.</p>
+  </section>
+
+  <!-- 18 LAB 03 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">lab 03</span> · 10 minutos · a hora de quebrar de propósito</div>
+    <div class="labhead"><span class="n">LAB 03</span><span class="t">destruir e ressuscitar</span></div>
+    <h2>Apague três commits e traga de volta</h2>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Faça três commits bobos</h3><p>Três arquivos, três commits. Rode <span class="code-inline">git log --oneline</span> e olhe a saída — mas <strong>não copie os hashes</strong>. Vale a honra.</p></div></div>
+      <div class="st"><div class="body"><h3>Destrua</h3><p><span class="code-inline">git reset --hard HEAD~3</span>. Rode <span class="code-inline">git log --oneline</span> e <span class="code-inline">ls</span>. Sumiu tudo. Sinta o frio na barriga — é o ponto do exercício.</p></div></div>
+      <div class="st"><div class="body"><h3>Olhe onde ninguém olha</h3><p><span class="code-inline">git reflog</span>. Ache a linha do seu último commit bom, a de antes do <span class="code-inline">reset</span>. Copie o hash dela.</p></div></div>
+      <div class="st"><div class="body"><h3>Ressuscite</h3><p><span class="code-inline">git reset --hard &lt;aquele hash&gt;</span>. Rode <span class="code-inline">git log --oneline</span> e <span class="code-inline">ls</span>: os três commits e os três arquivos estão de volta.</p></div></div>
+    </div>
+    <div class="ask"><b>responda antes de virar o slide</b><p>Se antes do passo 2 você tivesse uma edição <strong>não commitada</strong> num quarto arquivo — o reflog traria ela de volta também?</p></div>
+  </section>
+
+  <!-- 19 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>O que costuma dar errado desfazendo</h2>
+    <table>
+      <tr><th>o que acontece</th><th>por quê</th><th>o conserto</th></tr>
+      <tr><td>Deu <code>reset --hard</code> e perdeu edição não commitada</td><td>É o único comando que sobrescreve arquivo. O reflog só guarda <b>commit</b>.</td><td>Não tem conserto. Da próxima: <code>git stash -u</code> antes.</td></tr>
+      <tr><td><code>! [rejected] non-fast-forward</code> depois de um <code>amend</code></td><td>Você reescreveu um commit que já estava no remoto.</td><td>Se ninguém baixou: <code>push --force-with-lease</code>. Se baixou: <code>revert</code> e siga em frente.</td></tr>
+      <tr><td><code>error: could not apply…</code> no meio de um rebase</td><td>Conflito. O rebase reaplica commit a commit, e cada um pode conflitar.</td><td>Resolva, <code>git add</code>, <code>git rebase --continue</code>. Perdeu a coragem? <code>git rebase --abort</code> volta tudo. Conflito é a <b>aula 02</b>.</td></tr>
+      <tr><td>O <code>stash pop</code> não trouxe o arquivo novo</td><td>Arquivo não rastreado não entra no stash.</td><td><code>git stash -u</code> na próxima. O arquivo nunca saiu da pasta — está lá.</td></tr>
+      <tr><td>"Estou em detached HEAD e entrei em pânico"</td><td>Você está num commit, não numa branch. Bisect e <code>checkout &lt;hash&gt;</code> fazem isso.</td><td><code>git switch -</code> volta. Fez commit ali? <code>git switch -c salva-isso</code> antes de sair.</td></tr>
+      <tr><td>Reverteu o merge e o merge não volta mais</td><td>Reverter merge é caso especial — o Git passa a achar que aquilo já foi integrado.</td><td>Reverta o revert. E prefira reverter os commits individuais.</td></tr>
+    </table>
+  </section>
+
+  <!-- 20 A REGRA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a regra que organiza tudo</div>
+    <h2>Uma pergunta antes de qualquer comando</h2>
+    <p class="lead" style="margin-bottom:6px">"Isto que eu vou desfazer <strong>já está na máquina de outra pessoa</strong>?"</p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card ok">
+        <span class="verdict yes">não saiu daqui</span>
+        <h3>Vale tudo</h3>
+        <p><span class="code-inline">amend</span>, <span class="code-inline">reset</span>, <span class="code-inline">rebase -i</span>, <span class="code-inline">cherry-pick</span> e o que mais você quiser. É o seu rascunho — e o <span class="code-inline">reflog</span> está de plantão atrás de você.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict no">já foi pro remoto</span>
+        <h3>Só <span class="code-inline">revert</span></h3>
+        <p>Qualquer coisa que troque hash quebra o repositório de quem já baixou. O <span class="code-inline">revert</span> resolve o mesmo problema sem apagar nada de ninguém — e é exatamente por isso que ele existe.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:24px">Três coisas que <strong>não</strong> são desta aula: <strong>conflito de merge</strong> (aula 02), <strong>segredo vazado como incidente de segurança</strong> (aula 09 — aqui foi só a mecânica) e <strong>voltar uma versão em produção</strong> (aula 10 — lá o assunto é deploy, não histórico).</p>
+  </section>
+
+  <!-- 21 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">🪂</div>
+    <div class="eyebrow"><span class="b">fim da aula 11</span> · o que você já sabe fazer</div>
+    <h1 style="max-width:22ch">Agora você pode <span class="grad">errar à vontade</span></h1>
+    <p class="lead" style="max-width:62ch;margin-top:16px">Você desfez no arquivo, na bancada e no histórico. Anulou commit sem apagar história, guardou trabalho pela metade, levou commit de uma branch pra outra, limpou uma série e achou um bug em oito respostas. E ressuscitou três commits que tinha destruído de propósito.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">restore</span><span class="pill on">--amend</span><span class="pill on">revert</span><span class="pill on">reset</span><span class="pill on">stash</span><span class="pill on">cherry-pick</span><span class="pill on">rebase -i</span><span class="pill on">bisect</span><span class="pill on">reflog</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Aula 12:</strong> a última — open source, o fork que vira PR aceito, o GitHub CLI e o ciclo inteiro do curso desenhado numa página só.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)">refaça tudo sozinho com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 21</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

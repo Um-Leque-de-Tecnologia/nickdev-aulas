@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual · Aula 11 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Passo a passo da aula 11: a tabela de emergência do Git organizada por sintoma — restore no arquivo e na bancada, stash, commit --amend, revert, reset --soft/--mixed/--hard, cherry-pick para a branch errada, rebase -i, bisect — e o laboratório de reflog que destrói três commits com reset --hard e traz todos de volta.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --purple-lighter:#C3A6FF; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple-light);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple-light);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple-lighter)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+
+  /* A única regra que este manual acrescenta ao design dos guias: a tabela do
+     ciclo tem quatro colunas e não cabe em telas estreitas. Rolar dentro do
+     próprio bloco é melhor que empurrar a página inteira para o lado. */
+  .tabela{overflow-x:auto;margin:14px 0}
+  .tabela table{margin:0;min-width:520px}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Comece por aqui</div>
+    <a href="#emergencia">01 · Tabela de emergência</a>
+    <a href="#tres-lugares">02 · Os três lugares</a>
+    <div class="grp">Ainda não commitei</div>
+    <a href="#restore">03 · Desfazer arquivo e bancada</a>
+    <a href="#stash">04 · Guardar trabalho pela metade</a>
+    <div class="grp">Já commitei</div>
+    <a href="#amend">05 · Corrigir o último commit</a>
+    <a href="#revert">06 · Anular com revert</a>
+    <a href="#reset">07 · Apagar com reset</a>
+    <div class="grp">Situações clássicas</div>
+    <a href="#branch-errada">08 · Commitei na branch errada</a>
+    <a href="#segredo">09 · Commitei uma senha</a>
+    <a href="#rebase-i">10 · Limpar a série (rebase -i)</a>
+    <a href="#bisect">11 · Achar o commit que quebrou</a>
+    <div class="grp">A rede de segurança</div>
+    <a href="#reflog">12 · git reflog</a>
+    <a href="#lab-reflog">13 · Lab: destruir e recuperar</a>
+    <div class="grp">Consulta</div>
+    <a href="#se-travar">14 · Se travar</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Manual · Aula 11 · Introdução ao GitHub</div>
+  <h1>Desfazendo: <span class="g">reflog, revert, reset</span> e amigos</h1>
+  <p class="lead">O manual que você abre <b>na hora do desespero</b>. Comece pela tabela de emergência, ache o seu sintoma, pule direto para a seção. Cada comando vem com o que se espera ver na saída e com o aviso de quando ele é perigoso.</p>
+  <div class="rule"></div>
+
+  <div class="divisor">Comece por aqui</div>
+
+  <section id="emergencia">
+    <h2><span class="n">01</span>Tabela de emergência</h2>
+    <p>Você está aqui porque alguma coisa deu errado. Ache a linha que descreve o <b>seu</b> sintoma, veja o comando e clique no link para a seção com o passo a passo. Esta tabela também é a cola da aula — guarde o link.</p>
+
+    <div class="tabela">
+    <table>
+      <tr><th>o sintoma</th><th>o comando</th><th>o que ele faz</th><th>onde</th></tr>
+      <tr>
+        <td>Estraguei um arquivo e ainda não commitei</td>
+        <td><code>git restore arquivo</code></td>
+        <td>Volta o arquivo ao estado do último commit. <b>Destrói a sua edição.</b></td>
+        <td><a href="#restore">03</a></td>
+      </tr>
+      <tr>
+        <td>Dei <code>git add</code> em coisa que não queria</td>
+        <td><code>git restore --staged arquivo</code></td>
+        <td>Tira o arquivo da bancada. A edição continua intacta.</td>
+        <td><a href="#restore">03</a></td>
+      </tr>
+      <tr>
+        <td>Estou no meio de uma coisa e preciso trocar de branch</td>
+        <td><code>git stash -u</code></td>
+        <td>Guarda tudo numa gaveta e deixa a pasta limpa.</td>
+        <td><a href="#stash">04</a></td>
+      </tr>
+      <tr>
+        <td>Errei a mensagem do último commit</td>
+        <td><code>git commit --amend</code></td>
+        <td>Substitui o último commit por um novo. <b>Só antes do push.</b></td>
+        <td><a href="#amend">05</a></td>
+      </tr>
+      <tr>
+        <td>Esqueci um arquivo no último commit</td>
+        <td><code>git add x &amp;&amp; git commit --amend --no-edit</code></td>
+        <td>Mesma coisa, mantendo a mensagem que já estava lá.</td>
+        <td><a href="#amend">05</a></td>
+      </tr>
+      <tr>
+        <td>Preciso anular um commit que <b>já foi para o remoto</b></td>
+        <td><code>git revert &lt;hash&gt;</code></td>
+        <td>Cria um commit novo que desfaz o antigo. Não apaga nada.</td>
+        <td><a href="#revert">06</a></td>
+      </tr>
+      <tr>
+        <td>Quero juntar meus últimos 3 commits em 1</td>
+        <td><code>git reset --soft HEAD~3</code></td>
+        <td>Volta a branch e deixa tudo montado na bancada.</td>
+        <td><a href="#reset">07</a></td>
+      </tr>
+      <tr>
+        <td>Quero jogar fora tudo que fiz hoje, de verdade</td>
+        <td><code>git reset --hard &lt;hash&gt;</code></td>
+        <td>Volta a branch e <b>sobrescreve os arquivos</b>. Perigoso.</td>
+        <td><a href="#reset">07</a></td>
+      </tr>
+      <tr>
+        <td>Commitei na branch errada</td>
+        <td><code>git cherry-pick &lt;hash&gt;</code></td>
+        <td>Copia aquele commit para a branch onde você está agora.</td>
+        <td><a href="#branch-errada">08</a></td>
+      </tr>
+      <tr>
+        <td>Commitei uma senha / um <code>.env</code></td>
+        <td>depende do push</td>
+        <td>Sem push: <code>--amend</code> ou <code>reset --soft</code>. Com push: rotacione a chave <b>primeiro</b>.</td>
+        <td><a href="#segredo">09</a></td>
+      </tr>
+      <tr>
+        <td>Meus 9 commits são um vexame e o PR é amanhã</td>
+        <td><code>git rebase -i HEAD~9</code></td>
+        <td>Abre um editor onde você funde, renomeia e descarta commits.</td>
+        <td><a href="#rebase-i">10</a></td>
+      </tr>
+      <tr>
+        <td>Funcionava mês passado e agora não funciona</td>
+        <td><code>git bisect start</code></td>
+        <td>Busca binária: acha o commit culpado em poucos testes.</td>
+        <td><a href="#bisect">11</a></td>
+      </tr>
+      <tr>
+        <td>Achei que tinha perdido tudo</td>
+        <td><code>git reflog</code></td>
+        <td>Lista tudo por onde o seu HEAD passou. Nada de commit se perde.</td>
+        <td><a href="#reflog">12</a></td>
+      </tr>
+      <tr>
+        <td>Estou em <code>detached HEAD</code> e entrei em pânico</td>
+        <td><code>git switch -</code></td>
+        <td>Volta para a branch onde você estava antes.</td>
+        <td><a href="#se-travar">14</a></td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="tip star"><b>A única regra que você precisa decorar:</b> se o commit <b>já foi para o remoto</b>, o único comando aceitável é <code>revert</code>. Tudo que troca hash — <code>amend</code>, <code>reset</code>, <code>rebase</code> — só vale enquanto a coisa não saiu da sua máquina.</div>
+  </section>
+
+  <section id="tres-lugares">
+    <h2><span class="n">02</span>Os três lugares onde a sua mudança pode estar</h2>
+    <p>Escolher o comando errado é quase sempre ter errado o <b>lugar</b>. Antes de digitar qualquer coisa, descubra onde está o que você quer mexer.</p>
+
+    <dl class="gloss">
+      <dt>diretório</dt><dd>O arquivo como está aberto no editor. Mudança viva, que o Git ainda não guardou em lugar nenhum.</dd>
+      <dt>bancada (staging)</dt><dd>O que você já colocou com <code>git add</code>. Está montado, mas o commit não fechou.</dd>
+      <dt>histórico</dt><dd>Os commits. Cada um tem hash, autor e data — e, uma vez criado, é praticamente indestrutível por 90 dias, mesmo que a branch deixe de apontar para ele.</dd>
+    </dl>
+
+    <p>Rode isto para ver os três de uma vez:</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git status              <span class="cm"># diretório e bancada, em dois grupos</span>
+git diff                <span class="cm"># o que mudou e NÃO está na bancada</span>
+git diff --staged       <span class="cm"># o que já está na bancada</span>
+git log --oneline -5    <span class="cm"># o histórico recente</span></pre></div>
+
+    <div class="tip ok"><b>A regra do dia:</b> na dúvida, <b>commite antes de experimentar</b>. Commit é barato e o histórico a gente conserta depois. Mudança que nunca virou commit é a única coisa que o Git realmente deixa você perder.</div>
+
+    <div class="tip warn"><b>O que o reflog não salva:</b> arquivo nunca commitado. Se você editou e não commitou, um <code>git restore</code> ou um <code>git reset --hard</code> apagam para sempre. Não existe undo para isso — nem no Git, nem em lugar nenhum.</div>
+  </section>
+
+  <div class="divisor">Ainda não commitei</div>
+
+  <section id="restore">
+    <h2><span class="n">03</span>Desfazer no arquivo e na bancada</h2>
+    <p>Dois comandos parecidíssimos que fazem coisas bem diferentes. A palavra <code>--staged</code> é o que decide.</p>
+
+    <h3>Tirar da bancada, mantendo a edição</h3>
+    <p>Você deu <code>git add</code> em coisa demais e quer só desmontar o commit — sem perder o que escreveu.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git restore --staged estilo.css</pre></div>
+
+    <p>Confira com <code>git status</code>. O arquivo sai de <span class="an">Changes to be committed</span> e volta para <span class="k">Changes not staged for commit</span>. <b>A sua edição continua no arquivo.</b></p>
+
+    <h3>Jogar fora a edição do arquivo</h3>
+    <p>Você mexeu, não gostou e quer o arquivo como estava no último commit.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git restore estilo.css      <span class="cm"># um arquivo</span>
+git restore .               <span class="cm"># TODOS os arquivos modificados</span></pre></div>
+
+    <div class="tip warn"><b>Perigoso — e por quê:</b> <code>git restore arquivo</code> sobrescreve o arquivo no disco com a versão do último commit. Aquela edição nunca foi um commit, então <b>não existe reflog para ela</b>. Some e acabou. Antes de rodar em cima de várias horas de trabalho, prefira <code>git stash -u</code>: é reversível.</div>
+
+    <h3>Os dois de uma vez, quando você quer desfazer tudo</h3>
+    <div class="code"><button class="cp">copiar</button><pre>git restore --staged --worktree .</pre></div>
+
+    <p>Tira tudo da bancada <b>e</b> devolve todos os arquivos ao estado do último commit. É o "cancelar tudo desde o último commit".</p>
+
+    <div class="tip"><b>Atalho que o Git te dá de graça:</b> rode <code>git status</code> e leia. Ele imprime exatamente esses comandos, em texto, embaixo de cada grupo de arquivos. Você quase nunca precisa lembrar de cabeça.</div>
+  </section>
+
+  <section id="stash">
+    <h2><span class="n">04</span>Guardar o trabalho pela metade</h2>
+    <p>Cena de todo dia: você está no meio de um formulário e chega um bug urgente. Trocar de branch com a pasta suja dá erro ou carrega a bagunça junto. O <code>stash</code> é a gaveta.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># guarda tudo (inclusive arquivo novo) e limpa a pasta</span>
+git stash push -u -m <span class="st">"meio do formulário de login"</span>
+
+<span class="cm"># resolve o urgente</span>
+git switch hotfix
+<span class="cm"># ... conserta, commita, volta ...</span>
+git switch main
+
+<span class="cm"># traz de volta</span>
+git stash list
+git stash pop</pre></div>
+
+    <p>O que se espera ver:</p>
+
+    <div class="terminal"><span class="p">$</span> git stash push -u -m <span class="st">"meio do formulário de login"</span>
+<span class="out">Saved working directory and index state On main: meio do formulário de login</span>
+
+<span class="p">$</span> git stash list
+<span class="out">stash@{0}: On main: meio do formulário de login</span>
+
+<span class="p">$</span> git stash pop
+<span class="out">Dropped refs/stash@{0} (b71e0c4d5f2a9e3c8a11d7f4c2e5b8a0d3f6c9e1)</span></div>
+
+    <table>
+      <tr><th>comando</th><th>o que faz</th></tr>
+      <tr><td><code>git stash pop</code></td><td>Traz de volta <b>e</b> remove da gaveta. É o normal.</td></tr>
+      <tr><td><code>git stash apply</code></td><td>Traz de volta e <b>mantém</b> na gaveta. Use quando quiser aplicar em duas branches.</td></tr>
+      <tr><td><code>git stash list</code></td><td>Lista o que está guardado.</td></tr>
+      <tr><td><code>git stash show -p stash@{0}</code></td><td>Mostra o diff de uma entrada, antes de aplicar.</td></tr>
+      <tr><td><code>git stash drop stash@{0}</code></td><td>Descarta uma entrada.</td></tr>
+      <tr><td><code>git stash clear</code></td><td>Esvazia a gaveta inteira. <b>Sem confirmação.</b></td></tr>
+    </table>
+
+    <div class="tip warn"><b>Perigoso — e por quê:</b> <code>git stash clear</code> apaga todas as entradas de uma vez, sem perguntar. E <code>git stash</code> sem <code>-u</code> <b>ignora arquivo que o Git ainda não rastreia</b> — você troca de branch achando que guardou tudo, e o arquivo novo fica para trás, aparecendo na outra branch como se fosse dela. Use sempre <code>-u</code>.</div>
+
+    <div class="tip"><b>Sempre com <code>-m</code> e uma frase.</b> Um <code>stash list</code> com seis entradas anônimas de duas semanas atrás é lixo: ninguém lembra o que era e ninguém tem coragem de apagar.</div>
+  </section>
+
+  <div class="divisor">Já commitei</div>
+
+  <section id="amend">
+    <h2><span class="n">05</span>Corrigir o último commit</h2>
+    <p>O erro mais comum do mundo: você aperta enter e vê o erro de digitação na mensagem — ou percebe que esqueceu um arquivo.</p>
+
+    <h3>Só a mensagem estava errada</h3>
+    <div class="code"><button class="cp">copiar</button><pre>git commit --amend -m <span class="st">"fix: corrige o cálculo do frete"</span></pre></div>
+
+    <h3>Esqueceu um arquivo</h3>
+    <div class="code"><button class="cp">copiar</button><pre>git add teste-frete.js
+git commit --amend --no-edit</pre></div>
+
+    <p><code>--no-edit</code> quer dizer "mantenha a mensagem que já estava lá". Sem ele, o Git abre o editor. O que se espera ver:</p>
+
+    <div class="terminal"><span class="p">$</span> git commit --amend --no-edit
+<span class="out">[main a9f3c21] fix: corrige o cálculo do frete</span>
+<span class="out"> Date: Mon Sep 1 14:22:10 2025 -0300</span>
+<span class="out"> 2 files changed, 18 insertions(+), 3 deletions(-)</span></div>
+
+    <p>Repare no hash: <code>a9f3c21</code>. Ele é <b>diferente</b> do hash que o commit tinha antes. O <code>--amend</code> não edita nada: ele cria um commit novo e desencosta o antigo.</p>
+
+    <div class="tip warn"><b>Perigoso — e por quê:</b> o <code>--amend</code> <b>reescreve história</b>. Se o commit antigo já subiu para o remoto, quem deu <code>pull</code> tem na máquina um commit que você acabou de dizer que não existe. O seu próximo <code>push</code> volta com <code>! [rejected] non-fast-forward</code> (aula 03). <b>Só use <code>--amend</code> antes do push.</b></div>
+
+    <div class="tip"><b>Se já tinha subido e você é a única pessoa na branch:</b> <code>git push --force-with-lease</code>. Ao contrário do <code>--force</code>, ele aborta se alguém tiver mandado algo que você ainda não viu — o que salva você de sobrescrever o trabalho do outro. Na <code>main</code> ou em branch compartilhada, nem isso: use <code>revert</code>.</div>
+  </section>
+
+  <section id="revert">
+    <h2><span class="n">06</span>Anular um commit com revert</h2>
+    <p>O <code>revert</code> não apaga o commit ruim. Ele escreve uma <b>errata</b>: um commit novo, logo abaixo, que desfaz exatamente o que o outro fez. Os dois ficam no histórico.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># 1. ache o hash do commit que você quer anular</span>
+git log --oneline
+
+<span class="cm"># 2. reverta (o editor abre com a mensagem pronta: salve e feche)</span>
+git revert 4f2a91c
+
+<span class="cm"># sem abrir o editor, aceitando a mensagem padrão</span>
+git revert --no-edit 4f2a91c</pre></div>
+
+    <p>O que se espera ver:</p>
+
+    <div class="terminal"><span class="p">$</span> git log --oneline
+<span class="out">e8c30d2 (HEAD -&gt; main) Revert "feat: recurso que deu errado"</span>
+<span class="out">1a77b93 chore: ajusta o README</span>
+<span class="out">4f2a91c feat: recurso que deu errado</span>
+<span class="out">b02de41 feat: listagem de produtos</span></div>
+
+    <p>Um commit <b>a mais</b>, não a menos. O <code>4f2a91c</code> continua ali, e é isso que torna o <code>revert</code> seguro: quem já baixou aquele commit não precisa fazer nada — no próximo <code>pull</code> ele recebe a errata e pronto.</p>
+
+    <h3>Reverter vários commits de uma vez</h3>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># os três últimos, cada um vira um commit de revert</span>
+git revert --no-edit HEAD~3..HEAD
+
+<span class="cm"># os três últimos, tudo num commit de revert só</span>
+git revert --no-commit HEAD~3..HEAD
+git commit -m <span class="st">"revert: desfaz a série do filtro de busca"</span></pre></div>
+
+    <div class="tip ok"><b>Este é o comando que você usa em branch compartilhada.</b> Na <code>main</code>, em branch protegida, em qualquer coisa que outra pessoa já tenha baixado: <code>revert</code>, sempre. Ele é o único que resolve o problema sem exigir nada de ninguém.</div>
+
+    <div class="tip warn"><b>Um caso chato:</b> reverter um <b>commit de merge</b> exige dizer qual lado manter (<code>git revert -m 1 &lt;hash&gt;</code>) e deixa o Git achando que aquele ramo já foi integrado — mesclar de novo depois não traz nada de volta. Se der para escolher, reverta os commits individuais em vez do merge.</div>
+
+    <div class="tip"><b>Não confunda com rollback de produção.</b> Reverter um commit conserta o histórico do código; tirar uma versão quebrada do ar é outro assunto, com tag e workflow de deploy, e é a <b>aula 10</b>.</div>
+  </section>
+
+  <section id="reset">
+    <h2><span class="n">07</span>Apagar commits locais com reset</h2>
+    <p>O <code>reset</code> move o ponteiro da sua branch para trás. Os commits que ficaram para frente somem da branch — mas continuam no repositório, alcançáveis pelo <a href="#reflog">reflog</a>. As três opções movem a branch igual; a diferença é o que acontece com o trabalho.</p>
+
+    <div class="tabela">
+    <table>
+      <tr><th>opção</th><th>histórico</th><th>bancada</th><th>seus arquivos</th><th>para quê</th></tr>
+      <tr><td><code>--soft</code></td><td>volta</td><td><b>mantém, montado</b></td><td>intactos</td><td>Juntar vários commits em um: volta e commita de novo.</td></tr>
+      <tr><td><code>--mixed</code> <span class="muted">(padrão)</span></td><td>volta</td><td>esvazia</td><td>intactos</td><td>Refazer os commits do zero, escolhendo outra divisão.</td></tr>
+      <tr><td><code>--hard</code></td><td>volta</td><td>esvazia</td><td><b>sobrescritos</b></td><td>Jogar fora mesmo. É o único que apaga arquivo.</td></tr>
+    </table>
+    </div>
+
+    <h3>Juntar os três últimos commits em um</h3>
+    <div class="code"><button class="cp">copiar</button><pre>git reset --soft HEAD~3
+git status                <span class="cm"># tudo já está na bancada, montado</span>
+git commit -m <span class="st">"feat: exportação de relatório em CSV"</span></pre></div>
+
+    <h3>Tirar os commits e recomeçar a divisão</h3>
+    <div class="code"><button class="cp">copiar</button><pre>git reset HEAD~3          <span class="cm"># --mixed é o padrão</span>
+git status                <span class="cm"># arquivos modificados, bancada vazia</span>
+git add -p                <span class="cm"># escolha pedaço por pedaço</span></pre></div>
+
+    <h3>Jogar fora tudo mesmo</h3>
+    <div class="code"><button class="cp">copiar</button><pre>git stash -u              <span class="cm"># ← rede de segurança, faça isto antes</span>
+git reset --hard HEAD~3</pre></div>
+
+    <div class="terminal"><span class="p">$</span> git reset --hard HEAD~3
+<span class="out">HEAD is now at b02de41 feat: listagem de produtos</span></div>
+
+    <div class="tip warn"><b>Perigoso — e por quê (duas coisas separadas):</b><br>
+    <b>1.</b> <code>--hard</code> é o único comando desta aula que <b>sobrescreve arquivo no disco</b>. Commit removido você recupera pelo reflog; edição que nunca virou commit, não. Por isso o <code>git stash -u</code> antes.<br>
+    <b>2.</b> <code>reset</code> <b>reescreve história</b>. Se os commits que você está removendo já foram para o remoto, a sua branch fica atrás da remota e o próximo <code>push</code> só passa com <code>--force</code> — que apaga da máquina de todo mundo commits que eles já baixaram. <b>Em branch compartilhada, não é reset: é <a href="#revert">revert</a>.</b></div>
+
+    <div class="tip"><b>Reset de um arquivo só não existe com esse nome.</b> Para desfazer o <code>add</code> de um arquivo, o comando moderno é <code>git restore --staged arquivo</code> (seção <a href="#restore">03</a>). O <code>git reset arquivo</code> antigo faz a mesma coisa e continua funcionando.</div>
+  </section>
+
+  <div class="divisor">Situações clássicas</div>
+
+  <section id="branch-errada">
+    <h2><span class="n">08</span>Commitei na branch errada</h2>
+    <p>Você estava distraído, commitou na <code>main</code> o que era para estar numa branch de feature. O conserto tem dois tempos: <b>copiar para o lugar certo</b> e depois <b>remover do lugar errado</b>.</p>
+
+    <ol class="passos">
+      <li><b>Anote o hash</b><br>Ainda na branch errada, rode <code>git log --oneline -3</code> e copie os 7 primeiros caracteres do commit (ou dos commits) que você quer mover.</li>
+      <li><b>Crie a branch certa a partir daqui</b><br>Ela nasce já com o commit dentro, então o passo 3 fica opcional. Se a branch já existir, pule para o <code>cherry-pick</code>.</li>
+      <li><b>Copie o commit para lá</b><br>O <code>cherry-pick</code> copia — o commit ganha um hash novo no destino e o original continua onde estava.</li>
+      <li><b>Remova da branch errada</b><br>Aqui entra o <code>reset --hard</code>, e é o passo onde você precisa saber se já deu push.</li>
+    </ol>
+
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># 1. qual é o commit fora do lugar</span>
+git log --oneline -1
+<span class="cm">#   7c1e0aa feat: filtro de busca na listagem</span>
+
+<span class="cm"># 2 e 3. branch certa + trazer só aquele commit</span>
+git switch -c feat/filtro-busca
+git cherry-pick 7c1e0aa
+
+<span class="cm"># 4. voltar e limpar a main LOCAL</span>
+git switch main
+git reset --hard HEAD~1</pre></div>
+
+    <div class="terminal"><span class="p">$</span> git cherry-pick 7c1e0aa
+<span class="out">[feat/filtro-busca 2b8d5f3] feat: filtro de busca na listagem</span>
+<span class="out"> Date: Mon Sep 1 15:04:33 2025 -0300</span>
+<span class="out"> 1 file changed, 42 insertions(+)</span></div>
+
+    <div class="tip warn"><b>Perigoso — e por quê:</b> o passo 4 só é legítimo se a <code>main</code> ainda <b>não subiu</b> com esse commit. Se já subiu, o passo 4 vira <code>git revert 7c1e0aa</code> — você deixa a errata na <code>main</code> e segue com a feature na branch nova. Nunca <code>reset</code> numa branch que outra pessoa tem.</div>
+
+    <div class="tip"><b>Vários commits de uma vez:</b> <code>git cherry-pick a1b2c3d^..f4e5d6c</code> traz o intervalo inteiro, na ordem. Se der conflito no meio, resolva, <code>git add</code> e <code>git cherry-pick --continue</code>; para desistir, <code>git cherry-pick --abort</code>. Conflito é a <b>aula 02</b>.</div>
+  </section>
+
+  <section id="segredo">
+    <h2><span class="n">09</span>Commitei uma senha</h2>
+    <p>Aqui a resposta muda completamente conforme uma única pergunta: <b>já deu push?</b></p>
+
+    <div class="duo">
+      <div class="box ok">
+        <h4>Ainda não deu push</h4>
+        <p>É só um erro seu, na sua máquina. Dá para resolver em dois comandos.</p>
+        <pre><span class="cm"># era o último commit</span>
+git rm --cached .env
+git commit --amend --no-edit
+
+<span class="cm"># estava alguns commits atrás</span>
+git reset --soft HEAD~3
+<span class="cm"># tire o segredo, ajuste e commite de novo</span></pre>
+      </div>
+      <div class="box no">
+        <h4>Já deu push</h4>
+        <p>Não é mais um problema de Git. É um <b>incidente</b>.</p>
+        <pre><span class="cm"># 1. ROTACIONE A CHAVE. agora.</span>
+<span class="cm">#    antes de qualquer comando de git.</span>
+
+<span class="cm"># 2. só depois se pensa em limpar</span>
+<span class="cm">#    o histórico</span>
+
+<span class="cm"># 3. o procedimento completo é a</span>
+<span class="cm">#    aula 09</span></pre>
+      </div>
+    </div>
+
+    <p>E em qualquer um dos dois casos, no mesmo commit da correção:</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>echo <span class="st">".env"</span> &gt;&gt; .gitignore
+git add .gitignore
+git commit -m <span class="st">"chore: ignora o .env"</span></pre></div>
+
+    <div class="tip warn"><b>Perigoso — e por quê:</b> apagar o arquivo num commit novo <b>não resolve nada</b>. O valor continua dentro do commit antigo, e o commit antigo continua no histórico, nos forks e no cache do GitHub. Enquanto a chave for válida, ela está exposta. <b>Trocar a chave é o único passo que fecha a porta</b> — limpar o histórico é higiene, não conserto.</div>
+
+    <div class="tip"><b>Onde está o resto:</b> aqui a gente viu só a parte mecânica do Git. Secret scanning, o que comunicar ao time, como o GitHub te avisa e o procedimento completo de rotação são a <b>aula 09</b>. Como impedir que aconteça de novo — <code>.gitignore</code> desde o primeiro dia — é a <b>aula 01</b>.</div>
+  </section>
+
+  <section id="rebase-i">
+    <h2><span class="n">10</span>Limpar a série antes da revisão</h2>
+    <p>Você tem nove commits na sua branch e três deles se chamam <code>wip</code>. Antes de abrir o Pull Request (aula 06), o <code>rebase -i</code> transforma isso numa série que dá para revisar.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git rebase -i HEAD~4</pre></div>
+
+    <p>Abre um editor com uma linha por commit, <b>do mais antigo para o mais novo</b>. Você troca a primeira palavra de cada linha:</p>
+
+    <div class="file">o que abre no editor</div>
+    <pre><span class="k">pick</span>   a1b2c3d feat: adiciona o formulário de contato
+<span class="k">reword</span> e4f5g6h fet: valdiação do email
+<span class="k">squash</span> i7j8k9l wip
+<span class="k">drop</span>   m0n1o2p console.log de teste</pre>
+
+    <dl class="gloss">
+      <dt>pick</dt><dd>Mantém o commit como está. É o padrão de todas as linhas.</dd>
+      <dt>reword</dt><dd>Mantém o conteúdo e abre o editor para você corrigir só a mensagem.</dd>
+      <dt>squash</dt><dd>Funde este commit no da linha <b>de cima</b>, juntando as duas mensagens.</dd>
+      <dt>fixup</dt><dd>Igual ao <code>squash</code>, mas joga fora a mensagem deste commit. É o que você quer para um <code>wip</code>.</dd>
+      <dt>drop</dt><dd>Descarta o commit inteiro. Apagar a linha faz o mesmo.</dd>
+      <dt>edit</dt><dd>Para o rebase naquele commit para você mexer no conteúdo e depois <code>git rebase --continue</code>.</dd>
+    </dl>
+
+    <p>Salve e feche. O Git reaplica commit por commit e abre o editor de mensagem quando encontrar um <code>reword</code> ou <code>squash</code>. No fim:</p>
+
+    <div class="terminal"><span class="p">$</span> git rebase -i HEAD~4
+<span class="out">Successfully rebased and updated refs/heads/feat/contato.</span>
+
+<span class="p">$</span> git log --oneline -2
+<span class="out">c9a4f81 feat: validação do e-mail</span>
+<span class="out">7d2e6b0 feat: adiciona o formulário de contato</span></div>
+
+    <div class="tip warn"><b>Perigoso — e por quê:</b> o rebase <b>reescreve todos os commits que ele toca</b> — todos ganham hash novo, inclusive os que você deixou como <code>pick</code>. Só faça isso na <b>sua</b> branch, e só enquanto ninguém mais tiver baixado. Se você já tinha empurrado a branch e é a única pessoa nela, o push seguinte precisa de <code>git push --force-with-lease</code>. Na <code>main</code>, nunca.</div>
+
+    <div class="tip ok"><b>Perdeu a coragem no meio?</b> <code>git rebase --abort</code> devolve tudo ao estado anterior, sem deixar rastro. Deu conflito? Resolva, <code>git add</code>, <code>git rebase --continue</code> — conflito é a <b>aula 02</b>. E se você já terminou o rebase e se arrependeu, o <a href="#reflog">reflog</a> ainda tem a série antiga inteira.</div>
+  </section>
+
+  <section id="bisect">
+    <h2><span class="n">11</span>Achar o commit que quebrou</h2>
+    <p>"Funcionava na semana passada." Entre a semana passada e hoje tem 200 commits. O <code>bisect</code> faz busca binária: você responde "funciona" ou "não funciona" umas oito vezes e ele aponta o culpado.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git bisect start
+git bisect bad                 <span class="cm"># o commit atual está quebrado</span>
+git bisect good v1.4.0         <span class="cm"># nesta tag (ou hash) funcionava</span>
+
+<span class="cm"># o Git te leva a um commit do meio. TESTE e responda:</span>
+git bisect good                <span class="cm"># ou: git bisect bad</span>
+
+<span class="cm"># ... repita até ele anunciar o culpado ...</span>
+
+git bisect reset               <span class="cm"># SEMPRE, no fim</span></pre></div>
+
+    <div class="terminal"><span class="p">$</span> git bisect start
+<span class="p">$</span> git bisect bad
+<span class="p">$</span> git bisect good v1.4.0
+<span class="out">Bisecting: 97 revisions left to test after this (roughly 7 steps)</span>
+<span class="out">[3fa71c0] refatora o cálculo de desconto</span>
+
+<span class="p">$</span> git bisect good
+<span class="out">Bisecting: 48 revisions left to test after this (roughly 6 steps)</span>
+
+<span class="cm"># ... seis respostas depois ...</span>
+<span class="out">b3f9a1d is the first bad commit</span>
+<span class="out">Author: Fulano &lt;fulano@exemplo.com&gt;</span>
+<span class="out">    perf: troca o loop por reduce</span></div>
+
+    <p>Se você tem um teste automatizado que distingue os dois estados, dá para o Git rodar tudo sozinho:</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git bisect start HEAD v1.4.0
+git bisect run npm test</pre></div>
+
+    <div class="tip"><b>Não esqueça o <code>git bisect reset</code>.</b> Durante o bisect você fica em <code>detached HEAD</code> — num commit solto, sem branch. Sem o <code>reset</code> no fim, você continua lá, achando que o projeto inteiro voltou no tempo. Não voltou: é só o bisect ainda aberto.</div>
+  </section>
+
+  <div class="divisor">A rede de segurança</div>
+
+  <section id="reflog">
+    <h2><span class="n">12</span>git reflog: quase nada se perde</h2>
+    <p>Esta é a seção que devolve a coragem. O <code>git log</code> mostra a história <b>que a sua branch conta hoje</b>. O <code>git reflog</code> mostra <b>tudo por onde o seu HEAD passou</b> — inclusive commits que um <code>reset</code> tirou da branch e que o <code>log</code> não enxerga mais.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git reflog                     <span class="cm"># por onde o HEAD andou</span>
+git reflog show main           <span class="cm"># por onde a branch main andou</span>
+git reflog --date=iso          <span class="cm"># com data e hora legíveis</span></pre></div>
+
+    <div class="terminal"><span class="p">$</span> git reflog
+<span class="out">a1f9c02 HEAD@{0}: reset: moving to HEAD~3</span>
+<span class="out">9d3e7bb HEAD@{1}: commit: feat: exportar relatório em CSV</span>
+<span class="out">4c81a90 HEAD@{2}: commit: feat: filtro por período</span>
+<span class="out">77b2d15 HEAD@{3}: commit: refatora o serviço de relatório</span>
+<span class="out">a1f9c02 HEAD@{4}: commit: chore: sobe a versão</span>
+<span class="out">c05f8e7 HEAD@{5}: checkout: moving from feat/csv to main</span></div>
+
+    <p>Leia de cima para baixo como uma linha do tempo ao contrário. A linha <code>HEAD@{0}</code> é o que você acabou de fazer. Cada linha tem o hash de <b>onde o HEAD estava depois daquela operação</b> — e é esse hash que você usa para voltar.</p>
+
+    <h3>Voltar para um ponto do reflog</h3>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># olhe antes de saltar: o que tem naquele hash?</span>
+git show 9d3e7bb --stat
+
+<span class="cm"># leve a sua branch de volta para lá</span>
+git reset --hard 9d3e7bb
+
+<span class="cm"># ou, mais seguro: abra uma branch nova naquele ponto</span>
+git switch -c recuperado 9d3e7bb</pre></div>
+
+    <table>
+      <tr><th>o reflog guarda</th><th>o reflog NÃO guarda</th></tr>
+      <tr>
+        <td>Commits que um <code>reset</code> tirou da branch.</td>
+        <td>Edição de arquivo que nunca virou commit.</td>
+      </tr>
+      <tr>
+        <td>A série antiga de antes de um <code>rebase</code>.</td>
+        <td>O que você apagou com <code>git restore</code>.</td>
+      </tr>
+      <tr>
+        <td>O commit original de antes de um <code>--amend</code>.</td>
+        <td>Arquivo não rastreado que o <code>reset --hard</code> não chegou nem a ver.</td>
+      </tr>
+      <tr>
+        <td>Commits de uma branch que você deletou.</td>
+        <td>Nada de um <b>outro clone</b>: o reflog é local e não viaja no <code>push</code>.</td>
+      </tr>
+    </table>
+
+    <div class="tip ok"><b>Prazo de validade:</b> as entradas ficam por volta de <b>90 dias</b> (e 30 para o que já ficou inalcançável) antes de a coleta de lixo do Git considerar apagar. Na prática, dá tempo de sobra — mas não conte com ele daqui a um ano.</div>
+
+    <div class="tip warn"><b>O limite que importa:</b> o reflog é <b>seu, local e intransferível</b>. Não vai para o GitHub e não vem junto no <code>clone</code>. Se você apagar a pasta do repositório para "começar do zero", o reflog vai junto — e aí sim os commits somem de verdade. <b>Nunca apague a pasta: é justamente ela que guarda a rede.</b></div>
+  </section>
+
+  <section id="lab-reflog">
+    <h2><span class="n">13</span>Laboratório: destruir de propósito e recuperar</h2>
+    <p>Este é o exercício que faz a ficha cair. Você vai apagar três commits com <code>reset --hard</code>, ver a pasta vazia, e trazer tudo de volta. Faça num repositório de teste — <b>nunca no do trabalho</b>.</p>
+
+    <ol class="passos">
+      <li><b>Crie um repositório descartável</b><br>Fora de qualquer projeto seu, numa pasta nova.</li>
+      <li><b>Faça três commits bobos</b><br>Três arquivos, três commits, para ter o que destruir.</li>
+      <li><b>Olhe o histórico e NÃO copie os hashes</b><br>O exercício só funciona se você tiver que achá-los no reflog depois. Vale a honra.</li>
+      <li><b>Destrua</b><br><code>git reset --hard HEAD~3</code>. Confira que sumiu mesmo — <code>log</code> e <code>ls</code>.</li>
+      <li><b>Olhe onde ninguém olha</b><br><code>git reflog</code>. Ache a linha do seu último commit bom, a de antes do <code>reset</code>.</li>
+      <li><b>Ressuscite</b><br><code>git reset --hard</code> naquele hash. Confira que voltou tudo — <code>log</code> e <code>ls</code>.</li>
+    </ol>
+
+    <h4>Passos 1 a 3 — montar e olhar</h4>
+    <div class="code"><button class="cp">copiar</button><pre>mkdir lab-reflog &amp;&amp; cd lab-reflog
+git init
+
+echo <span class="st">"um"</span>   &gt; a.txt &amp;&amp; git add . &amp;&amp; git commit -m <span class="st">"feat: arquivo a"</span>
+echo <span class="st">"dois"</span> &gt; b.txt &amp;&amp; git add . &amp;&amp; git commit -m <span class="st">"feat: arquivo b"</span>
+echo <span class="st">"três"</span> &gt; c.txt &amp;&amp; git add . &amp;&amp; git commit -m <span class="st">"feat: arquivo c"</span>
+
+git log --oneline
+ls</pre></div>
+
+    <div class="terminal"><span class="p">$</span> git log --oneline
+<span class="out">9d3e7bb (HEAD -&gt; main) feat: arquivo c</span>
+<span class="out">4c81a90 feat: arquivo b</span>
+<span class="out">77b2d15 feat: arquivo a</span>
+<span class="p">$</span> ls
+<span class="out">a.txt  b.txt  c.txt</span></div>
+
+    <h4>Passo 4 — destruir</h4>
+    <div class="code"><button class="cp">copiar</button><pre>git reset --hard HEAD~3
+git log --oneline
+ls</pre></div>
+
+    <div class="terminal"><span class="p">$</span> git reset --hard HEAD~3
+<span class="err">fatal: ambiguous argument 'HEAD~3': unknown revision</span>
+<span class="cm"># ↑ se você tem só 3 commits, não existe "3 antes do HEAD".</span>
+<span class="cm">#   nesse caso use HEAD~2 e o exercício vale igual.</span>
+
+<span class="p">$</span> git reset --hard HEAD~2
+<span class="out">HEAD is now at 77b2d15 feat: arquivo a</span>
+<span class="p">$</span> ls
+<span class="out">a.txt</span></div>
+
+    <p>O <code>b.txt</code> e o <code>c.txt</code> sumiram do disco. O <code>git log</code> não conhece mais aqueles dois commits. Para todos os efeitos, o trabalho acabou. <b>Sinta o frio na barriga — é o ponto do exercício.</b></p>
+
+    <h4>Passo 5 — procurar</h4>
+    <div class="code"><button class="cp">copiar</button><pre>git reflog</pre></div>
+
+    <div class="terminal"><span class="p">$</span> git reflog
+<span class="out">77b2d15 HEAD@{0}: reset: moving to HEAD~2</span>
+<span class="out">9d3e7bb HEAD@{1}: commit: feat: arquivo c</span>   <span class="cm">← ele está aqui</span>
+<span class="out">4c81a90 HEAD@{2}: commit: feat: arquivo b</span>
+<span class="out">77b2d15 HEAD@{3}: commit (initial): feat: arquivo a</span></div>
+
+    <p>Ali está o <code>9d3e7bb</code>, o commit "perdido". Ele nunca foi apagado: só deixou de ter uma branch apontando para ele. Antes de saltar, espie o que tem lá dentro:</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>git show 9d3e7bb --stat</pre></div>
+
+    <h4>Passo 6 — ressuscitar</h4>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># use o hash que VOCÊ viu no seu reflog, não o do exemplo</span>
+git reset --hard 9d3e7bb
+
+git log --oneline
+ls</pre></div>
+
+    <div class="terminal"><span class="p">$</span> git reset --hard 9d3e7bb
+<span class="out">HEAD is now at 9d3e7bb feat: arquivo c</span>
+<span class="p">$</span> git log --oneline
+<span class="out">9d3e7bb (HEAD -&gt; main) feat: arquivo c</span>
+<span class="out">4c81a90 feat: arquivo b</span>
+<span class="out">77b2d15 feat: arquivo a</span>
+<span class="p">$</span> ls
+<span class="out">a.txt  b.txt  c.txt</span></div>
+
+    <div class="tip ok"><b>Está tudo de volta.</b> Os três commits, os três arquivos, os mesmos hashes. Você desfez um <code>reset --hard</code>, que é o comando que mais assusta no Git inteiro. Guarde a sensação: da próxima vez que der ruim, você já sabe onde procurar.</div>
+
+    <h4>A parte que NÃO volta</h4>
+    <p>Refaça o laboratório com uma diferença: antes do passo 4, crie um <code>d.txt</code> e <b>não commite</b>.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>echo <span class="st">"quatro"</span> &gt; d.txt
+git add d.txt
+git reset --hard HEAD~2      <span class="cm"># e agora?</span>
+ls</pre></div>
+
+    <div class="tip warn"><b>O <code>d.txt</code> não volta com nada.</b> Ele foi para a bancada mas nunca virou commit, e o reflog só guarda commit. É por isso que o <code>--hard</code> é o comando perigoso da aula, e é por isso que a regra é <code>git stash -u</code> antes de qualquer <code>--hard</code>. Repita o teste com o <code>stash</code> na frente e veja a diferença.</div>
+
+    <div class="tip"><b>Alternativa mais segura ao passo 6:</b> em vez de mover a sua branch com <code>reset --hard</code>, abra uma branch nova no commit recuperado — <code>git switch -c recuperado 9d3e7bb</code>. Aí você compara as duas com calma antes de decidir qual fica.</div>
+  </section>
+
+  <div class="divisor">Consulta</div>
+
+  <section id="se-travar">
+    <h2><span class="n">14</span>Se travar</h2>
+    <p>Os travamentos mais comuns desta aula, com o que causou e o que fazer. Se o seu caso não estiver aqui, comece sempre por <code>git status</code> e <code>git reflog</code>: entre os dois, quase toda resposta aparece.</p>
+
+    <div class="tabela">
+    <table>
+      <tr><th>sintoma</th><th>causa</th><th>conserto</th></tr>
+      <tr>
+        <td>Dei <code>reset --hard</code> e perdi edição que não estava commitada</td>
+        <td>É o único comando que sobrescreve arquivo no disco. O reflog só guarda <b>commit</b>.</td>
+        <td>Não tem conserto. Da próxima vez, <code>git stash -u</code> antes — ou um commit <code>wip</code>.</td>
+      </tr>
+      <tr>
+        <td><code>! [rejected] non-fast-forward</code> depois de um <code>amend</code> ou <code>rebase</code></td>
+        <td>Você reescreveu commits que já estavam no remoto. O GitHub está te protegendo.</td>
+        <td>Branch só sua: <code>git push --force-with-lease</code>. Branch compartilhada: desfaça o reescrito e use <a href="#revert">revert</a>.</td>
+      </tr>
+      <tr>
+        <td><code>fatal: ambiguous argument 'HEAD~3'</code></td>
+        <td>Você pediu três commits para trás e a branch não tem três.</td>
+        <td>Use um número menor, ou o hash direto do <code>git log --oneline</code>.</td>
+      </tr>
+      <tr>
+        <td><code>error: could not apply…</code> no meio de um rebase ou cherry-pick</td>
+        <td>Conflito. Os dois reaplicam commit a commit, e cada um pode conflitar.</td>
+        <td>Resolva, <code>git add</code>, depois <code>--continue</code>. Para desistir, <code>--abort</code>. Conflito é a <b>aula 02</b>.</td>
+      </tr>
+      <tr>
+        <td>O <code>stash pop</code> não trouxe o arquivo novo de volta</td>
+        <td>Arquivo não rastreado não entra no stash sem <code>-u</code>.</td>
+        <td>Ele nunca saiu da pasta — está lá. Confira com <code>ls</code>. Use <code>-u</code> na próxima.</td>
+      </tr>
+      <tr>
+        <td><code>error: Your local changes would be overwritten</code></td>
+        <td>Você tem edição pendente e o comando precisaria mexer nos mesmos arquivos.</td>
+        <td><code>git stash -u</code>, rode o comando, <code>git stash pop</code>.</td>
+      </tr>
+      <tr>
+        <td>"Estou em <code>detached HEAD</code>"</td>
+        <td>Você está num commit, não numa branch. <code>bisect</code> e <code>checkout &lt;hash&gt;</code> fazem isso.</td>
+        <td><code>git switch -</code> volta. Se você commitou ali, <code>git switch -c salva-isso</code> <b>antes</b> de sair.</td>
+      </tr>
+      <tr>
+        <td>Reverti um merge e agora ele não volta mais</td>
+        <td>Reverter merge é caso especial: o Git passa a achar que aquele ramo já foi integrado.</td>
+        <td>Reverta o revert. Da próxima, prefira reverter os commits individuais.</td>
+      </tr>
+      <tr>
+        <td>Deletei a branch e ela tinha commits que só existiam lá</td>
+        <td>Deletar branch não deleta commit — só tira o ponteiro.</td>
+        <td><code>git reflog</code>, ache o último commit dela e <code>git switch -c nome-de-volta &lt;hash&gt;</code>.</td>
+      </tr>
+      <tr>
+        <td>O <code>bisect</code> acabou e o projeto parece ter voltado no tempo</td>
+        <td>Você esqueceu o <code>git bisect reset</code> e continua no commit de teste.</td>
+        <td><code>git bisect reset</code>. Tudo volta ao normal.</td>
+      </tr>
+      <tr>
+        <td>Comecei um rebase, me perdi e não sei em que estado estou</td>
+        <td>O rebase para no meio e espera você.</td>
+        <td><code>git status</code> diz em que passo está. <code>git rebase --abort</code> desfaz tudo e devolve o estado anterior.</td>
+      </tr>
+      <tr>
+        <td>Não acho o commit em lugar nenhum, nem no reflog</td>
+        <td>Ou ele foi feito em <b>outro clone</b>, ou passou dos 90 dias.</td>
+        <td><code>git fsck --lost-found</code> pode achar objetos soltos. Se foi noutra máquina, o reflog de lá é o que vale.</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="tip star"><b>Antes de pedir ajuda:</b> cole a saída de <code>git status</code> <b>e</b> as dez primeiras linhas de <code>git reflog</code>. Com esses dois textos, qualquer pessoa que conhece Git reconstrói o que aconteceu e diz o comando certo — sem eles, é adivinhação.</div>
+
+    <div class="tip warn"><b>E o que fazer é o que NÃO fazer:</b> não apague a pasta do repositório para "começar limpo". É dentro dela, no <code>.git</code>, que mora o reflog — a única cópia dos commits que você acha que perdeu. Apagar a pasta é o único jeito de transformar um susto num prejuízo de verdade.</div>
+
+    <a class="cta primary" href="slides.html">▶ rever os slides da aula 11</a>
+    <a class="cta" href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html">guia de GitHub</a>
+  </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">voltar ao curso</a> · <a href="slides.html">slides da aula 11</a> 💜
+  </div>
+</main>
+</div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  /* Copiar o bloco de código. O botão vive dentro de `.code`, e o texto que
+     interessa é o do `pre` irmão — não o do botão. */
+  document.querySelectorAll(".code .cp").forEach((botao) => {
+    botao.addEventListener("click", async () => {
+      const pre = botao.parentElement.querySelector("pre");
+      if (!pre) return;
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        botao.textContent = "copiado ✓";
+        botao.classList.add("done");
+        setTimeout(() => {
+          botao.textContent = "copiar";
+          botao.classList.remove("done");
+        }, 1400);
+      } catch {
+        /* Sem permissão de clipboard o texto continua selecionável na mão —
+           melhor não fingir que copiou. */
+        botao.textContent = "copie na mão";
+        setTimeout(() => { botao.textContent = "copiar"; }, 1400);
+      }
+    });
+  });
+
+  /* O "voltar ao topo" aparece depois de 500px. `tt` pode não existir se
+     alguém remover o elemento: sem esta guarda, o ouvinte estouraria em toda
+     rolagem. */
+  const tt = document.getElementById("totop");
+  if (tt) {
+    addEventListener("scroll", () => {
+      tt.classList.toggle("show", scrollY > 500);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomia do GitHub: repositório, perfil e organização · Aula 04 · Introdução ao GitHub · NickDev</title>
+<meta name="description" content="Aula 04 do curso Introdução ao GitHub: a volta guiada pela plataforma — repositório público × privado e o que privado não protege, README, LICENSE e CONTRIBUTING.md, a estrutura de um README que faz alguém usar o projeto, MIT × Apache 2.0 × GPL, o perfil como currículo e os cinco níveis de permissão de uma organização.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-github">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 04</span> · introdução ao github</div>
+    <div class="tagtitle"><span class="br"># </span><span class="nm">README.md</span></div>
+    <h1 style="margin:24px 0 14px">Anatomia do GitHub: repositório, perfil e <span class="grad">organização</span></h1>
+    <p class="lead" style="max-width:58ch">Na aula 03 você publicou. Hoje a gente faz esse repositório <strong>ser entendido</strong> por quem chega de fora — e olha o perfil, que é o seu currículo público, queira você ou não.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o navegador no seu repositório da aula 03 e o terminal na pasta dele. hoje quase tudo acontece na tela, não no terminal.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="manual.html" style="color:var(--str)">manual desta aula</a></p>
+  </section>
+
+  <!-- 02 O PROBLEMA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>Publicado — e mudo</h2>
+    <div class="grid2">
+      <div>
+        <div class="tree">nicoly / <b>meu-primeiro-repo</b>
+  <span class="cm">Sem descrição, site ou tópicos.</span>
+
+  <b>index.html</b>       feat: horário das aulas
+  <b>estilo.css</b>       feat: página inicial
+  <b>.gitignore</b>       chore: ignora .env
+  <b>README.md</b>        chore: primeiro commit
+
+  <b># Meu primeiro repo</b>   <span class="cm">← o README inteiro</span></div>
+        <p class="note" style="margin-top:14px">É exatamente o que você tem depois da aula 03. Funciona, está no ar — e não diz nada.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O que <b>é</b> isso? Um site? Um exercício? Uma biblioteca pra instalar?</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Como eu <b>rodo</b> na minha máquina? Precisa de quê instalado?</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Eu <b>posso usar</b> isso num projeto meu? Copiar? Vender?</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Se eu quiser <b>ajudar</b>, por onde começo? Mando o quê, pra quem?</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Quem é <b>você</b>, e por que eu confiaria neste código?</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Nenhuma dessas cinco perguntas se responde com código.</strong> Todas se respondem com arquivos de texto — e é isso que a gente escreve hoje.</p>
+  </section>
+
+  <!-- 03 A PAGINA DO REPOSITORIO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a volta guiada</div>
+    <h2>A página do repositório, por partes</h2>
+    <dl class="glossario">
+      <dt>About</dt>
+      <dd>A caixinha da direita: <strong>descrição</strong>, link do site e <strong>tópicos</strong>. É o que aparece na busca do GitHub. Leva 40 segundos e quase ninguém preenche.</dd>
+      <dt>Code</dt>
+      <dd>A lista de arquivos, a branch atual, o botão de clonar e — logo abaixo — o <strong>README renderizado</strong>. A primeira tela é essa.</dd>
+      <dt>Issues</dt>
+      <dd>Onde se relata bug e se combina tarefa. É a <strong>aula 05</strong> inteira.</dd>
+      <dt>Pull requests</dt>
+      <dd>Onde uma mudança é proposta e revisada antes de entrar. <strong>Aula 06</strong>.</dd>
+      <dt>Actions</dt>
+      <dd>Automação: testar e publicar sozinho a cada push. <strong>Aula 08</strong>.</dd>
+      <dt>Insights</dt>
+      <dd>Gráficos do repositório: quem commitou, quando, quanto. Bom pra entender projeto alheio.</dd>
+      <dt>Settings</dt>
+      <dd>Visibilidade, colaboradores, apagar o repositório. Só quem é <strong>admin</strong> vê esta aba.</dd>
+    </dl>
+    <p class="note">O resto da aula mexe em três lugares só: <strong>o README</strong>, <strong>o About</strong> e <strong>o Settings</strong>.</p>
+  </section>
+
+  <!-- 04 PUBLICO x PRIVADO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>visibilidade</div>
+    <h2>Público × privado</h2>
+    <p class="lead">Uma chave só, em Settings, e ela decide quem consegue abrir o endereço do seu repositório.</p>
+    <div class="duo" style="margin-top:22px">
+      <div class="card ok">
+        <span class="verdict yes">público</span>
+        <h3>Qualquer pessoa vê</h3>
+        <p>Com ou sem conta no GitHub. Aparece na busca, no seu perfil, no Google. <strong>Ver não é mexer</strong>: só quem você autorizar consegue gravar. É o que você quer pra portfólio, estudo e open source.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict mid">privado</span>
+        <h3>Só quem você convidar</h3>
+        <p>Some da busca e do perfil de quem não tem acesso. Grátis e ilimitado em conta pessoal desde 2019. É o padrão pra trabalho de cliente, projeto de faculdade em grupo e coisa não terminada.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Dá pra trocar depois, nos dois sentidos.</strong> Mas trocar de privado para público publica o <strong>histórico inteiro</strong> de uma vez — é o próximo slide.</p>
+  </section>
+
+  <!-- 05 O QUE PRIVADO NAO PROTEGE -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>honestidade técnica</div>
+    <h2>O que <span class="grad">privado</span> não protege</h2>
+    <p class="lead">Privado quer dizer "pouca gente vê". Não quer dizer "seguro".</p>
+    <div class="regras" style="margin-top:20px">
+      <div class="r"><span class="num">1</span><span class="tx"><b>Quem tem acesso, vê tudo.</b> Não existe arquivo secreto dentro de repositório privado. Deu acesso, deu acesso ao repositório inteiro.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx"><b>Inclusive o histórico.</b> Aquela senha que você apagou no commit seguinte continua lá, num commit antigo, a dois cliques de distância.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx"><b>Tirar a pessoa do repositório não apaga a cópia dela.</b> Quem clonou levou o histórico inteiro pra máquina dela.</span></div>
+      <div class="r"><span class="num">4</span><span class="tx"><b>Virar público é irreversível na prática.</b> No segundo em que vira, o histórico todo fica legível — e alguém pode ter clonado.</span></div>
+      <div class="r"><span class="num">5</span><span class="tx">Segredo se guarda <b>fora do repositório</b>: no <span class="code-inline">.env</span> ignorado (aula 01) ou nos <b>secrets</b> do GitHub (aula 10).</span></div>
+    </div>
+    <p class="note"><strong>Se um segredo entrou no histórico, ele vazou.</strong> Não adianta apagar o arquivo: troque a chave. Rotacionar credencial e varredura automática de segredo são a <strong>aula 09</strong>.</p>
+  </section>
+
+  <!-- 06 OS TRES ARQUIVOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>os arquivos de recepção</div>
+    <h2>Três arquivos falam por você</h2>
+    <p class="lead">O GitHub trata estes três com carinho especial: ele os procura pelo nome, sozinho, e muda a interface quando acha.</p>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card">
+        <h3>README.md</h3>
+        <p><strong>O que é e como se usa.</strong> Renderizado na primeira tela do repositório, abaixo da lista de arquivos. É a única coisa que a maioria vai ler.</p>
+      </div>
+      <div class="card">
+        <h3>LICENSE</h3>
+        <p><strong>O que os outros podem fazer com isso.</strong> O GitHub reconhece o texto e mostra o nome da licença no About. Sem ele, a resposta legal é "nada".</p>
+      </div>
+      <div class="card">
+        <h3>CONTRIBUTING.md</h3>
+        <p><strong>Como ajudar sem errar.</strong> Vira um link automático na hora em que alguém abre uma issue ou um pull request.</p>
+      </div>
+    </div>
+    <p class="note">Os três são <strong>arquivos de texto na raiz</strong>, commitados como qualquer outro. Nada aqui é botão mágico — é <span class="code-inline">git add</span> e <span class="code-inline">git commit</span> de sempre.</p>
+  </section>
+
+  <!-- 07 README QUE FUNCIONA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o README</div>
+    <h2>O README que faz alguém usar</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">README.md</div>
+<pre class="code" style="font-size:12.5px"><span class="kw"># nome-do-projeto</span>
+
+Uma frase dizendo o que é e pra quem.
+
+<span class="kw">## Para que serve</span>
+
+Dois ou três parágrafos curtos: o
+problema que resolve, e quando não
+é a ferramenta certa.
+
+<span class="kw">## Como rodar</span>
+
+```bash
+git clone …
+npm install
+npm run dev
+```
+
+<span class="kw">## Como contribuir</span>
+
+Leia o CONTRIBUTING.md.
+
+<span class="kw">## Licença</span>
+
+MIT — veja o arquivo LICENSE.</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>A primeira frase é a mais importante.</b> Quem lê decide em cinco segundos se continua. "Projeto da faculdade" não é uma frase.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Como rodar tem que ser copiável.</b> Comandos em bloco, na ordem, sem "instale as dependências" no lugar do comando.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><b>Diga o que o projeto não faz.</b> Poupa a decepção de quem escolheu errado — e ganha respeito.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx"><b>Escreva pra pessoa que não te conhece.</b> Nada de "é só rodar aquele script". Que script? Qual pasta?</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Um README de <b>quinze linhas boas</b> vence um de cem linhas desatualizadas. Curto e verdadeiro.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">O README do seu repositório</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">No repositório que você publicou na aula 03. Escreva no editor, commite e mande — o ciclo de sempre.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Abra o README.md e apague o que tem</h3><p>Aquela linha única do primeiro commit já cumpriu o papel dela.</p></div></div>
+      <div class="st"><div class="body"><h3>Escreva as quatro seções, nesta ordem</h3><p>O que é · Para que serve · Como rodar · Licença. Uma frase de verdade em cada.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="kw"># meu-primeiro-repo</span>
+
+Página de treino da NickDev, feita
+na aula 01 do curso de GitHub.</pre></div></div>
+      <div class="st"><div class="body"><h3>Commite e mande</h3><p>Se o <span class="code-inline">push</span> reclamar, é a aula 03 batendo na porta — confira o upstream.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git add README.md
+git commit -m <span class="st">"docs: README com o que é e como rodar"</span>
+git push</pre></div></div>
+      <div class="st"><div class="body"><h3>Preencha o About</h3><p>No site, na engrenagem ao lado de <strong>About</strong>: descrição em uma linha e dois ou três tópicos.</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Atualize a página do repositório. O README apareceu <strong>formatado</strong>, com título grande e bloco de código cinza? Então o Markdown está certo.</p>
+    </div>
+  </section>
+
+  <!-- 09 MARKDOWN -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>markdown</div>
+    <h2>Markdown: a língua de tudo aqui</h2>
+    <p class="lead">README, issue, comentário de pull request, descrição de release. Aprender uma vez serve pro curso inteiro.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <div class="filetab">markdown</div>
+<pre class="code" style="font-size:12.5px"><span class="kw"># Título    ## Subtítulo</span>
+
+**negrito**   *itálico*   `código`
+
+- item de lista
+1. item numerado
+
+- [x] tarefa feita
+- [ ] tarefa pendente
+
+[texto do link](https://exemplo.com)
+
+| coluna | outra |
+|--------|-------|
+| valor  | valor |</pre>
+      </div>
+      <div>
+        <ul class="clean">
+          <li>Linha em branco <strong>separa parágrafo</strong>. Sem ela, duas linhas viram uma só.</li>
+          <li>Bloco de código com três crases e o <strong>nome da linguagem</strong> — é o que pinta as cores.</li>
+          <li>A checklist <span class="code-inline">- [ ]</span> vira caixa clicável em issue. Vale ouro na <strong>aula 05</strong>.</li>
+          <li>Dentro do repositório, prefira <strong>link relativo</strong>: <span class="code-inline">[contribuir](CONTRIBUTING.md)</span>. Continua funcionando no fork.</li>
+        </ul>
+        <p class="note">A tabela completa, com imagem, citação e detalhes recolhíveis, está no <a href="manual.html" style="color:var(--str)">manual desta aula</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 LICENCAS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>licença</div>
+    <h2>Escolher licença sem virar advogado</h2>
+    <p class="lead">Três respostas cobrem quase tudo que você vai publicar nos próximos anos.</p>
+    <table style="margin-top:18px">
+      <tr><th>licença</th><th>em uma frase</th><th>escolha quando</th></tr>
+      <tr><td><code>MIT</code></td><td>Faça o que quiser, inclusive vender, desde que mantenha o aviso de autoria. Sem garantia nenhuma.</td><td>É o seu padrão. Curta, conhecida, aceita em qualquer lugar.</td></tr>
+      <tr><td><code>Apache&nbsp;2.0</code></td><td>Como a MIT, e mais: <strong>concede o uso das patentes</strong> de quem contribuiu e pede que mudanças em arquivos sejam sinalizadas.</td><td>Projeto que empresa vai adotar — o jurídico delas gosta da cláusula de patente.</td></tr>
+      <tr><td><code>GPL&nbsp;v3</code></td><td><strong>Copyleft</strong>: pode usar e modificar, mas quem distribuir uma obra derivada tem que abrir o código sob a mesma licença.</td><td>Você quer garantir que melhorias feitas em cima do seu trabalho voltem pra comunidade.</td></tr>
+    </table>
+    <p class="note">Existem dezenas de outras — BSD, MPL, CC0 — e <span class="code-inline">choosealicense.com</span> te leva à certa em três perguntas. <strong>Não invente licença própria</strong>: ninguém vai ler.</p>
+  </section>
+
+  <!-- 11 SEM LICENCA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o caso mais comum</div>
+    <h2>Sem licença nenhuma = <span class="grad">todos os direitos reservados</span></h2>
+    <div class="grid2">
+      <div>
+        <ul class="clean">
+          <li>Código sem licença é <strong>protegido por direito autoral por padrão</strong>, na lei, sem você fazer nada.</li>
+          <li>Público não quer dizer livre. Qualquer pessoa <strong>pode ler</strong> o seu código — e, tecnicamente, <strong>não pode usar</strong>, copiar nem modificar.</li>
+          <li>Ao publicar no GitHub você já aceitou os termos que permitem <strong>ver e fazer fork dentro do próprio GitHub</strong>. Só isso.</li>
+          <li>Na dúvida, empresa séria <strong>não encosta</strong> em repositório sem licença. É risco jurídico de graça.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="card no">
+          <h3>O efeito prático</h3>
+          <p>O seu portfólio sem <span class="code-inline">LICENSE</span> diz, sem querer: "olhe, mas não use". Se você publicou pra ser útil, <strong>escolher a licença é parte de publicar</strong>.</p>
+        </div>
+        <div class="card ok" style="margin-top:16px">
+          <h3>O conserto</h3>
+          <p>Um arquivo chamado <span class="code-inline">LICENSE</span>, sem extensão, com o texto oficial da licença, o <strong>ano</strong> e o <strong>seu nome</strong>. O GitHub tem um assistente que escreve por você.</p>
+        </div>
+      </div>
+    </div>
+    <p class="note">Trabalho feito na empresa costuma ter dono definido em contrato. <strong>Não publique código do trabalho por conta própria</strong> — nem como portfólio.</p>
+  </section>
+
+  <!-- 12 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Sem seguir sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Três perguntas. A segunda derruba muita gente — inclusive gente com anos de profissão.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:780px">
+      <div class="r"><span class="num">1</span><span class="tx">Quais são as <b>quatro seções</b> mínimas de um README que presta?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Um repositório <b>privado</b> guarda com segurança a senha do banco? <b>Por quê?</b></span></div>
+      <div class="r"><span class="num">3</span><span class="tx">O seu repositório é público e não tem <span class="code-inline">LICENSE</span>. Eu posso usar o código num projeto meu?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 2 — não; quem tem acesso vê tudo, e o histórico guarda o que você apagou; 3 — não, sem licença é todos os direitos reservados.</p>
+  </section>
+
+  <!-- 13 CONTRIBUTING E .GITHUB -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>recepção</div>
+    <h2><span class="code-inline">CONTRIBUTING.md</span> e os vizinhos</h2>
+    <div class="grid2">
+      <div>
+        <div class="tree">meu-projeto/
+  <b>README.md</b>              <span class="cm">← a vitrine</span>
+  <b>LICENSE</b>                <span class="cm">← o que pode fazer</span>
+  <b>CONTRIBUTING.md</b>        <span class="cm">← como ajudar</span>
+  <b>CODE_OF_CONDUCT.md</b>     <span class="cm">← como se comportar</span>
+  <b>SECURITY.md</b>            <span class="cm">← como relatar falha</span>
+  <b>.github/</b>
+    <b>ISSUE_TEMPLATE/</b>      <span class="cm">← aula 05</span>
+    <b>pull_request_template.md</b>  <span class="cm">← aula 06</span></div>
+      </div>
+      <div>
+        <ul class="clean">
+          <li>O <strong>CONTRIBUTING</strong> responde: como rodar os testes, que padrão de commit usar, quanto tempo a resposta demora. Vira link automático na hora de abrir issue ou PR.</li>
+          <li>O <strong>código de conduta</strong> existe pra ser citado quando precisar. Sem ele escrito, moderar vira briga pessoal.</li>
+          <li>O <strong>SECURITY.md</strong> diz por onde relatar falha <em>em segredo</em> — segurança é assunto da <strong>aula 09</strong>.</li>
+          <li>A pasta <span class="code-inline">.github/</span> é onde moram os templates e os workflows. Nomes reservados: o GitHub lê sozinho.</li>
+        </ul>
+        <p class="note">Repositório de estudo <strong>não precisa dos cinco</strong>. README e LICENSE já colocam você à frente da maioria.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Licenciar o repositório</h2>
+      <span class="t">~8 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Este é pela interface — o GitHub escreve o arquivo, você só confere e commita.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Add file → Create new file</h3><p>Na página do repositório, botão <strong>Add file</strong>, opção <strong>Create new file</strong>.</p></div></div>
+      <div class="st"><div class="body"><h3>Digite LICENSE no nome do arquivo</h3><p>Maiúsculas, sem extensão. Assim que você terminar de digitar, aparece um botão <strong>Choose a license template</strong> à direita.</p></div></div>
+      <div class="st"><div class="body"><h3>Escolha MIT e confira ano e nome</h3><p>O assistente preenche os dois. Leia — é o seu nome que vai ficar ali.</p></div></div>
+      <div class="st"><div class="body"><h3>Commite pelo site e traga pra sua máquina</h3><p>O commit foi feito no GitHub, então o seu clone local ficou pra trás.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">git pull
+git log --oneline -1</pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Na caixa <strong>About</strong>, à direita, deve aparecer <span class="grn">MIT license</span>. Se aparecer só o nome do arquivo, o texto foi editado demais e o GitHub não reconheceu a licença.</p>
+    </div>
+  </section>
+
+  <!-- 15 O PERFIL -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o perfil</div>
+    <h2>O seu perfil é um currículo público</h2>
+    <p class="lead">Recrutador abre, colega de time abre, a pessoa que você pediu ajuda abre. Ele já está sendo lido — a escolha é se ele está sendo lido <strong>bem</strong>.</p>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><h3>Foto, nome e bio</h3><p>Uma linha dizendo o que você faz e o que está aprendendo. Foto de pessoa, não o gatinho cinza padrão.</p></div>
+      <div class="card"><h3>Repositórios fixados</h3><p>Até <strong>seis</strong>, na ordem que você quiser. É a sua vitrine — e a única parte do perfil que você controla inteira.</p></div>
+      <div class="card"><h3>README de perfil</h3><p>Um texto seu no topo da página, acima de tudo. Explica quem é você antes de qualquer código.</p></div>
+    </div>
+    <p class="note"><strong>Três repositórios bem descritos batem trinta abandonados.</strong> Fixe os que você sabe explicar numa conversa.</p>
+  </section>
+
+  <!-- 16 README DE PERFIL -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o truque do perfil</div>
+    <h2>O repositório com o seu próprio nome</h2>
+    <div class="grid2">
+      <div>
+        <div class="terminal"><span class="p">usuário:</span> nicoly
+<span class="p">repositório:</span> nicoly     <span class="cm"># idêntico</span>
+<span class="p">arquivo:</span>     README.md
+<span class="p">visibilidade:</span> <span class="out">Public</span>
+<span class="cm"># resultado: o README aparece no topo
+# de github.com/nicoly</span></div>
+        <p class="note" style="margin-top:14px">O GitHub chama isso de repositório especial. Ao criar um com o nome exato do seu usuário, ele mesmo avisa que você achou o easter egg.</p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">O nome do repositório tem que ser <b>exatamente igual</b> ao seu usuário, maiúscula por maiúscula.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">Tem que ser <b>público</b>, e o <span class="code-inline">README.md</span> tem que estar na <b>raiz</b>. Privado ou em subpasta: não aparece.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">É Markdown normal. Escreva o que você faz, o que está estudando e como te achar.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Não precisa de badge piscando nem contador de visitas. <b>Duas linhas honestas</b> funcionam melhor.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 O GRAFICO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o quadradinho verde</div>
+    <h2>O que o gráfico de contribuições diz</h2>
+    <div class="duo">
+      <div class="card ok">
+        <span class="verdict yes">o que ele conta</span>
+        <p>Commits na <strong>branch padrão</strong> dos seus repositórios, issues e pull requests que você abriu, e revisões que você fez. Tudo com data — e só isso.</p>
+        <p style="margin-top:10px">Repositório privado entra como quadrado sem detalhe, se você ligar a opção no perfil.</p>
+      </div>
+      <div class="card no">
+        <span class="verdict no">o que ele não conta</span>
+        <p>Commit assinado com <strong>e-mail que não está na sua conta</strong>. Trabalho em GitLab, Bitbucket ou servidor da empresa. Commit em branch que não é a padrão. Pareamento, revisão de corredor, documentação em outro lugar.</p>
+      </div>
+    </div>
+    <p class="note"><strong>E ele nunca disse nada sobre qualidade.</strong> Dá pra encher de verde com commit vazio todo dia. Ninguém sério contrata por quadradinho — mas muita gente se culpa por causa dele, e isso é besteira: descanso não aparece no gráfico e nem tem que aparecer.</p>
+  </section>
+
+  <!-- 18 LAB 3 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 3</span>
+      <h2 style="margin:0">Montar o perfil</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Tudo pelo site. No fim, o seu perfil deixa de ser uma lista de pastas.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie o repositório com o seu nome de usuário</h3><p>Público, e marque <strong>Add a README file</strong> na criação.</p></div></div>
+      <div class="st"><div class="body"><h3>Escreva três blocos no README</h3><p>Quem você é · o que está aprendendo agora · como te achar.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="kw">### Oi, eu sou a Nicoly</span>
+
+- Estudando <span class="st">**Git e GitHub**</span> na NickDev
+- Mexendo com HTML, CSS e JavaScript
+- Fale comigo: [LinkedIn](https://exemplo.com)</pre></div></div>
+      <div class="st"><div class="body"><h3>Fixe os repositórios</h3><p>Na aba <strong>Overview</strong> do perfil, <strong>Customize your pins</strong>. Escolha até seis — comece pelo da aula 03.</p></div></div>
+      <div class="st"><div class="body"><h3>Preencha bio e foto</h3><p>Uma linha. Sem enrolação, sem "apaixonado por tecnologia".</p></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Abra <span class="code-inline">github.com/seu-usuario</span> numa <strong>janela anônima</strong>. É assim que estranhos veem o seu perfil — e é a única prova que vale.</p>
+    </div>
+  </section>
+
+  <!-- 19 ORGANIZACOES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>organizações</div>
+    <h2>Quando o repositório não é seu</h2>
+    <p class="lead">Empresa, coletivo, grupo da faculdade: o dono do repositório não é uma pessoa, é uma <strong>organização</strong>. Você entra nela como membro.</p>
+    <div class="flow" style="margin:22px 0 6px">
+      <div class="node"><div class="ico">👤</div><b>conta pessoal</b><span>é você quem entra, com o seu usuário de sempre</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🏢</div><b>organização</b><span>dona dos repositórios, com faturamento e regras próprias</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">👥</div><b>time</b><span>um grupo de pessoas; o acesso é dado ao time, não a cada uma</span></div>
+    </div>
+    <ul class="clean" style="margin-top:20px">
+      <li>Você <strong>não cria outra conta</strong> pra trabalhar. É o mesmo usuário, com um chapéu a mais.</li>
+      <li>Dar acesso <strong>por time</strong> é o que mantém a coisa administrável: entrou alguém, põe no time; saiu, tira do time.</li>
+      <li>Times podem ter <strong>subtimes</strong>, e o subtime herda o acesso do time de cima.</li>
+      <li>Quem é de fora e precisa de acesso pontual entra como <strong>colaborador externo</strong> — vê aquele repositório, e só.</li>
+    </ul>
+  </section>
+
+  <!-- 20 PERMISSOES -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>permissões</div>
+    <h2>Os cinco níveis, do menor ao maior</h2>
+    <table>
+      <tr><th>nível</th><th>o que você consegue fazer</th><th>quem costuma ter</th></tr>
+      <tr><td><code>read</code></td><td>Ver, clonar, abrir issue e comentar. <strong>Não</strong> consegue dar push.</td><td>Todo mundo da empresa, em repositório interno.</td></tr>
+      <tr><td><code>triage</code></td><td>Tudo de read, mais organizar o que os outros abriram: rotular, fechar, reabrir, marcar duplicado. Continua sem push.</td><td>Quem cuida da fila de issues sem escrever código.</td></tr>
+      <tr><td><code>write</code></td><td>Push nas branches não protegidas, criar branch, abrir e revisar pull request. <strong>É o nível de quem programa.</strong></td><td>O time de desenvolvimento.</td></tr>
+      <tr><td><code>maintain</code></td><td>Tudo de write, mais cuidar do repositório: descrição, tópicos, releases. Sem apagar nem mexer em quem tem acesso.</td><td>Quem toca o projeto no dia a dia.</td></tr>
+      <tr><td><code>admin</code></td><td>Tudo. Trocar visibilidade, dar e tirar acesso, proteger a branch, transferir, <strong>apagar o repositório</strong>.</td><td>Uma ou duas pessoas. Nunca o time inteiro.</td></tr>
+    </table>
+    <p class="note">Os cinco níveis são de <strong>repositório de organização</strong>. Em repositório de conta pessoal existem só duas figuras: o dono e os colaboradores convidados. Proteger a <span class="code-inline">main</span> pra que nem quem tem write faça besteira é a <strong>aula 07</strong>.</p>
+  </section>
+
+  <!-- 21 ERROS COMUNS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>erros comuns</div>
+    <h2>O que costuma dar errado aqui</h2>
+    <table>
+      <tr><th>o que acontece</th><th>por quê</th><th>o conserto</th></tr>
+      <tr><td>O README de perfil não aparece</td><td>O repositório não tem o nome exato do usuário, está privado, ou o arquivo não está na raiz.</td><td>Confira as três coisas. O nome diferencia maiúscula de minúscula.</td></tr>
+      <tr><td>O About não mostra a licença</td><td>O texto do <code>LICENSE</code> foi editado, ou o arquivo tem outro nome.</td><td>Refaça pelo assistente <strong>Choose a license template</strong> e mude só ano e nome.</td></tr>
+      <tr><td>Commitei o <code>.env</code> e o repositório é público</td><td>O <code>.gitignore</code> veio depois. O segredo está no histórico.</td><td><strong>Rotacione a chave agora</strong>, depois limpe. Isso é a <strong>aula 09</strong>.</td></tr>
+      <tr><td>O README saiu tudo numa linha só</td><td>Faltou linha em branco entre os parágrafos.</td><td>Uma linha vazia separando cada bloco. Markdown não junta parágrafos separados.</td></tr>
+      <tr><td>Deram acesso à org e eu não consigo dar push</td><td>Você tem <code>read</code> ou <code>triage</code>.</td><td>Peça <code>write</code> a um admin — e diga em qual repositório.</td></tr>
+      <tr><td>Tirei a pessoa do repositório privado</td><td>O clone que ela fez continua na máquina dela.</td><td>Não tem como recolher. Trate como vazado o que era sensível.</td></tr>
+    </table>
+  </section>
+
+  <!-- 22 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">🪪</div>
+    <div class="eyebrow"><span class="b">fim da aula 04</span> · o que você já sabe fazer</div>
+    <h1 style="max-width:22ch">O seu repositório <span class="grad">se apresenta</span> sozinho</h1>
+    <p class="lead" style="max-width:60ch;margin-top:16px">README com as quatro seções, licença escolhida de propósito, About preenchido, perfil com README e repositórios fixados — e você já sabe o que consegue fazer dentro de uma organização.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">README</span><span class="pill on">LICENSE</span><span class="pill on">CONTRIBUTING</span><span class="pill on">markdown</span><span class="pill on">perfil</span><span class="pill on">org e times</span><span class="pill on">read → admin</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Aula 05:</strong> issues, labels, milestones e Projects — o trabalho combinado antes do código. <strong>Aula 06:</strong> pull request e code review, o coração do ciclo.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)">refaça tudo sozinho com o <a href="manual.html" style="color:var(--str)">manual desta aula</a> · consulta rápida no <a href="https://cdn.aulas.umlequedetecnologia.com.br/public/guias/github/github.html" style="color:var(--str)">guia de GitHub</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 22</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>

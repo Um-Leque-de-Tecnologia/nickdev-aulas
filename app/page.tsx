@@ -77,6 +77,17 @@ const CARTOES: Record<string, Cartao> = {
     ),
     meta: "16 aulas de 4h · em breve",
   },
+  "introducao-github": {
+    titulo: "Introdução ao GitHub",
+    texto: (
+      <>
+        O ciclo de vida do desenvolvimento na ordem em que ele acontece: issue,
+        branch, <span className="mono">commit</span>, Pull Request, code review,
+        CI com Actions e release. Serve para qualquer linguagem.
+      </>
+    ),
+    meta: "12 aulas · em breve",
+  },
   /*
     Fica no mapa mesmo sem aparecer hoje: este objeto é a CÓPIA de cada curso,
     e a cópia não deixa de existir porque o curso saiu da vitrine. Se um dia o
