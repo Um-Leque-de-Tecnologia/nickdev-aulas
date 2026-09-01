@@ -86,7 +86,7 @@ const CARTOES: Record<string, Cartao> = {
         CI com Actions e release. Serve para qualquer linguagem.
       </>
     ),
-    meta: "12 aulas · em breve",
+    meta: "12 aulas · material publicado",
   },
   /*
     Fica no mapa mesmo sem aparecer hoje: este objeto é a CÓPIA de cada curso,

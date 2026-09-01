@@ -1,3 +1,6 @@
+import BadgesDeTecnologia from "@/components/BadgesDeTecnologia";
+import { materialDaAula } from "@/lib/cdn";
+
 /**
  * O conteudo da landing do curso, sem moldura nenhuma.
  *
@@ -10,12 +13,10 @@
  * publica, mostrar o mesmo curso na area logada exigia manter duas copias
  * em dia na mao -- e a segunda ia ficar para tras no primeiro dia corrido.
  *
- * NOTA: nenhuma aula tem material publicado no CDN ainda, entao todas as
- * entradas saem sem `materiais` e caem sozinhas no `.lesson.soon`. Quando a
- * primeira subir, importe `materialDaAula` de `@/lib/cdn` e preencha
- * `materiais` naquela aula -- o card muda sozinho, sem mexer no resto. Linkar
- * arquivo que ainda nao existe e 404 na cara da turma; "em breve" diz a mesma
- * coisa sem quebrar nada.
+ * Toda aula tem os dois materiais, e por isso `materiaisDaAula` recebe so o
+ * slug da pasta: um par fixo nao precisa ser escrito doze vezes. Aula que um
+ * dia ganhe material extra passa a listar a mao; ate la, a funcao e a fonte
+ * unica dos rotulos, e trocar "Slides" por outra coisa e uma linha.
  */
 
 type Material = {
@@ -24,6 +25,20 @@ type Material = {
   primary?: boolean;
   externo?: boolean;
 };
+
+/**
+ * Os dois arquivos de uma aula, no CDN.
+ *
+ * `externo` porque o destino e outro dominio (o CDN), e nao uma rota do app:
+ * sem `target="_blank"` a pessoa perderia a pagina do curso ao abrir um deck.
+ */
+function materiaisDaAula(slug: string): Material[] {
+  const base = materialDaAula("introducao-github", slug);
+  return [
+    { href: `${base}/slides.html`, label: "▶ Slides da aula", primary: true, externo: true },
+    { href: `${base}/manual.html`, label: "📘 Manual passo a passo", externo: true },
+  ];
+}
 
 type Aula = {
   n: string;
@@ -54,6 +69,7 @@ const GIT: Aula[] = [
         histórico.
       </>
     ),
+    materiais: materiaisDaAula("aula-01-controle-de-versao"),
   },
   {
     n: "02",
@@ -70,6 +86,7 @@ const GIT: Aula[] = [
         como adivinhar qual das duas versões você quis.
       </>
     ),
+    materiais: materiaisDaAula("aula-02-branches-e-merge"),
   },
   {
     n: "03",
@@ -91,6 +108,7 @@ const GIT: Aula[] = [
         resposta.
       </>
     ),
+    materiais: materiaisDaAula("aula-03-repositorio-remoto"),
   },
 ];
 
@@ -111,6 +129,7 @@ const PLATAFORMA: Aula[] = [
         saber o que consegue fazer lá dentro.
       </>
     ),
+    materiais: materiaisDaAula("aula-04-anatomia-do-github"),
   },
   {
     n: "05",
@@ -127,6 +146,7 @@ const PLATAFORMA: Aula[] = [
         junto: backlog, refinamento, trabalho em andamento, pronto.
       </>
     ),
+    materiais: materiaisDaAula("aula-05-issues-e-projects"),
   },
   {
     n: "06",
@@ -147,6 +167,7 @@ const PLATAFORMA: Aula[] = [
         certo ser chamado sozinho.
       </>
     ),
+    materiais: materiaisDaAula("aula-06-pull-request-e-code-review"),
   },
   {
     n: "07",
@@ -164,6 +185,7 @@ const PLATAFORMA: Aula[] = [
         merge.
       </>
     ),
+    materiais: materiaisDaAula("aula-07-fluxos-e-branch-protection"),
   },
 ];
 
@@ -181,6 +203,7 @@ const CICLO: Aula[] = [
         o time aprende a ignorar. Fecha com o badge de status no README.
       </>
     ),
+    materiais: materiaisDaAula("aula-08-github-actions"),
   },
   {
     n: "09",
@@ -197,6 +220,7 @@ const CICLO: Aula[] = [
         foi para o histórico: rotacionar primeiro, limpar depois.
       </>
     ),
+    materiais: materiaisDaAula("aula-09-qualidade-automatica"),
   },
   {
     n: "10",
@@ -214,6 +238,7 @@ const CICLO: Aula[] = [
         provedor, e como voltar a versão anterior sem apagar histórico.
       </>
     ),
+    materiais: materiaisDaAula("aula-10-release-e-deploy"),
   },
   {
     n: "11",
@@ -234,6 +259,7 @@ const CICLO: Aula[] = [
         dificilmente se perde de verdade.
       </>
     ),
+    materiais: materiaisDaAula("aula-11-desfazendo"),
   },
   {
     n: "12",
@@ -251,6 +277,7 @@ const CICLO: Aula[] = [
         depois.
       </>
     ),
+    materiais: materiaisDaAula("aula-12-open-source"),
   },
 ];
 
@@ -292,7 +319,7 @@ function ListaDeAulas({ aulas }: { aulas: Aula[] }) {
 export default function IntroducaoGithub() {
   return (
     <>
-      <div className="eyebrow">Curso · 12 aulas · em breve</div>
+      <div className="eyebrow">Curso · 12 aulas · material publicado</div>
       <h1>
         Introdução ao <span className="grad-text">GitHub</span>
       </h1>
@@ -305,6 +332,7 @@ export default function IntroducaoGithub() {
         PR. Serve para qualquer linguagem — aqui o assunto é o <em>processo</em>,
         não a stack.
       </p>
+      <BadgesDeTecnologia tecnologias={["github"]} />
       <div className="brand-rule" />
 
       <div className="section-label">Projeto do curso</div>

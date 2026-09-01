@@ -64,6 +64,13 @@ export const GUIAS: Guia[] = [
     emoji: "🌱",
     resumo: "Injeção de dependência, autoconfiguração e o caminho até uma API REST no ar.",
   },
+  {
+    slug: "github",
+    nome: "GitHub",
+    emoji: "🐙",
+    resumo:
+      "O ciclo inteiro numa página: commit, branch, conflito, Pull Request, code review, Actions e release.",
+  },
 ];
 
 /** Onde o guia é servido. São arquivos estáticos, não rotas do app. */

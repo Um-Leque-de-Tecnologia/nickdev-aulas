@@ -89,15 +89,7 @@ export const COURSES: Course[] = [
     summary:
       "O ciclo de vida do desenvolvimento na prática: commits, branches, Pull Request, code review, GitHub Actions, branch protection e release.",
     href: "/cursos/introducao-github",
-    /*
-      Vazio de propósito, e não por esquecimento: não existe guia de Git nem de
-      GitHub em `lib/guias.ts`, e inventar um slug aqui quebraria em dois
-      lugares — `guiasDe()` erra alto no badge da landing, e o chip do filtro do
-      painel apontaria para um guia que o CDN devolve como 404. O preço é que
-      este curso só aparece no painel pelo chip "Todas" e pela busca. No dia em
-      que o guia de Git existir, é uma linha em `lib/guias.ts` e `["git"]` aqui.
-    */
-    technologies: [],
+    technologies: ["github"],
     access: "public",
   },
   {
