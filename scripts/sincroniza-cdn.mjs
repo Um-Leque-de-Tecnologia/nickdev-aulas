@@ -27,7 +27,7 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const API = process.env.AULAS_API ?? "https://api.aulas.umlequedetecnologia.com.br";
+const API = process.env.AULAS_API ?? "https://api.umlequedetecnologia.com.br/aulas";
 const EXECUTAR = process.argv.includes("--executar");
 const SO_CURSO = (process.argv.find((a) => a.startsWith("--curso=")) ?? "").split("=")[1];
 
