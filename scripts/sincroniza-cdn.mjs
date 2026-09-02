@@ -348,6 +348,12 @@ const NOME_DO_GUIA = {
 const TITULO_DA_AULA = {
   "introducao-spring-boot/aula-03-api-rest": "API REST: recursos, verbos e status",
 
+  // As tres primeiras de Introducao ao Next.js nasceram com o titulo derivado
+  // do slug, e nao ha PATCH para consertá-las. Da quarta em diante o titulo e
+  // escrito aqui ANTES da primeira publicacao, e e o mesmo de
+  // `components/cursos/IntroducaoNextjs.tsx`.
+  "introducao-nextjs/aula-04-data-fetching": "Data fetching e renderização",
+
   // As doze de Introdução ao GitHub, cadastradas antes da primeira publicação.
   // Os títulos são os mesmos de `components/cursos/IntroducaoGithub.tsx`, para
   // a API e a landing não contarem histórias diferentes.

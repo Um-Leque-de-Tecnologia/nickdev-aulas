@@ -17,6 +17,7 @@ import { materialDaAula } from "@/lib/cdn";
 const AULA_01 = materialDaAula("introducao-nextjs", "aula-01-abertura-fundamentos");
 const AULA_02 = materialDaAula("introducao-nextjs", "aula-02-roteamento-app-router");
 const AULA_03 = materialDaAula("introducao-nextjs", "aula-03-server-client");
+const AULA_04 = materialDaAula("introducao-nextjs", "aula-04-data-fetching");
 const PROJETO = materialDaAula("introducao-nextjs", "projeto");
 
 type Aula = {
@@ -27,19 +28,6 @@ type Aula = {
 };
 
 const AULAS: Aula[] = [
-  {
-    n: "04",
-    data: "02/09",
-    titulo: "Data fetching e renderização",
-    desc: (
-      <>
-        <span className="mono">fetch</span> com cache; revalidação (ISR);{" "}
-        <span className="mono">generateStaticParams</span>; static vs dynamic;
-        streaming com <span className="mono">Suspense</span>, agora que a espera
-        é de verdade; Partial Prerendering; Metadata API.
-      </>
-    ),
-  },
   {
     n: "05",
     data: "09/09",
@@ -377,6 +365,56 @@ export default function IntroducaoNextjs() {
                 🧩 Código do desafio
               </a>
               <a className="mat" href={`${AULA_03}/modelo-resposta.html`}>
+                👁️ Prévia da resposta
+              </a>
+              <a className="mat" href={`${PROJETO}/brief.html`}>
+                💼 Briefing do projeto
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="lesson">
+          <div className="idx">04</div>
+          <div className="body">
+            <h3>
+              A página que busca{" "}
+              <span
+                className="mono"
+                style={{ fontSize: 13, color: "var(--text-3)" }}
+              >
+                · 02/09
+              </span>
+            </h3>
+            <p>
+              Os dados saem de dentro do projeto e passam a vir de fora — e com
+              isso aparece uma coisa que o curso ainda não tinha: a{" "}
+              <strong>espera</strong>. Server Component{" "}
+              <span className="mono">async</span>; o{" "}
+              <span className="mono">fetch</span> que, no Next 16,{" "}
+              <strong>não guarda nada por padrão</strong>;{" "}
+              <span className="mono">revalidate</span> e ISR;{" "}
+              <span className="mono">generateStaticParams</span> e a legenda do{" "}
+              <span className="mono">build</span> — estático{" "}
+              <span className="mono">○</span> contra dinâmico{" "}
+              <span className="mono">ƒ</span>. Fecha com streaming por{" "}
+              <span className="mono">Suspense</span>, agora que há o que
+              esperar, e a Metadata API dando um título de aba a cada rota.
+            </p>
+            <div className="mats">
+              <a className="mat primary" href={`${AULA_04}/slides.html`}>
+                ▶ Slides da aula
+              </a>
+              <a className="mat" href={`${AULA_04}/exercicios.html`}>
+                🧪 Exercícios em aula
+              </a>
+              <a className="mat" href={`${AULA_04}/desafio.html`}>
+                🎯 Desafio técnico
+              </a>
+              <a className="mat" href={`${AULA_04}/codigos-desafio.html`}>
+                🧩 Código do desafio
+              </a>
+              <a className="mat" href={`${AULA_04}/modelo-resposta.html`}>
                 👁️ Prévia da resposta
               </a>
               <a className="mat" href={`${PROJETO}/brief.html`}>

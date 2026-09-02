@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código do desafio 04 — O dado sai do arquivo, linha por linha · Introdução ao Next.js · NickDev</title>
+<meta name="description" content="O código das quatro frentes do desafio 04 comentado linha a linha: lib/api.ts, generateStaticParams, generateMetadata, error.tsx e Suspense.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E;
+  --magenta:#F24487; --pink:#E73982; --purple:#7B4FD0;
+  --pink-light:#E88BB8; --purple-light:#A98CE0; --green:#5fd08a;
+  --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+  --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+  --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+  --grad-text:linear-gradient(100deg,#F24487 10%,#E73982 45%,#7B4FD0 90%);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad-x:clamp(20px,5vw,64px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-2);background:rgba(16,13,27,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line-strong);padding:7px 13px;border-radius:100px;transition:.2s}
+.voltar:hover{color:var(--pink-light);border-color:var(--pink-light)}
+
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(231,57,130,.16),transparent 62%)}
+.glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+
+.wrap{max-width:960px;margin:0 auto;padding:clamp(48px,6vw,72px) var(--pad-x) 70px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.head img{height:38px}
+.head .word{font-weight:700;font-size:18px}
+
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:14px}
+h1{font-weight:700;font-size:clamp(30px,5.4vw,52px);line-height:1.05;letter-spacing:-.03em}
+.lead{font-size:clamp(16px,1.7vw,19px);color:var(--text-2);margin-top:16px}
+.rule{width:110px;height:4px;border-radius:4px;background:var(--grad);margin:24px 0 0}
+
+.goal{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:14px;padding:20px 22px;margin-top:16px}
+.goal .ico{font-size:24px;line-height:1}
+.goal h3{font-size:16.5px;margin-bottom:4px}
+.goal p{color:var(--text-2);font-size:14.5px}
+.goal.roxo{border-left-color:var(--purple)}
+
+.label{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:48px 0 14px;display:flex;align-items:center;gap:12px}
+.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+pre{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.72;color:#d8d3e6;white-space:pre}
+pre .kw{color:#F24487}pre .ty{color:#7B9FE0}pre .st{color:#A98CE0}pre .fn{color:#E88BB8}pre .cm{color:#6f6a83}
+pre b{color:var(--text);font-weight:500}
+pre .hl{color:#F24487;font-weight:700}
+.terminal{background:#0b0913;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:12px;font-family:var(--mono);font-size:12.5px;line-height:1.8;white-space:pre;overflow-x:auto}
+.terminal .p{color:var(--text-3)}
+.terminal .out{color:#9ee39e}
+.terminal .cm{color:#6f6a83}
+code{font-family:var(--mono);font-size:.9em;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px;color:var(--pink-light)}
+
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);color:var(--text-2);vertical-align:top}
+th{color:var(--text);font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+td b{color:var(--text)}
+tr:last-child td{border-bottom:0}
+
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13.5px;padding:12px 20px;border-radius:100px;border:1px solid var(--line-strong);color:var(--text);transition:.2s}
+.btn:hover{border-color:var(--pink-light);color:var(--pink-light)}
+.btn.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:'Space Grotesk',sans-serif}
+
+.foot{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-4)}
+
+  .arq{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);
+    border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:22px}
+  .arq + pre{border-radius:0 12px 12px 12px;margin-top:-1px}
+  .audit{border-collapse:collapse;width:100%;margin-top:14px;font-size:14px}
+  .audit th,.audit td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  .audit th{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  .audit td{color:var(--text-2)}
+  .audit td:first-child{font-family:var(--mono);color:var(--pink-light);white-space:nowrap}
+  .audit tr:last-child td{border-bottom:0}
+  .porque{border:1px solid rgba(123,79,208,.4);background:rgba(123,79,208,.07);border-radius:10px;padding:13px 17px;margin-top:13px}
+  .porque b{color:var(--purple-light);font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px}
+  .porque p{font-size:14.5px;color:var(--text-2);margin:0}
+  .porque p + p{margin-top:8px}
+
+  /* ---- Aula 03: cabeçalho de frente ---- */
+  /* As quatro frentes têm cor fixa no curso inteiro (1 magenta, 2 roxo, 3 verde,
+     4 rosa claro). Repetir a cor aqui é o que faz cada pessoa achar a própria
+     parte rolando a página, sem precisar ler todos os títulos. */
+  .frente{border-top:1px solid var(--line-strong);margin-top:56px;padding-top:28px}
+  .frente-hd{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  .frente-hd .n{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--bg);
+    background:var(--magenta);padding:4px 11px;border-radius:999px;letter-spacing:.05em}
+  .frente-hd h2{font-size:clamp(21px,3vw,27px);letter-spacing:-.02em;margin:0}
+  .frente-hd .quem{font-family:var(--mono);font-size:12px;color:var(--text-3);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;margin-left:auto}
+  .frente .obj{font-size:15px;color:var(--text-2);margin:14px 0 0;border-left:3px solid var(--magenta);padding-left:13px}
+  .frente.f1 .n{background:#F24487}.frente.f1 .obj{border-left-color:#F24487}.frente.f1 h2{color:#F24487}
+  .frente.f2 .n{background:#7B4FD0}.frente.f2 .obj{border-left-color:#7B4FD0}.frente.f2 h2{color:#A98CE0}
+  .frente.f3 .n{background:#5fd08a}.frente.f3 .obj{border-left-color:#5fd08a}.frente.f3 h2{color:#5fd08a}
+  .frente.f4 .n{background:#E88BB8}.frente.f4 .obj{border-left-color:#E88BB8}.frente.f4 h2{color:#E88BB8}
+
+  /* ---- Aula 03: variações da caixa .goal ---- */
+  /* O molde só trazia .roxo. As frentes 3 e 4 precisam da própria cor para a
+     caixa de aviso não brigar com o cabeçalho colorido logo acima dela. */
+  .goal.verde{border-left-color:var(--green)}
+  .goal.rosa{border-left-color:var(--pink-light)}
+  .goal p + p{margin-top:8px}
+  .goal ul{margin:8px 0 0;padding-left:20px;color:var(--text-2);font-size:14.5px}
+  .goal li{margin:4px 0}
+  .goal li b{color:var(--text)}
+  .goal a,.porque a,td a,.mini a{color:var(--pink-light);text-decoration:underline}
+
+  /* ---- Aula 03: grade do "onde isso continua" ---- */
+  /* Cinco aulas futuras, uma por cartão, com a cor da frente que cada uma
+     continua. Vira pilha no celular sem perder a marcação de cor. */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .mini{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line-strong);
+    border-radius:12px;padding:15px 17px;font-size:14px;color:var(--text-2)}
+  .mini b{color:var(--text);display:block;margin-bottom:4px;font-size:14.5px}
+  .mini .q{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);display:block;margin-bottom:7px}
+  .mini.f1{border-left-color:#F24487}.mini.f2{border-left-color:#7B4FD0}
+  .mini.f3{border-left-color:#5fd08a}.mini.f4{border-left-color:#E88BB8}
+
+  /* ---- Aula 03: tabela dos erros ---- */
+  /* A primeira coluna é código escrito errado — mono e estreita, para a coluna
+     do meio (o que a pessoa vê na tela) ficar com o espaço. */
+  table.erros td:first-child{font-family:var(--mono);font-size:13px;color:var(--pink-light);width:29%}
+  table.erros td:first-child code{background:none;padding:0}
+
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  @media(max-width:560px){
+    .goal{flex-direction:column;gap:10px}
+    .frente-hd .quem{margin-left:0}
+    table.erros td:first-child{width:auto}
+  }
+
+  /* ---- Aula 04: o JSON nao e TypeScript ------------------------------- */
+  /* Metade dos blocos desta pagina e JSON, e nao codigo. Sem uma cor propria
+     para a CHAVE, o JSON sai quase todo roxo (tudo vira string) e some a
+     unica coisa que o aluno precisa ver: que a chave tambem leva aspas
+     duplas, ao contrario do objeto TypeScript de onde ele veio. */
+  pre .ch{color:#E88BB8}
+  pre .nm{color:#5fd08a}
+
+  /* ---- Aula 04: o simbolo do build ------------------------------------ */
+  /* Mesma cor dos slides e do desafio: verde para o que ja esta pronto,
+     magenta para o que ainda custa uma volta ao servidor. */
+  .terminal .est{color:#5fd08a;font-weight:700}
+  .terminal .din{color:#F24487;font-weight:700}
+
+</style>
+</head>
+<body>
+
+<a class="voltar" href="https://aulas.umlequedetecnologia.com.br/cursos/introducao-nextjs">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+
+  <div class="head">
+    <img src="https://aulas.umlequedetecnologia.com.br/assets/logo/logo-nickdeve.svg" alt="">
+    <span class="word">NickDev</span>
+  </div>
+
+  <div class="eyebrow">Código do desafio · Aula 04</div>
+  <h1>O dado sai do arquivo, <span class="grad">linha por linha</span></h1>
+  <p class="lead">
+    O código das quatro frentes do <a href="desafio.html">desafio 04</a>,
+    comentado. <b>Copiar daqui é o esperado</b> — o que não vale é copiar sem
+    ler os comentários, porque metade da nota desta semana é saber explicar por
+    que a linha está ali.
+  </p>
+  <div class="rule"></div>
+
+  <div class="goal">
+    <span class="ico">🧭</span>
+    <div>
+      <h3>Como usar esta página</h3>
+      <p>Ache a sua frente pela cor — a mesma dos slides, do briefing e do
+      desafio. Leia a sua inteira, e depois <b>dê uma passada rápida nas outras
+      três</b>: é o que vai permitir revisar o Pull Request de quem senta do
+      lado.</p>
+      <p>Os nomes de arquivo, componente e função aqui são <b>sugestões</b>. O
+      que não é sugestão: a URL mora num arquivo só, <code>resposta.ok</code> é
+      conferido antes do <code>.json()</code>, e nenhum array de dados sobra
+      dentro de <code>app/</code>.</p>
+    </div>
+  </div>
+
+  <div class="label">O ponto de partida — de todo mundo</div>
+
+  <div class="goal roxo">
+    <span class="ico">📄</span>
+    <div>
+      <h3>Os tipos deixam de morar junto com os dados</h3>
+      <p>Na aula 03, <code>data/vagas.ts</code> guardava as duas coisas: o tipo e
+      o array. Agora o array vai para o JSON — e como JSON não tem tipo,
+      <b>o TypeScript precisa continuar tendo o dele em algum lugar</b>. Esse
+      lugar é <code>lib/tipos.ts</code>, e é ele que faz o editor continuar
+      completando <code>vaga.senioridade</code> depois do <code>fetch</code>.</p>
+    </div>
+  </div>
+
+  <div class="arq">lib/tipos.ts</div>
+<pre><span class="cm">// Só os tipos. Nenhum dado. Este arquivo não sabe de onde a vaga vem —</span>
+<span class="cm">// e é por isso que ele continua valendo quando a fonte trocar de endereço.</span>
+
+<span class="kw">export type</span> <span class="ty">Vaga</span> = {
+  id: <span class="ty">string</span>;
+  titulo: <span class="ty">string</span>;
+  empresa: <span class="ty">string</span>;
+  empresaSlug: <span class="ty">string</span>;
+  area: <span class="ty">string</span>;
+  senioridade: <span class="ty">string</span>;
+  local: <span class="ty">string</span>;
+  aceitaIniciante: <span class="kw">boolean</span>;
+  descricao: <span class="ty">string</span>;
+};
+
+<span class="kw">export type</span> <span class="ty">Empresa</span> = {
+  slug: <span class="ty">string</span>;
+  nome: <span class="ty">string</span>;
+  sobre: <span class="ty">string</span>;
+  site: <span class="ty">string</span>;
+};</pre>
+
+  <div class="arq">dados/vagas.json — repare no que mudou de <code>.ts</code> para <code>.json</code></div>
+<pre>[
+  {
+    <span class="ch">"id"</span>: <span class="st">"1"</span>,                          <span class="cm">// aspas duplas na CHAVE também</span>
+    <span class="ch">"titulo"</span>: <span class="st">"Pessoa Desenvolvedora Front-end Júnior"</span>,
+    <span class="ch">"empresa"</span>: <span class="st">"Aurora Tech"</span>,
+    <span class="ch">"empresaSlug"</span>: <span class="st">"aurora-tech"</span>,     <span class="cm">// tem que existir no empresas.json</span>
+    <span class="ch">"area"</span>: <span class="st">"Front-end"</span>,
+    <span class="ch">"senioridade"</span>: <span class="st">"Júnior"</span>,
+    <span class="ch">"local"</span>: <span class="st">"Remoto"</span>,
+    <span class="ch">"aceitaIniciante"</span>: <span class="kw">true</span>,
+    <span class="ch">"descricao"</span>: <span class="st">"..."</span>
+  }                                <span class="cm">// ← SEM vírgula depois do último</span>
+]</pre>
+
+  <div class="porque">
+    <b>por que isto quebra tanto</b>
+    <p>O TypeScript é generoso: aceita aspas simples, chave sem aspas, comentário
+    e vírgula sobrando no fim. <b>JSON não aceita nada disso.</b> O arquivo que
+    você copiou e colou parece igual e não é — e o erro aparece do lado do
+    colega, no <code>.json()</code>, com uma mensagem que não fala do seu
+    arquivo.</p>
+    <p>Cole no validador do editor (ou em qualquer validador de JSON online)
+    <b>antes</b> do push. Trinta segundos aqui, uma hora a menos no grupo.</p>
+  </div>
+
+  <!-- ============================ FRENTE 1 ============================ -->
+  <div class="frente f1">
+    <div class="frente-hd"><span class="n">FRENTE 1</span><h2>Vaga</h2><span class="quem">fetch · generateStaticParams</span></div>
+    <p class="obj">Escrever o arquivo que a equipe inteira vai usar — e pré-gerar as doze páginas de detalhe no build.</p>
+  </div>
+
+  <div class="arq">lib/api.ts — <b>o único arquivo do projeto que conhece a URL</b></div>
+<pre><span class="kw">import type</span> { <span class="ty">Vaga</span>, <span class="ty">Empresa</span> } <span class="kw">from</span> <span class="st">"@/lib/tipos"</span>;
+
+<span class="cm">// A URL mora aqui, e só aqui. Quando a fonte trocar — a API do Spring Boot,</span>
+<span class="cm">// um banco, o que for — é ESTA linha que muda, e nenhuma página fica sabendo.</span>
+<span class="kw">const</span> FONTE = <span class="st">"https://raw.githubusercontent.com/SUA-EQUIPE/leque-de-vagas/main/dados"</span>;
+
+<span class="cm">// 60 segundos: uma vaga nova demora no máximo um minuto para aparecer, e o</span>
+<span class="cm">// site não bate no GitHub a cada visita. Escolha o SEU número e explique.</span>
+<span class="kw">const</span> CACHE = { next: { revalidate: <span class="nm">60</span>, tags: [<span class="st">"vagas"</span>] } };
+
+<span class="kw">export async function</span> <span class="fn">listarVagas</span>(): <span class="ty">Promise</span>&lt;<span class="ty">Vaga</span>[]&gt; {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">`${FONTE}/vagas.json`</span>, CACHE);
+
+  <span class="cm">// A LINHA QUE POUPA UMA HORA. Sem ela, um 404 do GitHub vira uma página</span>
+  <span class="cm">// de erro em HTML, e o .json() abaixo quebra com "Unexpected token '&lt;'"</span>
+  <span class="cm">// — uma mensagem que não fala nem da URL, nem do arquivo.</span>
+  <span class="kw">if</span> (!resposta.ok) {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="st">`vagas.json respondeu ${resposta.status}`</span>);
+  }
+
+  <span class="kw">return</span> resposta.<span class="fn">json</span>();
+}
+
+<span class="cm">// Buscar UMA vaga é buscar todas e achar. Parece desperdício e não é: as</span>
+<span class="cm">// duas chamadas são o MESMO fetch, com a mesma URL e as mesmas opções —</span>
+<span class="cm">// o Next junta as duas num pedido só dentro do mesmo request.</span>
+<span class="kw">export async function</span> <span class="fn">buscarVaga</span>(id: <span class="ty">string</span>): <span class="ty">Promise</span>&lt;<span class="ty">Vaga</span> | <span class="kw">undefined</span>&gt; {
+  <span class="kw">const</span> vagas = <span class="kw">await</span> <span class="fn">listarVagas</span>();
+  <span class="kw">return</span> vagas.<span class="fn">find</span>((vaga) =&gt; vaga.id === id);
+}
+
+<span class="kw">export async function</span> <span class="fn">listarEmpresas</span>(): <span class="ty">Promise</span>&lt;<span class="ty">Empresa</span>[]&gt; {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">`${FONTE}/empresas.json`</span>, {
+    next: { revalidate: <span class="nm">3600</span>, tags: [<span class="st">"empresas"</span>] },   <span class="cm">// empresa muda muito menos que vaga</span>
+  });
+  <span class="kw">if</span> (!resposta.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="st">`empresas.json respondeu ${resposta.status}`</span>);
+  <span class="kw">return</span> resposta.<span class="fn">json</span>();
+}
+
+<span class="kw">export async function</span> <span class="fn">buscarEmpresa</span>(slug: <span class="ty">string</span>): <span class="ty">Promise</span>&lt;<span class="ty">Empresa</span> | <span class="kw">undefined</span>&gt; {
+  <span class="kw">const</span> empresas = <span class="kw">await</span> <span class="fn">listarEmpresas</span>();
+  <span class="kw">return</span> empresas.<span class="fn">find</span>((empresa) =&gt; empresa.slug === slug);
+}</pre>
+
+  <div class="porque">
+    <b>por que dois revalidate diferentes</b>
+    <p>Porque a pergunta "quão fresco esse dado precisa estar?" tem resposta
+    diferente para cada dado. Vaga entra e sai toda hora; o nome e o "sobre" de
+    uma empresa mudam uma vez por ano. Usar o mesmo número para os dois é não ter
+    feito a pergunta.</p>
+    <p><b>É isto que a correção vai olhar</b> — não o número em si. 3600 com um
+    motivo escrito vale mais do que 60 copiado do slide.</p>
+  </div>
+
+  <div class="arq">app/vagas/page.tsx — a listagem</div>
+<pre><span class="kw">import</span> { listarVagas } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+<span class="kw">import</span> MuralDeVagas <span class="kw">from</span> <span class="st">"@/components/MuralDeVagas"</span>;
+
+<span class="cm">// `async` é tudo o que essa página precisou ganhar. Ela roda no servidor</span>
+<span class="cm">// (provado no lab 1 da aula 03), então pode parar e esperar à vontade:</span>
+<span class="cm">// ninguém está olhando ainda.</span>
+<span class="kw">export default async function</span> <span class="fn">PaginaDeVagas</span>() {
+  <span class="kw">const</span> vagas = <span class="kw">await</span> <span class="fn">listarVagas</span>();
+
+  <span class="cm">// O MuralDeVagas continua sendo componente de CLIENTE, e continua com os</span>
+  <span class="cm">// filtros no useState. A aula 03 inteira fica de pé — o que mudou é só</span>
+  <span class="cm">// de onde vem a lista que ele recebe por prop.</span>
+  <span class="kw">return</span> &lt;<span class="ty">MuralDeVagas</span> vagas={vagas} /&gt;;
+}</pre>
+
+  <div class="arq">app/vagas/[id]/page.tsx — a página de detalhe</div>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+<span class="kw">import</span> { notFound } <span class="kw">from</span> <span class="st">"next/navigation"</span>;
+<span class="kw">import</span> { listarVagas, buscarVaga } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+
+<span class="cm">// Desde o Next 15, params é uma Promise. É por isso que ele leva await.</span>
+<span class="kw">type</span> <span class="ty">Props</span> = { params: <span class="ty">Promise</span>&lt;{ id: <span class="ty">string</span> }&gt; };
+
+<span class="cm">// ─── A LISTA DO QUE PRÉ-GERAR ──────────────────────────────────────────</span>
+<span class="cm">// O Next não tem como adivinhar QUAIS ids existem — a pasta [id] atende</span>
+<span class="cm">// infinitos endereços. Esta função conta. Ela roda UMA vez, no build.</span>
+<span class="kw">export async function</span> <span class="fn">generateStaticParams</span>() {
+  <span class="kw">const</span> vagas = <span class="kw">await</span> <span class="fn">listarVagas</span>();
+
+  <span class="cm">// A CHAVE tem que se chamar `id`, igual ao nome da pasta [id]. Nome</span>
+  <span class="cm">// errado não dá erro: simplesmente não gera nada, em silêncio.</span>
+  <span class="cm">// E o valor tem que ser TEXTO — endereço é texto.</span>
+  <span class="kw">return</span> vagas.<span class="fn">map</span>((vaga) =&gt; ({ id: <span class="fn">String</span>(vaga.id) }));
+}
+
+<span class="cm">// ─── O TÍTULO DA ABA ───────────────────────────────────────────────────</span>
+<span class="kw">export async function</span> <span class="fn">generateMetadata</span>({ params }: <span class="ty">Props</span>): <span class="ty">Promise</span>&lt;<span class="ty">Metadata</span>&gt; {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;
+  <span class="kw">const</span> vaga = <span class="kw">await</span> <span class="fn">buscarVaga</span>(id);
+
+  <span class="cm">// Aqui NÃO se chama notFound(): quem decide isso é a página. Esta função</span>
+  <span class="cm">// só precisa devolver um título que não minta.</span>
+  <span class="kw">if</span> (!vaga) <span class="kw">return</span> { title: <span class="st">"Vaga não encontrada · Leque de Vagas"</span> };
+
+  <span class="kw">return</span> {
+    title: <span class="st">`${vaga.titulo} · ${vaga.empresa}`</span>,
+    description: vaga.descricao.<span class="fn">slice</span>(<span class="nm">0</span>, <span class="nm">150</span>),
+  };
+}
+
+<span class="cm">// ─── A PÁGINA ──────────────────────────────────────────────────────────</span>
+<span class="kw">export default async function</span> <span class="fn">PaginaDaVaga</span>({ params }: <span class="ty">Props</span>) {
+  <span class="kw">const</span> { id } = <span class="kw">await</span> params;
+  <span class="kw">const</span> vaga = <span class="kw">await</span> <span class="fn">buscarVaga</span>(id);
+
+  <span class="cm">// FRENTE 3: o id que não existe. notFound() não devolve nada — ele</span>
+  <span class="cm">// interrompe a renderização e entrega o not-found.tsx da aula 02.</span>
+  <span class="kw">if</span> (!vaga) <span class="fn">notFound</span>();
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">article</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;{vaga.titulo}&lt;/<span class="ty">h1</span>&gt;
+      &lt;<span class="ty">DescricaoDaVaga</span> texto={vaga.descricao} /&gt;   <span class="cm">// o "ver mais" da aula 03</span>
+    &lt;/<span class="ty">article</span>&gt;
+  );
+}</pre>
+
+  <div class="porque">
+    <b>"mas isso não busca as vagas três vezes?"</b>
+    <p>Parece que sim: <code>generateStaticParams</code> chama
+    <code>listarVagas()</code>, <code>generateMetadata</code> chama
+    <code>buscarVaga()</code> — que chama <code>listarVagas()</code> — e a página
+    chama de novo. <b>Não busca.</b></p>
+    <p><code>generateStaticParams</code> roda uma vez, no build, e é outro
+    momento. E dentro de um mesmo pedido, dois <code>fetch</code> com a mesma URL
+    e as mesmas opções viram <b>um só</b>: é a <i>request memoization</i>, e ela
+    existe justamente para você poder escrever o código óbvio. Não invente um
+    cache seu por cima — o Next já fez.</p>
+  </div>
+
+<div class="terminal"><span class="p">$</span> npm run build   <span class="cm"># o que a frente 1 tem que ver, e colar no PR</span>
+
+Route (app)                          Size
+<span class="est">○</span> /vagas                             <span class="cm">6.4 kB</span>
+<span class="est">●</span> /vagas/[id]                        <span class="cm">3.2 kB</span>
+    ├ /vagas/1
+    ├ /vagas/2
+    └ <span class="cm">[+10 more paths]</span></div>
+
+  <!-- ============================ FRENTE 2 ============================ -->
+  <div class="frente f2">
+    <div class="frente-hd"><span class="n">FRENTE 2</span><h2>Empresa</h2><span class="quem">generateMetadata</span></div>
+    <p class="obj">A mesma mudança do lado das empresas, e cada página com o seu próprio título de aba — o que aparece quando alguém manda o link no grupo.</p>
+  </div>
+
+  <div class="arq">app/empresas/[slug]/page.tsx</div>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+<span class="kw">import</span> { notFound } <span class="kw">from</span> <span class="st">"next/navigation"</span>;
+<span class="kw">import</span> { listarEmpresas, buscarEmpresa, listarVagas } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+<span class="kw">import</span> AbasDaEmpresa <span class="kw">from</span> <span class="st">"@/components/AbasDaEmpresa"</span>;
+
+<span class="kw">type</span> <span class="ty">Props</span> = { params: <span class="ty">Promise</span>&lt;{ slug: <span class="ty">string</span> }&gt; };
+
+<span class="cm">// A pasta é [slug], então a chave é `slug`. Mesma regra da frente 1.</span>
+<span class="kw">export async function</span> <span class="fn">generateStaticParams</span>() {
+  <span class="kw">const</span> empresas = <span class="kw">await</span> <span class="fn">listarEmpresas</span>();
+  <span class="kw">return</span> empresas.<span class="fn">map</span>((empresa) =&gt; ({ slug: empresa.slug }));
+}
+
+<span class="kw">export async function</span> <span class="fn">generateMetadata</span>({ params }: <span class="ty">Props</span>): <span class="ty">Promise</span>&lt;<span class="ty">Metadata</span>&gt; {
+  <span class="kw">const</span> { slug } = <span class="kw">await</span> params;
+  <span class="kw">const</span> empresa = <span class="kw">await</span> <span class="fn">buscarEmpresa</span>(slug);
+  <span class="kw">if</span> (!empresa) <span class="kw">return</span> { title: <span class="st">"Empresa não encontrada · Leque de Vagas"</span> };
+
+  <span class="kw">return</span> {
+    title: <span class="st">`${empresa.nome} · Leque de Vagas`</span>,
+    description: empresa.sobre.<span class="fn">slice</span>(<span class="nm">0</span>, <span class="nm">150</span>),
+  };
+}
+
+<span class="kw">export default async function</span> <span class="fn">PaginaDaEmpresa</span>({ params }: <span class="ty">Props</span>) {
+  <span class="kw">const</span> { slug } = <span class="kw">await</span> params;
+
+  <span class="cm">// As duas buscas não dependem uma da outra, então elas podem acontecer</span>
+  <span class="cm">// AO MESMO TEMPO. Dois `await` em linhas separadas seriam uma espera</span>
+  <span class="cm">// atrás da outra — o dobro do tempo, de graça.</span>
+  <span class="kw">const</span> [empresa, vagas] = <span class="kw">await</span> <span class="ty">Promise</span>.<span class="fn">all</span>([
+    <span class="fn">buscarEmpresa</span>(slug),
+    <span class="fn">listarVagas</span>(),
+  ]);
+
+  <span class="kw">if</span> (!empresa) <span class="fn">notFound</span>();
+
+  <span class="cm">// O filtro acontece no SERVIDOR. O componente de cliente recebe só o que</span>
+  <span class="cm">// vai mostrar — mandar as 32 vagas para o navegador filtrar 3 é pagar</span>
+  <span class="cm">// banda por dado que ninguém vai ver.</span>
+  <span class="kw">const</span> vagasDaEmpresa = vagas.<span class="fn">filter</span>((vaga) =&gt; vaga.empresaSlug === empresa.slug);
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;{empresa.nome}&lt;/<span class="ty">h1</span>&gt;
+
+      {<span class="cm">/* AbasDaEmpresa continua cliente, continua com useState("sobre").</span>
+<span class="cm">          A aula 03 fica inteira de pé: só a origem dos dados mudou. */</span>}
+      &lt;<span class="ty">AbasDaEmpresa</span> empresa={empresa} vagas={vagasDaEmpresa} /&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre>
+
+  <div class="arq">app/empresas/page.tsx — metadata de rota fixa</div>
+<pre><span class="kw">import type</span> { <span class="ty">Metadata</span> } <span class="kw">from</span> <span class="st">"next"</span>;
+
+<span class="cm">// Rota sem [param] não precisa de função: o título não depende de dado.</span>
+<span class="cm">// Um objeto exportado basta, e ele substitui o title do layout nesta rota.</span>
+<span class="kw">export const</span> metadata: <span class="ty">Metadata</span> = {
+  title: <span class="st">"Empresas · Leque de Vagas"</span>,
+  description: <span class="st">"As empresas que publicam vagas para quem está migrando para tecnologia."</span>,
+};</pre>
+
+  <div class="porque">
+    <b>por que o título importa mais do que parece</b>
+    <p>Ele é o que aparece na aba, no histórico, no favorito, no resultado do
+    Google e no card que o WhatsApp monta quando alguém manda o link. Doze vagas
+    com o mesmo título "Leque de Vagas" são doze links indistinguíveis na tela de
+    quem recebeu.</p>
+    <p>É a coisa mais barata desta semana — três linhas — e a mais visível para
+    quem não é da equipe.</p>
+  </div>
+
+  <!-- ============================ FRENTE 3 ============================ -->
+  <div class="frente f3">
+    <div class="frente-hd"><span class="n">FRENTE 3</span><h2>Pessoa e candidatura</h2><span class="quem">notFound() · error.tsx · loading</span></div>
+    <p class="obj">Responder às duas perguntas que só passaram a existir hoje: e se a vaga não existir? e se a busca falhar?</p>
+  </div>
+
+  <div class="goal verde">
+    <span class="ico">🔀</span>
+    <div>
+      <h3>Duas coisas diferentes, e trocá-las é dizer a coisa errada</h3>
+      <ul>
+        <li><b><code>notFound()</code></b> — o que <b>não existe</b>. O endereço
+        está errado, ou a vaga saiu do ar. Recarregar não vai ajudar, e a
+        mensagem certa é "isso não existe (mais)".</li>
+        <li><b><code>error.tsx</code></b> — o que <b>falhou</b>. A rede caiu, o
+        GitHub estava fora, o JSON veio quebrado. Tentar de novo pode muito bem
+        funcionar, e a mensagem certa vem com um botão.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arq">app/vagas/[id]/error.tsx — <b>precisa</b> de "use client"</div>
+<pre><span class="st">"use client"</span>;   <span class="cm">// obrigatório: este arquivo tem onClick, e o React precisa</span>
+              <span class="cm">// dele no navegador para conseguir se recuperar do erro.</span>
+
+<span class="kw">export default function</span> <span class="fn">ErroDaVaga</span>({
+  error,
+  reset,
+}: {
+  error: <span class="ty">Error</span>;
+  reset: () =&gt; <span class="kw">void</span>;   <span class="cm">// o Next passa esta função. Ela tenta renderizar de novo.</span>
+}) {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">div</span> className=<span class="st">"erro"</span>&gt;
+      &lt;<span class="ty">h2</span>&gt;Não conseguimos carregar esta vaga&lt;/<span class="ty">h2</span>&gt;
+
+      {<span class="cm">/* Português de gente. NÃO mostre error.message para quem usa o site:</span>
+<span class="cm">          "fetch failed" não ajuda ninguém e ainda assusta. */</span>}
+      &lt;<span class="ty">p</span>&gt;A conexão com a nossa fonte de dados falhou. Isso costuma ser
+         momentâneo.&lt;/<span class="ty">p</span>&gt;
+
+      &lt;<span class="ty">button</span> type=<span class="st">"button"</span> onClick={() =&gt; <span class="fn">reset</span>()}&gt;
+        Tentar de novo
+      &lt;/<span class="ty">button</span>&gt;
+    &lt;/<span class="ty">div</span>&gt;
+  );
+}</pre>
+
+  <div class="arq">app/vagas/[id]/loading.tsx — o esqueleto do tamanho certo</div>
+<pre><span class="cm">// Este arquivo já existe desde a aula 02 e quase nunca aparecia — não havia</span>
+<span class="cm">// o que esperar. Agora há uma rede no caminho, e ele passa a ter trabalho.</span>
+
+<span class="kw">export default function</span> <span class="fn">Carregando</span>() {
+  <span class="kw">return</span> (
+    <span class="cm">// A REGRA: o esqueleto tem MAIS OU MENOS a altura do conteúdo real.</span>
+    <span class="cm">// Um "Carregando..." de uma linha no lugar de um bloco de 300px faz a</span>
+    <span class="cm">// página inteira pular quando o dado chega — e o dedo de quem já ia</span>
+    <span class="cm">// clicar acerta outra coisa.</span>
+    &lt;<span class="ty">div</span> className=<span class="st">"esqueleto"</span> aria-busy=<span class="st">"true"</span>&gt;
+      &lt;<span class="ty">div</span> className=<span class="st">"barra titulo"</span> /&gt;
+      &lt;<span class="ty">div</span> className=<span class="st">"barra"</span> /&gt;
+      &lt;<span class="ty">div</span> className=<span class="st">"barra"</span> /&gt;
+      &lt;<span class="ty">div</span> className=<span class="st">"barra curta"</span> /&gt;
+    &lt;/<span class="ty">div</span>&gt;
+  );
+}</pre>
+
+  <div class="porque">
+    <b>como testar sem esperar a rede cair</b>
+    <p><b>Para o <code>notFound()</code>:</b> abra <code>/vagas/999</code>. É só
+    isso.</p>
+    <p><b>Para o <code>error.tsx</code>:</b> troque uma letra da URL no
+    <code>lib/api.ts</code> por trinta segundos — <code>vagass.json</code> —
+    recarregue, tire o print, e desfaça. Combine com a frente 1 antes, senão ela
+    vai achar que quebrou alguma coisa.</p>
+  </div>
+
+  <!-- ============================ FRENTE 4 ============================ -->
+  <div class="frente f4">
+    <div class="frente-hd"><span class="n">FRENTE 4</span><h2>Busca e números</h2><span class="quem">Suspense · streaming · revalidate</span></div>
+    <p class="obj">Fazer a página aparecer antes de o bloco mais lento ficar pronto — sem que ela pule quando o dado chegar.</p>
+  </div>
+
+  <div class="arq">components/NumerosDoCatalogo.tsx</div>
+<pre><span class="kw">import</span> { listarVagas } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+
+<span class="cm">// A REGRA QUE ECONOMIZA UMA HORA: quem espera é este componente, e o await</span>
+<span class="cm">// mora AQUI DENTRO. Se a página fizer o await e passar o número por prop,</span>
+<span class="cm">// ela já esperou — e o Suspense em volta não tem mais nada para fazer.</span>
+<span class="kw">export default async function</span> <span class="fn">NumerosDoCatalogo</span>() {
+  <span class="kw">const</span> vagas = <span class="kw">await</span> <span class="fn">listarVagas</span>();
+  <span class="kw">const</span> iniciantes = vagas.<span class="fn">filter</span>((vaga) =&gt; vaga.aceitaIniciante).length;
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">p</span> className=<span class="st">"numeros"</span>&gt;
+      &lt;<span class="ty">strong</span>&gt;{vagas.length}&lt;/<span class="ty">strong</span>&gt; vagas ·{<span class="st">" "</span>}
+      &lt;<span class="ty">strong</span>&gt;{iniciantes}&lt;/<span class="ty">strong</span>&gt; aceitam quem está começando
+    &lt;/<span class="ty">p</span>&gt;
+  );
+}</pre>
+
+  <div class="arq">components/NumerosEsqueleto.tsx</div>
+<pre><span class="cm">// O fallback. Mesma altura, mesma margem, mesmo lugar — para a linha de</span>
+<span class="cm">// baixo não se mexer no instante em que o número chega.</span>
+<span class="kw">export default function</span> <span class="fn">NumerosEsqueleto</span>() {
+  <span class="kw">return</span> &lt;<span class="ty">p</span> className=<span class="st">"numeros esqueleto"</span> aria-hidden=<span class="st">"true"</span>&gt;&amp;nbsp;&lt;/<span class="ty">p</span>&gt;;
+}</pre>
+
+  <div class="arq">app/vagas/page.tsx — a versão da frente 4</div>
+<pre><span class="kw">import</span> { Suspense } <span class="kw">from</span> <span class="st">"react"</span>;
+<span class="kw">import</span> { listarVagas } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+
+<span class="cm">// Combinem isto: se a página inteira for async, ela espera antes de mandar</span>
+<span class="cm">// qualquer coisa, e aí nem o &lt;h1&gt; chega cedo. Duas formas de resolver:</span>
+<span class="cm">//   a) a página NÃO é async, e CADA bloco que busca vira um filho async;</span>
+<span class="cm">//   b) a página busca o essencial e só o bloco lento vai para o Suspense.</span>
+<span class="cm">// Abaixo, a (a) — que é a que ensina melhor o que o Suspense faz.</span>
+<span class="kw">export default function</span> <span class="fn">PaginaDeVagas</span>() {
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">h1</span>&gt;Vagas&lt;/<span class="ty">h1</span>&gt;                          {<span class="cm">/* chega em ~0 ms */</span>}
+
+      &lt;<span class="ty">Suspense</span> fallback={&lt;<span class="ty">NumerosEsqueleto</span> /&gt;}&gt;
+        &lt;<span class="ty">NumerosDoCatalogo</span> /&gt;                {<span class="cm">/* chega quando ficar pronto */</span>}
+      &lt;/<span class="ty">Suspense</span>&gt;
+
+      &lt;<span class="ty">Suspense</span> fallback={&lt;<span class="ty">ListaEsqueleto</span> /&gt;}&gt;
+        &lt;<span class="ty">ListagemDeVagas</span> /&gt;                  {<span class="cm">/* async, busca sozinho */</span>}
+      &lt;/<span class="ty">Suspense</span>&gt;
+    &lt;/&gt;
+  );
+}
+
+<span class="cm">// O componente que embrulha o mural da aula 03. Ele busca, o mural filtra.</span>
+<span class="kw">async function</span> <span class="fn">ListagemDeVagas</span>() {
+  <span class="kw">const</span> vagas = <span class="kw">await</span> <span class="fn">listarVagas</span>();
+  <span class="kw">return</span> &lt;<span class="ty">MuralDeVagas</span> vagas={vagas} /&gt;;
+}</pre>
+
+  <div class="porque">
+    <b>por que dois Suspense e não um só</b>
+    <p>Porque um <code>Suspense</code> em volta dos dois faria os números
+    esperarem pela lista, e a lista esperar pelos números. <b>A cerca define
+    quem espera junto</b> — dois blocos independentes merecem duas cercas, e cada
+    um aparece quando ficar pronto.</p>
+    <p>Neste caso os dois buscam a mesma coisa e chegam quase juntos. Mas é o
+    desenho que vale: no dia em que um deles for a uma API lenta, o outro não vai
+    junto para o fundo do poço.</p>
+  </div>
+
+  <div class="label">O que a correção vai procurar</div>
+
+  <table class="audit">
+    <tr><th>onde</th><th>o que tem que estar lá</th></tr>
+    <tr><td>lib/api.ts</td><td>A <b>única</b> URL do projeto. Um <code>revalidate</code> por função, e um comentário dizendo por que aquele número.</td></tr>
+    <tr><td>lib/api.ts</td><td><code>if (!resposta.ok) throw</code> <b>antes</b> de todo <code>.json()</code>.</td></tr>
+    <tr><td>app/vagas/[id]</td><td><code>generateStaticParams</code> com a chave <code>id</code> e valor de texto. <code>generateMetadata</code>. <code>notFound()</code>.</td></tr>
+    <tr><td>app/empresas/[slug]</td><td>O mesmo, com a chave <code>slug</code>. <code>Promise.all</code> quando as buscas forem independentes.</td></tr>
+    <tr><td>error.tsx</td><td><code>"use client"</code> na primeira linha, mensagem em português e botão chamando <code>reset()</code>.</td></tr>
+    <tr><td>o <code>fallback</code></td><td>Do tamanho do conteúdo real. A página não pode pular quando o dado chega.</td></tr>
+    <tr><td>app/ e components/</td><td><b>Zero</b> <code>import</code> de array de dados. Zero <code>console.log</code>. Zero <code>setTimeout</code> de teste.</td></tr>
+  </table>
+
+  <div class="label">Os erros da semana</div>
+
+  <table class="erros">
+    <tr><th>o que aparece</th><th>o que aconteceu</th><th>o conserto</th></tr>
+    <tr><td><code>async/await is not supported in Client Components</code></td><td>Você pôs <code>async</code> num arquivo com <code>"use client"</code>.</td><td>Busque no pai, no servidor, e passe por prop.</td></tr>
+    <tr><td><code>Failed to parse URL from /dados/vagas.json</code></td><td>URL relativa. No servidor não existe "o site atual".</td><td>URL absoluta, com <code>https://</code>.</td></tr>
+    <tr><td><code>Unexpected token '&lt;' ... is not valid JSON</code></td><td>O <code>.json()</code> recebeu HTML — a página 404 do GitHub, quase sempre.</td><td>A linha do <code>resposta.ok</code>. E abra a URL no navegador.</td></tr>
+    <tr><td><code>Expected double-quoted property name</code></td><td>O JSON ainda tem sintaxe de TypeScript.</td><td>Aspas duplas nas chaves, sem vírgula final, sem comentário.</td></tr>
+    <tr><td><code>params.id is undefined</code></td><td>Faltou o <code>await</code> no <code>params</code>.</td><td><code>const { id } = await params;</code></td></tr>
+    <tr><td>o <code>fallback</code> nunca aparece</td><td>O <code>await</code> está na página, não no filho cercado.</td><td>Mova a busca para dentro do componente do <code>Suspense</code>.</td></tr>
+    <tr><td>a rota virou <code>ƒ</code> sem você pedir</td><td>Alguém na árvore usou <code>searchParams</code>, <code>cookies()</code> ou <code>headers()</code>.</td><td>Nem sempre é erro — descubra quem foi e decida se era para ser.</td></tr>
+  </table>
+
+  <div class="label">Onde cada frente continua</div>
+
+  <div class="grid2">
+    <div class="mini f1"><span class="q">frente 1 · aula 05</span><b>A vaga nasce de uma tela</b>O <code>lib/api.ts</code> ganha um <code>criarVaga()</code>, e o <code>revalidateTag("vagas")</code> joga fora o cache de hoje.</div>
+    <div class="mini f2"><span class="q">frente 2 · aula 07</span><b>O painel da empresa</b>A página passa a saber quem está logado — e a rota vira <code>ƒ</code>, desta vez de propósito.</div>
+    <div class="mini f3"><span class="q">frente 3 · aula 05</span><b>A candidatura grava</b>O formulário deixa de guardar no <code>useState</code> e passa por uma Server Action.</div>
+    <div class="mini f4"><span class="q">frente 4 · aula 06</span><b>O filtro vai para a URL</b><code>searchParams</code> no lugar do <code>useState</code> — e o filtro passa a caber num link.</div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn primary" href="desafio.html">🎯 Voltar ao enunciado</a>
+    <a class="btn" href="modelo-resposta.html">👁️ Prévia da resposta</a>
+    <a class="btn" href="exercicios.html">🧪 Exercícios da aula</a>
+    <a class="btn" href="slides.html">▶ Slides</a>
+  </div>
+
+  <div class="foot">
+    NickDev · Introdução ao Next.js · aula 04 · código do desafio
+  </div>
+
+</div>
+
+</body>
+</html>
