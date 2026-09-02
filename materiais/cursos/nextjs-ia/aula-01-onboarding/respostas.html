@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Respostas dos tickets · Aula 01 · Next.js + IA · NickDev</title>
+<meta name="description" content="Gabarito comentado dos 16 tickets da Aula 01 do curso Next.js + IA: o diagnóstico de cada bug, o aquecimento resolvido, onde a diretiva use client entra e por que ali, os critérios de aceite conferidos um a um e o que a IA teria acertado ou inventado em cada card.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08070E; --surface:#1B1632; --surface-2:#221C3E; --code-bg:#0b0913;
+    --magenta:#F24487; --purple:#7B4FD0;
+    --pink-light:#E88BB8; --purple-light:#A98CE0; --purple-lighter:#C3A6FF; --green:#5fd08a;
+    --text:#F3F0FA; --text-2:#B4AEC6; --text-3:#8B84A0; --text-4:#928AA9;
+    --line:rgba(255,255,255,.35); --line-strong:rgba(255,255,255,.45);
+    --grad:linear-gradient(100deg,#F24487,#7B4FD0);
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--purple-light);outline-offset:3px;border-radius:4px}
+  code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--pink-light)}
+
+  .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .ambient .glow{position:absolute;border-radius:50%}
+  .ambient .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.14),transparent 62%)}
+  .ambient .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.2),transparent 62%)}
+
+  .wrap{display:grid;grid-template-columns:276px 1fr;max-width:1320px;margin:0 auto}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;gap:4px}
+  .voltar-curso{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px;color:var(--text-3);margin-bottom:14px;transition:color .2s}
+  .voltar-curso:hover{color:var(--pink-light)}
+  .nd-brand .word{font-weight:700;font-size:16px;margin-bottom:10px;display:block}
+  .nd-brand .word b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:15px 0 4px}
+  aside nav a{display:block;padding:6px 11px;border-radius:8px;font-size:13.5px;color:var(--text-2);transition:.15s}
+  aside nav a:hover{background:var(--surface);color:var(--text)}
+
+  main{padding:44px clamp(22px,4vw,60px) 90px;min-width:0}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-light);margin-bottom:12px}
+  h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);margin-top:14px}
+  .rule{width:100px;height:4px;border-radius:4px;background:var(--grad);margin:22px 0 0}
+
+  section{margin-top:56px;scroll-margin-top:20px}
+  section > h2{font-size:26px;font-weight:700;display:flex;align-items:center;gap:12px;margin-bottom:6px;letter-spacing:-.02em}
+  section > h2::before{content:"";width:10px;height:26px;background:var(--grad);border-radius:4px;flex:none}
+  section > p{color:var(--text-2);margin:10px 0}
+  h3{font-size:17.5px;margin:26px 0 6px;color:var(--text)}
+  h4{font-size:15px;margin:18px 0 4px;color:var(--purple-light);font-family:var(--mono);font-weight:500}
+  ul,ol{margin:8px 0 8px 4px;padding-left:20px;color:var(--text-2)}
+  li{margin:5px 0}
+  li b, p b{color:var(--text)}
+  .divisor{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);
+    margin:64px 0 0;display:flex;align-items:center;gap:12px}
+  .divisor::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#d8d3e6;white-space:pre}
+  .cm{color:#6f6a83}
+  .kw{color:#F24487}
+  .ty{color:#7B4FD0}
+  .st{color:#A98CE0}
+  .fn{color:#E88BB8}
+  .an{color:#5fd08a}
+  .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--text-3);border:1px solid var(--line);border-bottom:0;border-radius:9px 9px 0 0;padding:6px 13px;display:inline-block;background:var(--surface);margin-top:12px}
+  .file + pre{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Bloco de código com botão de copiar. Veio do guia de HTML/CSS, que era o
+     único a ter isso — num documento de consulta, copiar é o gesto principal.
+     <div class="code"><button class="cp">copiar</button><pre>…</pre></div> */
+  .code{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+  .code pre{margin:0;border:0;border-radius:0;background:transparent}
+  .code .cp{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;color:var(--text-3);
+    background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.12s;opacity:0}
+  .code:hover .cp,.code .cp:focus-visible{opacity:1}
+  .code .cp:hover{color:var(--purple-light);border-color:var(--purple-light)}
+  .code .cp.done{color:var(--green);border-color:var(--green);opacity:1}
+  .file + .code{margin-top:-1px;border-radius:0 12px 12px 12px}
+
+  /* Prévia ao vivo: o código à esquerda, o resultado renderizado à direita.
+     <div class="demo"><div class="code">…</div><div class="out">…<iframe data-src="…"></iframe></div></div> */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;align-items:stretch}
+  .demo .code{margin:0}
+  .demo .out{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:120px}
+  .demo .out .hd{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+  .demo .out iframe{width:100%;border:0;background:#fff;display:block}
+  .demo-hd{font-family:var(--mono);font-size:11.5px;color:var(--text-3);padding:8px 14px;
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .demo-hd .d{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .demo .try{margin-left:auto;color:var(--purple-light)}
+  @media(max-width:920px){.demo{grid-template-columns:1fr}}
+
+  .terminal{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0;font-family:var(--mono);font-size:13px;line-height:1.8;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--text-3)}
+  .terminal .out{color:#9ee39e}
+  .terminal .err{color:#ff8fa3}
+  .terminal .cm{color:#6f6a83}
+
+  .tip{border-left:3px solid var(--purple);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14.5px;color:var(--text-2)}
+  .tip b{color:var(--purple-light)}
+  .tip.warn{border-left-color:var(--magenta)}
+  .tip.warn b{color:var(--pink-light)}
+  .tip.ok{border-left-color:var(--green)}
+  .tip.ok b{color:var(--green)}
+  .tip.star{border-left-color:var(--magenta)}
+  .tip.star b{color:var(--pink-light)}
+
+  /* Comparação lado a lado por sistema operacional — veio do guia de Java. */
+  .osgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+  .osgrid .os{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .osgrid .os h4{font-size:14px;margin-bottom:6px;color:var(--pink-light);font-family:var(--disp)}
+  .osgrid .os p{color:var(--text-2);font-size:13.5px;margin:0}
+  @media(max-width:700px){.osgrid{grid-template-columns:1fr}}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+  td{color:var(--text-2)}
+  td b{color:var(--text)}
+  td code{font-size:.9em}
+  tr:last-child td{border-bottom:0}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:920px){.duo{grid-template-columns:1fr}}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14.5px;color:var(--text-2)}
+  .box h4{margin-top:0;font-family:var(--disp);font-size:15.5px}
+  .box.ok{border-color:rgba(95,208,138,.4)}
+  .box.ok h4{color:var(--green)}
+  .box.no{border-color:rgba(242,68,135,.4)}
+  .box.no h4{color:var(--pink-light)}
+  .box pre{margin:8px 0 0;font-size:12px}
+
+  .passos{counter-reset:p;margin:16px 0;padding:0;list-style:none}
+  .passos > li{position:relative;padding-left:44px;margin:0 0 16px;color:var(--text-2)}
+  .passos > li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:0;
+    font-family:var(--mono);font-weight:700;font-size:13px;color:var(--purple-light);
+    border:1px solid rgba(169,140,224,.5);width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center}
+  .passos > li > b{display:block;color:var(--text);font-size:15.5px;margin-bottom:2px}
+
+  dl.gloss{display:grid;grid-template-columns:190px 1fr;gap:9px 20px;margin:16px 0;align-items:baseline}
+  dl.gloss dt{font-family:var(--mono);color:var(--purple-light);font-size:14px}
+  dl.gloss dd{color:var(--text-2);font-size:14.5px}
+  @media(max-width:700px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:12px}}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;margin:18px 12px 0 0;font-family:var(--mono);font-size:13.5px;border:1px solid var(--line-strong);color:var(--text);padding:11px 20px;border-radius:100px;transition:.2s}
+  .cta:hover{border-color:var(--pink-light);color:var(--pink-light)}
+  .cta.primary{background:var(--grad);border:0;color:#fff;font-weight:600;font-family:var(--disp)}
+
+  /* Herdadas do guia de HTML/CSS da transição, que é o mais catálogo do
+     acervo: numeração de seção, subtítulo, item de verbete, tabela de cola,
+     código inline e callout. */
+  h2 .n{font-family:var(--mono);font-size:.5em;color:var(--purple-light);font-weight:400;margin-right:10px;vertical-align:middle}
+  .sub{color:var(--text-3);margin:14px 0 26px;max-width:66ch}
+  .item{margin:26px 0;padding-top:4px}
+  .item p{font-size:15.5px;color:var(--text);max-width:68ch;margin-bottom:12px}
+  .item p .muted,.muted{color:var(--text-3)}
+  .ci{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);
+    padding:1px 7px;border-radius:5px;font-size:.88em;color:var(--purple-light)}
+  table.cheat{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  table.cheat td,table.cheat th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cheat th{font-family:var(--disp);color:var(--text-3);font-weight:600;font-size:13px}
+  table.cheat td:first-child{font-family:var(--mono);color:var(--purple-light);white-space:nowrap}
+  table.cheat td .muted{color:var(--text-3)}
+  .callout{border-left:3px solid var(--pink-light);background:rgba(232,139,184,.06);
+    padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14.5px}
+  .callout b{color:var(--pink-light)}
+
+  /* Cores de destaque aplicadas à mão nos exemplos. As fontes divergiam nos
+     tons — aqui vale um conjunto só, senão o mesmo token muda de cor conforme
+     a seção de onde veio. */
+  .t{color:var(--purple-lighter)}
+  .s{color:var(--purple-light)}
+  .k{color:var(--magenta)}
+  .a{color:var(--pink-light)}
+  .c{color:var(--text-3);font-style:italic}
+  .sel{color:var(--green)}
+  .prop{color:var(--magenta)}
+
+  .foot{border-top:1px solid var(--line);margin-top:64px;padding-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--text-3)}
+
+  .totop{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:18px;opacity:0;transition:.2s;
+    display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{border-color:var(--purple);color:var(--purple-light)}
+
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr}
+    aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    aside nav{columns:2}
+  }
+
+  /* A única regra que este manual acrescenta ao design dos guias: a tabela do
+     ciclo tem quatro colunas e não cabe em telas estreitas. Rolar dentro do
+     próprio bloco é melhor que empurrar a página inteira para o lado. */
+  .tabela{overflow-x:auto;margin:14px 0}
+  .tabela table{margin:0;min-width:520px}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="wrap">
+<aside>
+  <a class="voltar-curso" href="/cursos/nextjs-ia">← voltar ao curso</a>
+  <div class="nd-brand"><span class="word">Nick<b>Dev</b></span></div>
+  <nav>
+    <div class="grp">Antes de conferir</div>
+    <a href="#abertura">Como ler este gabarito</a>
+    <div class="grp">A home</div>
+    <a href="#lp-101">LP-101 · Contador e filtro</a>
+    <a href="#lp-104">LP-104 · Carrossel de destaques</a>
+    <a href="#lp-105">LP-105 · Chips de gênero</a>
+    <a href="#lp-106">LP-106 · Ordenação do catálogo</a>
+    <div class="grp">O cabeçalho e a navegação</div>
+    <a href="#lp-102">LP-102 · Busca do cabeçalho</a>
+    <a href="#lp-103">LP-103 · Menu mobile</a>
+    <a href="#lp-107">LP-107 · Alternador de tema</a>
+    <a href="#lp-110">LP-110 · Voltar ao topo e o ano</a>
+    <div class="grp">A ficha</div>
+    <a href="#lp-108">LP-108 · Ver mais da sinopse</a>
+    <a href="#lp-109">LP-109 · Abas da ficha</a>
+    <a href="#lp-111">LP-111 · Seletor de temporada</a>
+    <a href="#lp-112">LP-112 · Copiar link</a>
+    <div class="grp">Formulário e estados</div>
+    <a href="#lp-113">LP-113 · Rota /sobre</a>
+    <a href="#lp-114">LP-114 · Contador da resenha</a>
+    <a href="#lp-115">LP-115 · Estado vazio</a>
+    <a href="#lp-116">LP-116 · Continuar assistindo</a>
+    <div class="grp">O padrão da semana</div>
+    <a href="#padrao">A semana em uma página</a>
+  </nav>
+</aside>
+
+<main>
+  <div class="eyebrow">Gabarito · Aula 01</div>
+  <h1>Respostas dos <span class="g">tickets</span></h1>
+  <p class="lead">Os dezesseis cards da Aula 01, do LP-101 ao LP-116, com o diagnóstico de cada bug, o código que resolve, os critérios de aceite conferidos um a um e o que a IA teria acertado — ou inventado — em cada um deles.</p>
+  <div class="rule"></div>
+
+  <div class="tip star"><b>Isto é gabarito.</b> Ler antes de tentar troca o aprendizado por uma leitura: você concorda com tudo, fecha a página e continua sem saber decidir onde a fronteira fica. Tente primeiro, erre, e só então confira.</div>
+
+  <section id="abertura">
+    <h2><span class="n">00</span>Como ler este gabarito</h2>
+    <p class="sub">Um documento de conferência, não um tutorial. Cada card aqui já está resolvido — o que interessa é o <b>porquê</b> de cada decisão, porque é o porquê que o review cobra.</p>
+
+    <h3>A regra de uso</h3>
+    <p>Abra a seção do card <b>depois</b> de ter tentado, e de preferência depois de ter aberto o PR. O valor de um gabarito está na comparação: você vê onde a sua fronteira ficou diferente da daqui e descobre se foi decisão ou descuido. Lido antes, ele vira um texto plausível que você acha que entendeu.</p>
+
+    <div class="tip warn"><b>Se você já leu antes de tentar, não desista do card.</b> Faça mesmo assim, e no PR escreva o que você teria decidido sozinho e o que copiou daqui. Isso é honesto e é revisável — copiar em silêncio não é nem uma coisa nem outra.</div>
+
+    <h3>Existe mais de uma resposta certa</h3>
+    <p>Em vários cards a resposta daqui é <i>uma</i> resposta, não <i>a</i> resposta. O caso explícito é o <a href="#lp-106">LP-106</a>: ordenar no servidor e ordenar no navegador se defendem as duas, com trade-offs diferentes, e este documento implementa uma delas por inteiro sem dizer que a outra está errada. O mesmo vale para o corte da sinopse no <a href="#lp-108">LP-108</a> (CSS ou string) e para o carregamento das abas no <a href="#lp-109">LP-109</a> (tudo junto ou por aba).</p>
+
+    <div class="tip ok"><b>O que o review cobra é a decisão defendida</b> — não a resposta idêntica a esta. Um PR que escolhe o outro caminho e explica por quê passa; um PR que escolhe o caminho daqui sem saber dizer o motivo, não. E meia-implementação dos dois caminhos é o pior resultado possível em qualquer um desses cards.</div>
+
+    <h3>O tema único da semana</h3>
+    <p>Os dezesseis bugs são variações de uma coisa só: <b>a fronteira entre Server e Client Component</b>. O aquecimento de cada card é a correção pequena que faz você atravessar o fluxo do time uma vez — branch, PR, review, merge, deploy. A lição é o <code>"use client"</code>, e o que vale nota não é usá-lo: é <b>onde</b> ele entra.</p>
+
+    <div class="tip"><b>A frase que resolve quase todos:</b> extraia só o controle interativo; os dados continuam vindo do servidor e descem por props. Marcar a página inteira resolve o sintoma e estraga o resto — joga a busca de dados para o navegador e manda para o pacote código que não precisava sair de casa.</div>
+
+    <h3>A anatomia de cada seção</h3>
+    <ul>
+      <li><b>O diagnóstico</b> — por que quebrava, na causa e não no sintoma.</li>
+      <li><b>O aquecimento</b> — a correção pequena, resolvida.</li>
+      <li><b>A lição</b> — a fronteira, com o código e o motivo de a diretiva estar naquele arquivo.</li>
+      <li><b>Os critérios de aceite</b> — os seis do card, conferidos um a um.</li>
+      <li><b>Sobre a IA</b> — o que ela teria acertado e o que você precisaria conferir. Esta parte não é decorativa: é metade do valor do curso.</li>
+    </ul>
+
+    <div class="tip star"><b>O fecho vale para os dezesseis.</b> Branch com o slug do card, PR com a decisão técnica escrita, review aprovado, merge, publicado. Um card sem a frase da decisão no PR não está pronto, mesmo funcionando na tela.</div>
+  </section>
+
+  <div class="divisor">a home</div>
+
+  <section id="lp-101">
+    <h2><span class="n">LP-101</span>O contador do acervo diz 0 e o filtro "ainda não vi" não responde</h2>
+    <p class="sub">O card de abertura da semana, e o único em que a pista está no que <i>não</i> acontece.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>São dois bugs sem relação entre si, e é de propósito. O contador diz <span class="hl">0</span> porque o número está escrito no JSX e nunca olhou a resposta da API. O toggle não responde porque o componente é renderizado no servidor: o <code>onClick</code> existe no arquivo, mas nunca chega ao navegador como função — o React serializa a marcação e descarta o manipulador.</p>
+
+    <div class="tip warn"><b>A pista é o console limpo.</b> Bug de JavaScript quebrado grita. Este não grita nada, porque não há JavaScript nenhum daquela página no cliente. Silêncio absoluto num clique é quase sempre fronteira, não erro.</div>
+
+    <h3>O aquecimento</h3>
+    <p>O total vem da mesma resposta que já preenche a grade — não precisa de segunda chamada. E o rótulo concorda em número:</p>
+
+    <div class="file">app/page.tsx · o contador</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="kw">const</span> total = acervo.length;
+
+<span class="cm">// Concordância no plural: "1 título" e "12 títulos". Detalhe pequeno,</span>
+<span class="cm">// visível na tela o tempo todo — e o review vai ver.</span>
+&lt;<span class="ty">p</span>&gt;{total} {total === <span class="an">1</span> ? <span class="st">"título"</span> : <span class="st">"títulos"</span>}&lt;/<span class="ty">p</span>&gt;</pre></div>
+
+    <h3>A lição</h3>
+    <p>O filtro precisa de estado, então precisa de cliente. A tentação é escrever <code>"use client"</code> na primeira linha de <span class="hl">app/page.tsx</span> — resolve o clique e joga fora a renderização no servidor da home inteira. O que se extrai é o menor pedaço que precisa de estado: o toggle e a grade que ele filtra.</p>
+
+    <div class="duo">
+      <div class="box no"><h4>Antes — a página inteira vira client</h4>
+        <div class="code"><button class="cp">copiar</button><pre><span class="cm">// app/page.tsx</span>
+<span class="st">"use client"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Home</span>() {
+  <span class="cm">// e agora o fetch precisa de useEffect,</span>
+  <span class="cm">// e o HTML inicial chega vazio.</span>
+}</pre></div>
+      </div>
+      <div class="box ok"><h4>Depois — só o controle</h4>
+        <div class="code"><button class="cp">copiar</button><pre><span class="cm">// app/page.tsx — continua Server Component</span>
+<span class="kw">import</span> { <span class="ty">AcervoFiltravel</span> } <span class="kw">from</span> <span class="st">"./acervo-filtravel"</span>;
+
+<span class="kw">export default async function</span> <span class="fn">Home</span>() {
+  <span class="kw">const</span> acervo = <span class="kw">await</span> <span class="fn">listarAcervo</span>();
+  <span class="kw">return</span> &lt;<span class="ty">AcervoFiltravel</span> itens={acervo} /&gt;;
+}</pre></div>
+      </div>
+    </div>
+
+    <div class="file">app/acervo-filtravel.tsx · a folha interativa</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// aqui, e não na página: é este arquivo que tem estado</span>
+
+<span class="kw">import</span> { useState } <span class="kw">from</span> <span class="st">"react"</span>;
+<span class="kw">import type</span> { <span class="ty">Midia</span> } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+
+<span class="kw">export function</span> <span class="fn">AcervoFiltravel</span>({ itens }: { itens: <span class="ty">Midia</span>[] }) {
+  <span class="kw">const</span> [soNaoVistos, setSoNaoVistos] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+  <span class="cm">// Os dados já chegaram prontos por props. O cliente só escolhe</span>
+  <span class="cm">// o que mostrar — não busca nada.</span>
+  <span class="kw">const</span> visiveis = soNaoVistos ? itens.<span class="fn">filter</span>((m) =&gt; !m.visto) : itens;
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">button</span> <span class="an">aria-pressed</span>={soNaoVistos} <span class="an">onClick</span>={() =&gt; <span class="fn">setSoNaoVistos</span>(!soNaoVistos)}&gt;
+        ainda não vi
+      &lt;/<span class="ty">button</span>&gt;
+      &lt;<span class="ty">Grade</span> itens={visiveis} /&gt;
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <table>
+      <thead><tr><th>Critério</th><th>Como foi satisfeito</th></tr></thead>
+      <tbody>
+        <tr><td><b>Contador vem do total da API</b></td><td><code>acervo.length</code> sobre a mesma resposta que monta a grade — sem segunda chamada e sem número chumbado.</td></tr>
+        <tr><td><b>Singular e plural concordam</b></td><td>Ternário no rótulo: <code>1 título</code> / <code>12 títulos</code>.</td></tr>
+        <tr><td><b>O toggle filtra de verdade</b></td><td>Estado <code>soNaoVistos</code> no Client Component; a lista visível é derivada dele.</td></tr>
+        <tr><td><b><code>"use client"</code> no menor componente possível</b></td><td>A diretiva está em <span class="hl">acervo-filtravel.tsx</span>, a folha que tem estado. Nada acima dela mudou.</td></tr>
+        <tr><td><b>A página continua Server Component</b></td><td><span class="hl">app/page.tsx</span> segue <code>async</code>, com o <code>await</code> da API rodando no servidor.</td></tr>
+        <tr><td><b>PR explica a fronteira em uma frase</b></td><td>"A busca fica no servidor porque o HTML precisa sair pronto; só o toggle virou client, porque só ele tem estado."</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Sobre a IA</h3>
+    <p>O mapa do repositório recém-clonado ela acerta: as pastas, o caminho geral, onde a home mora. <b>Erra o detalhe</b> — o nome exato da função que busca o acervo, ou o arquivo em que ela vive. Confira cada afirmação abrindo o arquivo antes de usar.</p>
+    <div class="tip warn"><b>Onde ela quase sempre erra aqui:</b> pedida para "fazer o botão funcionar", a resposta mais comum é <code>"use client"</code> no topo da página. Funciona, passa no seu teste manual e reprova no review. A diferença Server × Client ela explica bem — a fronteira <i>deste</i> projeto é sua, e a frase do PR precisa ser escrita com as suas palavras.</div>
+  </section>
+
+  <section id="lp-104">
+    <h2><span class="n">LP-104</span>As setas do carrossel de destaques estão mortas e a legenda é sempre a mesma</h2>
+    <p class="sub">O card que instala o padrão que se repete o curso inteiro: buscar no servidor, passar por props.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O carrossel não tem índice: mostra <code>destaques[0]</code> e as setas não têm para onde mover nada. A legenda é uma string fixa, <span class="hl">"Destaque da semana"</span>, escrita no JSX em vez de sair do slide atual. E, como em todo card desta semana, o <code>onClick</code> das setas está num componente de servidor — mesmo com o índice implementado, nada aconteceria.</p>
+
+    <h3>O aquecimento</h3>
+    <p>A legenda passa a ler o slide atual. Uma linha, e ela já cobre o segundo bug de graça: se a legenda vem do índice, ela muda quando o índice muda.</p>
+
+    <h3>A lição</h3>
+    <p>A decisão que o review olha não é o índice — é <b>onde a lista de destaques é buscada</b>. Ela vem da API e não precisa ir para o navegador como código: desce como dado, pronta, para o componente client.</p>
+
+    <div class="file">app/page.tsx · a busca fica de fora</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="kw">export default async function</span> <span class="fn">Home</span>() {
+  <span class="cm">// A chamada acontece no servidor. O navegador recebe os destaques</span>
+  <span class="cm">// já serializados no HTML — não a função que sabe buscá-los.</span>
+  <span class="kw">const</span> destaques = <span class="kw">await</span> <span class="fn">listarDestaques</span>();
+
+  <span class="kw">return</span> &lt;<span class="ty">Carrossel</span> slides={destaques} /&gt;;
+}</pre></div>
+
+    <div class="file">app/carrossel.tsx · só o controle de índice</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">import</span> { useState } <span class="kw">from</span> <span class="st">"react"</span>;
+<span class="kw">import type</span> { <span class="ty">Destaque</span> } <span class="kw">from</span> <span class="st">"@/lib/api"</span>;
+
+<span class="kw">export function</span> <span class="fn">Carrossel</span>({ slides }: { slides: <span class="ty">Destaque</span>[] }) {
+  <span class="kw">const</span> [i, setI] = <span class="fn">useState</span>(<span class="an">0</span>);
+  <span class="kw">const</span> atual = slides[i];
+
+  <span class="cm">// Sem dar a volta, e com intenção: nas pontas o botão fica</span>
+  <span class="cm">// desabilitado, o que também comunica o limite a quem navega por teclado.</span>
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span> <span class="an">aria-roledescription</span>=<span class="st">"carrossel"</span>&gt;
+      &lt;<span class="ty">button</span> <span class="an">onClick</span>={() =&gt; <span class="fn">setI</span>(i - <span class="an">1</span>)} <span class="an">disabled</span>={i === <span class="an">0</span>}
+              <span class="an">aria-label</span>=<span class="st">"destaque anterior"</span>&gt;←&lt;/<span class="ty">button</span>&gt;
+
+      &lt;<span class="ty">figure</span>&gt;
+        &lt;<span class="ty">figcaption</span>&gt;{atual.titulo}&lt;/<span class="ty">figcaption</span>&gt;
+      &lt;/<span class="ty">figure</span>&gt;
+
+      &lt;<span class="ty">button</span> <span class="an">onClick</span>={() =&gt; <span class="fn">setI</span>(i + <span class="an">1</span>)} <span class="an">disabled</span>={i === slides.length - <span class="an">1</span>}
+              <span class="an">aria-label</span>=<span class="st">"próximo destaque"</span>&gt;→&lt;/<span class="ty">button</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre></div>
+
+    <div class="tip"><b>Por que <code>&lt;button&gt;</code> e não <code>&lt;div onClick&gt;</code>:</b> o botão nativo já é focável, já responde a Enter e espaço e já anuncia o estado desabilitado. Metade dos critérios de teclado deste card se resolve por escolher a tag certa.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Setas avançam e voltam</b> — <code>setI(i ± 1)</code> sobre o estado local.</li>
+      <li><b>Legenda mostra o título do slide atual</b> — <code>atual.titulo</code>, derivado do índice; a string fixa saiu.</li>
+      <li><b>Busca dos destaques continua no servidor</b> — o <code>await listarDestaques()</code> ficou em <span class="hl">app/page.tsx</span>.</li>
+      <li><b>Dados chegam por props</b> — <code>slides</code> entra pronto; não há <code>fetch</code> nem <code>useEffect</code> no arquivo do carrossel.</li>
+      <li><b>Setas alcançáveis pelo teclado</b> — são <code>&lt;button&gt;</code> nativos, com <code>aria-label</code> dizendo a ação.</li>
+      <li><b>Não passa dos limites</b> — <code>disabled</code> nas pontas; a alternativa de dar a volta também vale, desde que o PR diga que foi escolha.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Ela escreve o controle de índice em segundos, e escreve bem. <b>O que ela não diz sozinha</b> é que a busca dos destaques fica do lado de fora, no servidor: a resposta padrão dela é um componente client com <code>useEffect</code> buscando os destaques ao montar — que funciona e desfaz exatamente o que este card ensina. A decisão é sua, e é ela que o review olha.</p>
+  </section>
+
+  <section id="lp-105">
+    <h2><span class="n">LP-105</span>O chip "Todos" nunca fica marcado e os gêneros vieram com acento quebrado</h2>
+    <p class="sub">O primeiro card em que a resposta certa está na documentação da API, não no seu editor.</p>
+
+    <h3>O diagnóstico</h3>
+    <p><span class="hl">Ficç?o</span> e <span class="hl">Document&#xFFFD;rio</span> não são erro de dado: são erro de <b>codificação na hora de montar o rótulo</b>. A API entrega UTF-8; algum ponto do caminho tratou os bytes como latin-1. E o chip "Todos" nunca acende porque o estado inicial do filtro é uma string vazia, enquanto o chip compara contra o literal <code>"todos"</code> — duas representações do mesmo "nada selecionado" que nunca se encontram.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Corrigir a codificação e, de brinde, fazer a primeira leitura séria da documentação da API para confirmar em que formato os gêneros chegam — se é <code>string[]</code>, se é objeto com <code>id</code> e <code>nome</code>, se o rótulo já vem pronto ou precisa ser montado. É essa leitura que evita o resto do bug.</p>
+
+    <div class="tip ok"><b>Estado nulo, não string vazia.</b> O "nada selecionado" fica sendo <code>null</code>, e o chip "Todos" é marcado quando <code>selecionado === null</code>. Um só valor representa o vazio, e o bug de comparação desaparece por construção.</div>
+
+    <h3>A lição</h3>
+    <p>Os chips vão para o cliente porque têm estado de seleção. A <b>lista de gêneros</b> não: ela é dado, vem do servidor e desce por props — o mesmo padrão do <a href="#lp-104">LP-104</a>.</p>
+
+    <div class="file">app/chips-genero.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// só os chips; a lista veio pronta do servidor</span>
+
+<span class="kw">export function</span> <span class="fn">ChipsGenero</span>({ generos }: { generos: <span class="ty">string</span>[] }) {
+  <span class="kw">const</span> [sel, setSel] = <span class="fn">useState</span>&lt;<span class="ty">string</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">div</span> <span class="an">role</span>=<span class="st">"group"</span> <span class="an">aria-label</span>=<span class="st">"filtrar por gênero"</span>&gt;
+      &lt;<span class="ty">button</span> <span class="an">aria-pressed</span>={sel === <span class="kw">null</span>} <span class="an">onClick</span>={() =&gt; <span class="fn">setSel</span>(<span class="kw">null</span>)}&gt;
+        Todos {sel === <span class="kw">null</span> &amp;&amp; <span class="st">"✓"</span>}
+      &lt;/<span class="ty">button</span>&gt;
+
+      {generos.<span class="fn">map</span>((g) =&gt; (
+        <span class="cm">// aria-pressed dá o estado a quem usa leitor de tela; o ✓ dá</span>
+        <span class="cm">// a quem não distingue as cores. O estado não depende só de cor.</span>
+        &lt;<span class="ty">button</span> key={g} <span class="an">aria-pressed</span>={sel === g} <span class="an">onClick</span>={() =&gt; <span class="fn">setSel</span>(g)}&gt;
+          {g} {sel === g &amp;&amp; <span class="st">"✓"</span>}
+        &lt;/<span class="ty">button</span>&gt;
+      ))}
+    &lt;/<span class="ty">div</span>&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Acentuação correta</b> — o rótulo é montado em UTF-8, conferido contra a resposta real da API.</li>
+      <li><b>"Todos" marcado quando nada está selecionado</b> — <code>sel === null</code> é o único jeito de representar o vazio.</li>
+      <li><b>Clicar num chip marca ele e desmarca "Todos"</b> — consequência direta do estado único; não há dois estados para sincronizar.</li>
+      <li><b>Lista continua vindo do servidor</b> — <code>generos</code> é prop, buscada na página.</li>
+      <li><b>Navegáveis pelo teclado com foco visível</b> — <code>&lt;button&gt;</code> nativos, e o <code>:focus-visible</code> do projeto não foi removido.</li>
+      <li><b>O estado marcado não depende só de cor</b> — <code>aria-pressed</code> mais a marca visual.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <div class="tip warn"><b>Este é o card feito para pegá-la.</b> Peça o formato dos gêneros a partir da documentação e ela responde com confiança total — frequentemente um formato inventado, plausível, do jeito que a maioria das APIs faz. Resposta inventada sobre formato de dado é o erro mais comum e mais caro dela: você escreve o componente inteiro em cima de um contrato que não existe e só descobre na tela. <b>Confira contra a resposta real</b>, com o endpoint aberto ao lado.</div>
+    <p>No mais, o padrão ARIA dos chips ela entrega bem, e a lembrança de não depender só de cor costuma vir junto se você perguntar por acessibilidade.</p>
+  </section>
+
+  <section id="lp-106">
+    <h2><span class="n">LP-106</span>A ordenação do catálogo não reordena nada e o rótulo diz sempre "Relevância"</h2>
+    <p class="sub">O card com a pergunta boa embutida — e o único em que este gabarito escolhe um caminho sabendo que o outro também passa.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O <code>&lt;select&gt;</code> não tem <code>value</code> nem <code>onChange</code>: é um controle decorativo. O rótulo mostra a string fixa <span class="hl">"Relevância"</span> porque nunca houve escolha guardada em lugar nenhum para ele ler. Escolher "A-Z" muda o que aparece dentro do próprio select nativo e mais nada.</p>
+
+    <h3>A decisão: quem ordena?</h3>
+    <div class="duo">
+      <div class="box"><h4>No navegador</h4>
+        <p>O seletor vira client e recebe a lista inteira por props. Ordenar é <code>[...itens].sort()</code>, instantâneo, sem ida ao servidor.</p>
+        <p><b>Defende-se quando</b> a lista já veio inteira e é pequena. <b>Custa</b> não sobreviver ao recarregar nem ser compartilhável por link.</p>
+      </div>
+      <div class="box"><h4>No servidor</h4>
+        <p>A escolha sai do componente e vira informação que o servidor enxerga — <code>searchParams</code>. A página lê a ordem e devolve a lista já ordenada.</p>
+        <p><b>Defende-se quando</b> a lista é grande ou paginada, e quando o link precisa carregar a escolha. <b>Custa</b> uma ida ao servidor por troca.</p>
+      </div>
+    </div>
+
+    <div class="tip warn"><b>Meia-implementação das duas é o pior resultado possível.</b> Ler <code>searchParams</code> e também guardar a ordem em <code>useState</code> cria duas fontes de verdade que discordam na primeira navegação — e o bug que nasce daí é muito mais caro que o bug original.</div>
+
+    <h3>A lição — o caminho escolhido aqui</h3>
+    <p>Este gabarito ordena <b>no navegador</b>, porque nesta semana o catálogo da home já chega inteiro do servidor e a lista é curta: mandar ordenação para a URL agora seria pagar uma ida ao servidor por uma operação que custa microssegundos. O PR diz isso, e diz também o gatilho da mudança: quando o catálogo for paginado, a ordenação sobe para o servidor.</p>
+
+    <div class="file">app/catalogo-ordenavel.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">type</span> <span class="ty">Ordem</span> = <span class="st">"relevancia"</span> | <span class="st">"az"</span> | <span class="st">"recentes"</span>;
+
+<span class="kw">const</span> <span class="ty">ROTULOS</span>: <span class="ty">Record</span>&lt;<span class="ty">Ordem</span>, <span class="ty">string</span>&gt; = {
+  relevancia: <span class="st">"Relevância"</span>, az: <span class="st">"A-Z"</span>, recentes: <span class="st">"Mais recentes"</span>,
+};
+
+<span class="kw">export function</span> <span class="fn">CatalogoOrdenavel</span>({ itens }: { itens: <span class="ty">Midia</span>[] }) {
+  <span class="kw">const</span> [ordem, setOrdem] = <span class="fn">useState</span>&lt;<span class="ty">Ordem</span>&gt;(<span class="st">"relevancia"</span>);
+
+  <span class="cm">// itens NUNCA é mutado: sort() mexe no array original, e o original</span>
+  <span class="cm">// é a ordem de relevância que precisamos devolver depois.</span>
+  <span class="kw">const</span> lista =
+    ordem === <span class="st">"az"</span>       ? [...itens].<span class="fn">sort</span>((a, b) =&gt; a.titulo.<span class="fn">localeCompare</span>(b.titulo, <span class="st">"pt-BR"</span>))
+  : ordem === <span class="st">"recentes"</span> ? [...itens].<span class="fn">sort</span>((a, b) =&gt; b.ano - a.ano)
+  : itens; <span class="hl">// relevância = a ordem que o servidor mandou</span>
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">label</span> <span class="an">htmlFor</span>=<span class="st">"ordem"</span>&gt;Ordenar por&lt;/<span class="ty">label</span>&gt;
+      &lt;<span class="ty">select</span> <span class="an">id</span>=<span class="st">"ordem"</span> <span class="an">value</span>={ordem}
+              <span class="an">onChange</span>={(e) =&gt; <span class="fn">setOrdem</span>(e.target.value <span class="kw">as</span> <span class="ty">Ordem</span>)}&gt;
+        {(<span class="ty">Object</span>.<span class="fn">keys</span>(<span class="ty">ROTULOS</span>) <span class="kw">as</span> <span class="ty">Ordem</span>[]).<span class="fn">map</span>((o) =&gt; (
+          &lt;<span class="ty">option</span> key={o} <span class="an">value</span>={o}&gt;{<span class="ty">ROTULOS</span>[o]}&lt;/<span class="ty">option</span>&gt;
+        ))}
+      &lt;/<span class="ty">select</span>&gt;
+      &lt;<span class="ty">Grade</span> itens={lista} /&gt;
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <div class="tip"><b>O <code>&lt;select&gt;</code> nativo é a resposta de teclado inteira.</b> Setas, digitar a primeira letra, Enter, Esc: tudo já funciona, em todo sistema operacional. Um dropdown feito à mão custaria meio card só para empatar.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>As três ordenações funcionam</b> — relevância, A-Z (com <code>localeCompare</code> em <code>pt-BR</code>, que ordena acento direito) e mais recentes.</li>
+      <li><b>Rótulo mostra a escolhida</b> — o <code>value</code> controlado pelo estado; o rótulo saiu do <code>ROTULOS</code>, não de string fixa.</li>
+      <li><b>Escolha explicada no PR</b> — cliente, por lista curta já carregada, com o gatilho de revisão anotado.</li>
+      <li><b>Abordagem implementada por inteiro</b> — nada de <code>searchParams</code> sobrando no arquivo.</li>
+      <li><b>Funciona pelo teclado</b> — <code>&lt;select&gt;</code> nativo com <code>&lt;label htmlFor&gt;</code>.</li>
+      <li><b>Voltar para "Relevância" devolve a ordem original</b> — só porque a cópia <code>[...itens]</code> preservou o array do servidor.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Aqui ela ajuda de verdade: descreva as duas abordagens e peça prós e contras, e a tabela que volta é boa — ela conhece bem os trade-offs de estado na URL contra estado local. <b>O que ela não faz</b> é escolher pelo seu projeto, porque a escolha depende de coisas que não estão no código: o tamanho futuro do catálogo, se o link precisa ser compartilhável, o que a semana 6 vai pedir.</p>
+    <div class="tip warn"><b>E ela mistura os dois caminhos.</b> Peça "implemente a ordenação" sem decidir antes e há boa chance de voltar um componente com <code>useState</code> <i>e</i> um <code>router.push</code> com query string — exatamente a meia-implementação que este card proíbe.</div>
+  </section>
+  <div class="divisor">o cabeçalho e a navegação</div>
+
+  <section id="lp-102">
+    <h2><span class="n">LP-102</span>A busca do cabeçalho não abre e o placeholder fala de "produtos"</h2>
+    <p class="sub">O card em que o alcance da diretiva custa caro: o cabeçalho é o componente mais compartilhado do app.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>A lupa é um <code>&lt;button&gt;</code> com <code>onClick</code> dentro do cabeçalho, que é Server Component — o mesmo silêncio do <a href="#lp-101">LP-101</a>. O placeholder <span class="hl">"Buscar produtos..."</span> é herança de template: o LequePlay não vende produto, tem acervo.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Trocar a palavra. Parece trivial, e é o momento de reparar que o vocabulário do produto é uma decisão de time — "acervo", "títulos", "episódios" — e que placeholder herdado de template é dívida que aparece na tela de todo mundo.</p>
+
+    <div class="code"><button class="cp">copiar</button><pre>&lt;<span class="ty">input</span> <span class="an">placeholder</span>=<span class="st">"Buscar no acervo..."</span> <span class="an">aria-label</span>=<span class="st">"Buscar no acervo"</span> /&gt;</pre></div>
+
+    <h3>A lição</h3>
+    <div class="tip warn"><b>Cuidado com o alcance.</b> Marcar <span class="hl">app/components/cabecalho.tsx</span> inteiro como client manda para o pacote do navegador a lista de rotas, a marca, e — o que dói — a lógica de sessão que o cabeçalho lê para decidir o que mostrar a quem está logado. Nada disso tem interação. Extraia só o botão e o campo.</div>
+
+    <div class="file">app/components/busca-cabecalho.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// o cabeçalho continua server; só esta folha desce</span>
+
+<span class="kw">import</span> { useEffect, useRef, useState } <span class="kw">from</span> <span class="st">"react"</span>;
+
+<span class="kw">export function</span> <span class="fn">BuscaCabecalho</span>() {
+  <span class="kw">const</span> [aberta, setAberta] = <span class="fn">useState</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> campo = <span class="fn">useRef</span>&lt;<span class="ty">HTMLInputElement</span>&gt;(<span class="kw">null</span>);
+
+  <span class="cm">// Foco no campo assim que abre: quem abriu a busca quer digitar,</span>
+  <span class="cm">// e quem navega por teclado não deveria ter que procurar o campo.</span>
+  <span class="fn">useEffect</span>(() =&gt; { <span class="kw">if</span> (aberta) campo.current?.<span class="fn">focus</span>(); }, [aberta]);
+
+  <span class="cm">// Esc no documento inteiro, porque o foco pode estar fora do campo.</span>
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">if</span> (!aberta) <span class="kw">return</span>;
+    <span class="kw">const</span> <span class="fn">aoTeclar</span> = (e: <span class="ty">KeyboardEvent</span>) =&gt; { <span class="kw">if</span> (e.key === <span class="st">"Escape"</span>) <span class="fn">setAberta</span>(<span class="kw">false</span>); };
+    <span class="fn">addEventListener</span>(<span class="st">"keydown"</span>, aoTeclar);
+    <span class="kw">return</span> () =&gt; <span class="fn">removeEventListener</span>(<span class="st">"keydown"</span>, aoTeclar);
+  }, [aberta]);
+
+  <span class="kw">return</span> (
+    <span class="cm">// onBlur na casca fecha ao clicar fora sem precisar de listener global:</span>
+    <span class="cm">// se o foco saiu da caixa inteira, ninguém está usando a busca.</span>
+    &lt;<span class="ty">div</span> <span class="an">onBlur</span>={(e) =&gt; { <span class="kw">if</span> (!e.currentTarget.<span class="fn">contains</span>(e.relatedTarget)) <span class="fn">setAberta</span>(<span class="kw">false</span>); }}&gt;
+      &lt;<span class="ty">button</span> <span class="an">aria-expanded</span>={aberta} <span class="an">aria-label</span>=<span class="st">"Buscar no acervo"</span>
+              <span class="an">onClick</span>={() =&gt; <span class="fn">setAberta</span>(!aberta)}&gt;🔍&lt;/<span class="ty">button</span>&gt;
+
+      {aberta &amp;&amp; &lt;<span class="ty">input</span> ref={campo} <span class="an">placeholder</span>=<span class="st">"Buscar no acervo..."</span> /&gt;}
+    &lt;/<span class="ty">div</span>&gt;
+  );
+}</pre></div>
+
+    <div class="file">app/components/cabecalho.tsx · o que ficou no servidor</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm">// Sem diretiva nenhuma: rotas, marca e sessão continuam no servidor.</span>
+<span class="kw">import</span> { <span class="ty">BuscaCabecalho</span> } <span class="kw">from</span> <span class="st">"./busca-cabecalho"</span>;
+
+<span class="kw">export default async function</span> <span class="fn">Cabecalho</span>() {
+  <span class="kw">const</span> sessao = <span class="kw">await</span> <span class="fn">lerSessao</span>();
+  <span class="kw">return</span> (
+    &lt;<span class="ty">header</span>&gt;
+      &lt;<span class="ty">Marca</span> /&gt;
+      &lt;<span class="ty">Rotas</span> /&gt;
+      <span class="hl">&lt;BuscaCabecalho /&gt;</span> <span class="cm">{/* a única ilha de cliente */}</span>
+      &lt;<span class="ty">Conta</span> sessao={sessao} /&gt;
+    &lt;/<span class="ty">header</span>&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Placeholder fala do acervo</b> — e o <code>aria-label</code> repete o texto, para quem não vê o placeholder.</li>
+      <li><b>Clicar na lupa abre e clicar fora fecha</b> — <code>onBlur</code> na casca, testando <code>relatedTarget</code>.</li>
+      <li><b>Esc fecha</b> — ouvinte de <code>keydown</code> no documento, registrado só enquanto aberta e removido na limpeza.</li>
+      <li><b>Só o controle da busca é client</b> — a diretiva está na folha; o cabeçalho permanece <code>async</code> lendo a sessão no servidor.</li>
+      <li><b>O foco vai pro campo ao abrir</b> — <code>useEffect</code> com <code>ref</code>, disparado pela mudança de <code>aberta</code>.</li>
+      <li><b>PR explica a escolha da fronteira</b> — "recusei marcar o cabeçalho inteiro: ele carrega rotas e sessão que não têm interação nenhuma".</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Pergunte onde colocar a diretiva e ela quase sempre sugere o arquivo inteiro — é a resposta rápida, e é a que funciona na primeira tentativa. <b>Decida você.</b> O trecho do PR que este card cobra é literalmente "por que recusei a sugestão": não é penalidade, é o campo do template que mais aparece em entrevista.</p>
+    <div class="tip"><b>O que ela acerta bem:</b> o <code>useEffect</code> do foco e a limpeza do ouvinte de teclado. É código repetitivo e ela não erra — desde que você confira que o <code>return</code> de limpeza existe, porque a versão sem limpeza também aparece e vaza ouvintes a cada abertura.</div>
+  </section>
+
+  <section id="lp-103">
+    <h2><span class="n">LP-103</span>O menu mobile não fecha ao navegar e repete o item "Início"</h2>
+    <p class="sub">O único card em que o componente <i>já</i> é client — e mesmo assim o problema é a fronteira.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O item duplicado é literal: <span class="hl">"Início"</span> aparece duas vezes no array de navegação. O menu que fica aberto por cima é mais interessante — <b>navegação no App Router não recarrega a página</b>. O React troca a árvore da rota e o menu, que é um componente com estado próprio, continua montado com <code>aberto === true</code>. Ninguém avisou ele. No mundo do recarregamento completo esse bug não existia, e é por isso que ele pega tanta gente.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Remover a linha duplicada do array. E notar que o array de links é dado estático: ele não precisa de cliente nenhum, e pode ficar num módulo que o servidor também importa.</p>
+
+    <h3>A lição</h3>
+    <p>O menu precisa ser client porque tem estado aberto/fechado. A <b>lista de links não precisa</b> — ela é constante, desce por props e nunca muda no navegador. E o fechamento ao navegar sai do caminho da rota atual: quando <code>usePathname()</code> muda, o efeito fecha.</p>
+
+    <div class="file">app/components/menu-mobile.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">import</span> { usePathname } <span class="kw">from</span> <span class="st">"next/navigation"</span>; <span class="cm">// App Router, não next/router</span>
+<span class="kw">import</span> { useEffect, useState } <span class="kw">from</span> <span class="st">"react"</span>;
+
+<span class="kw">export function</span> <span class="fn">MenuMobile</span>({ links }: { links: { href: <span class="ty">string</span>; rotulo: <span class="ty">string</span> }[] }) {
+  <span class="kw">const</span> [aberto, setAberto] = <span class="fn">useState</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> rota = <span class="fn">usePathname</span>();
+
+  <span class="cm">// A rota mudou =&gt; o menu fecha. Não é o clique que fecha: é a</span>
+  <span class="cm">// navegação. Assim funciona também no voltar do navegador.</span>
+  <span class="fn">useEffect</span>(() =&gt; { <span class="fn">setAberto</span>(<span class="kw">false</span>); }, [rota]);
+
+  <span class="cm">// Trava a rolagem do corpo enquanto o painel cobre a tela.</span>
+  <span class="fn">useEffect</span>(() =&gt; {
+    document.body.style.overflow = aberto ? <span class="st">"hidden"</span> : <span class="st">""</span>;
+    <span class="kw">return</span> () =&gt; { document.body.style.overflow = <span class="st">""</span>; };
+  }, [aberto]);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> <span class="fn">esc</span> = (e: <span class="ty">KeyboardEvent</span>) =&gt; { <span class="kw">if</span> (e.key === <span class="st">"Escape"</span>) <span class="fn">setAberto</span>(<span class="kw">false</span>); };
+    <span class="fn">addEventListener</span>(<span class="st">"keydown"</span>, esc);
+    <span class="kw">return</span> () =&gt; <span class="fn">removeEventListener</span>(<span class="st">"keydown"</span>, esc);
+  }, []);
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">button</span> <span class="an">aria-expanded</span>={aberto} <span class="an">aria-label</span>=<span class="st">"Abrir menu"</span>
+              <span class="an">onClick</span>={() =&gt; <span class="fn">setAberto</span>(<span class="kw">true</span>)}&gt;☰&lt;/<span class="ty">button</span>&gt;
+
+      {aberto &amp;&amp; (
+        &lt;<span class="ty">nav</span>&gt;
+          &lt;<span class="ty">button</span> <span class="an">aria-label</span>=<span class="st">"Fechar menu"</span> <span class="an">onClick</span>={() =&gt; <span class="fn">setAberto</span>(<span class="kw">false</span>)}&gt;✕&lt;/<span class="ty">button</span>&gt;
+          {links.<span class="fn">map</span>((l) =&gt; &lt;<span class="ty">Link</span> key={l.href} href={l.href}&gt;{l.rotulo}&lt;/<span class="ty">Link</span>&gt;)}
+        &lt;/<span class="ty">nav</span>&gt;
+      )}
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <div class="tip ok"><b>Por que fechar pelo <code>usePathname</code> e não pelo <code>onClick</code> do link:</b> o <code>onClick</code> fecha quando a pessoa clica, mesmo que a navegação falhe, e não fecha quando ela volta pelo botão do navegador. Reagir à rota cobre os dois casos com uma linha a menos.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <table>
+      <thead><tr><th>Critério</th><th>Como foi satisfeito</th></tr></thead>
+      <tbody>
+        <tr><td><b>"Início" aparece uma vez</b></td><td>Entrada duplicada removida do array de navegação.</td></tr>
+        <tr><td><b>Tocar num item navega e fecha</b></td><td><code>useEffect</code> em <code>[rota]</code> — fecha na navegação, inclusive no voltar.</td></tr>
+        <tr><td><b>Esc fecha e o botão de fechar continua</b></td><td>Ouvinte global de <code>Escape</code>; o <code>✕</code> não foi substituído por ele.</td></tr>
+        <tr><td><b>O corpo não rola atrás</b></td><td><code>body.style.overflow = "hidden"</code> enquanto aberto, restaurado na limpeza.</td></tr>
+        <tr><td><b>Só o menu é client</b></td><td>O array de links é dado; entra por props e o cabeçalho continua server.</td></tr>
+        <tr><td><b>Testado em largura de celular de verdade</b></td><td>No modo dispositivo do navegador <i>e</i> num aparelho — o teclado virtual e o toque revelam o que a janela estreita esconde.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Sobre a IA</h3>
+    <div class="tip warn"><b>Este é o card do Pages Router.</b> Pergunte como saber, dentro de um Client Component, que a rota mudou, e há grande chance de vir <code>useRouter</code> de <span class="hl">next/router</span> com <code>router.events.on("routeChangeComplete")</code> — que é API do Pages Router e simplesmente não existe aqui. O import parece certo, o erro só aparece em execução, e a explicação que acompanha é convincente. <b>Confirme na documentação oficial da versão instalada</b>: no App Router o caminho é <code>usePathname</code> de <span class="hl">next/navigation</span>.</div>
+  </section>
+
+  <section id="lp-107">
+    <h2><span class="n">LP-107</span>O alternador de tema não alterna e o ícone está invertido</h2>
+    <p class="sub">Um bug de interação, um de escrita de interface, e uma armadilha de brinde que vale o PR inteiro.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O botão não alterna porque está num Server Component — de novo. O ícone invertido não é bug de código, é <b>bug de conceito</b>: ele mostra o tema atual. No escuro aparece a lua, que é onde a pessoa já está. Botão comunica <b>ação</b>, não estado: no escuro deve aparecer o sol, que é o que se obtém clicando.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Inverter o ícone e escrever o rótulo acessível pela mesma régua — <code>aria-label="Mudar para o tema claro"</code>, não "tema escuro ativo".</p>
+
+    <h3>A lição</h3>
+    <div class="file">app/components/botao-tema.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// só o botão: o layout inteiro continua server</span>
+
+<span class="kw">export function</span> <span class="fn">BotaoTema</span>() {
+  <span class="kw">const</span> [tema, setTema] = <span class="fn">useState</span>&lt;<span class="st">"claro"</span> | <span class="st">"escuro"</span>&gt;(<span class="st">"escuro"</span>);
+  <span class="kw">const</span> proximo = tema === <span class="st">"escuro"</span> ? <span class="st">"claro"</span> : <span class="st">"escuro"</span>;
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    document.documentElement.dataset.tema = tema;
+    <span class="fn">localStorage</span>.<span class="fn">setItem</span>(<span class="st">"tema"</span>, tema); <span class="cm">// sobrevive à navegação e ao recarregar</span>
+  }, [tema]);
+
+  <span class="kw">return</span> (
+    <span class="cm">// O ícone e o rótulo falam do PRÓXIMO tema, não do atual.</span>
+    &lt;<span class="ty">button</span> <span class="an">onClick</span>={() =&gt; <span class="fn">setTema</span>(proximo)}
+            <span class="an">aria-label</span>={<span class="st">`Mudar para o tema ${proximo}`</span>}&gt;
+      {proximo === <span class="st">"claro"</span> ? <span class="st">"☀"</span> : <span class="st">"🌙"</span>}
+    &lt;/<span class="ty">button</span>&gt;
+  );
+}</pre></div>
+
+    <div class="tip warn"><b>A armadilha de brinde: o flash.</b> Se o tema é decidido só no navegador, o servidor pinta o HTML com o padrão e o efeito troca depois da primeira pintura — a página pisca claro antes de ficar escura. <b>Você não precisa resolver isso nesta semana</b>, precisa notar e descrever no PR. A solução que se adota depois é um script minúsculo que lê o <code>localStorage</code> e escreve o atributo no <code>&lt;html&gt;</code> <i>antes</i> do React montar, mais um cookie para o servidor já mandar o tema certo no HTML.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Alterna entre claro e escuro</b> — estado local escrevendo <code>data-tema</code> na raiz do documento.</li>
+      <li><b>Ícone mostra o tema que será aplicado</b> — tudo é derivado de <code>proximo</code>, então ícone e rótulo não podem discordar.</li>
+      <li><b>Rótulo acessível dizendo o que faz</b> — "Mudar para o tema claro", no imperativo da ação.</li>
+      <li><b>Só o botão é client</b> — o layout raiz continua Server Component.</li>
+      <li><b>O flash está descrito no PR</b> — com a solução que eu adotaria, e o motivo de ficar fora deste ticket.</li>
+      <li><b>A escolha sobrevive à navegação</b> — <code>localStorage</code>, lido na montagem.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Peça uma explicação do FOUC e ela explica o fenômeno muito bem — a ordem entre HTML do servidor, primeira pintura e hidratação sai clara e correta. <b>As soluções são o problema:</b> costumam vir de outras versões do Next, ou pressupõem uma biblioteca de tema que este projeto não tem. Confirme antes de colar, e prefira descrever a solução no PR a colar uma que você não consegue explicar.</p>
+  </section>
+
+  <section id="lp-110">
+    <h2><span class="n">LP-110</span>O "voltar ao topo" não funciona e o rodapé ainda diz 2024</h2>
+    <p class="sub">Tamanho P, de propósito: é o card para atravessar branch, PR e deploy com folga no primeiro dia.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O botão não rola porque o <code>onClick</code> está no rodapé, que é servidor. O ano é uma string fixa. E a pegadinha está aí: calcular o ano é uma linha, mas <b>onde</b> essa linha roda muda o resultado.</p>
+
+    <h3>O aquecimento, com a pegadinha</h3>
+    <p>Se <code>new Date().getFullYear()</code> for avaliado num Client Component, o HTML do servidor sai com um ano e o navegador pinta outro — no fim do ano, ou com relógios em fusos diferentes, os dois textos divergem e o React reclama de <b>hydration mismatch</b>. O ano é dado estável no momento da renderização: calcule no servidor.</p>
+
+    <div class="duo">
+      <div class="box no"><h4>Antes — ano calculado no cliente</h4>
+        <div class="code"><button class="cp">copiar</button><pre><span class="st">"use client"</span>;
+<span class="kw">export function</span> <span class="fn">Rodape</span>() {
+  <span class="cm">// servidor: 2025 · navegador: 2026</span>
+  <span class="cm">// e o React acusa incompatibilidade</span>
+  <span class="kw">return</span> &lt;<span class="ty">p</span>&gt;© {<span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">getFullYear</span>()}&lt;/<span class="ty">p</span>&gt;;
+}</pre></div>
+      </div>
+      <div class="box ok"><h4>Depois — ano no servidor</h4>
+        <div class="code"><button class="cp">copiar</button><pre><span class="cm">// app/components/rodape.tsx — sem diretiva</span>
+<span class="kw">export function</span> <span class="fn">Rodape</span>() {
+  <span class="kw">const</span> ano = <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">getFullYear</span>();
+  <span class="kw">return</span> (
+    &lt;<span class="ty">footer</span>&gt;
+      &lt;<span class="ty">p</span>&gt;© {ano} LequePlay&lt;/<span class="ty">p</span>&gt;
+      <span class="hl">&lt;VoltarAoTopo /&gt;</span>
+    &lt;/<span class="ty">footer</span>&gt;
+  );
+}</pre></div>
+      </div>
+    </div>
+
+    <div class="file">app/components/voltar-ao-topo.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// só o botão precisa de scroll e de evento</span>
+
+<span class="kw">export function</span> <span class="fn">VoltarAoTopo</span>() {
+  <span class="kw">const</span> [visivel, setVisivel] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> <span class="fn">aoRolar</span> = () =&gt; <span class="fn">setVisivel</span>(scrollY &gt; <span class="an">500</span>);
+    <span class="fn">aoRolar</span>(); <span class="cm">// já entra com o estado certo se a página abriu rolada</span>
+    <span class="fn">addEventListener</span>(<span class="st">"scroll"</span>, aoRolar, { passive: <span class="kw">true</span> });
+    <span class="kw">return</span> () =&gt; <span class="fn">removeEventListener</span>(<span class="st">"scroll"</span>, aoRolar);
+  }, []);
+
+  <span class="kw">if</span> (!visivel) <span class="kw">return</span> <span class="kw">null</span>;
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">button</span> <span class="an">aria-label</span>=<span class="st">"Voltar ao topo"</span>
+            <span class="an">onClick</span>={() =&gt; <span class="fn">scrollTo</span>({ top: <span class="an">0</span>, behavior: <span class="st">"smooth"</span> })}&gt;↑&lt;/<span class="ty">button</span>&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Leva ao topo com rolagem suave</b> — <code>scrollTo</code> com <code>behavior: "smooth"</code>; a preferência de movimento reduzido é respeitada pelo CSS do projeto.</li>
+      <li><b>Ano corrente sem erro de hidratação</b> — calculado no rodapé, que é Server Component; o console fica limpo.</li>
+      <li><b>Só aparece depois de rolar um trecho</b> — 500px, com o estado inicial já ajustado na montagem.</li>
+      <li><b>Rótulo acessível e teclado</b> — <code>&lt;button&gt;</code> com <code>aria-label</code>; Enter e espaço funcionam de graça.</li>
+      <li><b>Só o que precisa de interatividade virou client</b> — o rodapé inteiro continua no servidor.</li>
+      <li><b>PR explica onde o ano é calculado e por quê</b> — servidor, para o HTML e a hidratação concordarem.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Se aparecer <i>hydration mismatch</i>, cole a mensagem inteira no copiloto. É um erro que assusta pelo tamanho e ela explica bem: o que o servidor renderizou, o que o cliente renderizou, por que a diferença quebra a hidratação. <b>Entender essa mensagem agora economiza horas na semana 4</b>, quando ela voltar por causa de sessão e cookie.</p>
+    <div class="tip"><b>Cole o erro inteiro, sem cortar.</b> A linha que você julgou irrelevante costuma ser justamente a que diz o componente.</div>
+  </section>
+  <div class="divisor">a ficha</div>
+
+  <section id="lp-108">
+    <h2><span class="n">LP-108</span>O "ver mais" da sinopse não expande e o texto corta no meio da palavra</h2>
+    <p class="sub">O card em que o critério mais importante é invisível na tela: o que existe no HTML do servidor.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O corte é <code>sinopse.slice(0, 180)</code>, cru, que deixa <span class="hl">"uma jornada de supera"</span> no fim. O "ver mais" não expande porque está num Server Component. E há um terceiro problema, o que o review vai cobrar: se a sinopse for cortada <b>antes</b> de virar HTML, o texto completo nunca existiu na página.</p>
+
+    <div class="tip warn"><b>Mandar só o pedaço e buscar o resto no clique deixa leitor de tela e buscadores com metade do texto.</b> Quem usa leitor de tela não "clica em ver mais" para o conteúdo existir — e o robô do buscador nem clica. A sinopse inteira precisa estar no HTML do servidor; o botão só controla o que fica <i>visível</i>.</div>
+
+    <h3>O aquecimento</h3>
+    <p>Cortar no espaço mais próximo, com reticências. E, melhor ainda: se dá para resolver no CSS em vez de picotar a string, resolva — o texto completo permanece no HTML e o navegador cuida do corte visual.</p>
+
+    <div class="duo">
+      <div class="box no"><h4>Corte na string</h4>
+        <div class="code"><button class="cp">copiar</button><pre><span class="cm">// respeita a palavra, mas o texto</span>
+<span class="cm">// completo some do HTML se você</span>
+<span class="cm">// mandar só o resultado.</span>
+<span class="kw">const</span> corte = sinopse.<span class="fn">slice</span>(<span class="an">0</span>, <span class="an">180</span>);
+<span class="kw">const</span> curta =
+  corte.<span class="fn">slice</span>(<span class="an">0</span>, corte.<span class="fn">lastIndexOf</span>(<span class="st">" "</span>)) + <span class="st">"…"</span>;</pre></div>
+      </div>
+      <div class="box ok"><h4>Corte no CSS — o escolhido</h4>
+        <div class="code"><button class="cp">copiar</button><pre><span class="cm">/* O texto inteiro está no HTML;</span>
+<span class="cm">   o navegador só o esconde. */</span>
+.sinopse.recolhida {
+  display: -webkit-box;
+  -webkit-line-clamp: <span class="an">3</span>;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}</pre></div>
+      </div>
+    </div>
+
+    <h3>A lição</h3>
+    <p>A sinopse inteira desce como prop, do servidor. O client controla apenas uma classe.</p>
+
+    <div class="file">app/midias/[slug]/sinopse-expansivel.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">export function</span> <span class="fn">SinopseExpansivel</span>({ texto }: { texto: <span class="ty">string</span> }) {
+  <span class="kw">const</span> [aberta, setAberta] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+  <span class="cm">// Sinopse curta não ganha botão: um "ver mais" que não revela nada</span>
+  <span class="cm">// é ruído, e a régua bate com as três linhas do CSS.</span>
+  <span class="kw">const</span> precisaBotao = texto.length &gt; <span class="an">180</span>;
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      {<span class="cm">/* o texto vai INTEIRO para o HTML, sempre */</span>}
+      &lt;<span class="ty">p</span> <span class="an">id</span>=<span class="st">"sinopse"</span> className={aberta || !precisaBotao ? <span class="st">"sinopse"</span> : <span class="st">"sinopse recolhida"</span>}&gt;
+        {texto}
+      &lt;/<span class="ty">p</span>&gt;
+
+      {precisaBotao &amp;&amp; (
+        &lt;<span class="ty">button</span> <span class="an">aria-expanded</span>={aberta} <span class="an">aria-controls</span>=<span class="st">"sinopse"</span>
+                <span class="an">onClick</span>={() =&gt; <span class="fn">setAberta</span>(!aberta)}&gt;
+          {aberta ? <span class="st">"ver menos"</span> : <span class="st">"ver mais"</span>}
+        &lt;/<span class="ty">button</span>&gt;
+      )}
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Corte respeita a palavra e termina com reticências</b> — o <code>line-clamp</code> corta na linha e desenha o "…" sem tocar na string; a versão em JavaScript fica documentada acima como alternativa.</li>
+      <li><b>"Ver mais" expande e "ver menos" recolhe</b> — a mesma classe alternada pelo estado.</li>
+      <li><b>Sinopse completa no HTML do servidor</b> — a prop <code>texto</code> chega inteira e é renderizada inteira.</li>
+      <li><b>Rótulo acessível que muda com o estado</b> — <code>aria-expanded</code> mais o texto do botão trocando.</li>
+      <li><b>Só o trecho expansível é client</b> — a ficha continua Server Component buscando a mídia.</li>
+      <li><b>Sinopse curta não mostra o botão</b> — <code>precisaBotao</code> guarda a renderização.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>O expandir/recolher ela resolve em segundos, e resolve certo. <b>A pergunta que decide o card é outra:</b> pergunte a ela o impacto do corte em SEO e acessibilidade, e a resposta é boa — texto que só existe depois de um clique não é indexado nem lido. Mas ela não levanta isso sozinha: a sugestão espontânea costuma ser exatamente a versão que corta a string antes de renderizar.</p>
+  </section>
+
+  <section id="lp-109">
+    <h2><span class="n">LP-109</span>As abas da ficha não trocam e nenhuma vem selecionada</h2>
+    <p class="sub">Sinopse, Elenco, Detalhes — e um padrão de acessibilidade que quase ninguém aplica.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>Não existe estado de aba selecionada: as três abas são <code>&lt;div&gt;</code> com <code>onClick</code> num Server Component, e o painel renderiza um conteúdo que nunca foi escolhido — daí o vazio. Nada disso é anunciado a leitor de tela, porque <code>&lt;div&gt;</code> não tem papel de aba.</p>
+
+    <h3>A decisão consciente</h3>
+    <p>Os três conteúdos descem juntos, ou cada aba busca o seu ao abrir? <b>Para textos curtos, tudo junto é mais simples e mais rápido</b> — uma requisição só, troca instantânea, nada de estado de carregando. Este gabarito faz assim, e o PR diz que foi escolha, não descuido. Se o elenco fosse uma lista de duzentas pessoas com foto, a conta viraria.</p>
+
+    <h3>A lição</h3>
+    <div class="file">app/midias/[slug]/page.tsx · tudo desce junto</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="kw">export default async function</span> <span class="fn">Ficha</span>({ params }: { params: <span class="ty">Promise</span>&lt;{ slug: <span class="ty">string</span> }&gt; }) {
+  <span class="hl">const { slug } = await params;</span> <span class="cm">// no Next 16 params é Promise</span>
+  <span class="kw">const</span> midia = <span class="kw">await</span> <span class="fn">buscarMidia</span>(slug);
+
+  <span class="cm">// Os três conteúdos são elementos prontos, renderizados no servidor,</span>
+  <span class="cm">// e passam como children. O client recebe marcação, não dados a buscar.</span>
+  <span class="kw">return</span> (
+    &lt;<span class="ty">Abas</span>
+      abas={[
+        { id: <span class="st">"sinopse"</span>,  rotulo: <span class="st">"Sinopse"</span>,  conteudo: &lt;<span class="ty">Sinopse</span> midia={midia} /&gt; },
+        { id: <span class="st">"elenco"</span>,   rotulo: <span class="st">"Elenco"</span>,   conteudo: &lt;<span class="ty">Elenco</span> midia={midia} /&gt; },
+        { id: <span class="st">"detalhes"</span>, rotulo: <span class="st">"Detalhes"</span>, conteudo: &lt;<span class="ty">Detalhes</span> midia={midia} /&gt; },
+      ]}
+    /&gt;
+  );
+}</pre></div>
+
+    <div class="file">app/midias/[slug]/abas.tsx · só o controle</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">export function</span> <span class="fn">Abas</span>({ abas }: { abas: <span class="ty">Aba</span>[] }) {
+  <span class="kw">const</span> [i, setI] = <span class="fn">useState</span>(<span class="an">0</span>); <span class="cm">// a primeira já vem selecionada</span>
+
+  <span class="cm">// Padrão ARIA de abas: setas navegam entre elas, Tab sai do conjunto.</span>
+  <span class="kw">const</span> <span class="fn">aoTeclar</span> = (e: <span class="ty">KeyboardEvent</span>&lt;<span class="ty">HTMLDivElement</span>&gt;) =&gt; {
+    <span class="kw">if</span> (e.key === <span class="st">"ArrowRight"</span>) <span class="fn">setI</span>((i + <span class="an">1</span>) % abas.length);
+    <span class="kw">if</span> (e.key === <span class="st">"ArrowLeft"</span>)  <span class="fn">setI</span>((i - <span class="an">1</span> + abas.length) % abas.length);
+  };
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">div</span> <span class="an">role</span>=<span class="st">"tablist"</span> <span class="an">onKeyDown</span>={aoTeclar}&gt;
+        {abas.<span class="fn">map</span>((a, n) =&gt; (
+          &lt;<span class="ty">button</span> key={a.id} <span class="an">role</span>=<span class="st">"tab"</span>
+                  <span class="an">aria-selected</span>={n === i}
+                  <span class="an">aria-controls</span>={<span class="st">`painel-${a.id}`</span>}
+                  <span class="an">id</span>={<span class="st">`aba-${a.id}`</span>}
+                  <span class="an">tabIndex</span>={n === i ? <span class="an">0</span> : -<span class="an">1</span>} <span class="cm">// só a selecionada entra no Tab</span>
+                  <span class="an">onClick</span>={() =&gt; <span class="fn">setI</span>(n)}&gt;
+            {a.rotulo}
+          &lt;/<span class="ty">button</span>&gt;
+        ))}
+      &lt;/<span class="ty">div</span>&gt;
+
+      &lt;<span class="ty">div</span> <span class="an">role</span>=<span class="st">"tabpanel"</span> <span class="an">id</span>={<span class="st">`painel-${abas[i].id}`</span>} <span class="an">aria-labelledby</span>={<span class="st">`aba-${abas[i].id}`</span>}&gt;
+        {abas[i].conteudo}
+      &lt;/<span class="ty">div</span>&gt;
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <div class="tip"><b>O <code>tabIndex={-1}</code> nas abas não selecionadas é o detalhe que separa o padrão certo do quase certo.</b> Sem ele, o Tab passa por cada aba uma por uma; com ele, o Tab entra no conjunto uma vez e as setas fazem o resto — que é como abas funcionam em qualquer sistema operacional.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Primeira aba selecionada ao abrir</b> — <code>useState(0)</code>.</li>
+      <li><b>Clicar troca aba e conteúdo</b> — o painel deriva do mesmo índice.</li>
+      <li><b>Setas do teclado navegam</b> — <code>ArrowLeft</code> e <code>ArrowRight</code> com volta circular.</li>
+      <li><b>Aba selecionada anunciada</b> — <code>role="tab"</code> mais <code>aria-selected</code>, e o painel amarrado por <code>aria-controls</code>/<code>aria-labelledby</code>.</li>
+      <li><b>Conteúdos vêm do servidor</b> — renderizados na página e passados prontos; o client não busca nada.</li>
+      <li><b>PR explica a escolha</b> — tudo junto, porque os três textos são curtos e uma requisição só é mais rápida que três.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Peça o padrão ARIA de abas: ela conhece bem e poupa meia hora de documentação — <code>tablist</code>, <code>tab</code>, <code>tabpanel</code>, a relação de <code>id</code>, o <code>tabIndex</code> gerenciado. É um dos usos em que ela é claramente melhor que a busca. <b>Confira navegando só com o teclado</b>, porque o detalhe que ela às vezes esquece é mover o foco junto com a seleção quando a seta troca a aba.</p>
+  </section>
+
+  <section id="lp-111">
+    <h2><span class="n">LP-111</span>O seletor de temporada não troca e a numeração começa no zero</h2>
+    <p class="sub">"Temporada 0, 1, 2" para uma série de três — o índice do array virou número na tela.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O <code>map</code> renderiza <code>Temporada {i}</code>, usando a posição no array como se fosse o número da temporada. Some com o zero somando 1 e o bug parece resolvido — e continua errado, porque <b>o número da temporada é dado da API</b>, não posição. Existe série que começa numa temporada especial, ou que pula numeração: aí índice e número nunca batem, e o <code>+1</code> mente com mais elegância.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Ler a documentação e confirmar que a temporada traz o próprio número — e um identificador estável, que é o que vira <code>key</code> e, na semana 3, vira segmento de rota.</p>
+
+    <div class="duo">
+      <div class="box no"><h4>Antes</h4>
+        <div class="code"><button class="cp">copiar</button><pre>{temporadas.<span class="fn">map</span>((t, i) =&gt; (
+  &lt;<span class="ty">option</span> key={i} <span class="an">value</span>={i}&gt;
+    Temporada {i}
+  &lt;/<span class="ty">option</span>&gt;
+))}</pre></div>
+      </div>
+      <div class="box ok"><h4>Depois</h4>
+        <div class="code"><button class="cp">copiar</button><pre>{temporadas.<span class="fn">map</span>((t) =&gt; (
+  &lt;<span class="ty">option</span> key={t.id} <span class="an">value</span>={t.id}&gt;
+    Temporada {t.numero}
+  &lt;/<span class="ty">option</span>&gt;
+))}</pre></div>
+      </div>
+    </div>
+
+    <h3>A lição</h3>
+    <div class="file">app/series/[slug]/seletor-temporada.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">export function</span> <span class="fn">SeletorTemporada</span>({ temporadas }: { temporadas: <span class="ty">Temporada</span>[] }) {
+  <span class="cm">// Identificador da API, nunca índice: se a ordem do array mudar,</span>
+  <span class="cm">// a seleção continua apontando para a mesma temporada.</span>
+  <span class="kw">const</span> [id, setId] = <span class="fn">useState</span>(temporadas[<span class="an">0</span>].id);
+  <span class="kw">const</span> atual = temporadas.<span class="fn">find</span>((t) =&gt; t.id === id)!;
+
+  <span class="cm">// Série de uma temporada só não mostra seletor — só a lista.</span>
+  <span class="kw">if</span> (temporadas.length === <span class="an">1</span>) <span class="kw">return</span> &lt;<span class="ty">Episodios</span> itens={temporadas[<span class="an">0</span>].episodios} /&gt;;
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">label</span> <span class="an">htmlFor</span>=<span class="st">"temporada"</span>&gt;Temporada&lt;/<span class="ty">label</span>&gt;
+      &lt;<span class="ty">select</span> <span class="an">id</span>=<span class="st">"temporada"</span> <span class="an">value</span>={id} <span class="an">onChange</span>={(e) =&gt; <span class="fn">setId</span>(e.target.value)}&gt;
+        {temporadas.<span class="fn">map</span>((t) =&gt; (
+          &lt;<span class="ty">option</span> key={t.id} <span class="an">value</span>={t.id}&gt;Temporada {t.numero}&lt;/<span class="ty">option</span>&gt;
+        ))}
+      &lt;/<span class="ty">select</span>&gt;
+
+      {<span class="cm">/* os episódios já vieram todos do servidor, dentro de temporadas */</span>}
+      &lt;<span class="ty">Episodios</span> itens={atual.episodios} /&gt;
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Número vem da API</b> — <code>t.numero</code>, conferido na documentação; o índice sumiu da tela e da <code>key</code>.</li>
+      <li><b>Escolher outra temporada troca os episódios</b> — a lista deriva de <code>atual</code>.</li>
+      <li><b>Primeira temporada selecionada ao abrir</b> — <code>useState(temporadas[0].id)</code>.</li>
+      <li><b>Episódios continuam vindo do servidor</b> — a ficha busca as temporadas com os episódios dentro e passa por props.</li>
+      <li><b>Funciona pelo teclado</b> — <code>&lt;select&gt;</code> nativo com rótulo associado.</li>
+      <li><b>Série de uma temporada só não mostra seletor</b> — guarda no começo do componente.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Pergunte por que usar índice de array como identificador é problema e a explicação é ótima: reordenação, inserção no meio, <code>key</code> instável no React, identificador que não sobrevive a uma rota. <b>É um vício que ela mesma comete</b> quando escreve rápido — o <code>map((t, i) =&gt; ... key={i})</code> aparece na primeira resposta com frequência incômoda. Saber explicar o problema e não cometê-lo são coisas diferentes, nela como em nós.</p>
+    <div class="tip"><b>Este card conversa direto com a semana 3</b>, quando temporada virar rota de verdade. Usar o identificador da API agora é o que faz aquele card ser uma mudança pequena em vez de uma reescrita.</div>
+  </section>
+
+  <section id="lp-112">
+    <h2><span class="n">LP-112</span>O botão de copiar link não copia e a URL sai com localhost</h2>
+    <p class="sub">O card de variáveis de ambiente — e a distinção que volta na semana 2 e na semana 4.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>A URL é montada com a string <span class="hl">http://localhost:3000</span> escrita no código, então o link que a pessoa compartilha em produção aponta para a máquina dela. E o botão não copia porque <code>navigator.clipboard</code> é API de navegador chamada de um componente que roda no servidor.</p>
+
+    <h3>O aquecimento</h3>
+    <p>O endereço público é <b>configuração, não código</b>: muda entre a sua máquina, a prévia do PR e produção. Sai do arquivo e vira variável de ambiente.</p>
+
+    <div class="file">.env.local · e o mesmo nome configurado na Cloudflare</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm"># Público de propósito: o navegador precisa deste valor para montar o link.</span>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+<span class="cm"># Em produção: https://lequeplay.exemplo.br</span>
+<span class="cm"># Na prévia: a URL do deploy de PR</span></pre></div>
+
+    <div class="tip warn"><b>Cuidado com o prefixo.</b> <code>NEXT_PUBLIC_</code> não "permite" o valor no navegador — ele <b>embute</b> o valor no JavaScript que qualquer pessoa baixa e lê. Para uma URL pública é aceitável, porque ela já está na barra de endereço. Para token, chave de API ou segredo de sessão é vazamento, e vazamento que fica no histórico do repositório. Segredo fica sem prefixo e só é lido no servidor.</div>
+
+    <h3>A lição</h3>
+    <div class="file">app/midias/[slug]/copiar-link.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// clipboard é API de navegador: precisa estar aqui</span>
+
+<span class="kw">export function</span> <span class="fn">CopiarLink</span>({ url }: { url: <span class="ty">string</span> }) {
+  <span class="kw">const</span> [copiado, setCopiado] = <span class="fn">useState</span>(<span class="kw">false</span>);
+
+  <span class="kw">async function</span> <span class="fn">copiar</span>() {
+    <span class="kw">try</span> {
+      <span class="kw">await</span> navigator.clipboard.<span class="fn">writeText</span>(url);
+      <span class="fn">setCopiado</span>(<span class="kw">true</span>);
+      <span class="fn">setTimeout</span>(() =&gt; <span class="fn">setCopiado</span>(<span class="kw">false</span>), <span class="an">1500</span>);
+    } <span class="kw">catch</span> {
+      <span class="cm">// Sem permissão de área de transferência, não finja que copiou.</span>
+      <span class="fn">setCopiado</span>(<span class="kw">false</span>);
+    }
+  }
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">button</span> <span class="an">onClick</span>={copiar}&gt;{copiado ? <span class="st">"Link copiado ✓"</span> : <span class="st">"Copiar link"</span>}&lt;/<span class="ty">button</span>&gt;
+      {<span class="cm">/* aria-live para quem não vê a mudança do rótulo */</span>}
+      &lt;<span class="ty">span</span> <span class="an">role</span>=<span class="st">"status"</span> <span class="an">aria-live</span>=<span class="st">"polite"</span>&gt;{copiado &amp;&amp; <span class="st">"Link copiado"</span>}&lt;/<span class="ty">span</span>&gt;
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <div class="file">app/midias/[slug]/page.tsx · a URL é montada no servidor</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="kw">const</span> url = <span class="st">`${process.env.NEXT_PUBLIC_SITE_URL}/midias/${slug}`</span>;
+<span class="kw">return</span> &lt;<span class="ty">CopiarLink</span> url={url} /&gt;;</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>URL vem de variável de ambiente</b> — <code>NEXT_PUBLIC_SITE_URL</code>; nenhuma string de host no código.</li>
+      <li><b>Link funciona em produção e na prévia</b> — porque cada ambiente define o próprio valor.</li>
+      <li><b>O botão copia de verdade</b> — <code>navigator.clipboard.writeText</code> num Client Component.</li>
+      <li><b>A interface confirma que copiou</b> — o rótulo troca e um <code>role="status"</code> anuncia.</li>
+      <li><b>PR explica por que essa variável pode ser pública</b> — é o endereço do site, já visível na barra de endereço; publicá-lo não revela nada.</li>
+      <li><b>Nenhum segredo foi para uma <code>NEXT_PUBLIC_</code></b> — conferido lendo o <span class="hl">.env</span> inteiro, uma variável por vez.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Pergunte quando <code>NEXT_PUBLIC_</code> é seguro e quando é vazamento: a resposta é boa e vale gravar agora, porque essa distinção volta na <b>semana 2</b>, quando o BFF passar a guardar a chave da API, e na <b>semana 4</b>, quando o token de sessão entrar em cena.</p>
+    <div class="tip warn"><b>O que conferir:</b> pedida para "fazer a URL funcionar em produção", ela às vezes sugere prefixar variáveis existentes com <code>NEXT_PUBLIC_</code> para resolver um <code>undefined</code> no navegador. Se a variável é um segredo, essa sugestão é o vazamento — e o <code>undefined</code> era o sistema funcionando como devia.</div>
+  </section>
+  <div class="divisor">formulário e estados</div>
+
+  <section id="lp-113">
+    <h2><span class="n">LP-113</span>A rota /sobre devolve 404 e o link do rodapé leva a lugar nenhum</h2>
+    <p class="sub">O coração do App Router: a URL não é registrada em lugar nenhum, é o caminho da pasta.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O conteúdo já existe no repositório. O que não existe é a rota — o arquivo está com nome quase certo: <span class="hl">app/sobre/index.tsx</span>, ou <span class="hl">Page.tsx</span> com maiúscula, ou solto em <span class="hl">app/sobre.tsx</span>. <b>Nome quase certo não vira rota: vira arquivo ignorado, sem erro nenhum.</b> Nada quebra, nada avisa, e o 404 é a única mensagem que você recebe.</p>
+
+    <div class="tip warn"><b>Por que isso engana tanto:</b> em frameworks com rota declarada num arquivo de configuração, uma rota faltando aparece como erro de importação. Aqui a convenção é o registro — e uma convenção não atendida é apenas silêncio.</div>
+
+    <h3>O aquecimento</h3>
+    <p>Renomear para <span class="hl">app/sobre/page.tsx</span>, tudo minúsculo, exportando um componente padrão. E conferir o <code>href</code> do rodapé, que apontava para <code>/sobre/</code> com barra final ou para <code>#</code>.</p>
+
+    <div class="file">a convenção, em quatro nomes</div>
+    <div class="code"><button class="cp">copiar</button><pre>app/
+├─ sobre/
+│  └─ page.tsx        <span class="cm">← isto, e só isto, cria a rota /sobre</span>
+├─ layout.tsx         <span class="cm">casca que envolve as rotas abaixo</span>
+├─ loading.tsx        <span class="cm">o que aparece enquanto a página carrega (semana 2)</span>
+└─ not-found.tsx      <span class="cm">a tela de 404 do projeto</span></pre></div>
+
+    <h3>A lição</h3>
+    <p>A página é Server Component — é texto estático, não tem nada que precise do navegador. Só o acordeão de perguntas é client.</p>
+
+    <div class="file">app/sobre/page.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm">// Sem "use client": é conteúdo, renderizado no servidor e indexável.</span>
+<span class="kw">import</span> { <span class="ty">Acordeao</span> } <span class="kw">from</span> <span class="st">"./acordeao"</span>;
+<span class="kw">import</span> { <span class="ty">PERGUNTAS</span> } <span class="kw">from</span> <span class="st">"./perguntas"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Sobre</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">main</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;Sobre o LequePlay&lt;/<span class="ty">h1</span>&gt;
+      {<span class="cm">/* as respostas descem inteiras: o acordeão só esconde */</span>}
+      &lt;<span class="ty">Acordeao</span> itens={<span class="ty">PERGUNTAS</span>} /&gt;
+    &lt;/<span class="ty">main</span>&gt;
+  );
+}</pre></div>
+
+    <div class="file">app/sobre/acordeao.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span>
+
+<span class="kw">export function</span> <span class="fn">Acordeao</span>({ itens }: { itens: <span class="ty">Pergunta</span>[] }) {
+  <span class="kw">const</span> [aberto, setAberto] = <span class="fn">useState</span>&lt;<span class="ty">string</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">dl</span>&gt;
+      {itens.<span class="fn">map</span>((p) =&gt; (
+        &lt;<span class="ty">div</span> key={p.id}&gt;
+          &lt;<span class="ty">dt</span>&gt;
+            &lt;<span class="ty">button</span> <span class="an">aria-expanded</span>={aberto === p.id} <span class="an">aria-controls</span>={p.id}
+                    <span class="an">onClick</span>={() =&gt; <span class="fn">setAberto</span>(aberto === p.id ? <span class="kw">null</span> : p.id)}&gt;
+              {p.titulo}
+            &lt;/<span class="ty">button</span>&gt;
+          &lt;/<span class="ty">dt</span>&gt;
+          &lt;<span class="ty">dd</span> <span class="an">id</span>={p.id} hidden={aberto !== p.id}&gt;{p.resposta}&lt;/<span class="ty">dd</span>&gt;
+        &lt;/<span class="ty">div</span>&gt;
+      ))}
+    &lt;/<span class="ty">dl</span>&gt;
+  );
+}</pre></div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b><code>/sobre</code> responde e mostra o conteúdo que já existia</b> — o arquivo virou <span class="hl">app/sobre/page.tsx</span> e o conteúdo não foi reescrito.</li>
+      <li><b>O link do rodapé leva até lá</b> — <code>&lt;Link href="/sobre"&gt;</code>, conferido na tela.</li>
+      <li><b>A página é Server Component</b> — nenhuma diretiva no <span class="hl">page.tsx</span>.</li>
+      <li><b>O acordeão abre e fecha</b> — estado com um item aberto por vez; clicar no aberto fecha.</li>
+      <li><b>Só o acordeão é client</b> — a diretiva está no arquivo dele.</li>
+      <li><b>PR explica a regra em uma frase</b> — "a rota é o caminho da pasta em <code>app/</code>, e só um arquivo chamado exatamente <code>page.tsx</code> a cria".</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Peça a convenção de arquivos do App Router e o que cada nome especial faz. A lista que volta é boa e <b>serve a semana 2 inteira</b>, quando <code>loading</code>, <code>error</code> e <code>not-found</code> entram em cena — vale guardar. Confira contra a documentação da versão instalada mesmo assim: nomes especiais foram acrescentados entre versões, e ela mistura o conjunto de uma versão com o de outra sem avisar.</p>
+  </section>
+
+  <section id="lp-114">
+    <h2><span class="n">LP-114</span>O contador de caracteres da resenha não conta e o limite está errado</h2>
+    <p class="sub">Mente em dobro: mostra "0/280" que nunca muda, e a API recusa acima de 500.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O <code>&lt;textarea&gt;</code> não é controlado — não há <code>value</code> nem <code>onChange</code>, então o contador não tem de onde ler nada e o "0" é literal. O limite 280 veio de outro produto (é o do Twitter, e ninguém conferiu). <b>O jeito de descobrir o número certo é ler a documentação da API</b>, e essa é a habilidade da semana: não chute.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Ler o contrato do endpoint de resenha, achar o limite real e usá-lo — de preferência a partir de uma constante única, para o campo, o contador e a mensagem nunca divergirem.</p>
+
+    <h3>A lição</h3>
+    <div class="file">app/midias/[slug]/campo-resenha.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// campo controlado + contador: estado a cada tecla</span>
+
+<span class="cm">// Um número, uma fonte. Confirmado em docs/api-contrato.md, não chutado.</span>
+<span class="kw">const</span> <span class="ty">LIMITE</span> = <span class="an">500</span>;
+
+<span class="kw">export function</span> <span class="fn">CampoResenha</span>() {
+  <span class="kw">const</span> [texto, setTexto] = <span class="fn">useState</span>(<span class="st">""</span>);
+  <span class="kw">const</span> restam = <span class="ty">LIMITE</span> - texto.length;
+  <span class="kw">const</span> estourou = restam &lt; <span class="an">0</span>;
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="ty">label</span> <span class="an">htmlFor</span>=<span class="st">"resenha"</span>&gt;Sua resenha&lt;/<span class="ty">label</span>&gt;
+      &lt;<span class="ty">textarea</span> <span class="an">id</span>=<span class="st">"resenha"</span> <span class="an">value</span>={texto} <span class="an">aria-describedby</span>=<span class="st">"contador"</span>
+                <span class="an">onChange</span>={(e) =&gt; <span class="fn">setTexto</span>(e.target.value)} /&gt;
+
+      {<span class="cm">/* aria-live="polite" só perto do limite: anunciar a cada tecla</span>
+         <span class="cm">   transformaria o leitor de tela em ruído. */</span>}
+      &lt;<span class="ty">p</span> <span class="an">id</span>=<span class="st">"contador"</span> className={estourou ? <span class="st">"erro"</span> : <span class="kw">undefined</span>}
+         <span class="an">aria-live</span>={restam &lt;= <span class="an">20</span> ? <span class="st">"polite"</span> : <span class="st">"off"</span>}&gt;
+        {estourou
+          ? <span class="st">`${-restam} caracteres acima do limite`</span>
+          : <span class="st">`${texto.length}/${LIMITE}`</span>}
+      &lt;/<span class="ty">p</span>&gt;
+
+      &lt;<span class="ty">button</span> <span class="an">disabled</span>={estourou || texto.length === <span class="an">0</span>}&gt;Publicar&lt;/<span class="ty">button</span>&gt;
+    &lt;/&gt;
+  );
+}</pre></div>
+
+    <div class="tip warn"><b>Desabilitar o botão não é validação.</b> É conveniência de interface — some com o DevTools aberto, com um cliente que não seja este, ou com uma requisição feita à mão. A validação de verdade é do servidor recusar, e isso é assunto da semana 5. Anote no PR que você viu: notar o buraco antes de ele virar incidente é metade do trabalho.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <table>
+      <thead><tr><th>Critério</th><th>Como foi satisfeito</th></tr></thead>
+      <tbody>
+        <tr><td><b>O limite é o que a API aceita</b></td><td>500, confirmado na documentação do endpoint e isolado na constante <code>LIMITE</code>.</td></tr>
+        <tr><td><b>Contador atualiza a cada tecla</b></td><td><code>textarea</code> controlado, com <code>value</code> e <code>onChange</code>.</td></tr>
+        <tr><td><b>Passando do limite avisa visualmente</b></td><td>Classe de erro mais texto que diz quantos caracteres sobram — não só a cor.</td></tr>
+        <tr><td><b>Só o campo e o contador são client</b></td><td>A ficha e o restante do formulário continuam no servidor.</td></tr>
+        <tr><td><b>Anunciado ao se aproximar do limite</b></td><td><code>aria-live="polite"</code> a partir de 20 caracteres restantes; <code>aria-describedby</code> amarra o contador ao campo.</td></tr>
+        <tr><td><b>PR registra a validação de servidor</b></td><td>Escrito que o <code>disabled</code> é interface e que a recusa real fica para a semana 5.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Sobre a IA</h3>
+    <div class="tip warn"><b>Este card existe para mostrar a falha mais cara dela na prática.</b> Peça o limite de caracteres da resenha e ela responde um número — com confiança, sem hesitar, e há uma boa chance de ser 280, porque é o número que mais aparece em texto sobre campos de resenha na internet. Ela não diz "não confirmei". <b>Confirme na fonte</b>, com o contrato aberto, e repare que a resposta errada e a certa chegam com exatamente o mesmo tom.</div>
+    <p>No resto ela ajuda: o campo controlado e o padrão de <code>aria-live</code> saem corretos, e a lembrança de não anunciar a cada tecla costuma vir se você perguntar por acessibilidade.</p>
+  </section>
+
+  <section id="lp-115">
+    <h2><span class="n">LP-115</span>A tela de "nada encontrado" tem um botão morto e uma mensagem genérica</h2>
+    <p class="sub">Escrita de produto — e a diferença entre a pessoa desistir e tentar de novo.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>"Nenhum item encontrado." não diz o que foi buscado, não sugere o que fazer, e usa uma palavra que não é do produto: o LequePlay tem títulos, filmes, séries e podcasts — não "itens". E o "limpar filtros" é um botão sem <code>onClick</code> ligado a nada, num componente de servidor.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Reescrever o texto com o termo buscado dentro e uma saída oferecida. Estado vazio bem escrito não é enfeite: é o momento em que a pessoa decide se insiste.</p>
+
+    <div class="duo">
+      <div class="box no"><h4>Antes</h4>
+        <p>"Nenhum item encontrado."</p>
+        <p class="muted">Não diz o que foi buscado, não diz o que fazer, e "item" é palavra de template.</p>
+      </div>
+      <div class="box ok"><h4>Depois</h4>
+        <p>"Nenhum título encontrado para <b>"tarkovski"</b>. Tente outra grafia, limpe os filtros ou dê uma olhada nos destaques da semana."</p>
+        <p class="muted">Repete o termo, usa o vocabulário do produto e oferece três saídas.</p>
+      </div>
+    </div>
+
+    <h3>A lição</h3>
+    <div class="file">app/busca/estado-vazio.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// só por causa do botão que limpa</span>
+
+<span class="kw">export function</span> <span class="fn">EstadoVazio</span>({ termo, aoLimpar }: { termo: <span class="ty">string</span>; aoLimpar: () =&gt; <span class="ty">void</span> }) {
+  <span class="kw">return</span> (
+    <span class="cm">// role="status" para o leitor de tela anunciar que a busca não achou nada;</span>
+    <span class="cm">// sem isso, quem não vê a tela fica esperando um resultado que não vem.</span>
+    &lt;<span class="ty">div</span> <span class="an">role</span>=<span class="st">"status"</span>&gt;
+      &lt;<span class="ty">p</span>&gt;Nenhum título encontrado para &lt;<span class="ty">b</span>&gt;“{termo}”&lt;/<span class="ty">b</span>&gt;.&lt;/<span class="ty">p</span>&gt;
+      &lt;<span class="ty">p</span>&gt;Tente outra grafia, limpe os filtros ou veja os destaques da semana.&lt;/<span class="ty">p</span>&gt;
+
+      &lt;<span class="ty">button</span> <span class="an">onClick</span>={aoLimpar}&gt;Limpar filtros&lt;/<span class="ty">button</span>&gt;
+      &lt;<span class="ty">Link</span> href=<span class="st">"/"</span>&gt;Ver destaques&lt;/<span class="ty">Link</span>&gt;
+    &lt;/<span class="ty">div</span>&gt;
+  );
+}</pre></div>
+
+    <div class="tip"><b>Por que <code>aoLimpar</code> vem por prop:</b> quem é dono do estado de filtro é o componente da lista, do <a href="#lp-105">LP-105</a>. O estado vazio não precisa saber o que "limpar" significa — recebe a função e chama. Fronteira também é isso: cada componente sabendo o mínimo.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>A mensagem repete o termo buscado e usa o vocabulário do LequePlay</b> — "título", com o termo entre aspas.</li>
+      <li><b>O botão limpa e a grade volta</b> — <code>aoLimpar</code> zera os filtros no componente que os guarda.</li>
+      <li><b>Sugere um caminho</b> — limpar filtros e ver destaques, os dois oferecidos.</li>
+      <li><b>Só o botão é client</b> — o restante da página de busca segue no servidor.</li>
+      <li><b>Anunciado por leitor de tela</b> — <code>role="status"</code> no bloco inteiro.</li>
+      <li><b>Busca com resultado continua igual</b> — o estado vazio é uma alternativa da renderização, não uma mudança na grade.</li>
+    </ul>
+
+    <div class="tip"><b>Encosta na semana 6</b>, quando o filtro virar estado da URL e "limpar filtros" passar a ser uma navegação. Por enquanto resolve-se no cliente, e o PR pode anotar isso como próximo passo.</div>
+
+    <h3>Sobre a IA</h3>
+    <p><b>Texto de interface é onde ela é genuinamente útil.</b> Peça três versões, com tons diferentes, e escolha uma ajustando ao tom do produto. O que não vale é aceitar a primeira sugestão sem ler em voz alta: ela tende ao publicitário — "Ops! Parece que não encontramos nada por aqui!" — que é simpático na primeira leitura e cansativo na terceira.</p>
+  </section>
+
+  <section id="lp-116">
+    <h2><span class="n">LP-116</span>A barra de "continuar assistindo" mostra percentual errado e o botão retomar não retoma</h2>
+    <p class="sub">87% num episódio mal começado — e o caso de borda que a IA vai jurar que não existe.</p>
+
+    <h3>O diagnóstico</h3>
+    <p>O campo <code>progresso</code> da API vem em <b>segundos assistidos</b>, e o componente o trata como se já fosse porcentagem. Oitenta e sete segundos viram 87%. A conta que falta é a divisão pela duração. E o botão retomar não retoma porque nunca recebeu o episódio: navega para a série, não para o ponto.</p>
+
+    <h3>O aquecimento</h3>
+    <p>Ler a documentação com atenção — não passar o olho. É lá que está escrito que <code>progresso</code> é em segundos, e é lá que se descobre que <code>duracao</code> pode faltar.</p>
+
+    <h3>A lição — e o caso de borda</h3>
+    <div class="file">lib/progresso.ts · a conta, no servidor</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm">// Duração ausente ou zero não pode virar NaN% nem barra quebrada.</span>
+<span class="cm">// Divisão por zero em JavaScript não lança erro: devolve Infinity,</span>
+<span class="cm">// e 0/0 devolve NaN. Os dois chegam calados até a tela.</span>
+<span class="kw">export function</span> <span class="fn">calcularProgresso</span>(assistidoSeg: <span class="ty">number</span>, duracaoSeg?: <span class="ty">number</span>): <span class="ty">number</span> | <span class="kw">null</span> {
+  <span class="kw">if</span> (!duracaoSeg || duracaoSeg &lt;= <span class="an">0</span>) <span class="kw">return</span> <span class="hl">null</span>; <span class="cm">// não sabemos: não invente 0%</span>
+  <span class="kw">return</span> <span class="ty">Math</span>.<span class="fn">min</span>(<span class="an">100</span>, <span class="ty">Math</span>.<span class="fn">round</span>((assistidoSeg / duracaoSeg) * <span class="an">100</span>));
+}</pre></div>
+
+    <div class="file">app/continuar-assistindo.tsx</div>
+    <div class="code"><button class="cp">copiar</button><pre><span class="cm">// Server Component: a faixa inteira é dado renderizado no servidor.</span>
+<span class="kw">export default async function</span> <span class="fn">ContinuarAssistindo</span>() {
+  <span class="kw">const</span> historico = <span class="kw">await</span> <span class="fn">listarHistorico</span>();
+
+  <span class="cm">// Conta sem histórico não mostra a faixa — nem o título dela.</span>
+  <span class="kw">if</span> (historico.length === <span class="an">0</span>) <span class="kw">return</span> <span class="kw">null</span>;
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h2</span>&gt;Continuar assistindo&lt;/<span class="ty">h2</span>&gt;
+      {historico.<span class="fn">map</span>((h) =&gt; {
+        <span class="kw">const</span> pct = <span class="fn">calcularProgresso</span>(h.progressoSeg, h.episodio.duracaoSeg);
+        <span class="kw">return</span> (
+          &lt;<span class="ty">article</span> key={h.episodio.id}&gt;
+            {pct !== <span class="kw">null</span> &amp;&amp; (
+              &lt;<span class="ty">div</span> <span class="an">role</span>=<span class="st">"progressbar"</span> <span class="an">aria-valuenow</span>={pct}
+                   <span class="an">aria-valuemin</span>={<span class="an">0</span>} <span class="an">aria-valuemax</span>={<span class="an">100</span>}
+                   <span class="an">aria-label</span>={<span class="st">`${h.episodio.titulo}: ${pct}% assistido`</span>}&gt;
+                &lt;<span class="ty">span</span> style={{ width: <span class="st">`${pct}%`</span> }} /&gt;
+              &lt;/<span class="ty">div</span>&gt;
+            )}
+
+            {<span class="cm">/* Retomar é um link para o episódio certo, com o ponto de parada.</span>
+               <span class="cm">   Link não precisa de client — e ainda funciona no botão do meio. */</span>}
+            &lt;<span class="ty">Link</span> href={<span class="st">`/series/${h.serie.slug}/${h.episodio.id}?t=${h.progressoSeg}`</span>}&gt;
+              Retomar
+            &lt;/<span class="ty">Link</span>&gt;
+          &lt;/<span class="ty">article</span>&gt;
+        );
+      })}
+    &lt;/<span class="ty">section</span>&gt;
+  );
+}</pre></div>
+
+    <div class="tip ok"><b>Repare no que <i>não</i> virou client neste card.</b> Nada. A faixa inteira é dado renderizado no servidor, e "retomar" é um link — não um botão com <code>onClick</code> chamando <code>router.push</code>. O critério "só o que precisa de interação é client" pode ser satisfeito com zero diretivas, e essa é a resposta mais forte que ele aceita.</div>
+
+    <h3>Os critérios de aceite</h3>
+    <ul>
+      <li><b>Percentual calculado a partir de segundos e duração</b> — em <code>calcularProgresso</code>, uma função pura e testável.</li>
+      <li><b>Duração ausente ou zero não gera NaN nem barra quebrada</b> — a guarda devolve <code>null</code> e a barra não é renderizada; não se inventa 0%.</li>
+      <li><b>Retomar leva ao episódio certo</b> — link para o identificador do episódio, com o ponto de parada na query.</li>
+      <li><b>Barra com rótulo acessível contendo o percentual</b> — <code>role="progressbar"</code>, <code>aria-valuenow</code> e um <code>aria-label</code> com título e porcentagem.</li>
+      <li><b>Só o que precisa de interação é client</b> — nada precisava.</li>
+      <li><b>Conta sem histórico não mostra a faixa</b> — <code>return null</code> antes do título.</li>
+    </ul>
+
+    <h3>Sobre a IA</h3>
+    <p>Peça os tipos da resposta a partir da documentação e você recebe uma interface TypeScript bem formada. Depois <b>audite campo por campo</b>: ela vai declarar <code>duracaoSeg: number</code>, sem <code>?</code>, porque duração "obviamente" existe. É exatamente esse o caso de borda deste card — e o compilador, contente com o tipo mentiroso, não vai avisar de nada.</p>
+    <div class="tip star"><b>É a mesma auditoria que salva a semana 2 inteira</b> (LP-212). Depois de qualquer tipo gerado por IA, faça uma pergunta só: <i>quais destes campos a documentação garante que sempre vêm, e quais podem faltar?</i> A resposta separada é o que você confere — não o código.</div>
+  </section>
+
+  <div class="divisor">o padrão da semana</div>
+
+  <section id="padrao">
+    <h2><span class="n">17</span>A semana em uma página</h2>
+    <p class="sub">Dezesseis cards, um padrão. Se você sair da Aula 01 com esta página na cabeça, o resto do curso fica mais barato.</p>
+
+    <h3>A fronteira</h3>
+    <p>No App Router, <b>tudo é Server Component até você dizer o contrário</b>. A diretiva <code>"use client"</code> não "liga o JavaScript": ela marca o ponto a partir do qual o módulo e <i>tudo que ele importa</i> passam a ser empacotados e enviados ao navegador. Por isso a pergunta nunca é "preciso de <code>use client</code>?" — é <b>onde</b> ela entra, porque a resposta define o tamanho do que desce.</p>
+
+    <div class="duo">
+      <div class="box ok"><h4>Fica no servidor</h4>
+        <ul>
+          <li>toda busca de dados — <code>await</code> na API;</li>
+          <li>segredo, chave, cookie de sessão;</li>
+          <li>texto, marcação e conteúdo indexável;</li>
+          <li>cálculo estável — o ano do <a href="#lp-110">LP-110</a>, o percentual do <a href="#lp-116">LP-116</a>;</li>
+          <li>listas e constantes que nunca mudam no navegador.</li>
+        </ul>
+      </div>
+      <div class="box no"><h4>Sobe para o cliente</h4>
+        <ul>
+          <li>estado que muda com o uso — <code>useState</code>;</li>
+          <li>evento de pessoa — clique, digitação, tecla;</li>
+          <li>efeito e ciclo de vida — <code>useEffect</code>;</li>
+          <li>API de navegador — <code>clipboard</code>, <code>scrollTo</code>, <code>localStorage</code>;</li>
+          <li>hooks de rota do cliente — <code>usePathname</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>O movimento, sempre o mesmo</h3>
+    <ol class="passos">
+      <li><b>Identifique o menor controle interativo.</b> Não o componente onde ele está: o controle. O botão da busca, não o cabeçalho. O toggle, não a home.</li>
+      <li><b>Extraia esse controle para o próprio arquivo</b>, e ponha <code>"use client"</code> na primeira linha <i>desse</i> arquivo.</li>
+      <li><b>Continue buscando os dados no servidor</b>, no componente pai, com <code>await</code>.</li>
+      <li><b>Passe os dados por props.</b> Prontos, serializados. O client recebe resultado, não a capacidade de buscar.</li>
+      <li><b>Escreva no PR por que a fronteira ficou ali.</b> Uma frase. Se você não consegue escrevê-la, o ticket não terminou — mesmo funcionando.</li>
+    </ol>
+
+    <h3>Os três sintomas que denunciam a fronteira</h3>
+    <table>
+      <thead><tr><th>Sintoma</th><th>Causa quase certa</th></tr></thead>
+      <tbody>
+        <tr><td>Clique sem reação e <b>console limpo</b></td><td>o <code>onClick</code> está num Server Component (LP-101, LP-102, LP-104, LP-107)</td></tr>
+        <tr><td><i>Hydration mismatch</i></td><td>algo calculado no cliente diverge do que o servidor renderizou (LP-110)</td></tr>
+        <tr><td>Tudo funciona, mas o HTML inicial chega vazio</td><td>a diretiva subiu demais e a busca foi junto para o navegador</td></tr>
+      </tbody>
+    </table>
+
+    <h3>O que a IA fez bem, e onde ela custou caro</h3>
+    <ul>
+      <li><b>Boa em</b>: padrões de acessibilidade (abas do <a href="#lp-109">LP-109</a>, <code>aria-live</code> do <a href="#lp-114">LP-114</a>), texto de interface (<a href="#lp-115">LP-115</a>), explicar erros grandes (<a href="#lp-110">LP-110</a>), listar prós e contras de duas abordagens (<a href="#lp-106">LP-106</a>).</li>
+      <li><b>Cara em</b>: inventar formato de dado (<a href="#lp-105">LP-105</a>), inventar número que estava na documentação (<a href="#lp-114">LP-114</a>), declarar campo opcional como garantido (<a href="#lp-116">LP-116</a>), misturar Pages Router com App Router (<a href="#lp-103">LP-103</a>) e — o mais frequente — sugerir <code>"use client"</code> no arquivo inteiro (<a href="#lp-102">LP-102</a>).</li>
+    </ul>
+
+    <div class="tip warn"><b>O padrão dos erros dela é um só:</b> ela erra onde a versão mudou depois do treino, e erra onde o dado real não está no código. Nos dois casos a checagem é a mesma — abrir a fonte. A documentação da versão instalada, ou a resposta de verdade do endpoint.</div>
+
+    <h3>A frase que a turma leva para a semana 2</h3>
+    <div class="tip star"><b>Extraia só o controle interativo. Os dados continuam vindo do servidor e descem por props.</b> Na semana 2, quando o BFF entrar e a chave da API tiver que ficar escondida, essa mesma frase é o que decide onde cada coisa mora — e quem a entendeu aqui vai achar aquela aula fácil.</div>
+
+    <p class="muted">Terminou os dezesseis? Então você atravessou o fluxo do time dezesseis vezes: branch, PR com a decisão escrita, review, merge, publicado. A parte que fica não é o código — é a frase que você aprendeu a escrever no PR.</p>
+  </section>
+
+  <div class="foot">
+    NickDev · um leque de tecnologia · <a href="/cursos/nextjs-ia">voltar ao curso</a>
+  </div>
+</main>
+</div>
+
+<a class="totop" id="totop" href="#" aria-label="Voltar ao topo">↑</a>
+
+<script>
+  /* Copiar o bloco de código. O botão vive dentro de `.code`, e o texto que
+     interessa é o do `pre` irmão — não o do botão. */
+  document.querySelectorAll(".code .cp").forEach((botao) => {
+    botao.addEventListener("click", async () => {
+      const pre = botao.parentElement.querySelector("pre");
+      if (!pre) return;
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        botao.textContent = "copiado ✓";
+        botao.classList.add("done");
+        setTimeout(() => {
+          botao.textContent = "copiar";
+          botao.classList.remove("done");
+        }, 1400);
+      } catch {
+        /* Sem permissão de clipboard o texto continua selecionável na mão —
+           melhor não fingir que copiou. */
+        botao.textContent = "copie na mão";
+        setTimeout(() => { botao.textContent = "copiar"; }, 1400);
+      }
+    });
+  });
+
+  /* O "voltar ao topo" aparece depois de 500px. `tt` pode não existir se
+     alguém remover o elemento: sem esta guarda, o ouvinte estouraria em toda
+     rolagem. */
+  const tt = document.getElementById("totop");
+  if (tt) {
+    addEventListener("scroll", () => {
+      tt.classList.toggle("show", scrollY > 500);
+    });
+  }
+</script>
+</body>
+</html>

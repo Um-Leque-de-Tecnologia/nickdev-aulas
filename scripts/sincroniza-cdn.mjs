@@ -348,6 +348,11 @@ const NOME_DO_GUIA = {
 const TITULO_DA_AULA = {
   "introducao-spring-boot/aula-03-api-rest": "API REST: recursos, verbos e status",
 
+  // A aula 01 deste curso é o exemplo vivo do aviso acima: ela foi criada sem
+  // entrada aqui e ficou "Aula 01 — onboarding" no servidor, para sempre. A 02
+  // entra ANTES de existir, que é a única janela que a API dá.
+  "nextjs-ia/aula-02-catalogo-e-bff": "Consumindo a API: catálogo, detalhe e o BFF",
+
   // As tres primeiras de Introducao ao Next.js nasceram com o titulo derivado
   // do slug, e nao ha PATCH para consertá-las. Da quarta em diante o titulo e
   // escrito aqui ANTES da primeira publicacao, e e o mesmo de

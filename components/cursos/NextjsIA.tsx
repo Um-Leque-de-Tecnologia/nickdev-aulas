@@ -24,6 +24,15 @@ type Aula = {
   objetivo?: React.ReactNode;
   /** Pasta em `public/` quando a aula já tem material. Sem ela, o card fica "em breve". */
   base?: string;
+  /**
+   * O gabarito dos tickets da aula, quando existe.
+   *
+   * Guarda só o nome do arquivo, e não a URL: o destino é montado no card,
+   * porque ele NÃO é o mesmo dos slides. Deck é tela cheia; gabarito é
+   * documento de consulta, e abre na leitura dentro do painel, com a sidebar
+   * do app e o índice à direita — igual ao Manual da IA, pelo mesmo motivo.
+   */
+  respostas?: string;
 };
 
 type Sprint = {
@@ -73,6 +82,7 @@ const SPRINTS: Sprint[] = [
         n: "01",
         titulo: "Onboarding, primeiro deploy e o mental model do Next",
         base: materialProtegido("nextjs-ia", "aula-01-onboarding"),
+        respostas: "respostas.html",
         objetivo: (
           <>
             Entrar no time, subir o front contra a API, fazer o primeiro merge e
@@ -96,6 +106,7 @@ const SPRINTS: Sprint[] = [
       {
         n: "02",
         titulo: "Consumindo a API: catálogo, detalhe e o BFF",
+        base: materialProtegido("nextjs-ia", "aula-02-catalogo-e-bff"),
       },
       {
         n: "03",
@@ -170,11 +181,12 @@ function CardDeAula({ a }: { a: Aula }) {
         )}
 
         {/*
-          Um botão só, de propósito. O card da aula guarda o que é daquele
-          encontro — o deck; o resto tem dono em outro lugar e repetir aqui
-          criaria duas fontes da mesma verdade: o ticket da semana vive no
-          Trello, e o combinado do time e o repositório ficam no card do
-          produto, onde continuam à mão depois que a turma passou desta aula.
+          Só o que é daquele encontro. O ticket da semana vive no Trello, e o
+          combinado do time e o repositório ficam no card do produto — repetir
+          aqui criaria duas fontes da mesma verdade, e a daqui envelheceria.
+          O gabarito é a exceção que confirma a regra: ele responde aos tickets
+          DAQUELA aula e não serve para mais nada depois, então é justamente o
+          tipo de coisa que pertence ao card da aula.
         */}
         {a.base ? (
           <div className="mats" style={{ marginTop: 18 }}>
@@ -188,6 +200,18 @@ function CardDeAula({ a }: { a: Aula }) {
             <a className="mat primary" href={`${a.base}/slides.html?inteira=1`}>
               ▶ Slides da aula
             </a>
+            {/*
+              Sem `?inteira=1`, e não por esquecimento: o gabarito É um
+              documento, então deixamos o proxy fazer o desvio que o deck
+              precisa evitar. Ele abre no shell, com a navegação do app em volta
+              — que é como se lê um gabarito, voltando e comparando com o
+              próprio código.
+            */}
+            {a.respostas && (
+              <a className="mat" href={`/painel${a.base}/${a.respostas}`}>
+                ✅ Respostas dos tickets
+              </a>
+            )}
           </div>
         ) : (
           <span className="soon-tag">em breve</span>

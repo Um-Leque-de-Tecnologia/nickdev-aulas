@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consumindo a API: catálogo, detalhe e o BFF · Aula 02 · Next.js + IA · NickDev</title>
+<meta name="description" content="Aula 02 do curso Next.js + IA: componente assíncrono buscando no servidor, loading.tsx, error.tsx e notFound(), generateMetadata com deduplicação, Open Graph, o BFF em Route Handler, mapeamento de status da API, tipos honestos e formatação determinística — com os 16 cards da semana.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#08070E; --canvas-2:#1B1632;
+    --ink:#F3F0FA; --muted:#8B84A0;
+    --tag:#7B4FD0; --str:#A98CE0; --key:#F24487; --attr:#E88BB8; --green:#5fd08a;
+    --line:rgba(255,255,255,.35);
+    --mono:'JetBrains Mono',monospace;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .deck{position:fixed;inset:0;z-index:2}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;
+    padding:clamp(28px,6vw,90px);overflow:auto;opacity:0;transform:translateY(14px);
+    transition:opacity .45s ease,transform .45s ease}
+  .slide.active{display:flex;opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.3vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--attr);margin-bottom:18px}
+  .eyebrow .b{color:var(--key)}
+  .tagtitle{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:clamp(24px,4.6vw,58px);line-height:1.02;letter-spacing:-.01em}
+  .tagtitle .br{color:var(--muted);opacity:.55}
+  .tagtitle .nm{color:var(--tag)}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(32px,6.2vw,78px);line-height:1.02;letter-spacing:-.02em}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,4.2vw,50px);line-height:1.05;letter-spacing:-.015em;margin-bottom:22px}
+  h3{font-family:var(--disp);font-weight:600;font-size:clamp(18px,2.3vw,26px);margin-bottom:10px}
+  p{font-size:clamp(15px,1.7vw,20px);line-height:1.55;max-width:64ch}
+  p.lead{font-size:clamp(17px,2.1vw,26px);color:var(--muted)}
+  .muted{color:var(--muted)}
+  .key{color:var(--key)}.str{color:var(--str)}.attr{color:var(--attr)}.tagc{color:var(--tag)}.grn{color:var(--green)}
+  strong{font-weight:600;color:#fff}
+  code,.mono{font-family:var(--mono)}
+  .code-inline{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--line);padding:2px 8px;border-radius:6px;font-size:.88em;color:var(--str)}
+
+  .stack>*+*{margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .card{background:var(--canvas-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin-bottom:6px}
+  .card p{font-size:clamp(13.5px,1.5vw,17px);color:var(--muted)}
+  .card.ok{border-color:rgba(95,208,138,.4)}
+  .card.no{border-color:rgba(242,68,135,.4)}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0}
+  .pill.on{color:var(--canvas);background:var(--str);border-color:var(--str);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;margin-top:8px}
+
+  ul.clean{list-style:none;max-width:66ch}
+  ul.clean li{position:relative;padding-left:26px;margin:11px 0;font-size:clamp(14.5px,1.65vw,19px);line-height:1.5}
+  ul.clean li::before{content:'▸';position:absolute;left:0;color:var(--tag)}
+
+  .code{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:20px 22px;font-family:var(--mono);
+    font-size:clamp(11.5px,1.25vw,15px);line-height:1.75;color:#d8d3e6;overflow-x:auto;width:100%;max-width:860px;
+    white-space:pre;tab-size:4}
+  .code .cm{color:#6f6a83}
+  .code .kw{color:var(--key)}
+  .code .st{color:var(--str)}
+  .code .fn{color:var(--attr)}
+  .code .ty{color:var(--tag)}
+  .code .an{color:var(--green)}
+  .code .hl{background:rgba(242,68,135,.16);border-radius:3px}
+  .filetab{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-bottom:0;
+    border-radius:10px 10px 0 0;padding:6px 13px;display:inline-block;background:var(--canvas-2)}
+  .filetab + .code{border-radius:0 14px 14px 14px;margin-top:-1px}
+
+  .terminal{background:#0b0913;border:1px solid var(--line);border-radius:14px;padding:18px 22px;width:100%;max-width:860px;
+    font-family:var(--mono);font-size:clamp(12px,1.3vw,15px);line-height:1.85;white-space:pre;overflow-x:auto}
+  .terminal .p{color:var(--muted)}
+  .terminal .out{color:#9ee39e}
+  .terminal .cm{color:#6f6a83}
+
+  .nav{position:fixed;bottom:18px;right:22px;display:flex;align-items:center;gap:12px;z-index:60;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .nav button{background:var(--canvas-2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:17px;transition:.15s}
+  .nav button:hover{border-color:var(--tag);color:var(--tag)}
+  .nav button:focus-visible{outline:2px solid var(--tag);outline-offset:2px}
+  .progress{position:fixed;bottom:0;left:0;height:3px;background:var(--tag);z-index:60;transition:width .35s ease}
+  .hint{position:fixed;bottom:18px;left:22px;font-family:var(--mono);font-size:12px;color:var(--muted);z-index:60}
+  kbd{font-family:var(--mono);background:var(--canvas-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .agenda{display:flex;flex-direction:column;gap:1px;max-width:980px;width:100%}
+  .row{display:grid;grid-template-columns:90px 1fr auto;gap:16px;align-items:center;padding:9px 14px;border-radius:10px;transition:.15s}
+  .row:hover{background:var(--canvas-2)}
+  .row .t{font-family:var(--mono);color:var(--attr);font-size:13.5px}
+  .row .d{font-size:clamp(13.5px,1.5vw,17px)}
+  .row .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .row.brk{opacity:.5}.row.brk .t{color:var(--muted)}
+
+  .flow{display:flex;align-items:stretch;width:100%;max-width:1000px}
+  .flow .node{flex:1;background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center}
+  .flow .node .ico{font-size:30px;margin-bottom:8px}
+  .flow .node b{font-family:var(--disp);display:block;font-size:clamp(14px,1.7vw,19px);margin-bottom:5px}
+  .flow .node span{font-size:13px;color:var(--muted)}
+  .flow .arw{display:flex;align-items:center;padding:0 12px;color:var(--tag);font-size:24px}
+  @media(max-width:900px){.flow{flex-direction:column}.flow .arw{transform:rotate(90deg);padding:6px 0}}
+
+  table{border-collapse:collapse;width:100%;max-width:940px;font-size:clamp(13px,1.5vw,17px)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td code{font-size:.9em;color:var(--str)}
+  tr:last-child td{border-bottom:0}
+
+  .tree{font-family:var(--mono);font-size:clamp(12px,1.3vw,16px);line-height:1.85;color:var(--muted);
+    background:var(--canvas-2);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:820px;white-space:pre}
+  .tree b{color:var(--ink);font-weight:500}
+  .tree .cm{color:var(--attr);opacity:.8}
+
+  .parada{align-items:center;text-align:center}
+  .parada .badge{font-family:var(--mono);font-size:clamp(13px,1.6vw,17px);color:var(--attr);border:1px solid var(--attr);
+    padding:8px 18px;border-radius:999px;margin-bottom:24px;letter-spacing:.06em}
+  .parada h1{max-width:20ch;margin:0 auto}
+
+  .steps{counter-reset:s;max-width:860px;width:100%}
+  .steps .st{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .steps .st:last-child{border-bottom:0}
+  .steps .st::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:700;color:var(--tag);
+    border:1px solid var(--tag);width:32px;height:32px;min-width:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px}
+  .steps .st .body h3{font-size:clamp(15px,1.8vw,20px);margin-bottom:1px}
+  .steps .st .body p{font-size:clamp(13px,1.45vw,16px);color:var(--muted)}
+
+  .note{font-family:var(--mono);font-size:clamp(12px,1.3vw,14px);color:var(--attr);border-left:2px solid var(--attr);
+    padding-left:14px;margin-top:20px;max-width:70ch;line-height:1.55}
+  .big-emoji{font-size:clamp(38px,6.5vw,68px);margin-bottom:10px}
+  .center{align-items:center;text-align:center}
+
+  .glossario{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;max-width:900px;align-items:baseline}
+  .glossario dt{font-family:var(--mono);color:var(--str);font-size:clamp(13px,1.5vw,17px)}
+  .glossario dd{color:var(--muted);font-size:clamp(13.5px,1.5vw,17px);line-height:1.5}
+  @media(max-width:700px){.glossario{grid-template-columns:1fr;gap:2px 0}.glossario dd{margin-bottom:12px}}
+
+  .grad{background:linear-gradient(90deg,#F24487,#7B4FD0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .scene .glow{position:absolute;border-radius:50%}
+  .scene .glow.magenta{width:60vw;height:60vw;top:-18vw;right:-14vw;background:radial-gradient(circle,rgba(242,68,135,.16),transparent 62%)}
+  .scene .glow.purple{width:62vw;height:62vw;bottom:-22vw;left:-16vw;background:radial-gradient(circle,rgba(123,79,208,.22),transparent 62%)}
+  .voltar{position:fixed;top:16px;left:18px;z-index:100;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;color:#B4AEC6;background:rgba(16,13,27,.72);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
+    padding:7px 13px;border-radius:100px;text-decoration:none;transition:.2s}
+  .voltar:hover{color:#E88BB8;border-color:#E88BB8}
+
+  @media(max-width:600px){
+    .slide h1 br{display:none}
+    .row{grid-template-columns:56px 1fr;gap:8px}
+    .row .tag{display:none}
+    .slide{padding:22px 18px}
+  }
+  .slide:not(.center):not(.parada) > *{margin-inline:auto;width:100%;max-width:1000px}
+
+  /* ---- Aula 02 -------------------------------------------------------- */
+  /* NAO ponha max-width inline em filho direto de .slide. O contentor ja
+     define a medida:
+
+       .slide:not(.center):not(.parada) > * { width:100%; max-width:1000px }
+
+     Estilo inline ganha desse seletor, e um valor em ch pode passar dos
+     1000px — o Space Grotesk tem digito largo, entao 64ch da ~1080px. O
+     paragrafo fica mais largo que o h2 e, centralizado, comeca antes dele.
+     Em slide .center a regra nao vale e o inline e legitimo. */
+
+  /* ---- Slides de exercicio -------------------------------------------- */
+  /* O exercicio precisa se distinguir do slide de conceito a distancia:
+     quem esta no fundo da sala tem que saber, sem ler, que agora e a vez
+     dele digitar. Por isso a borda inteira muda de cor, nao so um selo. */
+  .slide.lab{border-left:6px solid var(--green)}
+  .lab .eyebrow{color:var(--green)}
+  .lab .eyebrow .b{color:var(--green)}
+  .labhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .labhead .n{font-family:var(--mono);font-weight:700;font-size:clamp(13px,1.5vw,15px);color:var(--canvas);
+    background:var(--green);padding:5px 13px;border-radius:999px;letter-spacing:.04em}
+  .labhead .t{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--muted);
+    border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+  .ask{border:1px solid rgba(95,208,138,.42);background:rgba(95,208,138,.07);border-radius:14px;
+    padding:16px 20px;margin-top:20px;max-width:900px}
+  .ask b{color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .ask p{font-size:clamp(14px,1.6vw,18px);color:var(--ink);max-width:none}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1000px}
+  @media(max-width:900px){.duo{grid-template-columns:1fr}}
+  .verdict{font-family:var(--mono);font-size:clamp(12px,1.35vw,15px);letter-spacing:.04em;
+    padding:5px 12px;border-radius:999px;display:inline-block;margin-bottom:10px}
+  .verdict.yes{color:var(--canvas);background:var(--green);font-weight:700}
+  .verdict.mid{color:var(--attr);border:1px solid var(--attr)}
+  .verdict.no{color:var(--key);border:1px solid var(--key)}
+
+  /* Ficha de anatomia: as regras que fazem a classe estar certa. */
+  .regras{display:flex;flex-direction:column;gap:1px;width:100%;max-width:1000px;margin-top:20px}
+  .regras .r{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:11px 0;
+    border-bottom:1px solid var(--line)}
+  .regras .r:last-child{border-bottom:0}
+  .regras .r .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--canvas);
+    background:var(--str);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .regras .r .tx{font-size:clamp(14px,1.6vw,18.5px);line-height:1.5}
+  .regras .r .tx b{color:#fff;font-weight:600}
+  .passo{font-family:var(--mono);font-size:clamp(12px,1.4vw,14px);color:var(--canvas);background:var(--attr);
+    padding:5px 13px;border-radius:999px;letter-spacing:.05em;display:inline-block;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<a class="voltar" href="/cursos/nextjs-ia">← voltar ao curso</a>
+<div class="scene" aria-hidden="true"><span class="glow magenta"></span><span class="glow purple"></span></div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 CAPA -->
+  <section class="slide center">
+    <div class="eyebrow"><span class="b">aula 02</span> · next.js + ia · sprint 1 · semana 2</div>
+    <div class="tagtitle"><span class="br">await </span><span class="nm">fetch</span><span class="br">(api)</span></div>
+    <h1 style="margin:24px 0 14px">Consumindo a API: catálogo, detalhe e o <span class="grad">BFF</span></h1>
+    <p class="lead" style="max-width:60ch">O sprint 1 é <strong>o catálogo</strong>: o front deixa de quebrar quando a API responde diferente do esperado. No fim de hoje você pega um ticket do <em>Refined</em> e abre uma branch.</p>
+    <p class="note" style="margin-top:22px;border:0;padding:0;color:var(--muted)">deixe aberto: o repositório do LequePlay, a documentação da API e a aba <strong>Network</strong> do navegador. hoje a Network decide várias discussões.</p>
+    <p class="note" style="margin-top:14px;border:0;padding:0;color:var(--muted)">use <kbd>←</kbd> <kbd>→</kbd> pra navegar · <a href="../projeto/manual-ia.html" style="color:var(--str)">Manual da IA</a></p>
+  </section>
+
+  <!-- 02 A SEMANA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a cerimônia de hoje</div>
+    <h2>O que a sprint 1 pede de você</h2>
+    <p class="lead">Aula é cerimônia, não palestra. A gente alinha o escopo, entende os conceitos que os tickets exigem, e cada pessoa sai com um card.</p>
+    <div class="agenda" style="margin-top:20px">
+      <div class="row"><span class="t">bloco 1</span><span class="d">Buscar no servidor: o componente assíncrono que substitui o <span class="code-inline">useEffect</span></span><span class="tag">LP-205 · LP-216</span></div>
+      <div class="row"><span class="t">bloco 2</span><span class="d">Os arquivos especiais da rota: carregando, erro e não encontrado</span><span class="tag">LP-202 · LP-203 · LP-204</span></div>
+      <div class="row"><span class="t">bloco 3</span><span class="d">Fichas por tipo de mídia, metadata dinâmica e Open Graph</span><span class="tag">LP-206 · LP-207 · LP-208 · LP-209</span></div>
+      <div class="row brk"><span class="t">parada</span><span class="d">checkpoint — ninguém segue sem responder três perguntas</span><span class="tag">5 min</span></div>
+      <div class="row"><span class="t">bloco 4</span><span class="d">O BFF: a chave sai do navegador e os status da API viram respostas diferentes</span><span class="tag">LP-210 · LP-211</span></div>
+      <div class="row"><span class="t">bloco 5</span><span class="d">Dado honesto: tipos auditados, formatação determinística, um cartão só</span><span class="tag">LP-201 · LP-212 · LP-213 · LP-214 · LP-215</span></div>
+      <div class="row"><span class="t">fim</span><span class="d">Escolha do ticket, branch aberta, PR até o fim da semana</span><span class="tag">16 cards</span></div>
+    </div>
+    <p class="note"><strong>Regra da casa:</strong> card entra, PR mergeado sai. A decisão técnica mora na descrição do PR — é ela que o review lê primeiro.</p>
+  </section>
+
+  <!-- 03 O PROBLEMA DA SEMANA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o problema</div>
+    <h2>O front confia demais na API</h2>
+    <p class="lead">Os dezesseis cards da semana são o mesmo bug em dezesseis roupas: alguém supôs como a resposta seria, e a resposta veio diferente.</p>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card no"><h3>Um campo nulo</h3><p>Um podcast sem capa derrubou a home inteira. Trinta pôsteres perfeitos foram embora junto com um <span class="code-inline">null</span>.</p></div>
+      <div class="card no"><h3>Um status ignorado</h3><p>A API respondeu 500 e a tela disse "título não encontrado". A pessoa desistiu de procurar um filme que está lá.</p></div>
+      <div class="card no"><h3>Uma chave no bolso errado</h3><p>O navegador chama a API direto, com a chave no cabeçalho. Quem abrir o site tem a chave.</p></div>
+    </div>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx">O tipo dizia <span class="code-inline">poster: string</span>. A API devolve <span class="code-inline">null</span>. <b>O tipo mentiu e o código acreditou.</b></span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Metade desses tipos foi <b>gerada por IA numa tarde e nunca conferida</b> — é literalmente o <span class="code-inline">LP-212</span>.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">A saída não é escrever mais código defensivo. É <b>parar de supor</b>: ler a documentação, conferir na resposta real, registrar a evidência.</span></div>
+    </div>
+    <p class="note"><strong>Um item quebrado não pode derrubar os outros.</strong> Guarde essa frase: ela vale o curso todo e é o critério de aceite do <span class="code-inline">LP-201</span>.</p>
+  </section>
+
+  <!-- 04 COMPONENTE ASSINCRONO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>conceito · LP-205</div>
+    <h2>O componente que busca <span class="grad">antes</span> de existir na tela</h2>
+    <p class="lead">Server Component pode ser <span class="code-inline">async</span>. Ele espera a API, monta o HTML já preenchido e manda pronto. Não existe "estado de carregando" porque não existe o momento sem dado.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <div class="filetab">app/midia/[slug]/page.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">export default async function</span> <span class="fn">Ficha</span>(
+  <span class="an">&#123; params &#125;</span>: <span class="ty">&#123; params: Promise&lt;&#123; slug: string &#125;&gt; &#125;</span>
+) &#123;
+  <span class="cm">// no Next 16 params é Promise — o await não é enfeite</span>
+  <span class="kw">const</span> &#123; slug &#125; = <span class="kw">await</span> params;
+  <span class="kw">const</span> midia = <span class="kw">await</span> <span class="fn">buscarMidia</span>(slug);
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">article</span>&gt;
+      &lt;<span class="ty">h1</span>&gt;&#123;midia.titulo&#125;&lt;/<span class="ty">h1</span>&gt;
+      &#123;midia.diretor &amp;&amp; &lt;<span class="ty">p</span>&gt;Diretor: &#123;midia.diretor&#125;&lt;/<span class="ty">p</span>&gt;&#125;
+    &lt;/<span class="ty">article</span>&gt;
+  );
+&#125;</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Sem <span class="code-inline">useEffect</span>, sem <span class="code-inline">useState</span>, sem spinner à mão. A busca acontece <b>onde a chave mora</b>: no servidor.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O <span class="code-inline">&amp;&amp;</span> ali não é estilo: <b>campo ausente tem que sumir junto com o rótulo</b>. "Diretor:" sozinho é pior que não mostrar nada.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">Filme antigo sem elenco, documentário sem diretor. <b>Leia a documentação antes de escrever</b> — quais campos podem vir vazios?</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Duração vem em minutos e aparece como <b>1h47</b>, nunca "107". Formato é decisão de produto.</span></div>
+      </div>
+    </div>
+    <p class="note"><span class="code-inline">LP-205</span> é a prática deste slide inteiro: a ficha do filme com diretor, duração, elenco e classificação — e testada com um filme completo <em>e</em> com um filme faltando dado.</p>
+  </section>
+
+  <!-- 05 LADO A LADO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a comparação que fecha a semana · LP-216</div>
+    <h2>Quatro coisas que você apaga</h2>
+    <div class="duo">
+      <div class="card no">
+        <span class="verdict no">o jeito antigo</span>
+        <div class="filetab">components/EmAlta.tsx</div>
+<pre class="code" style="font-size:11.5px"><span class="st">"use client"</span>;
+
+<span class="kw">export function</span> <span class="fn">EmAlta</span>() &#123;
+  <span class="kw">const</span> [itens, setItens] = <span class="fn">useState</span>([]);
+  <span class="kw">const</span> [carregando, setCarregando] = <span class="fn">useState</span>(<span class="kw">true</span>);
+
+  <span class="fn">useEffect</span>(() =&gt; &#123;
+    <span class="fn">fetch</span>(<span class="st">"/api/em-alta"</span>)
+      .<span class="fn">then</span>(r =&gt; r.<span class="fn">json</span>())
+      .<span class="fn">then</span>(d =&gt; &#123; <span class="fn">setItens</span>(d); <span class="fn">setCarregando</span>(<span class="kw">false</span>); &#125;);
+  &#125;, []);
+
+  <span class="kw">if</span> (carregando) <span class="kw">return</span> &lt;<span class="ty">Spinner</span> /&gt;;
+  <span class="kw">return</span> &lt;<span class="ty">Faixa</span> itens=&#123;itens&#125; /&gt;;
+&#125;</pre>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">o jeito da semana</span>
+        <div class="filetab">components/EmAlta.tsx</div>
+<pre class="code" style="font-size:11.5px"><span class="cm">// sem diretiva, sem estado,</span>
+<span class="cm">// sem efeito, sem spinner</span>
+
+<span class="kw">export async function</span> <span class="fn">EmAlta</span>() &#123;
+  <span class="kw">const</span> itens = <span class="kw">await</span> <span class="fn">buscarEmAlta</span>();
+  <span class="kw">return</span> &lt;<span class="ty">Faixa</span> itens=&#123;itens&#125; /&gt;;
+&#125;</pre>
+        <p style="margin-top:14px">Menos código, sem cascata de requisição, conteúdo já no HTML inicial — e a chamada <strong>some da aba Network</strong>.</p>
+      </div>
+    </div>
+    <p class="note"><span class="code-inline">LP-216</span> pede número no PR: <strong>quantos KB de JavaScript saíram</strong> e quanto antes a faixa aparece. E pede também o contrário — em que casos o <span class="code-inline">useEffect</span> ainda seria certo. Resposta honesta: quando o dado depende de algo que só o navegador sabe.</p>
+  </section>
+
+  <!-- 06 ARQUIVOS ESPECIAIS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>App Router · LP-202 · LP-203 · LP-204</div>
+    <h2>Três arquivos que o framework já procura</h2>
+    <p class="lead">Você não liga esses arquivos em lugar nenhum. Basta existirem na pasta da rota — o Next descobre sozinho e os usa nos três momentos em que a tela pode não ter conteúdo.</p>
+    <div class="tree" style="margin-top:20px">app/midia/[slug]/
+  <b>page.tsx</b>          <span class="cm">← o conteúdo, quando tudo dá certo</span>
+  <b>loading.tsx</b>       <span class="cm">← enquanto o await não voltou      · LP-202</span>
+  <b>error.tsx</b>         <span class="cm">← quando algo estourou             · LP-203</span>
+  <b>not-found.tsx</b>     <span class="cm">← quando notFound() foi chamado    · LP-204</span></div>
+    <div class="flow" style="margin-top:22px">
+      <div class="node"><div class="ico">⏳</div><b>carregando</b><span>esqueleto com a forma do conteúdo</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">✅</div><b>conteúdo</b><span>o HTML já vem preenchido</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">🚫</div><b>404</b><span>status de verdade, não ficha vazia</span></div>
+      <div class="arw">→</div>
+      <div class="node"><div class="ico">💥</div><b>erro</b><span>mensagem em português e "tentar de novo"</span></div>
+    </div>
+    <p class="note">Três dos quatro estados da tela são responsabilidade sua. <strong>Tela branca é o estado que a gente esqueceu de desenhar.</strong></p>
+  </section>
+
+  <!-- 07 LOADING -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>loading.tsx · LP-202</div>
+    <h2>O esqueleto precisa ter a <span class="grad">forma</span> do conteúdo</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">app/loading.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">export default function</span> <span class="fn">Carregando</span>() &#123;
+  <span class="kw">return</span> (
+    &lt;<span class="ty">div</span> role=<span class="st">"status"</span> aria-live=<span class="st">"polite"</span>&gt;
+      &lt;<span class="ty">span</span> className=<span class="st">"sr-only"</span>&gt;
+        Carregando o catálogo
+      &lt;/<span class="ty">span</span>&gt;
+      &#123;<span class="hl">Array.<span class="fn">from</span>(&#123; length: 12 &#125;)</span>.<span class="fn">map</span>((_, i) =&gt; (
+        &lt;<span class="ty">div</span> key=&#123;i&#125; className=<span class="st">"cartao-esqueleto"</span> /&gt;
+      ))&#125;
+    &lt;/<span class="ty">div</span>&gt;
+  );
+&#125;</pre>
+        <p class="note" style="margin-top:14px">Doze esqueletos porque a grade mostra doze cartões. <strong>O número não é decorativo.</strong></p>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Automático: <b>sem estado, sem <span class="code-inline">useEffect</span>, sem biblioteca</b>. O arquivo existir já basta.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O que separa bom de ruim: o esqueleto tem <b>a mesma forma e a mesma altura</b> dos cartões. Esqueleto menor faz tudo pular quando os dados chegam.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">A animação <b>respeita quem prefere menos movimento</b> — <span class="code-inline">prefers-reduced-motion</span> é critério de aceite, não capricho.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">O carregamento é <b>anunciado por leitor de tela</b>. Sem isso, para quem não vê a tela nada aconteceu.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Teste em <b>3G lento</b> no DevTools. Em rede boa você nunca vê o próprio trabalho.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 <strong>Pergunta boa para a IA:</strong> qual a diferença entre <span class="code-inline">loading.tsx</span> e um <span class="code-inline">Suspense</span> escrito à mão? Entender isso agora é o que permite, na semana 7, mostrar a resposta da IA em <em>streaming</em>.</p>
+  </section>
+
+  <!-- 08 ERROR -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>error.tsx · LP-203</div>
+    <h2>A API caiu. E agora, o que a pessoa vê?</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">app/midia/[slug]/error.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="hl"><span class="st">"use client"</span>;</span> <span class="cm">// obrigatório — descubra por quê</span>
+
+<span class="kw">export default function</span> <span class="fn">Erro</span>(&#123;
+  error, <span class="hl">reset</span>,
+&#125;: <span class="ty">&#123; error: Error; reset: () =&gt; void &#125;</span>) &#123;
+  <span class="fn">registrarNoLog</span>(error);  <span class="cm">// detalhe técnico vai pro log</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="ty">section</span>&gt;
+      &lt;<span class="ty">h2</span>&gt;Não conseguimos carregar este título.&lt;/<span class="ty">h2</span>&gt;
+      &lt;<span class="ty">p</span>&gt;O problema é do nosso lado. Tente de novo.&lt;/<span class="ty">p</span>&gt;
+      &lt;<span class="ty">button</span> onClick=&#123;<span class="hl">reset</span>&#125;&gt;Tentar de novo&lt;/<span class="ty">button</span>&gt;
+    &lt;/<span class="ty">section</span>&gt;
+  );
+&#125;</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">É <b>obrigatoriamente Client Component</b>. Ele precisa de um limite de erro no navegador e de um <span class="code-inline">onClick</span> — as duas coisas só existem no cliente.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b><span class="code-inline">reset</span> é o que faz o "tentar de novo" ser de verdade.</b> Botão que só recarrega a página é teatro.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">A mensagem é <b>para a pessoa</b>, em português, sem stack trace. O detalhe técnico vai para o log do servidor.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Cabeçalho e rodapé <b>continuam na tela</b>: o erro é da rota, não do site.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Tem <b>um caso que ele não captura</b>. Saber qual vale mais que o resto do card — e o PR do <span class="code-inline">LP-203</span> tem que dizer.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 Pergunte à IA por que precisa ser client e <strong>o que ele não captura</strong>. Depois confirme na documentação da versão instalada — esta é uma pergunta em que o modelo mistura Next 13 com Next 16 sem avisar.</p>
+  </section>
+
+  <!-- 09 NOT FOUND -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>notFound() · LP-204</div>
+    <h2>Ficha vazia respondendo <span class="grad">200</span> é mentira</h2>
+    <p class="lead"><span class="code-inline">/midia/titulo-que-nao-existe</span> abre uma ficha esqueleto e diz para o mundo inteiro que deu certo. Isso tem nome: <strong>soft 404</strong>.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <div class="filetab">app/midia/[slug]/page.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">import</span> &#123; <span class="fn">notFound</span> &#125; <span class="kw">from</span> <span class="st">"next/navigation"</span>;
+
+<span class="kw">const</span> midia = <span class="kw">await</span> <span class="fn">buscarMidia</span>(slug);
+<span class="kw">if</span> (!midia) <span class="hl"><span class="fn">notFound</span>()</span>;   <span class="cm">// 404 de verdade</span></pre>
+        <div class="terminal" style="margin-top:16px"><span class="p">Network ›</span> /midia/nao-existe
+<span class="out">Status: 404 Not Found</span>   <span class="cm">← o único jeito de saber</span></div>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Buscador <b>indexa lixo</b>, monitoramento <b>não acusa</b>, e ninguém descobre o link interno quebrado. O 200 esconde o problema de todo mundo.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Confira o status na aba Network.</b> A tela pode estar bonita e o status errado — só o cabeçalho HTTP responde.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">O <span class="code-inline">not-found.tsx</span> merece mais que uma frase: <b>ofereça busca e destaques</b>. É uma pessoa perdida, não um erro de sistema.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Cuidado: <b>título existente com dado incompleto não pode virar 404</b> por engano. Ausência de campo não é ausência de título.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 <strong>Conteúdo de entrevista:</strong> peça a diferença entre <span class="code-inline">notFound()</span>, <span class="code-inline">not-found.tsx</span> e um <span class="code-inline">redirect</span> para a home. As três "resolvem" o sintoma; só uma está certa — e o PR do <span class="code-inline">LP-204</span> tem que argumentar por que redirecionar seria errado.</p>
+  </section>
+
+  <!-- 10 LAB 1 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 1</span>
+      <h2 style="margin:0">Os três estados, na sua rota</h2>
+      <span class="t">~12 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Sem escrever produto ainda. Só provar que os arquivos especiais funcionam e que o status é o que você acha que é.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Crie o <span class="code-inline">loading.tsx</span> da rota do catálogo</h3><p>Comece com um texto simples. Estrangule a rede em 3G lento no DevTools para conseguir vê-lo.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="kw">export default function</span> <span class="fn">Carregando</span>() &#123;
+  <span class="kw">return</span> &lt;<span class="ty">p</span>&gt;carregando…&lt;/<span class="ty">p</span>&gt;;
+&#125;</pre></div></div>
+      <div class="st"><div class="body"><h3>Force um erro dentro do <span class="code-inline">page.tsx</span></h3><p>Uma linha temporária. Veja o <span class="code-inline">error.tsx</span> assumir — e o cabeçalho continuar na tela.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="kw">throw new</span> <span class="ty">Error</span>(<span class="st">"teste do error boundary"</span>);</pre></div></div>
+      <div class="st"><div class="body"><h3>Abra um slug que não existe e olhe a Network</h3><p>Antes de chamar <span class="code-inline">notFound()</span>, anote o status. Depois de chamar, anote de novo.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="cm">/midia/isto-nao-existe-mesmo</span>
+<span class="cm">antes: 200  ·  depois: 404</span></pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Duas perguntas: o seu <span class="code-inline">error.tsx</span> tem <span class="code-inline">"use client"</span>? E o status virou <span class="grn">404</span> na Network — não só na tela? Se a resposta for "a tela mudou", ainda não está pronto.</p>
+    </div>
+  </section>
+
+  <!-- 11 FICHAS POR TIPO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>modelagem · LP-205 · LP-206 · LP-207</div>
+    <h2>Três mídias, três fichas — e uma decisão de arquitetura</h2>
+    <p class="lead">Hoje a ficha da série é idêntica à do filme, e por isso está errada: mostra "duração" de algo que não tem duração única. O podcast exibe "Diretor: —".</p>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card"><h3>🎬 Filme <span class="muted">· LP-205</span></h3><p>Diretor, duração, elenco, classificação. Duração em minutos vira <strong>1h47</strong>. Campo ausente some junto com o rótulo.</p></div>
+      <div class="card"><h3>📺 Série <span class="muted">· LP-206</span></h3><p>Temporadas, total de episódios, status. Série de uma temporada <strong>no singular</strong>. Nenhum campo de filme sobra.</p></div>
+      <div class="card"><h3>🎙️ Podcast <span class="muted">· LP-207</span></h3><p>Apresentador, frequência, total de episódios. Datas em português por extenso. Lista dos recentes com caminho para o resto.</p></div>
+    </div>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx"><b>Tipos diferentes de mídia mostram campos diferentes.</b> Pilha de <span class="code-inline">if</span> num componente só funciona hoje e apodrece na semana 5.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Armadilha do <span class="code-inline">LP-206</span>: o total de episódios <b>pode vir pronto da API ou precisar ser somado</b>. Confira antes — somar o que a API já calculou sai errado quando falta temporada na resposta.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Decisão de volume no <span class="code-inline">LP-207</span>: podcast pode ter centenas de episódios. <b>Diga no PR quantos você mostra e por quê.</b></span></div>
+    </div>
+    <p class="note">🤖 Descreva as três formas de mídia e peça sugestões de estrutura. <strong>Ouça, escolha uma, e escreva no PR por que ela e não as outras.</strong> A decisão é de arquitetura — e é sua.</p>
+  </section>
+
+  <!-- 12 PARADA -->
+  <section class="slide parada">
+    <div class="badge">parada obrigatória</div>
+    <h1>Ninguém segue sem responder</h1>
+    <p class="lead" style="max-width:62ch;margin:22px auto 0">Três perguntas. O resto da aula empilha em cima destas — se alguma travar, é agora.</p>
+    <div class="regras" style="margin:26px auto 0;text-align:left;max-width:800px">
+      <div class="r"><span class="num">1</span><span class="tx">Seu componente busca dado com <span class="code-inline">await</span>. <b>Onde essa requisição acontece</b> — na sua máquina, no servidor ou no navegador de quem visita?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">A ficha abre com título vazio e responde 200. <b>Isso é bug de quê</b>: de layout, de dado ou de HTTP?</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Por que o <span class="code-inline">error.tsx</span> não pode ser Server Component?</span></div>
+    </div>
+    <p class="note" style="margin:26px auto 0;border:0;padding:0">respostas: 1 — no servidor, e é por isso que a chave pode ficar lá; 2 — de HTTP, e o resto é consequência; 3 — precisa de limite de erro no navegador e de um <span class="code-inline">onClick</span>.</p>
+  </section>
+
+  <!-- 13 GENERATE METADATA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>generateMetadata · LP-208</div>
+    <h2>Vinte abas chamadas "LequePlay"</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">app/midia/[slug]/page.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">export async function</span> <span class="fn">generateMetadata</span>(
+  &#123; params &#125;: <span class="ty">Props</span>
+): <span class="ty">Promise&lt;Metadata&gt;</span> &#123;
+  <span class="kw">const</span> &#123; slug &#125; = <span class="kw">await</span> params;
+  <span class="kw">const</span> midia = <span class="kw">await</span> <span class="hl"><span class="fn">buscarMidia</span>(slug)</span>;
+  <span class="kw">if</span> (!midia) <span class="kw">return</span> &#123; title: <span class="st">"Título não encontrado"</span> &#125;;
+
+  <span class="kw">return</span> &#123;
+    title: <span class="st">`&#36;&#123;midia.titulo&#125; · LequePlay`</span>,
+    description: <span class="fn">resumoCurto</span>(midia.sinopse),
+  &#125;;
+&#125;
+
+<span class="kw">export default async function</span> <span class="fn">Ficha</span>(&#123; params &#125;: <span class="ty">Props</span>) &#123;
+  <span class="kw">const</span> &#123; slug &#125; = <span class="kw">await</span> params;
+  <span class="kw">const</span> midia = <span class="kw">await</span> <span class="hl"><span class="fn">buscarMidia</span>(slug)</span>;  <span class="cm">// a MESMA busca</span>
+  <span class="cm">// …</span>
+&#125;</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>O detalhe que quase todo mundo erra:</b> essa função e a página fazem a mesma busca. Escrito sem cuidado, você chama a API <b>duas vezes por página</b>.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx">O Next <b>deduplica requisições feitas na mesma renderização</b> — mas isso depende de como você escreveu a função de busca. Descubra o mecanismo antes de confiar nele.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">O aceite não é "eu acho que deduplica". É <b>contar as chamadas no log</b> e colar o número no PR.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Descrição é <b>resumo curto</b>, não a sinopse inteira — a prévia corta e fica feio.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Slug inexistente também precisa de <b>metadata coerente</b>. A aba do 404 não pode dizer "undefined".</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 Este é um mecanismo que quase ninguém conhece e que muda como você escreve o resto do curso. Pergunte — e confira a resposta na documentação da versão instalada, não na memória do modelo.</p>
+  </section>
+
+  <!-- 14 OPEN GRAPH -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>Open Graph · LP-209</div>
+    <h2>Um catálogo visual compartilhado como <span class="grad">link cinza</span></h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">app/midia/[slug]/page.tsx</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">const</span> base = process.env.<span class="an">SITE_URL</span>;  <span class="cm">// nunca "localhost"</span>
+
+<span class="kw">return</span> &#123;
+  title: midia.titulo,
+  openGraph: &#123;
+    title: midia.titulo,
+    description: <span class="fn">resumoCurto</span>(midia.sinopse),
+    images: [&#123;
+      url: <span class="hl"><span class="st">`&#36;&#123;base&#125;&#36;&#123;midia.poster ?? FALLBACK&#125;`</span></span>,
+      width: <span class="an">1200</span>, height: <span class="an">630</span>,
+      alt: <span class="st">`Pôster de &#36;&#123;midia.titulo&#125;`</span>,
+    &#125;],
+  &#125;,
+&#125;;</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>URL absoluta.</b> Caminho relativo não funciona: quem lê a prévia é um servidor de outra empresa, que não tem o seu domínio como base.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Dimensões declaradas.</b> Sem elas o aplicativo de mensagem decide sozinho o recorte — e decide mal.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><b>Alternativo para título sem pôster.</b> É o mesmo buraco do <span class="code-inline">LP-201</span>, aparecendo agora fora do site.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">O endereço público vem de <b>variável de ambiente</b>. Chumbar <span class="code-inline">localhost</span> faz todo link de produção apontar para a máquina de quem compartilhou.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Teste real: <b>publique e cole num aplicativo de mensagem.</b> Não existe outro jeito de saber.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 A lista de tags OG e Twitter Card a IA conhece bem — peça sem medo. <strong>O que ela não lembra de avisar é da URL absoluta e do fallback</strong>, que são exatamente os dois motivos pelos quais isso falha em produção.</p>
+  </section>
+
+  <!-- 15 BFF CONCEITO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o card mais grave da semana · LP-210</div>
+    <h2><span class="code-inline">NEXT_PUBLIC_</span> não é estilo. É uma <span class="grad">declaração</span>.</h2>
+    <p class="lead">Tudo que começa com esse prefixo é <strong>embutido no pacote que vai para o navegador</strong>. Você não está nomeando uma variável — está assinando um documento dizendo que aquele valor é público.</p>
+    <div class="duo" style="margin-top:20px">
+      <div class="card no">
+        <span class="verdict no">hoje</span>
+        <div class="flow">
+          <div class="node"><div class="ico">🌐</div><b>navegador</b><span>carrega a chave junto com o catálogo</span></div>
+          <div class="arw">→</div>
+          <div class="node"><div class="ico">🔓</div><b>API</b><span>recebe a chave direto de quem quiser</span></div>
+        </div>
+        <p style="margin-top:14px">Qualquer pessoa com o site aberto tem a chave. Basta a aba Network.</p>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">com BFF</span>
+        <div class="flow">
+          <div class="node"><div class="ico">🌐</div><b>navegador</b><span>fala só com o seu servidor</span></div>
+          <div class="arw">→</div>
+          <div class="node"><div class="ico">🛡️</div><b>seu Route Handler</b><span>guarda a chave, devolve só o necessário</span></div>
+          <div class="arw">→</div>
+          <div class="node"><div class="ico">🔒</div><b>API</b><span>só aceita quem tem a chave</span></div>
+        </div>
+        <p style="margin-top:14px"><strong>BFF</strong> = <em>Backend for Frontend</em>. Um servidor seu, entre o navegador e a API de terceiro.</p>
+      </div>
+    </div>
+    <p class="note"><strong>Verdade desconfortável:</strong> chave que já foi ao navegador <span class="key">está comprometida</span>. Trocar o código não a desvaza. O <span class="code-inline">LP-210</span> exige registrar isso no PR e avisar quem administra a API.</p>
+  </section>
+
+  <!-- 16 ROUTE HANDLER -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>Route Handler · LP-210 · LP-216</div>
+    <h2>O BFF, em um arquivo</h2>
+    <div class="grid2">
+      <div>
+        <div class="filetab">app/api/catalogo/route.ts</div>
+<pre class="code" style="font-size:12.5px"><span class="kw">import</span> &#123; <span class="ty">NextResponse</span> &#125; <span class="kw">from</span> <span class="st">"next/server"</span>;
+
+<span class="kw">export async function</span> <span class="fn">GET</span>() &#123;
+  <span class="kw">const</span> r = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="st">`&#36;&#123;process.env.API_URL&#125;/catalogo`</span>, &#123;
+    headers: &#123; Authorization: <span class="st">`Bearer &#36;&#123;process.env.API_KEY&#125;`</span> &#125;,
+    signal: <span class="ty">AbortSignal</span>.<span class="fn">timeout</span>(<span class="an">5000</span>),
+  &#125;);
+
+  <span class="kw">const</span> dados = <span class="kw">await</span> r.<span class="fn">json</span>();
+
+  <span class="cm">// devolve SÓ o que a interface precisa</span>
+  <span class="kw">return</span> <span class="ty">NextResponse</span>.<span class="fn">json</span>(
+    dados.itens.<span class="fn">map</span>(<span class="fn">paraCartao</span>)
+  );
+&#125;</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">As variáveis <b>não têm <span class="code-inline">NEXT_PUBLIC_</span></b>. Esse é metade do card — renomear é parte da correção, não detalhe.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Devolve só o que a interface precisa.</b> Repassar a resposta inteira da API entrega o formato dela para o mundo, de graça.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">O <b>tempo limite</b> já mora aqui. Sem ele, API lenta vira página pendurada — e isso é o <span class="code-inline">LP-211</span>.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Prova de aceite: <b>buscar o texto da chave no pacote publicado não encontra nada</b>, e a Network não mostra a URL da API.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 Mostre o trecho e pergunte "essa chave está exposta?" — ele responde bem. Depois peça o Route Handler. <strong>Mas a conferência é na aba Network, feita por você. Só ela responde de verdade.</strong></p>
+  </section>
+
+  <!-- 17 LAB 2 -->
+  <section class="slide lab">
+    <div class="eyebrow"><span class="b">// </span>mão na massa</div>
+    <div class="labhead">
+      <span class="n">LAB 2</span>
+      <h2 style="margin:0">Caçar a chave no pacote</h2>
+      <span class="t">~10 min</span>
+    </div>
+    <p class="lead" style="margin-bottom:18px">Antes de consertar, prove que o problema existe. Ver a própria chave num arquivo público é o momento em que o <span class="code-inline">LP-210</span> deixa de ser abstrato.</p>
+    <div class="steps">
+      <div class="st"><div class="body"><h3>Gere o pacote de produção</h3><p>É o que vai para o navegador de quem visita — não o que roda no seu <span class="code-inline">dev</span>.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">npm run build</pre></div></div>
+      <div class="st"><div class="body"><h3>Procure o texto da chave dentro do pacote</h3><p>Use um pedaço reconhecível do valor, não o nome da variável.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px">grep -r <span class="st">"lp_live_"</span> .next/static/ | head</pre></div></div>
+      <div class="st"><div class="body"><h3>Abra o site e olhe a aba Network</h3><p>Filtre por <span class="code-inline">Fetch/XHR</span>. Se aparecer o domínio da API, o navegador está falando com ela direto.</p>
+<pre class="code" style="font-size:12.5px;margin-top:10px"><span class="cm">antes:  api.lequeplay.com.br   ← ruim</span>
+<span class="cm">depois: /api/catalogo         ← o seu servidor</span></pre></div></div>
+    </div>
+    <div class="ask">
+      <b>quando terminar</b>
+      <p>Quem achou a chave no <span class="code-inline">grep</span>? Essa chave <strong>já está comprometida</strong> — e a primeira linha do seu PR precisa dizer isso, não escondê-lo. Consertar o código é a segunda parte do trabalho; avisar é a primeira.</p>
+    </div>
+  </section>
+
+  <!-- 18 STATUS DA API -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>mapeamento de status · LP-211</div>
+    <h2>Nem todo não-200 é a mesma coisa</h2>
+    <p class="lead">Hoje o código trata qualquer resposta ruim igual. Erro interno da API vira "o filme não existe", e a pessoa desiste de procurar um título que está lá.</p>
+    <table style="margin-top:20px">
+      <tr><th>a API respondeu</th><th>o que significa</th><th>o que a pessoa vê</th></tr>
+      <tr><td><code>404</code></td><td>este título realmente não existe</td><td><code>notFound()</code> → a tela de 404 com busca e caminhos</td></tr>
+      <tr><td><code>500</code></td><td>a API quebrou; o título provavelmente existe</td><td>tela de erro com <strong>"tentar de novo"</strong> que usa <code>reset</code></td></tr>
+      <tr><td><code>tempo esgotado</code></td><td>a API não respondeu no prazo</td><td>tela de erro — <strong>nunca</strong> espera infinita</td></tr>
+      <tr><td><code>401 / 403</code></td><td>a nossa credencial parou de valer</td><td>tela de erro <em>e</em> <strong>alerta no log</strong>: isso é alarme, não incidente de usuário</td></tr>
+    </table>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx"><b>Sem tempo limite não existe erro</b>, existe página pendurada. Defina um e escreva o número no PR.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Nenhuma mensagem técnica vaza para a tela. <b>Status da API é assunto do log</b>, não do usuário.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx">Cada caso <b>testado forçando a resposta</b> — não "eu li o código e parece certo".</span></div>
+    </div>
+    <p class="note">🤖 Peça para mapear os status: ele monta a estrutura bem. <strong>Revise o tempo limite e o que vai para o log</strong> — são os dois pontos em que ele passa batido.</p>
+  </section>
+
+  <!-- 19 TIPOS HONESTOS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>a ironia da semana · LP-212</div>
+    <h2>Ausente, nulo e vazio são <span class="grad">três</span> coisas</h2>
+    <p class="lead">O arquivo de tipos do LequePlay foi gerado por IA numa tarde e nunca conferido. O TypeScript garante uma segurança que não existe — e metade dos bugs desta semana nasce daí.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <div class="filetab">types/midia.ts</div>
+<pre class="code" style="font-size:12.5px"><span class="cm">// o que a IA escreveu</span>
+<span class="kw">type</span> <span class="ty">Midia</span> = &#123;
+  titulo: <span class="ty">string</span>;
+  <span class="hl">poster: <span class="ty">string</span>;</span>
+  <span class="hl">elenco: <span class="ty">string</span>[];</span>
+  <span class="hl">nota: <span class="ty">number</span>;</span>
+&#125;;
+
+<span class="cm">// o que a API devolve de verdade</span>
+<span class="kw">type</span> <span class="ty">Midia</span> = &#123;
+  titulo: <span class="ty">string</span>;
+  poster<span class="kw">?</span>: <span class="ty">string</span> | <span class="kw">null</span>;   <span class="an">// evidência: doc §4.2</span>
+  elenco<span class="kw">?</span>: <span class="ty">string</span>[];         <span class="an">// evidência: resposta real</span>
+  nota<span class="kw">?</span>: <span class="ty">number</span> | <span class="kw">null</span>;     <span class="an">// null = ainda não avaliado</span>
+&#125;;</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx"><b>Ausente</b> — a chave nem vem na resposta. Acessar dá <span class="code-inline">undefined</span>, e o erro aparece longe daqui.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><b>Nulo</b> — a chave vem, o valor é <span class="code-inline">null</span>. Passa por uma checagem de existência e quebra no <span class="code-inline">.length</span>.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx"><b>Vazio</b> — string vazia, lista vazia, zero. Não quebra nada: só exibe rótulo órfão ou uma nota 0,0 que é mentira.</span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Onde a documentação não disser, <b>teste contra a API real e registre</b>. Documentação mente por omissão; a resposta de verdade não.</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Aceite duro: <b>nenhum <span class="code-inline">any</span> novo para calar o compilador</b>. Isso troca um problema visível por um invisível.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 <strong>A ironia do card:</strong> ele conserta o que a IA escreveu. Use o Copilot para acelerar a varredura, mas <strong>cada campo opcional precisa de evidência</strong> — uma linha da documentação ou uma resposta real. A evidência vai no PR.</p>
+  </section>
+
+  <!-- 20 UM ITEM NAO DERRUBA OS OUTROS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>resiliência · LP-201</div>
+    <h2>Um item quebrado não derruba os outros</h2>
+    <p class="lead">Um podcast entrou sem capa e a home inteira parou de abrir. Trinta pôsteres perfeitos morreram por causa de um campo nulo. A correção tem <strong>duas metades</strong>, e entregar só uma reprova no review.</p>
+    <div class="duo" style="margin-top:20px">
+      <div class="card ok">
+        <span class="verdict yes">metade 1 · honestidade de tipo</span>
+        <h3>O campo é opcional, e o código sabe</h3>
+<pre class="code" style="font-size:12px;margin-top:10px">poster<span class="kw">?</span>: <span class="ty">string</span> | <span class="kw">null</span>;</pre>
+        <p style="margin-top:10px">A ausência deixa de ser surpresa em tempo de execução e vira um caso que o compilador te obriga a tratar.</p>
+      </div>
+      <div class="card ok">
+        <span class="verdict yes">metade 2 · produto</span>
+        <h3>Pôster ausente vira cartão nomeado</h3>
+<pre class="code" style="font-size:12px;margin-top:10px">&#123;midia.poster
+  ? &lt;<span class="ty">Poster</span> src=&#123;midia.poster&#125; /&gt;
+  : &lt;<span class="ty">CartaoNomeado</span> titulo=&#123;midia.titulo&#125; /&gt;&#125;</pre>
+        <p style="margin-top:10px">Não é buraco cinza: é um cartão com o nome do título, e o texto alternativo descreve o que a pessoa está perdendo.</p>
+      </div>
+    </div>
+    <p class="note">Aceite do <span class="code-inline">LP-201</span>: <strong>testado com três itens quebrados de formas diferentes</strong> — um sem o campo, um com <span class="code-inline">null</span>, um com string vazia. As três quebram diferente, e é por isso que são três testes.</p>
+  </section>
+
+  <!-- 21 FORMATACAO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>formatação · LP-213 · LP-214</div>
+    <h2>O servidor formatou de um jeito. O navegador, de outro.</h2>
+    <p class="lead">Armadilha específica do Next: os dois lados podem ter <strong>fuso e configuração regional diferentes</strong>. O HTML sai com um texto, o navegador pinta outro, e o React acusa incompatibilidade de hidratação.</p>
+    <div class="grid2" style="margin-top:20px">
+      <div>
+        <div class="filetab">lib/formato.ts</div>
+<pre class="code" style="font-size:12.5px"><span class="cm">// determinístico: idioma e fuso fixados</span>
+<span class="kw">export const</span> <span class="fn">data</span> = (iso: <span class="ty">string</span>) =&gt;
+  <span class="kw">new</span> <span class="ty">Intl</span>.<span class="fn">DateTimeFormat</span>(<span class="st">"pt-BR"</span>, &#123;
+    <span class="hl">timeZone: <span class="st">"America/Sao_Paulo"</span></span>,
+    day: <span class="st">"2-digit"</span>, month: <span class="st">"long"</span>, year: <span class="st">"numeric"</span>,
+  &#125;).<span class="fn">format</span>(<span class="kw">new</span> <span class="ty">Date</span>(iso));
+
+<span class="kw">export const</span> <span class="fn">nota</span> = (n: <span class="ty">number</span> | <span class="kw">null</span> | <span class="ty">undefined</span>) =&gt;
+  n == <span class="kw">null</span>
+    ? <span class="hl"><span class="st">"ainda não avaliado"</span></span>
+    : n.<span class="fn">toFixed</span>(<span class="an">1</span>).<span class="fn">replace</span>(<span class="st">"."</span>, <span class="st">","</span>);</pre>
+      </div>
+      <div class="regras">
+        <div class="r"><span class="num">1</span><span class="tx">Caso mais visível: <b>título lançado às 21h aparece como do dia seguinte</b> em outro fuso. Escolha um fuso de referência e aplique em todo lugar.</span></div>
+        <div class="r"><span class="num">2</span><span class="tx"><span class="code-inline">LP-213</span>: sem avaliação <b>não é 0,0</b>. Zero é uma nota, e péssima. Ausência de informação é outra coisa — e merece convite para ser a primeira pessoa a avaliar.</span></div>
+        <div class="r"><span class="num">3</span><span class="tx">A correção óbvia é não dividir por zero. <b>A boa é decidir o que "sem nota" significa.</b></span></div>
+        <div class="r"><span class="num">4</span><span class="tx">Formatação <b>centralizada, não repetida</b>. Cartão e ficha usando a mesma função é o que garante o mesmo texto nos dois. Duração vira <b>1h47</b>, não "107 min".</span></div>
+        <div class="r"><span class="num">5</span><span class="tx">Aceite: <b>nenhum aviso de hidratação no console</b> e nenhuma data crua na interface.</span></div>
+      </div>
+    </div>
+    <p class="note">🤖 Descreva o erro de hidratação e peça a causa — ele acerta o diagnóstico. <strong>Sobre fuso, confira com calma: é o assunto em que ele mais mistura conselhos incompatíveis entre si.</strong> No <span class="code-inline">LP-213</span>, use-o para o que ele faz bem: varrer o projeto atrás de outras divisões com denominador possivelmente zero.</p>
+  </section>
+
+  <!-- 22 UM CARTAO SO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>duplicação · LP-215</div>
+    <h2>Cinco cópias, cinco verdades diferentes</h2>
+    <p class="lead">O cartão do catálogo foi copiado para home, busca, destaques, perfil e página de gênero. Cinco arquivos quase iguais, com a mesma cadeia de <span class="code-inline">if</span>. <strong>A etiqueta já está errada em dois</strong>: série marcada como filme.</p>
+    <div class="grid3" style="margin-top:20px">
+      <div class="card no"><h3>Sintoma</h3><p>Etiqueta errada em duas telas. Alguém corrigiu em três arquivos e esqueceu dos outros dois.</p></div>
+      <div class="card no"><h3>Causa</h3><p>Duplicação. Cinco cópias não são cinco componentes: são cinco chances de divergir.</p></div>
+      <div class="card ok"><h3>Correção</h3><p>Um componente só, usado nos cinco lugares — com as diferenças legítimas resolvidas de propósito.</p></div>
+    </div>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx">As diferenças <b>são reais</b>: destaque é maior, perfil mostra progresso. Isso não é ruído, é requisito.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">Três saídas possíveis: <b>propriedades de variação</b>, <b>composição</b>, ou <b>dois componentes com base comum</b>. Escolher é o trabalho do card.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx"><b>Cuidado com o exagero oposto:</b> um componente com onze propriedades booleanas é pior que cinco cópias. Ele parece unificado e não é.</span></div>
+      <div class="r"><span class="num">4</span><span class="tx">Aceite: <b>nenhuma cópia antiga sobrou</b>. Unificar deixando os arquivos velhos no repositório é criar a sexta cópia.</span></div>
+    </div>
+    <p class="note">🤖 Ele é bom em achar a duplicação e propor a unificação; <strong>erra na dose</strong>, sugerindo o componente universal de onze propriedades. Peça <strong>duas alternativas</strong> e escolha a mais simples — depois defenda a escolha no PR.</p>
+  </section>
+
+  <!-- 23 A API E A ALUCINACAO -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o antídoto</div>
+    <h2>A API tem três estados, e o segundo é uma <span class="grad">armadilha</span></h2>
+    <p class="lead">A documentação da API do LequePlay marca cada endpoint. Não é burocracia: a confusão da sprint passada nasceu de <strong>confiar na leitura de memória</strong> — a de quem lembrava, e a do modelo.</p>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card ok"><h3>✅ existe</h3><p>Está no ar hoje. Você pode chamar, testar e ver a resposta real. É daqui que sai a evidência do <span class="code-inline">LP-212</span>.</p></div>
+      <div class="card no"><h3>🕓 backlog</h3><p><strong>É especificação, não existe.</strong> Está escrito na documentação e responde 404. Endpoint documentado não é endpoint pronto.</p></div>
+      <div class="card"><h3>❓ a confirmar</h3><p>Ninguém garante. Antes de construir tela em cima, pergunte a quem mantém a API — e registre a resposta no PR.</p></div>
+    </div>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx">A IA lê a documentação inteira e <b>não distingue os três estados</b>. Ela sugere o endpoint 🕓 com a mesma confiança do ✅.</span></div>
+      <div class="r"><span class="num">2</span><span class="tx">O sintoma é sempre o mesmo: <b>código plausível que responde 404 em execução</b>. Não há erro de compilação para te salvar.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx"><b>Nunca prometa na tela o que a API não tem.</b> Se o endpoint é 🕓, o card não é este — fale com quem prioriza.</span></div>
+    </div>
+    <p class="note"><strong>Consumir a API de verdade é o antídoto contra a alucinação.</strong> Os dois eixos da aula — Next e IA — se encontram exatamente aqui: quem confere na fonte não é enganado nem pela própria memória nem pela do modelo.</p>
+  </section>
+
+  <!-- 24 O EIXO DE IA -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o padrão da semana · o eixo de IA</div>
+    <h2>Onde ela acerta, e onde ela erra <span class="grad">caro</span></h2>
+    <div class="duo">
+      <div class="card ok">
+        <span class="verdict yes">peça sem medo</span>
+        <ul class="clean">
+          <li><strong>Stack trace → causa raiz.</strong> Cole inteiro, sem cortar. <span class="muted">LP-201 · LP-214</span></li>
+          <li><strong>Varredura mecânica.</strong> "Ache toda divisão com denominador possivelmente zero." <span class="muted">LP-213</span></li>
+          <li><strong>Padrão de acessibilidade.</strong> ARIA, <span class="code-inline">role</span>, região anunciada. <span class="muted">LP-202</span></li>
+          <li><strong>Texto de interface.</strong> A mensagem de erro em português que não assusta. <span class="muted">LP-203</span></li>
+          <li><strong>Estrutura de código.</strong> O esqueleto do mapeamento de status, as tags OG. <span class="muted">LP-209 · LP-211</span></li>
+        </ul>
+      </div>
+      <div class="card no">
+        <span class="verdict no">confira sempre</span>
+        <ul class="clean">
+          <li><strong>Declara todo campo como obrigatório.</strong> É o bug que o <span class="code-inline">LP-212</span> existe para consertar.</li>
+          <li><strong>Inventa formato de dado.</strong> "Duração vem em segundos" — vem em minutos, e ninguém avisou.</li>
+          <li><strong>Inventa endpoint 🕓.</strong> Sugere o que só existe na especificação, com voz de quem testou.</li>
+          <li><strong>Mistura versões do Next.</strong> <span class="code-inline">params</span> sem <span class="code-inline">await</span>, <span class="code-inline">getServerSideProps</span>, <span class="code-inline">error.tsx</span> sem <span class="code-inline">"use client"</span>.</li>
+          <li><strong>Erra na dose da abstração.</strong> O componente universal de onze propriedades. <span class="muted">LP-215</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="regras">
+      <div class="r"><span class="num">1</span><span class="tx"><b>Auditar campo por campo.</b> Não "revisei o arquivo": percorreu cada campo perguntando ausente? nulo? vazio?</span></div>
+      <div class="r"><span class="num">2</span><span class="tx"><b>Pedir evidência.</b> Toda afirmação da IA vira uma pergunta: "onde está escrito isso?" Sem linha de documentação ou resposta real, não entra.</span></div>
+      <div class="r"><span class="num">3</span><span class="tx"><b>Conferir na fonte.</b> A fonte é a aba Network, o log do servidor, o <span class="code-inline">node_modules</span> — nunca o chat.</span></div>
+    </div>
+    <p class="note"><strong>A IA escreve, você assina.</strong> O nome no PR é o seu, e a pergunta do review — "por que assim?" — é feita a você. O campo <em>"o que a IA sugeriu e eu recusei"</em> não é enfeite do template.</p>
+  </section>
+
+  <!-- 25 MAPA DOS CARDS -->
+  <section class="slide">
+    <div class="eyebrow"><span class="b">// </span>o quadro · lista Refined</div>
+    <h2>Dezesseis cards. Escolha o seu.</h2>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card">
+        <h3>Estados da rota</h3>
+        <p><span class="code-inline">LP-202</span> loading do catálogo · <span class="code-inline">LP-203</span> error boundary · <span class="code-inline">LP-204</span> soft 404 e <span class="code-inline">notFound()</span></p>
+        <div class="tags"><span class="pill">slides 6–9</span></div>
+      </div>
+      <div class="card">
+        <h3>Busca no servidor</h3>
+        <p><span class="code-inline">LP-205</span> ficha do filme · <span class="code-inline">LP-206</span> ficha da série · <span class="code-inline">LP-207</span> ficha do podcast · <span class="code-inline">LP-216</span> "Em alta" sem <span class="code-inline">useEffect</span></p>
+        <div class="tags"><span class="pill">slides 4, 5, 11</span></div>
+      </div>
+      <div class="card">
+        <h3>Compartilhar</h3>
+        <p><span class="code-inline">LP-208</span> metadata dinâmica e deduplicação · <span class="code-inline">LP-209</span> Open Graph com URL absoluta</p>
+        <div class="tags"><span class="pill">slides 13–14</span></div>
+      </div>
+      <div class="card no">
+        <h3>Segurança e resiliência</h3>
+        <p><span class="code-inline">LP-210</span> BFF e a chave exposta <strong>(G)</strong> · <span class="code-inline">LP-211</span> mapear status da API</p>
+        <div class="tags"><span class="pill on">o mais grave</span><span class="pill">slides 15–18</span></div>
+      </div>
+      <div class="card">
+        <h3>Dado honesto</h3>
+        <p><span class="code-inline">LP-201</span> pôster nulo derruba a grade · <span class="code-inline">LP-212</span> auditoria de tipos <strong>(G)</strong> · <span class="code-inline">LP-213</span> NaN na nota · <span class="code-inline">LP-214</span> formatação pt-BR</p>
+        <div class="tags"><span class="pill on">o mais valioso</span><span class="pill">slides 19–21</span></div>
+      </div>
+      <div class="card">
+        <h3>Estrutura</h3>
+        <p><span class="code-inline">LP-215</span> um cartão do catálogo servindo cinco telas</p>
+        <div class="tags"><span class="pill">slide 22</span></div>
+      </div>
+    </div>
+    <p class="note"><strong>Como escolher:</strong> se você travou na aula 01, pegue <span class="code-inline">LP-202</span> ou <span class="code-inline">LP-205</span>. Se quer o assunto que mais aparece em entrevista, <span class="code-inline">LP-210</span> ou <span class="code-inline">LP-204</span>. Se quer consertar a causa de vários outros bugs, <span class="code-inline">LP-212</span> — o mais chato e o mais valioso.</p>
+  </section>
+
+  <!-- 26 FECHAMENTO -->
+  <section class="slide center">
+    <div class="big-emoji">🎫</div>
+    <div class="eyebrow"><span class="b">fim da aula 02</span> · agora o ticket é seu</div>
+    <h1 style="max-width:22ch">O front <span class="grad">para de quebrar</span> quando você para de supor</h1>
+    <p class="lead" style="max-width:64ch;margin-top:16px">Você sabe buscar no servidor sem <span class="code-inline">useEffect</span>, desenhar os três estados da rota, gerar metadata sem chamar a API duas vezes, tirar a chave do navegador com um BFF e auditar um tipo campo por campo.</p>
+    <div class="tags" style="justify-content:center;margin-top:22px">
+      <span class="pill on">server component async</span><span class="pill on">loading.tsx</span><span class="pill on">error.tsx</span><span class="pill on">notFound()</span><span class="pill on">generateMetadata</span><span class="pill on">Open Graph</span><span class="pill on">BFF</span><span class="pill on">status da API</span><span class="pill on">tipos honestos</span><span class="pill on">Intl</span>
+    </div>
+    <p class="note" style="margin-top:26px;border:0;padding:0"><strong>Até a próxima cerimônia:</strong> branch <span class="code-inline">tipo/slug</span> → PR explicando a decisão técnica → review aprovado → merge → publicado. Um card por pessoa, e o PR diz <em>o que a IA sugeriu e você recusou</em>.</p>
+    <p class="note" style="margin-top:16px;border:0;padding:0;color:var(--muted)"><strong>Aula 03:</strong> séries, rotas aninhadas, cache e revalidação — o mesmo catálogo, agora rápido. · <a href="../projeto/manual-ia.html" style="color:var(--str)">Manual da IA</a> · <a href="/cursos/nextjs-ia" style="color:var(--str)">página do curso</a></p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> navegar</div>
+<div class="nav">
+  <span id="counter">01 / 26</span>
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="próximo">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;const tot=slides.length;
+  const pad=n=>String(n+1).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(tot-1,n));
+    slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+    document.getElementById('counter').textContent=pad(i)+' / '+tot;
+    document.getElementById('progress').style.width=((i+1)/tot*100)+'%';
+    slides[i].scrollTop=0;
+  }
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(tot-1);
+  });
+  show(0);
+</script>
+
+</body>
+</html>
