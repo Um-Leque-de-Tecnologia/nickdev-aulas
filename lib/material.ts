@@ -14,7 +14,7 @@ import { getAccessToken } from "@/lib/auth/tokens";
  * shell. Cada uma decide o seu, com o mesmo `Material` na mão.
  */
 
-const API = process.env.AULAS_API ?? "https://api.aulas.umlequedetecnologia.com.br";
+const API = process.env.AULAS_API ?? "https://api.umlequedetecnologia.com.br/aulas";
 
 export type MaterialOk = {
   ok: true;

@@ -50,6 +50,11 @@
   "vars": {
     "KEYCLOAK_ISSUER": "https://auth.rodolfodebonis.com.br/realms/aulas",
     "KEYCLOAK_CLIENT_ID": "aulas-web",
-    "APP_URL": "https://aulas.umlequedetecnologia.com.br"
+    "APP_URL": "https://aulas.umlequedetecnologia.com.br",
+    // A API do aluno agora é servida pelo GATEWAY (api.umlequedetecnologia.com.br/aulas), não mais
+    // pelo subdomínio direto api.aulas.*. A API é prefix-aware (X-Forwarded-Prefix), então o
+    // prefixo /aulas funciona; o subdomínio direto será aposentado. É o mesmo valor do default no
+    // código (lib/material.ts e as rotas do admin) — aqui explícito e num lugar só.
+    "AULAS_API": "https://api.umlequedetecnologia.com.br/aulas"
   }
 }

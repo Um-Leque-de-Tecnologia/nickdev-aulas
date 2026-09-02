@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Admin · NickDev",
 };
 
-const API = process.env.AULAS_API ?? "https://api.aulas.umlequedetecnologia.com.br";
+const API = process.env.AULAS_API ?? "https://api.umlequedetecnologia.com.br/aulas";
 
 /**
  * O catálogo publicado, lido da API.
