@@ -215,6 +215,7 @@
     <div class="grp">Antes de tudo</div>
     <a href="#combinado">O combinado</a>
     <a href="#gemini">Gemini para codar</a>
+    <a href="#plus">Assinei o Plus e não funciona</a>
     <a href="#ferramentas">As duas ferramentas</a>
     <div class="grp">O ciclo</div>
     <a href="#ciclo">Onde a IA entra</a>
@@ -289,9 +290,35 @@
       </ul>
     </div>
 
+    <div class="divisor" id="plus">o caso de quem assinou o plus</div>
+
+    <p>Vários alunos assinaram o <b>Google AI Plus</b> e continuaram sem conseguir usar o Gemini como copiloto no editor. Não é instalação malfeita: <b>é plano comprado para outra coisa</b>.</p>
+
+    <div class="tip warn"><b>Plano do aplicativo não é licença de ferramenta de código.</b> O Plus é um plano do <i>app</i> Gemini — mais uso no chat, mais armazenamento. As ferramentas de código têm a própria escada e ele não está nela: quem sobe cota no Code Assist e na CLI é o <b>AI Pro</b> (ou o Ultra), e o Standard/Enterprise é vendido por assento no Google Cloud. O Plus não deixou de cobrir o editor — ele nunca cobriu. O que você tem lá é a mesma faixa gratuita de quem não paga nada.</div>
+
+    <p>E é por isso mesmo que, se o editor não funciona <i>de jeito nenhum</i>, a causa quase nunca é o plano: a faixa gratuita bastaria. Confira nesta ordem, que é a ordem em que isso costuma estar quebrado:</p>
+
+    <ol class="passos">
+      <li><b>A conta é pessoal ou da instituição?</b> Conta de Google Workspace administrada por escola ou empresa normalmente não tem a faixa gratuita para indivíduos, e a mensagem que aparece na tela não diz isso com essas palavras. Entre com uma conta Google pessoal e teste de novo — é a causa mais comum, e é gratuita de resolver.</li>
+      <li><b>Você está logado na conta que tem o plano?</b> O VS Code guarda o login anterior. Se você assinou com um e-mail e o editor está autenticado com outro, nada do que você pagou aparece ali.</li>
+      <li><b>Escolheu "uso individual" no login?</b> Se em algum momento você selecionou um projeto do Google Cloud, o editor passa a esperar uma licença paga daquele projeto — e recusa, porque ela não existe. Sair e entrar de novo, pela opção individual, resolve.</li>
+      <li><b>Testou a CLI?</b> O <span class="hl">gemini</span> no terminal usa a mesma conta e a mesma faixa gratuita, por outro caminho. Se a CLI entra e a extensão não, o problema é da extensão e não da sua conta — e você já tem como trabalhar enquanto resolve.</li>
+    </ol>
+
+    <div class="divisor">as saídas</div>
+
+    <div class="osgrid">
+      <div class="os"><h4>Antigravity</h4><p>O editor do Google construído em torno de agente. É um VS Code com outra casca, então atalho e extensão continuam familiares, e entra com conta Google sem pedir plano pago. É a saída mais rápida para quem só quer voltar a trabalhar hoje.</p></div>
+      <div class="os"><h4>Subir para o AI Pro</h4><p>Se o que incomoda é cota e modelo, e não acesso, este é o degrau que muda algo no editor — o que o Plus não faz. Estudante não precisa pagar por ele: veja o bloco acima.</p></div>
+      <div class="os"><h4>Ficar no gratuito</h4><p>Se a lista acima destravou o login, fique. Para o volume deste curso a faixa gratuita dá conta — e o Plus, nesse caso, é assinatura paga por uma coisa que você não está usando.</p></div>
+    </div>
+
+    <div class="tip"><b>Antigravity é editor, não extensão.</b> Ele não entra no seu VS Code: é um programa separado que abre a mesma pasta do projeto. Trocar de editor no meio do curso é decisão sua, e nada aqui depende dela — o ciclo deste manual e o <span class="hl">GEMINI.md</span> valem igual nos dois, de propósito.</div>
+
     <a class="cta primary" href="https://gemini.google/students/" target="_blank" rel="noopener">Plano de estudante ↗</a>
     <a class="cta" href="https://codeassist.google/" target="_blank" rel="noopener">Gemini Code Assist ↗</a>
     <a class="cta" href="https://github.com/google-gemini/gemini-cli" target="_blank" rel="noopener">Gemini CLI ↗</a>
+    <a class="cta" href="https://antigravity.google/" target="_blank" rel="noopener">Antigravity ↗</a>
 
     <div class="divisor">configurar no vs code</div>
 
@@ -315,7 +342,7 @@
 
     <div class="tip"><b>Sobre o <span class="hl">#file:</span> dos prompts prontos.</b> Aquele marcador é idioma do Copilot. No Code Assist e na CLI você não precisa dele: escreva o caminho do arquivo na frase, ou selecione o trecho antes de perguntar. O corpo do prompt continua igual — o que faz um prompt funcionar não é o marcador, é o resto.</div>
 
-    <div class="tip warn"><b>Esta é a página deste manual que envelhece mais rápido.</b> Nome de plano, cota e tela de login do Gemini mudaram mais de uma vez desde 2025. Se o que está escrito aqui não bater com o que aparece na sua tela, o que ganha é a sua tela — e avise no canal do time para o manual ser corrigido.</div>
+    <div class="tip warn"><b>Esta é a página deste manual que envelhece mais rápido.</b> Nome de plano, cota, tela de login e até o nome do editor mudaram mais de uma vez desde 2025 — o Antigravity, em especial, é recente e ainda muda de mês para mês. Se o que está escrito aqui não bater com o que aparece na sua tela, o que ganha é a sua tela — e avise no canal do time para o manual ser corrigido.</div>
   </section>
 
   <section id="ferramentas">
