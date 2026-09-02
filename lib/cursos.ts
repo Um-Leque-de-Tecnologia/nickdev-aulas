@@ -40,7 +40,7 @@ export type Course = {
 export const COURSES: Course[] = [
   {
     slug: "frontend-transicao",
-    name: "Frontend — Transição de Carreira",
+    name: "Introdução ao Frontend",
     summary:
       "Do primeiro <h1> ao seu site no ar: HTML, CSS, responsividade e deploy, pra quem está migrando pra tech.",
     href: "/cursos/frontend-transicao",

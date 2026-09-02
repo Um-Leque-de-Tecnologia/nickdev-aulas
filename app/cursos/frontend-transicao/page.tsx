@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import FrontendTransicao from "@/components/cursos/FrontendTransicao";
 
 export const metadata: Metadata = {
-  title: "Frontend — Transição de Carreira · NickDev",
+  title: "Introdução ao Frontend · NickDev",
   description:
     "Curso de frontend para transição de carreira: HTML, CSS, JavaScript, design, React e Next.js — do primeiro site ao projeto publicado.",
 };

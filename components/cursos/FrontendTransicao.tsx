@@ -25,7 +25,7 @@ export default function FrontendTransicao() {
     <>
       <div className="eyebrow">Curso · pós-graduação</div>
       <h1>
-        Frontend — <span className="grad-text">Transição de Carreira</span>
+        Introdução ao <span className="grad-text">Frontend</span>
       </h1>
       <p className="lead">
         Do primeiro <span className="mono">&lt;h1&gt;</span> ao seu site

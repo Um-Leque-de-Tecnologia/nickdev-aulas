@@ -27,7 +27,7 @@ type Cartao = {
 
 const CARTOES: Record<string, Cartao> = {
   "frontend-transicao": {
-    titulo: "Frontend — Transição de Carreira",
+    titulo: "Introdução ao Frontend",
     texto: (
       <>
         Do primeiro <span className="mono">&lt;h1&gt;</span> ao seu site no ar.
