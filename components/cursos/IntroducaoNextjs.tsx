@@ -232,7 +232,7 @@ export default function IntroducaoNextjs() {
               </a>
               <a
                 className="mat"
-                href="https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas"
+                href="https://github.com/Um-Leque-de-Tecnologia/lequedevagas-web"
                 target="_blank"
                 rel="noopener noreferrer"
               >

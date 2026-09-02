@@ -358,9 +358,10 @@ A partir da **aula 04** o curso tem um projeto que cresce a cada aula. Ele vive
 num repositório próprio da organização — não dentro deste repo — pra que a turma
 possa clonar, forkar e publicar na Vercel sem levar junto o site das aulas:
 
-| Projeto | Repositório | Entra na |
-| --- | --- | --- |
-| 🪭 Leque de Vagas | [Um-Leque-de-Tecnologia/leque-de-vagas](https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas) | aula 04 |
+| Projeto | Curso | Repositório | Entra na |
+| --- | --- | --- | --- |
+| 🪭 Leque de Vagas | Frontend: Transição de Carreira | [Um-Leque-de-Tecnologia/leque-de-vagas](https://github.com/Um-Leque-de-Tecnologia/leque-de-vagas) | aula 04 |
+| 🪭 Leque de Vagas | Introdução ao Next.js | [Um-Leque-de-Tecnologia/lequedevagas-web](https://github.com/Um-Leque-de-Tecnologia/lequedevagas-web) | referência, congelada na aula 03 |
 
 Aqui ficam só os **materiais** (slides, guias, desafios) — que linkam pro
 repositório do projeto.
