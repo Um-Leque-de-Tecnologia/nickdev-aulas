@@ -39,3 +39,8 @@ cloudflare-env.d.ts
 # credenciais vivas do publicador de material (scripts/credencial-do-cookie.mjs)
 .aulas-refresh
 cookie.txt
+
+# plano de sincronizacao gerado por --salvar-plano (scripts/sincroniza-cdn.mjs).
+# E um instantaneo do que falta enviar, com id de curso dentro: util na maquina
+# de quem publica, sem sentido no repositorio -- e ele muda a cada execucao.
+plano.json
