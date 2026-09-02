@@ -248,6 +248,24 @@ export default function NextjsIA() {
       <BadgesDeTecnologia tecnologias={["nextjs"]} />
       <div className="brand-rule" />
 
+      {/*
+        A playlist é pública, e é a única coisa deste curso que é. O material
+        continua atrás da role — os cards de aula usam `materialProtegido()`,
+        e o CDN devolve 404 no caminho público. Quem chega pelo link direto da
+        landing vê as gravações e o que o curso é; para abrir slides e
+        gabarito, precisa ter comprado.
+      */}
+      <div className="acoes">
+        <a
+          className="glow-btn"
+          href="https://www.youtube.com/watch?v=I4w6JtGNqbs&list=PLG8pkRqGrJQ4"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ▶ Aulas gravadas
+        </a>
+      </div>
+
       <div className="section-label">Como funciona</div>
 
       <ul className="faixa">
