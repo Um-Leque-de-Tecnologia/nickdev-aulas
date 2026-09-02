@@ -214,6 +214,7 @@
   <nav>
     <div class="grp">Antes de tudo</div>
     <a href="#combinado">O combinado</a>
+    <a href="#gemini">Gemini para codar</a>
     <a href="#ferramentas">As duas ferramentas</a>
     <div class="grp">O ciclo</div>
     <a href="#ciclo">Onde a IA entra</a>
@@ -255,9 +256,71 @@
     <div class="tip warn"><b>Recusar também é trabalho.</b> O template de PR deste curso tem um campo chamado <i>"o que a IA sugeriu e eu recusei"</i>. Ele não é enfeite: saber recusar é metade da habilidade, e é o campo que mais aparece em entrevista.</div>
   </section>
 
+  <section id="gemini">
+    <h2><span class="n">01</span>Gemini para codar: plano, conta e VS Code</h2>
+    <p class="sub">A primeira pergunta é sempre "qual plano eu preciso comprar". Para este curso a resposta é <b>nenhum</b> — e a parte que quase ninguém sabe é que estudante tem o plano pago de graça por doze meses.</p>
+
+    <p>O Gemini chega até você por duas portas, e as duas têm faixa gratuita com uma conta Google comum:</p>
+
+    <div class="duo">
+      <div class="box">
+        <b>Gemini Code Assist (VS Code)</b>
+        <p>A extensão do Google dentro do editor: completa código enquanto você digita e abre um chat lateral que enxerga os arquivos do projeto. É o equivalente direto do Copilot Chat.</p>
+      </div>
+      <div class="box">
+        <b>Gemini CLI (terminal)</b>
+        <p>O agente de linha de comando, de código aberto. Roda dentro da pasta do projeto, lê os arquivos por conta própria e <i>executa</i> — é a coluna da direita da seção seguinte.</p>
+      </div>
+    </div>
+
+    <div class="divisor">qual plano</div>
+
+    <div class="osgrid">
+      <div class="os"><h4>Gratuito, individual</h4><p>Conta Google pessoal, sem cartão. Cobre o curso inteiro com folga: o gargalo aqui vai ser o seu tempo de revisar o que a IA escreveu, não a cota diária.</p></div>
+      <div class="os"><h4>Google AI Pro</h4><p>Plano de consumidor: sobe os limites e libera os modelos maiores. <b>É este que sai de graça para estudante.</b></p></div>
+      <div class="os"><h4>Standard / Enterprise</h4><p>Vendido por assento para empresa, via Google Cloud, com administração e controle de dados. Não é para você agora — é bom saber que existe para quando perguntarem no trabalho.</p></div>
+    </div>
+
+    <div class="callout"><b>Google AI Pro de graça por 12 meses para estudante.</b> A ativação passa por verificação de matrícula: o site pede comprovante ou e-mail da instituição, e o Brasil está entre os países da oferta. Três coisas para não tomar susto depois:
+      <ul>
+        <li>pede um meio de pagamento no cadastro, mesmo sendo gratuito;</li>
+        <li><b>renova sozinho no preço cheio</b> quando os doze meses acabam — algo em torno de R$ 100 por mês;</li>
+        <li>então <b>marque no calendário a data de cancelar</b> agora, antes de fechar esta página. Daqui a um ano você não vai lembrar.</li>
+      </ul>
+    </div>
+
+    <a class="cta primary" href="https://gemini.google/students/" target="_blank" rel="noopener">Plano de estudante ↗</a>
+    <a class="cta" href="https://codeassist.google/" target="_blank" rel="noopener">Gemini Code Assist ↗</a>
+    <a class="cta" href="https://github.com/google-gemini/gemini-cli" target="_blank" rel="noopener">Gemini CLI ↗</a>
+
+    <div class="divisor">configurar no vs code</div>
+
+    <ol class="passos">
+      <li><b>Instale a extensão.</b> No painel de extensões do VS Code, procure por <span class="hl">Gemini Code Assist</span> — a publicada pelo Google. Ela traz o completar e o chat juntos.</li>
+      <li><b>Entre com a conta Google.</b> O botão de login abre o navegador. Na hora de escolher, pegue a opção <b>para uso individual</b>, e não a de selecionar um projeto do Google Cloud: a segunda é o caminho das licenças pagas e vai pedir um projeto que você não tem.</li>
+      <li><b>Confirme que ligou.</b> O ícone do Gemini aparece na barra lateral e o status na barra de baixo. Sem isso, o que você digitar no chat não vai a lugar nenhum.</li>
+      <li><b>Ensine o repositório à ferramenta.</b> Um arquivo <span class="hl">GEMINI.md</span> na raiz do projeto é lido a cada conversa: é onde entram as regras da casa — a versão do Next, o que não pode virar Client Component, o combinado do time. Escrever uma vez ali evita repetir em todo prompt, e vale para você e para quem clonar depois.</li>
+      <li><b>Teste com uma pergunta cuja resposta você já sabe.</b> Pergunte o que um arquivo que você acabou de ler faz. Se a resposta bater, você calibrou a ferramenta; se não bater, você acabou de aprender — de graça — o quanto precisa conferir. É a primeira regra do <a href="#combinado">combinado</a> em forma de exercício.</li>
+    </ol>
+
+    <div class="divisor">e no terminal</div>
+
+    <div class="terminal"><span class="p">$</span> npm i -g @google/gemini-cli   <span class="cm"># precisa de Node 20 ou mais novo</span>
+<span class="p">$</span> cd lequeplay-web
+<span class="p">$</span> gemini                        <span class="cm"># a primeira execução abre o login no navegador</span></div>
+
+    <div class="tip"><b>O mesmo <span class="hl">GEMINI.md</span> serve aos dois.</b> A CLI lê o arquivo da raiz do projeto pelo mesmo motivo que a extensão lê: instrução do time é código versionado, revisado em PR, e não um parágrafo que cada pessoa cola no próprio chat de um jeito diferente.</div>
+
+    <div class="tip warn"><b>O gratuito é pago em dado.</b> Na faixa gratuita para indivíduos, o padrão é o Google poder usar suas conversas e trechos de código para melhorar os produtos — existe um ajuste para desligar isso nas configurações da extensão e da CLI, e ele <i>não</i> vem desligado. Para o LequePlay dá na mesma, o repositório é público. Para o código do seu trabalho, não dá: confira o ajuste antes de apontar a ferramenta para lá. E a terceira regra do <a href="#combinado">combinado</a> — segredo nunca entra no prompt — vale igual nos dois casos.</div>
+
+    <div class="tip"><b>Sobre o <span class="hl">#file:</span> dos prompts prontos.</b> Aquele marcador é idioma do Copilot. No Code Assist e na CLI você não precisa dele: escreva o caminho do arquivo na frase, ou selecione o trecho antes de perguntar. O corpo do prompt continua igual — o que faz um prompt funcionar não é o marcador, é o resto.</div>
+
+    <div class="tip warn"><b>Esta é a página deste manual que envelhece mais rápido.</b> Nome de plano, cota e tela de login do Gemini mudaram mais de uma vez desde 2025. Se o que está escrito aqui não bater com o que aparece na sua tela, o que ganha é a sua tela — e avise no canal do time para o manual ser corrigido.</div>
+  </section>
+
   <section id="ferramentas">
-    <h2><span class="n">01</span>As duas ferramentas</h2>
-    <p class="sub">O curso é dado com o Copilot no VS Code. Mas quem já usa um agente de linha de comando não precisa trocar: o ciclo é o mesmo, muda o gesto.</p>
+    <h2><span class="n">02</span>As duas ferramentas</h2>
+    <p class="sub">São dois formatos, e não duas marcas: um vive no editor (Gemini Code Assist, Copilot Chat) e o outro no terminal (Gemini CLI e parentes). O ciclo é o mesmo nos dois — muda o gesto.</p>
 
     <div class="duo">
       <div class="box">
@@ -277,11 +340,11 @@
       </div>
     </div>
 
-    <div class="tip"><b>O que os dois têm em comum:</b> ambos leem instruções versionadas do repositório. No Copilot é <span class="hl">.github/copilot-instructions.md</span>; nos agentes costuma ser um <span class="hl">AGENTS.md</span> ou <span class="hl">CLAUDE.md</span>. É o time escrevendo as regras uma vez, para não repeti-las em todo prompt.</div>
+    <div class="tip"><b>O que os dois têm em comum:</b> ambos leem instruções versionadas do repositório. No Copilot é <span class="hl">.github/copilot-instructions.md</span>; nos agentes é o <span class="hl">GEMINI.md</span> do Gemini, ou um <span class="hl">AGENTS.md</span>/<span class="hl">CLAUDE.md</span>. É o time escrevendo as regras uma vez, para não repeti-las em todo prompt.</div>
   </section>
 
   <section id="ciclo">
-    <h2><span class="n">02</span>Onde a IA entra no ciclo</h2>
+    <h2><span class="n">03</span>Onde a IA entra no ciclo</h2>
     <p class="sub">Seis etapas. Em cada uma, o que você quer da IA é diferente — e pedir a coisa errada na etapa errada é a causa mais comum de resposta ruim.</p>
 
     <div class="tabela">
@@ -302,7 +365,7 @@
   </section>
 
   <section id="entender-projeto">
-    <h2><span class="n">03</span>1. Entender um projeto que não é seu</h2>
+    <h2><span class="n">04</span>1. Entender um projeto que não é seu</h2>
     <p class="sub">Primeiro dia num repositório de outra pessoa. Você quer o mapa: onde ficam as coisas, e por onde passa o acesso a dado.</p>
 
     <div class="duo">
@@ -326,7 +389,7 @@ Se não tiver certeza de algo, diga "não confirmei" em vez de supor.</pre></div
   </section>
 
   <section id="entender-codigo">
-    <h2><span class="n">04</span>2. Entender um trecho de código</h2>
+    <h2><span class="n">05</span>2. Entender um trecho de código</h2>
     <p class="sub">Você abriu um arquivo e travou em vinte linhas. Aqui o que se quer não é resumo — é tradução, com o "por quê".</p>
 
     <div class="file">prompt · entender código</div>
@@ -346,7 +409,7 @@ Termine com uma pergunta que eu deveria fazer para quem escreveu isso.</pre></di
   </section>
 
   <section id="planejar">
-    <h2><span class="n">05</span>3. Planejar antes de escrever</h2>
+    <h2><span class="n">06</span>3. Planejar antes de escrever</h2>
     <p class="sub">A etapa que quase todo mundo pula, e a que mais economiza tempo. O objetivo aqui é uma lista de passos — <b>nenhum arquivo é tocado</b>.</p>
 
     <div class="duo">
@@ -373,7 +436,7 @@ Se faltar informação no ticket para planejar, pergunte antes de assumir.</pre>
   </section>
 
   <section id="implementar">
-    <h2><span class="n">06</span>4. Implementar</h2>
+    <h2><span class="n">07</span>4. Implementar</h2>
     <p class="sub">Aqui a IA produz rascunho. Rascunho é para revisar, não para aceitar — e a diferença entre as duas coisas é o seu nome no commit.</p>
 
     <ol class="passos">
@@ -402,7 +465,7 @@ funcionou.</pre></div>
   </section>
 
   <section id="revisar">
-    <h2><span class="n">07</span>5. Revisar — o próprio código e o do colega</h2>
+    <h2><span class="n">08</span>5. Revisar — o próprio código e o do colega</h2>
     <p class="sub">A IA é um primeiro leitor rápido. Ela acha coisa boa e fala bobagem, e as duas com a mesma convicção.</p>
 
     <div class="duo">
@@ -447,7 +510,7 @@ para escrever.</pre></div>
   </section>
 
   <section id="entregar">
-    <h2><span class="n">08</span>6. Entregar</h2>
+    <h2><span class="n">09</span>6. Entregar</h2>
     <p class="sub">Nada vai direto para a <span class="hl">main</span>. O ticket termina num PR com o template preenchido, e a descrição é onde você defende a decisão.</p>
 
     <div class="file">prompt · descrição do Pull Request</div>
@@ -475,7 +538,7 @@ uma justificativa.</pre></div>
   </section>
 
   <section id="anatomia">
-    <h2><span class="n">09</span>Anatomia de um prompt que funciona</h2>
+    <h2><span class="n">10</span>Anatomia de um prompt que funciona</h2>
     <p class="sub">Todo prompt bom deste manual tem as mesmas cinco partes. Depois que você vê o padrão, para de precisar de prompt pronto.</p>
 
     <ol class="passos">
@@ -495,7 +558,7 @@ uma justificativa.</pre></div>
   </section>
 
   <section id="prompts">
-    <h2><span class="n">10</span>Prompts prontos</h2>
+    <h2><span class="n">11</span>Prompts prontos</h2>
     <p class="sub">Os quatro que não estão nas seções acima e que você vai usar toda semana.</p>
 
     <div class="file">prompt · ler um erro que você não entende</div>
@@ -556,7 +619,7 @@ diga o que você conferiu para concluir.</pre></div>
   </section>
 
   <section id="comandos">
-    <h2><span class="n">11</span>Comandos do repositório: o <span class="hl">/plan</span> e o <span class="hl">/go</span></h2>
+    <h2><span class="n">12</span>Comandos do repositório: o <span class="hl">/plan</span> e o <span class="hl">/go</span></h2>
     <p class="sub">Prompt bom que você usa toda semana não deve morar no seu histórico de chat. Ele deve morar no repositório, versionado, com nome curto.</p>
 
     <p>É isso que um comando de barra é: um arquivo de prompt com um nome. Quem digita <span class="hl">/plan</span> não está usando um recurso mágico da ferramenta — está chamando um texto que alguém do time escreveu e commitou. Nos agentes de linha de comando isso costuma ser uma pasta de comandos no repositório; no Copilot, o equivalente mais próximo é o <span class="hl">.github/copilot-instructions.md</span>, que vale para todo prompt.</p>
@@ -574,7 +637,7 @@ diga o que você conferiu para concluir.</pre></div>
   </section>
 
   <section id="erra">
-    <h2><span class="n">12</span>Onde ela erra neste projeto</h2>
+    <h2><span class="n">13</span>Onde ela erra neste projeto</h2>
     <p class="sub">Não é aleatório. São três erros previsíveis, e saber quais são vale mais que qualquer prompt.</p>
 
     <ol class="passos">
@@ -587,7 +650,7 @@ diga o que você conferiu para concluir.</pre></div>
   </section>
 
   <section id="contexto">
-    <h2><span class="n">13</span>Contexto: como dar, e como não estourar</h2>
+    <h2><span class="n">14</span>Contexto: como dar, e como não estourar</h2>
     <p class="sub">Resposta ruim quase nunca é falta de inteligência da ferramenta. É falta de contexto, ou contexto demais.</p>
 
     <div class="duo">
@@ -604,7 +667,7 @@ diga o que você conferiu para concluir.</pre></div>
   </section>
 
   <section id="nunca">
-    <h2><span class="n">14</span>O que nunca delegar</h2>
+    <h2><span class="n">15</span>O que nunca delegar</h2>
     <p class="sub">Cinco coisas. Em todas, o custo de errar é seu, não dela.</p>
 
     <ol class="passos">
