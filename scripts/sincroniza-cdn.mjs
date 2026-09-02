@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * Sincroniza os materiais de `public/cursos/` com a Leque de Aulas API,
- * que guarda o conteúdo no MinIO e serve pelo CDN.
+ * Sincroniza os materiais do disco com a Leque de Aulas API, que guarda o
+ * conteúdo no MinIO e serve pelo CDN. Hoje eles moram em `materiais/`, e o
+ * padrão daqui ainda é `public/` — daí o `--materiais=materiais` nos exemplos.
  *
  * Por padrão ele NÃO escreve nada: mostra o plano e para. Para valer:
  *
- *     AULAS_API_TOKEN="$(...)" node scripts/sincroniza-cdn.mjs --executar
+ *     AULAS_API_TOKEN="$(...)" node scripts/sincroniza-cdn.mjs --materiais=materiais --executar
  *
  * O que ele faz, nesta ordem:
  *   1. lê o estado do servidor pelas rotas públicas;
@@ -80,7 +81,7 @@ const MATERIAIS = (process.argv.find((a) => a.startsWith("--materiais=")) ?? "")
  * com "Maximum allowed refresh token reuse exceeded".
  *
  *     AULAS_CLIENT_SECRET=... AULAS_REFRESH_FILE=~/.aulas-refresh \
- *       node scripts/sincroniza-cdn.mjs --executar
+ *       node scripts/sincroniza-cdn.mjs --materiais=materiais --executar
  * ------------------------------------------------------------------------ */
 
 const ISSUER = process.env.AULAS_ISSUER ?? "https://auth.rodolfodebonis.com.br/realms/aulas";
@@ -506,7 +507,7 @@ if (plano.soNoServidor.length) {
 if (!EXECUTAR) {
   console.log("  ensaio. para valer, com credencial que renova:\n");
   console.log("    AULAS_CLIENT_ID=... AULAS_CLIENT_SECRET=... \\");
-  console.log("      node scripts/sincroniza-cdn.mjs --executar\n");
+  console.log("      node scripts/sincroniza-cdn.mjs --materiais=materiais --executar\n");
   process.exit(0);
 }
 try {
